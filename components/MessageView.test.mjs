@@ -48,6 +48,40 @@ test("keeps streamed tool input out of collapsed markup while counting it", () =
   assert.equal(getTokenEstimateText(block), block.rawInput);
 });
 
+test("renders disk-backed @path image mentions as previews in user messages", () => {
+  const html = renderMessage({
+    role: "user",
+    timestamp: Date.now(),
+    content: "please review @/Users/xupeng/pi-web-attachments/shot.png",
+  }, { cwd: "/Users/xupeng/dev/agegr-pi-web" });
+
+  assert.match(html, /api\/files\/Users\/xupeng\/pi-web-attachments\/shot\.png\?type=read/);
+  assert.match(html, /please review/);
+  // The mention text stays in the bubble (it is what the agent reads).
+  assert.match(html, /@\/Users\/xupeng\/pi-web-attachments\/shot\.png/);
+});
+
+test("resolves relative @path image mentions against the session cwd", () => {
+  const html = renderMessage({
+    role: "user",
+    timestamp: Date.now(),
+    content: "@assets/diagram.png",
+  }, { cwd: "/work/repo" });
+
+  assert.match(html, /api\/files\/work\/repo\/assets\/diagram\.png\?type=read/);
+});
+
+test("does not render non-image @path mentions as previews", () => {
+  const html = renderMessage({
+    role: "user",
+    timestamp: Date.now(),
+    content: "see @src/main.ts",
+  }, { cwd: "/work/repo" });
+
+  assert.doesNotMatch(html, /api\/files\/work\/repo\/src\/main\.ts\?type=read/);
+  assert.match(html, /src\/main\.ts/);
+});
+
 const COMPLETE_SKILL_EXPANSION = `<skill name="review" location="/skills/review/SKILL.md">
 References are relative to /skills/review.
 

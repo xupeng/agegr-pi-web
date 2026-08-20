@@ -18,7 +18,7 @@ const execFileAsync = promisify(execFile);
 const IGNORED_NAMES = new Set([
   "node_modules", ".git", ".next", "dist", "build", "__pycache__",
   ".turbo", ".cache", "coverage", ".pytest_cache", ".mypy_cache",
-  "target", "vendor", ".DS_Store",
+  "target", "vendor", ".DS_Store", ".pi-web",
 ]);
 
 const IGNORED_SUFFIXES = [".pyc"];

@@ -38,7 +38,10 @@ declare global {
   var __piProjectCache: Map<string, { info: ProjectInfo; expiresAt: number }> | undefined;
 }
 
-const PROJECT_CACHE_TTL_MS = 60_000;
+// Long-lived: resolveProject() spawns a git subprocess per unique session cwd,
+// so a 60s TTL re-paid that cost on every scan after a minute. Worktree
+// add/remove invalidates the cache eagerly, so 10 minutes is safe.
+const PROJECT_CACHE_TTL_MS = 600_000;
 
 function getProjectCache(): Map<string, { info: ProjectInfo; expiresAt: number }> {
   if (!globalThis.__piProjectCache) globalThis.__piProjectCache = new Map();

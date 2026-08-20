@@ -1,36 +1,47 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import os from "os";
-import { allowFileRoot } from "@/lib/allowed-roots";
+import {
+  attachmentFileName,
+  attachmentDirForProjectRoot,
+  fallbackAttachmentDir,
+  isTrustedAttachmentCwd,
+  trustAttachmentCwd,
+} from "@/lib/attachment-paths";
+import { allowFileRoot, getAllowedFileRoots, isFilePathAllowed } from "@/lib/file-access";
 import { isApiRequestAllowed } from "@/lib/request-security";
 import { parseFormDataWithinLimit, RequestBodyTooLargeError } from "@/lib/bounded-form-data";
+import { resolveProject } from "@/lib/worktree";
 
 const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024; // 10MB per image
 const MAX_ATTACHMENTS = 10;
-const ATTACHMENT_DIR = path.join(os.homedir(), "pi-web-attachments");
+const TRUSTED_CWD_TTL_MS = 10 * 60 * 1000;
 
-const ALLOWED_IMAGE_EXTS = new Set([
-  ".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".avif",
-]);
+declare global {
+  var __piTrustedAttachmentCwds: Map<string, number> | undefined;
+}
 
-function safeFileName(index: number, originalName: string, mimeType: string): string {
-  const originalExt = path.extname(originalName).toLowerCase();
-  const ext = ALLOWED_IMAGE_EXTS.has(originalExt)
-    ? originalExt
-    : (mimeType === "image/png" ? ".png"
-      : mimeType === "image/jpeg" ? ".jpg"
-      : mimeType === "image/webp" ? ".webp"
-      : mimeType === "image/gif" ? ".gif"
-      : mimeType === "image/bmp" ? ".bmp"
-      : mimeType === "image/avif" ? ".avif"
-      : ".png");
-  const base = path
-    .basename(originalName, path.extname(originalName))
-    .replace(/[^\w\u4e00-\u9fa5-]+/g, "_")
-    .slice(0, 40) || "image";
-  const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-  return `${stamp}-${index + 1}-${base}${ext}`;
+/**
+ * Resolve the project-scoped attachment directory for a session cwd, or null
+ * when the cwd is not a browsable root. The full allowed-roots check scans
+ * every session and runs git per project (multi-second on large session
+ * stores), so passing cwds are cached for TRUSTED_CWD_TTL_MS — repeated pastes
+ * in the same project skip the scan entirely.
+ */
+async function resolveAttachmentDirForCwd(cwd: string): Promise<string | null> {
+  const trustedCache = globalThis.__piTrustedAttachmentCwds;
+  if (isTrustedAttachmentCwd(trustedCache, cwd)) {
+    const { projectRoot } = await resolveProject(cwd);
+    return attachmentDirForProjectRoot(projectRoot);
+  }
+
+  const allowedRoots = await getAllowedFileRoots();
+  if (!isFilePathAllowed(cwd, allowedRoots)) return null;
+  const { projectRoot } = await resolveProject(cwd);
+
+  const cache = globalThis.__piTrustedAttachmentCwds ??= new Map();
+  trustAttachmentCwd(cache, cwd, TRUSTED_CWD_TTL_MS);
+  return attachmentDirForProjectRoot(projectRoot);
 }
 
 export async function POST(request: NextRequest) {
@@ -70,15 +81,27 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    fs.mkdirSync(ATTACHMENT_DIR, { recursive: true });
+    // Project-scoped attachments: the request carries the session cwd, which
+    // resolves to the project root, so images land in
+    // `<projectRoot>/.pi-web/attachments/` — each project keeps its own
+    // images next to the code they describe. The cwd must already be a
+    // browsable root (otherwise a crafted cwd could write anywhere); sessions
+    // without a cwd yet fall back to the shared home directory.
+    let attachmentDir = fallbackAttachmentDir();
+    const cwd = request.nextUrl.searchParams.get("cwd");
+    if (cwd) {
+      attachmentDir = (await resolveAttachmentDirForCwd(cwd)) ?? attachmentDir;
+    }
+
+    fs.mkdirSync(attachmentDir, { recursive: true });
     // Make the attachment directory browsable/readable by /api/files so the
     // @-mentioned path can be previewed in the file viewer.
-    allowFileRoot(ATTACHMENT_DIR);
+    allowFileRoot(attachmentDir);
 
     const paths: string[] = [];
     for (let index = 0; index < files.length; index += 1) {
       const file = files[index];
-      const target = path.join(ATTACHMENT_DIR, safeFileName(index, file.name, file.type));
+      const target = path.join(attachmentDir, attachmentFileName(index, file.name, file.type));
       await fs.promises.writeFile(target, Buffer.from(await file.arrayBuffer()));
       paths.push(target);
     }

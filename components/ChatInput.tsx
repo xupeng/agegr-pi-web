@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useCallback, useEffect, useLayoutEffect, useImperativeHandle, forwardRef, KeyboardEvent } from "react";
+import React, { useRef, useState, useCallback, useEffect, useLayoutEffect, useMemo, useImperativeHandle, forwardRef, KeyboardEvent } from "react";
 import type { BuiltinSlashCommandResult, CompactResultInfo, QueuedMessages, SlashCommandInfo } from "@/hooks/useAgentSession";
 import type { SkillsResponse } from "@/lib/api-types";
 import type { TextContent, UserMessage } from "@/lib/types";
@@ -22,6 +22,13 @@ import {
   buildEntriesFromFiles, buildAtInsertText, extractAtQuery, filterFileEntries,
   type AtQueryMatch, type FileIndexEntry,
 } from "@/lib/file-fuzzy";
+import {
+  buildImageMentionText,
+  extractImageMentions,
+  imagePreviewSrc,
+  removeImageMentionFromText,
+  resolveMentionPath,
+} from "@/lib/image-mentions";
 import { FolderIcon, getFileIcon } from "./FileIcons";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useI18n } from "@/hooks/useI18n";
@@ -33,10 +40,16 @@ export interface AttachedImage {
   previewUrl: string; // object URL for display
 }
 
+interface PendingDiskImage {
+  id: string;
+  name: string;
+}
+
 interface ModelOption {
   provider: string;
   modelId: string;
   name: string;
+  input?: string[];
 }
 
 interface Props {
@@ -49,7 +62,7 @@ interface Props {
   model?: { provider: string; modelId: string } | null;
   isAutoModelSelection?: boolean;
   modelNames?: Record<string, string>;
-  modelList?: { id: string; name: string; provider: string }[];
+  modelList?: { id: string; name: string; provider: string; input?: string[] }[];
   modelError?: string | null;
   /** Diagnostics from resolving `enabledModels`, e.g. a pattern that matched nothing. */
   modelScopeWarnings?: string[];
@@ -87,6 +100,7 @@ export interface ChatInputHandle {
   insertIfEmpty: (text: string) => void;
   replaceMessage: (message: UserMessage) => void;
   prependText: (text: string) => void;
+  attachImages: (files: File[]) => void;
   addImages: (files: File[]) => void;
   saveImages: (files: File[]) => void;
   rekeyDraft: (previousKey: string, nextKey: string) => void;
@@ -138,6 +152,17 @@ export function filterModelOptions(options: ModelOption[], query: string): Model
       .toLocaleLowerCase()
       .includes(normalizedQuery)
   ));
+}
+
+export function modelSupportsImageInput(
+  model: { provider: string; modelId: string } | null | undefined,
+  modelList: Array<{ id: string; provider: string; input?: string[] }> | undefined,
+): boolean {
+  if (!model) return false;
+  const entry = modelList?.find((candidate) => (
+    candidate.provider === model.provider && candidate.id === model.modelId
+  ));
+  return entry?.input?.includes("image") === true;
 }
 
 const THINKING_LEVELS = ["auto", "off", "minimal", "low", "medium", "high", "xhigh", "max"] as const;
@@ -288,6 +313,63 @@ function revokeImagePreview(image: AttachedImage): void {
   }
 }
 
+/**
+ * Thumbnail for a disk-backed image (@<path> mention). The image is served by
+ * /api/files, which can 403/404 for deleted or out-of-scope paths — hide those
+ * instead of showing a broken image.
+ */
+function DiskImageThumb({ src, alt = "" }: { src: string; alt?: string }) {
+  const [failed, setFailed] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  if (failed) return null;
+  return (
+    <div style={{ position: "relative", width: 56, height: 56 }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt={alt}
+        decoding="async"
+        onLoad={() => setLoaded(true)}
+        onError={() => setFailed(true)}
+        style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 6, border: "1px solid var(--border)", display: "block", opacity: loaded ? 1 : 0 }}
+      />
+      {!loaded && (
+        <div style={{
+          position: "absolute", inset: 0,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          border: "1px solid var(--border)", borderRadius: 6,
+          background: "var(--bg-panel)", color: "var(--text-dim)",
+        }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" style={{ animation: "spin 0.8s linear infinite" }} aria-hidden="true">
+            <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+          </svg>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PendingDiskImageThumb({ image, label }: { image: PendingDiskImage; label: string }) {
+  return (
+    <div
+      role="status"
+      aria-label={`${label}: ${image.name}`}
+      title={`${label}: ${image.name}`}
+      style={{
+        position: "relative", width: 56, height: 56, flexShrink: 0,
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
+        border: "1px solid var(--border)", borderRadius: 6,
+        background: "var(--bg-panel)", color: "var(--text-muted)",
+      }}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" style={{ animation: "spin 0.8s linear infinite" }} aria-hidden="true">
+        <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+      </svg>
+      <span style={{ fontSize: 8.5, fontWeight: 650, lineHeight: 1, letterSpacing: "-0.01em" }}>{label}</span>
+    </div>
+  );
+}
+
 function QueuedMessageRow({ kind, text }: { kind: "steer" | "follow-up"; text: string }) {
   return (
     <div
@@ -396,6 +478,10 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
 }: Props, ref) {
   const { t } = useI18n();
   const isMobile = useIsMobile();
+  const supportsInlineImages = useMemo(
+    () => modelSupportsImageInput(model, modelList),
+    [model, modelList],
+  );
   const [value, setValue] = useState(() => (draftKey ? getDraft(draftKey)?.value ?? "" : ""));
   const [modelDropdownOpen, setModelDropdownOpen] = useState(false);
   const [modelDropdownRect, setModelDropdownRect] = useState<{ top: number; left: number; width: number } | null>(null);
@@ -406,9 +492,28 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
   const [attachedImages, setAttachedImages] = useState<AttachedImage[]>(() => (
     draftKey ? draftImagesToAttachedImages(getDraft(draftKey)?.images) : []
   ));
+  const [pendingInlineImages, setPendingInlineImages] = useState<PendingDiskImage[]>([]);
+  const [pendingDiskImages, setPendingDiskImages] = useState<PendingDiskImage[]>([]);
   const [attachmentError, setAttachmentError] = useState<string | null>(null);
+  // Disk-backed images (@<path> mentions inside the text) preview here too.
+  // The text is the source of truth — pasting inserts a mention, deleting the
+  // preview removes it, and drafts/reloads restore it for free. No base64 copy
+  // is kept, so the agent never receives the image twice.
+  const diskImagePreviews = useMemo(() => {
+    const seen = new Set<string>();
+    const previews: Array<{ path: string; src: string }> = [];
+    for (const mention of extractImageMentions(value)) {
+      const absolute = resolveMentionPath(mention.path, cwd);
+      if (seen.has(absolute)) continue;
+      seen.add(absolute);
+      previews.push({ path: absolute, src: imagePreviewSrc(absolute) });
+    }
+    return previews;
+  }, [value, cwd]);
+  const hasPendingDiskImages = pendingDiskImages.length > 0;
+  const hasPendingImages = hasPendingDiskImages || pendingInlineImages.length > 0;
   const trimmedValue = value.trimStart();
-  const bashMode = attachedImages.length === 0 && trimmedValue.startsWith("!");
+  const bashMode = attachedImages.length === 0 && !hasPendingImages && trimmedValue.startsWith("!");
   const bashExcluded = bashMode && trimmedValue.startsWith("!!");
   const [slashMenuOpen, setSlashMenuOpen] = useState(false);
   const [slashActiveIndex, setSlashActiveIndex] = useState(0);
@@ -449,6 +554,9 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
   const draftKeyRef = useRef(draftKey);
   const valueRef = useRef(value);
   const attachedImagesRef = useRef(attachedImages);
+  const pendingInlineImagesRef = useRef<PendingDiskImage[]>([]);
+  const pendingDiskImagesRef = useRef<PendingDiskImage[]>([]);
+  const pendingImageIdRef = useRef(0);
   const pendingImageCountRef = useRef(0);
   valueRef.current = value;
   attachedImagesRef.current = attachedImages;
@@ -633,6 +741,10 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
     insertText(text: string) {
       insertTextAtCursor(text);
     },
+    attachImages(files: File[]) {
+      if (supportsInlineImages) processImageFiles(files);
+      else void saveImagesToDisk(files);
+    },
     saveImages(files: File[]) {
       void saveImagesToDisk(files);
     },
@@ -650,7 +762,17 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
       .filter((f) => f.type.startsWith("image/") && f.size <= MAX_ATTACHED_IMAGE_BYTES)
       .slice(0, remaining);
     if (!imageFiles.length) return;
-    pendingImageCountRef.current += imageFiles.length;
+
+    setAttachmentError(null);
+    const pending = imageFiles.map((file) => ({
+      id: `inline-process-${++pendingImageIdRef.current}`,
+      name: file.name || "image",
+    }));
+    const pendingIds = new Set(pending.map((image) => image.id));
+    pendingImageCountRef.current += pending.length;
+    pendingInlineImagesRef.current = [...pendingInlineImagesRef.current, ...pending];
+    setPendingInlineImages(pendingInlineImagesRef.current);
+
     try {
       const newImages = await Promise.all(
         imageFiles.map(
@@ -675,8 +797,15 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
         attachedImagesRef.current = next;
         return next;
       });
+    } catch {
+      setAttachmentError("Failed to process image");
     } finally {
-      pendingImageCountRef.current -= imageFiles.length;
+      pendingImageCountRef.current = Math.max(0, pendingImageCountRef.current - pending.length);
+      setPendingInlineImages((current) => {
+        const next = current.filter((image) => !pendingIds.has(image.id));
+        pendingInlineImagesRef.current = next;
+        return next;
+      });
     }
   }, []);
 
@@ -686,16 +815,35 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
    * even when the active model has no vision support.
    */
   const saveImagesToDisk = useCallback(async (files: File[]) => {
+    const remaining = Math.max(
+      0,
+      MAX_ATTACHED_IMAGES
+        - attachedImagesRef.current.length
+        - extractImageMentions(valueRef.current).length
+        - pendingImageCountRef.current,
+    );
     const imageFiles = files.filter(
       (f) => f.type.startsWith("image/") && f.size > 0 && f.size <= MAX_ATTACHED_IMAGE_BYTES,
-    ).slice(0, MAX_ATTACHED_IMAGES);
+    ).slice(0, remaining);
     if (!imageFiles.length) return;
 
     setAttachmentError(null);
+    const pending = imageFiles.map((file) => ({
+      id: `disk-upload-${++pendingImageIdRef.current}`,
+      name: file.name || "image",
+    }));
+    const pendingIds = new Set(pending.map((image) => image.id));
+    pendingImageCountRef.current += pending.length;
+    pendingDiskImagesRef.current = [...pendingDiskImagesRef.current, ...pending];
+    setPendingDiskImages(pendingDiskImagesRef.current);
+
     const body = new FormData();
     for (const file of imageFiles) body.append("files", file);
     try {
-      const response = await fetch("/api/attachments", { method: "POST", body });
+      const response = await fetch(
+        `/api/attachments?cwd=${encodeURIComponent(cwd ?? "")}`,
+        { method: "POST", body },
+      );
       if (!response.ok) {
         let message = `Failed to save image (HTTP ${response.status})`;
         try {
@@ -713,12 +861,24 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
         setAttachmentError("No image paths returned");
         return;
       }
-      const mention = paths.map((p) => `@${p}`).join(" ") + " ";
+      const mention = paths.map((p) => buildImageMentionText(p)).join("");
       insertTextAtCursor(mention);
     } catch {
       setAttachmentError("Failed to save image (network error)");
+    } finally {
+      pendingImageCountRef.current = Math.max(0, pendingImageCountRef.current - pending.length);
+      setPendingDiskImages((current) => {
+        const next = current.filter((image) => !pendingIds.has(image.id));
+        pendingDiskImagesRef.current = next;
+        return next;
+      });
     }
-  }, [insertTextAtCursor]);
+  }, [insertTextAtCursor, cwd]);
+
+  const attachImageFiles = useCallback((files: File[]) => {
+    if (supportsInlineImages) processImageFiles(files);
+    else void saveImagesToDisk(files);
+  }, [processImageFiles, saveImagesToDisk, supportsInlineImages]);
 
   const removeImage = useCallback((index: number) => {
     setAttachedImages((prev) => {
@@ -728,6 +888,16 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
       attachedImagesRef.current = next;
       return next;
     });
+  }, []);
+
+  /** Remove a disk image's @<path> mention from the text (preview disappears with it). */
+  const removeDiskImageMention = useCallback((path: string) => {
+    const current = valueRef.current;
+    const next = removeImageMentionFromText(current, path);
+    if (next === current) return;
+    valueRef.current = next;
+    setValue(next);
+    setAtQuery(null);
   }, []);
 
   const clearImages = useCallback(() => {
@@ -801,6 +971,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
   const handleSend = useCallback(async () => {
     const msg = value.trim();
     if (!msg && !attachedImages.length) return;
+    if (hasPendingImages) return;
     if (isStreaming) return;
     onAudioUnlock?.();
     if (!attachedImages.length && msg.startsWith("/") && onBuiltinCommand) {
@@ -812,7 +983,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
     }
     clearInput();
     onSend(msg, attachedImages.length ? attachedImages : undefined);
-  }, [value, attachedImages, isStreaming, onBuiltinCommand, onSend, clearInput, onAudioUnlock]);
+  }, [value, attachedImages, hasPendingImages, isStreaming, onBuiltinCommand, onSend, clearInput, onAudioUnlock]);
 
   const slashQuery = value.startsWith("/") && !/\s/.test(value.slice(1))
     ? value.slice(1).toLowerCase()
@@ -844,7 +1015,11 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
     ? t(slashQuery ? "chat.match" : "chat.command")
     : t(slashQuery ? "chat.matches" : "chat.commands", { count: filteredSlashCommands.length });
   const hasInputText = Boolean(value.trim());
-  const canQueueStreamingMessage = hasInputText || attachedImages.length > 0;
+  const canSubmitMessage = !hasPendingImages && (hasInputText || attachedImages.length > 0);
+  const canQueueStreamingMessage = !hasPendingImages && (hasInputText || attachedImages.length > 0);
+  const pendingImageActionLabel = hasPendingDiskImages
+    ? t("chat.uploadingImage")
+    : t("chat.processingImage");
 
   // ── @ file autocomplete ──────────────────────────────────────────────────
   // Recomputed from the text before the caret on every change/caret move.
@@ -1031,6 +1206,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
   const sendQueued = useCallback((mode: "steer" | "followup") => {
     const msg = value.trim();
     if (!msg && !attachedImages.length) return;
+    if (hasPendingImages) return;
     onAudioUnlock?.();
     const streamingBehavior = mode === "steer" ? "steer" : "followUp";
     if (msg.startsWith("/") && onPromptWithStreamingBehavior) {
@@ -1044,7 +1220,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
     } else if (mode === "followup" && onFollowUp) {
       onFollowUp(msg, attachedImages.length ? attachedImages : undefined);
     }
-  }, [value, attachedImages, onPromptWithStreamingBehavior, onSteer, onFollowUp, clearInput, onAudioUnlock]);
+  }, [value, attachedImages, hasPendingImages, onPromptWithStreamingBehavior, onSteer, onFollowUp, clearInput, onAudioUnlock]);
 
   const getNextSlashIndex = useCallback((direction: "up" | "down" | "left" | "right") => {
     const lastIndex = displayedSlashCommands.length - 1;
@@ -1227,8 +1403,8 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
     if (!imageItems.length) return;
     e.preventDefault();
     const files = imageItems.map((item) => item.getAsFile()).filter((f): f is File => f !== null);
-    void saveImagesToDisk(files);
-  }, [saveImagesToDisk]);
+    attachImageFiles(files);
+  }, [attachImageFiles]);
 
   useEffect(() => {
     if (slashQuery === null) {
@@ -1336,7 +1512,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
   // Build model options: prefer modelList (has provider info), fallback to modelNames
   const modelOptions: ModelOption[] = (() => {
     if (modelList && modelList.length > 0) {
-      return modelList.map((m) => ({ provider: m.provider, modelId: m.id, name: m.name })).sort(compareModelOptions);
+      return modelList.map((m) => ({ provider: m.provider, modelId: m.id, name: m.name, input: m.input })).sort(compareModelOptions);
     }
     return Object.entries(modelNames ?? {}).map(([modelId, name]) => ({
       provider: model?.provider ?? "unknown",
@@ -1424,7 +1600,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
         style={{ display: "none" }}
         onChange={(e) => {
           const files = Array.from(e.target.files ?? []);
-          void saveImagesToDisk(files);
+          attachImageFiles(files);
           e.target.value = "";
         }}
       />
@@ -1561,8 +1737,8 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
             {compactError}
           </div>
         )}
-        {/* Image previews */}
-        {attachedImages.length > 0 && (
+        {/* Immediate local previews while disk uploads run, then saved @<path> previews */}
+        {(attachedImages.length > 0 || pendingInlineImages.length > 0 || pendingDiskImages.length > 0 || diskImagePreviews.length > 0) && (
           <div style={{ display: "flex", gap: 6, marginBottom: 6, flexWrap: "wrap" }}>
             {attachedImages.map((img, i) => (
               <div key={i} style={{ position: "relative", flexShrink: 0 }}>
@@ -1574,6 +1750,33 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
                 />
                 <button
                   onClick={() => removeImage(i)}
+                  style={{
+                    position: "absolute", top: -4, right: -4,
+                    width: 16, height: 16, borderRadius: "50%",
+                    background: "var(--bg-panel)", border: "1px solid var(--border)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    cursor: "pointer", padding: 0, color: "var(--text-muted)",
+                  }}
+                >
+                  <svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                    <line x1="1" y1="1" x2="7" y2="7" /><line x1="7" y1="1" x2="1" y2="7" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+            {pendingInlineImages.map((image) => (
+              <PendingDiskImageThumb key={image.id} image={image} label={t("chat.processingImage")} />
+            ))}
+            {pendingDiskImages.map((image) => (
+              <PendingDiskImageThumb key={image.id} image={image} label={t("chat.uploadingImage")} />
+            ))}
+            {diskImagePreviews.map((img) => (
+              <div key={img.path} style={{ position: "relative", flexShrink: 0 }}>
+                <DiskImageThumb src={img.src} />
+                <button
+                  onClick={() => removeDiskImageMention(img.path)}
+                  title="Remove image"
+                  aria-label="Remove image"
                   style={{
                     position: "absolute", top: -4, right: -4,
                     width: 16, height: 16, borderRadius: "50%",
@@ -2047,29 +2250,36 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
           ) : (
             <button
               onClick={handleSend}
-              disabled={!value.trim() && !attachedImages.length}
+              disabled={!canSubmitMessage}
+              title={hasPendingImages ? pendingImageActionLabel : undefined}
               style={{
                 flexShrink: 0,
                 alignSelf: "flex-end",
                 display: "flex", alignItems: "center", gap: 6,
                 padding: "7px 14px",
-                background: (value.trim() || attachedImages.length) ? "var(--accent)" : "var(--bg-panel)",
+                background: canSubmitMessage ? "var(--accent)" : "var(--bg-panel)",
                 border: "none",
                 borderRadius: 8,
-                color: (value.trim() || attachedImages.length) ? "#fff" : "var(--text-dim)",
-                cursor: (value.trim() || attachedImages.length) ? "pointer" : "not-allowed",
+                color: canSubmitMessage ? "#fff" : "var(--text-dim)",
+                cursor: canSubmitMessage ? "pointer" : "not-allowed",
                 fontSize: 13,
                 fontWeight: 600,
                 letterSpacing: "-0.01em",
-                boxShadow: (value.trim() || attachedImages.length) ? "0 1px 3px rgba(37,99,235,0.25)" : "none",
+                boxShadow: canSubmitMessage ? "0 1px 3px rgba(37,99,235,0.25)" : "none",
                 transition: "background 0.15s, box-shadow 0.15s",
               }}
             >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="2" y1="7" x2="11" y2="7" />
-                <polyline points="7.5 3 12 7 7.5 11" />
-              </svg>
-              {t("chat.send")}
+              {hasPendingImages ? (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" style={{ animation: "spin 0.8s linear infinite" }} aria-hidden="true">
+                  <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+                </svg>
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="2" y1="7" x2="11" y2="7" />
+                  <polyline points="7.5 3 12 7 7.5 11" />
+                </svg>
+              )}
+              {hasPendingImages ? pendingImageActionLabel : t("chat.send")}
             </button>
           )}
           </div>
@@ -2101,18 +2311,18 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
                 width: 32, height: 32, padding: 0,
                 background: "none", border: "none",
                 borderRadius: 9,
-                color: attachedImages.length ? "var(--accent)" : "var(--text-muted)",
+                color: (attachedImages.length || hasPendingImages || diskImagePreviews.length) ? "var(--accent)" : "var(--text-muted)",
                 cursor: "pointer",
                 opacity: 1,
                 transition: "background 0.12s, color 0.12s",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = "var(--bg-hover)";
-                e.currentTarget.style.color = attachedImages.length ? "var(--accent)" : "var(--text)";
+                e.currentTarget.style.color = (attachedImages.length || hasPendingImages || diskImagePreviews.length) ? "var(--accent)" : "var(--text)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = "none";
-                e.currentTarget.style.color = attachedImages.length ? "var(--accent)" : "var(--text-muted)";
+                e.currentTarget.style.color = (attachedImages.length || hasPendingImages || diskImagePreviews.length) ? "var(--accent)" : "var(--text-muted)";
               }}
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

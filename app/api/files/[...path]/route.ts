@@ -32,7 +32,7 @@ import { samePath } from "@/lib/paths";
 const IGNORED_NAMES = new Set([
   "node_modules", ".git", ".next", "dist", "build", "__pycache__",
   ".turbo", ".cache", "coverage", ".pytest_cache", ".mypy_cache",
-  "target", "vendor", ".DS_Store", ".git",
+  "target", "vendor", ".DS_Store", ".git", ".pi-web",
 ]);
 
 const IGNORED_SUFFIXES = [".pyc"];

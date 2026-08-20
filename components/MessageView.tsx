@@ -9,6 +9,11 @@ import { parseCompactionSummary } from "@/lib/compaction-summary";
 import { getAssistantErrorMessage, isEmptyThinkingBlock } from "@/lib/message-display";
 import { parseUnifiedPatch, type SplitDiffCell } from "@/lib/patch";
 import { isEditToolName } from "@/lib/tool-names";
+import {
+  extractImageMentions,
+  imagePreviewSrc,
+  resolveMentionPath,
+} from "@/lib/image-mentions";
 import { TurnWrittenFiles } from "./TurnWrittenFiles";
 import type { WrittenFile } from "@/lib/turn-written-files";
 import { skillExpansionToCommand } from "@/lib/slash-display";
@@ -25,6 +30,27 @@ import type {
   ToolCallContent,
   ThinkingContent,
 } from "@/lib/types";
+
+/**
+ * Preview for a disk-backed image referenced by @<path> in a user message.
+ * The image is served by /api/files, which 403s/404s for deleted or
+ * out-of-scope paths — hide those instead of showing a broken image.
+ */
+function MentionedImagePreview({ src }: { src: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return null;
+  return (
+    <ImagePreview src={src}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt=""
+        onError={() => setFailed(true)}
+        style={{ maxWidth: 160, maxHeight: 160, borderRadius: 6, objectFit: "contain", display: "block", border: "1px solid rgba(59,130,246,0.15)" }}
+      />
+    </ImagePreview>
+  );
+}
 
 // CJK chars ~1 token each (GLM/DeepSeek/GPT-o200k); other chars ~4 chars/token.
 const CJK_PATTERN = /[\u3000-\u30ff\u3400-\u9fff\uf900-\ufaff\u{20000}-\u{2fa1f}\uac00-\ud7af]/u;
@@ -144,7 +170,7 @@ function SafeMarkdownBody({ children, className, ...props }: React.ComponentProp
 
 // Cap the user "sent" bubble's height so an abnormally long message does not
 // push the conversation off screen; overflow scrolls inside the bubble.
-const USER_BUBBLE_MAX_HEIGHT = 300;
+const USER_BUBBLE_MAX_HEIGHT = 400;
 
 function loadThinkingContent(sessionId: string, entryId: string, blockIndex: number): Promise<string> {
   const key = `${sessionId}:${entryId}:${blockIndex}`;
@@ -314,6 +340,21 @@ function UserMessageView({ message, cwd, onOpenFile, entryId, onFork, forking, o
       ? []
       : message.content.filter((b): b is ImageContent => b.type === "image");
 
+  // Disk-backed images (@<path> mentions inside the text) preview here too.
+  // Derived from the text alone, so they survive reloads and never duplicate
+  // the agent-side payload (no inline base64 copy is sent alongside a mention).
+  const mentionedImages = useMemo(() => {
+    const seen = new Set<string>();
+    const images: Array<{ path: string; src: string }> = [];
+    for (const mention of extractImageMentions(content)) {
+      const absolute = resolveMentionPath(mention.path, cwd);
+      if (seen.has(absolute)) continue;
+      seen.add(absolute);
+      images.push({ path: absolute, src: imagePreviewSrc(absolute) });
+    }
+    return images;
+  }, [content, cwd]);
+
   const commandText = skillExpansionToCommand(content);
   const commandSeparator = commandText?.search(/\s/) ?? -1;
   const commandName = commandText
@@ -328,7 +369,7 @@ function UserMessageView({ message, cwd, onOpenFile, entryId, onFork, forking, o
   const copyTarget = commandText ?? content;
   const editTarget = commandText ? replaceUserMessageText(message, commandText) : message;
 
-  const imageBlocksNode = imageBlocks.length > 0 && (
+  const imageBlocksNode = (imageBlocks.length > 0 || mentionedImages.length > 0) && (
     <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: content ? 8 : 0 }}>
       {imageBlocks.map((img, i) => {
         // lib/types.ts ImageContent uses {source:{type,data,media_type,url}}
@@ -347,11 +388,14 @@ function UserMessageView({ message, cwd, onOpenFile, entryId, onFork, forking, o
             <img
               src={src}
               alt=""
-              style={{ maxWidth: 240, maxHeight: 240, borderRadius: 6, objectFit: "contain", display: "block", border: "1px solid rgba(59,130,246,0.15)" }}
+              style={{ maxWidth: 160, maxHeight: 160, borderRadius: 6, objectFit: "contain", display: "block", border: "1px solid rgba(59,130,246,0.15)" }}
             />
           </ImagePreview>
         );
       })}
+      {mentionedImages.map((img) => (
+        <MentionedImagePreview key={img.path} src={img.src} />
+      ))}
     </div>
   );
   const canNavigate = !!prevAssistantEntryId && !!onNavigate;

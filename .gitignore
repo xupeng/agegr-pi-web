@@ -42,3 +42,7 @@ next-env.d.ts
 .factory
 # local tooling
 .codegraph/
+
+# pi-web runtime attachments & local packages
+.pi-web/
+*.tgz

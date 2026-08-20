@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -8,9 +9,50 @@ const jiti = createJiti(import.meta.url, {
   jsx: { runtime: "automatic" },
   tsconfigPaths: true,
 });
-const { ChatInput, ModelErrorBanner, ModelScopeWarningBanner, canRestoreUserMessage, filterModelOptions, getUpwardMenuMaxHeight, getUserMessageText, getUserMessageDraftImages } = await jiti.import("./ChatInput.tsx");
+const { ChatInput, ModelErrorBanner, ModelScopeWarningBanner, canRestoreUserMessage, filterModelOptions, getUpwardMenuMaxHeight, getUserMessageText, getUserMessageDraftImages, modelSupportsImageInput } = await jiti.import("./ChatInput.tsx");
 const { clearDraft, getDraft, mergeRestoredSubmissionDraft, mergeRestoredSubmissionText, rekeyDraft, setDraft } = await jiti.import("../lib/draft-store.ts");
 const { I18nProvider } = await jiti.import("../hooks/useI18n.tsx");
+
+test("shows a lightweight pending placeholder before loading the server image", async () => {
+  const source = await readFile(new URL("./ChatInput.tsx", import.meta.url), "utf-8");
+  const saveStart = source.indexOf("const saveImagesToDisk");
+  const pendingAt = source.indexOf("setPendingDiskImages(pendingDiskImagesRef.current)", saveStart);
+  const uploadAt = source.indexOf("const response = await fetch", pendingAt);
+  const saveEnd = source.indexOf("const removeImage", uploadAt);
+  const saveSource = source.slice(saveStart, saveEnd);
+
+  assert.ok(pendingAt >= 0, "publishes an immediate pending placeholder");
+  assert.ok(uploadAt > pendingAt, "publishes the placeholder before awaiting the upload");
+  assert.doesNotMatch(saveSource, /URL\.createObjectURL/, "does not decode a local blob in the disk upload path");
+  assert.match(source, /pendingDiskImages\.map/);
+  assert.match(source, /imagePreviewSrc\(absolute\)/, "loads the completed preview through pi-web");
+  assert.match(source, /hasPendingImages \? pendingImageActionLabel : t\("chat\.send"\)/);
+  assert.match(source, /if \(hasPendingImages\) return/);
+});
+
+test("detects image input support from exact model metadata", () => {
+  const models = [
+    { provider: "openai", id: "gpt-5.6-sol", input: ["text", "image"] },
+    { provider: "deepseek", id: "deepseek-v4-flash", input: ["text"] },
+  ];
+
+  assert.equal(modelSupportsImageInput({ provider: "openai", modelId: "gpt-5.6-sol" }, models), true);
+  assert.equal(modelSupportsImageInput({ provider: "deepseek", modelId: "deepseek-v4-flash" }, models), false);
+  assert.equal(modelSupportsImageInput({ provider: "proxy", modelId: "gpt-5.6-sol" }, models), false);
+  assert.equal(modelSupportsImageInput(null, models), false);
+});
+
+test("routes image attachments by current model capability", async () => {
+  const source = await readFile(new URL("./ChatInput.tsx", import.meta.url), "utf-8");
+  const processStart = source.indexOf("const processImageFiles");
+  const pendingAt = source.indexOf("setPendingInlineImages(pendingInlineImagesRef.current)", processStart);
+  const readAt = source.indexOf("reader.readAsDataURL(file)", pendingAt);
+
+  assert.ok(pendingAt > processStart, "shows the inline-processing placeholder immediately");
+  assert.ok(readAt > pendingAt, "shows the placeholder before base64 encoding");
+  assert.match(source, /if \(supportsInlineImages\) processImageFiles\(files\);\s*else void saveImagesToDisk\(files\);/);
+  assert.match(source, /pendingInlineImages\.map/);
+});
 
 test("renders the upstream model error", () => {
   const html = renderToStaticMarkup(

@@ -245,7 +245,7 @@ export interface AttachedImage {
 }
 
 type SelectedModel = { provider: string; modelId: string };
-type ModelEntry = { id: string; name: string; provider: string };
+type ModelEntry = { id: string; name: string; provider: string; input?: string[] };
 type ModelsResponse = {
   models: Record<string, string>;
   modelList?: ModelEntry[];
