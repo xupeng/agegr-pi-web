@@ -88,6 +88,7 @@ export interface ChatInputHandle {
   replaceMessage: (message: UserMessage) => void;
   prependText: (text: string) => void;
   addImages: (files: File[]) => void;
+  saveImages: (files: File[]) => void;
   rekeyDraft: (previousKey: string, nextKey: string) => void;
   restoreSubmission: (text: string, images?: ChatDraftImage[], targetDraftKey?: string) => void;
 }
@@ -405,6 +406,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
   const [attachedImages, setAttachedImages] = useState<AttachedImage[]>(() => (
     draftKey ? draftImagesToAttachedImages(getDraft(draftKey)?.images) : []
   ));
+  const [attachmentError, setAttachmentError] = useState<string | null>(null);
   const trimmedValue = value.trimStart();
   const bashMode = attachedImages.length === 0 && trimmedValue.startsWith("!");
   const bashExcluded = bashMode && trimmedValue.startsWith("!!");
@@ -450,6 +452,31 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
   const pendingImageCountRef = useRef(0);
   valueRef.current = value;
   attachedImagesRef.current = attachedImages;
+
+  const insertTextAtCursor = useCallback((text: string) => {
+    const ta = textareaRef.current;
+    if (!ta) {
+      setValue((v) => v + (v ? " " : "") + text);
+      return;
+    }
+    const start = ta.selectionStart ?? ta.value.length;
+    const end = ta.selectionEnd ?? ta.value.length;
+    const before = ta.value.slice(0, start);
+    const after = ta.value.slice(end);
+    const sep = before.length > 0 && !before.endsWith(" ") ? " " : "";
+    const newVal = before + sep + text + after;
+    valueRef.current = newVal;
+    setValue(newVal);
+    setAtQuery(null);
+    requestAnimationFrame(() => {
+      if (!ta) return;
+      const pos = start + sep.length + text.length;
+      ta.setSelectionRange(pos, pos);
+      ta.focus();
+      ta.style.height = "auto";
+      ta.style.height = `${Math.min(ta.scrollHeight, 200)}px`;
+    });
+  }, []);
 
   useImperativeHandle(ref, () => ({
     insertIfEmpty(text: string) {
@@ -604,28 +631,10 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
       });
     },
     insertText(text: string) {
-      const ta = textareaRef.current;
-      if (!ta) {
-        setValue((v) => v + (v ? " " : "") + text);
-        return;
-      }
-      const start = ta.selectionStart ?? ta.value.length;
-      const end = ta.selectionEnd ?? ta.value.length;
-      const before = ta.value.slice(0, start);
-      const after = ta.value.slice(end);
-      const sep = before.length > 0 && !before.endsWith(" ") ? " " : "";
-      const newVal = before + sep + text + after;
-      valueRef.current = newVal;
-      setValue(newVal);
-      setAtQuery(null);
-      requestAnimationFrame(() => {
-        if (!ta) return;
-        const pos = start + sep.length + text.length;
-        ta.setSelectionRange(pos, pos);
-        ta.focus();
-        ta.style.height = "auto";
-        ta.style.height = `${Math.min(ta.scrollHeight, 200)}px`;
-      });
+      insertTextAtCursor(text);
+    },
+    saveImages(files: File[]) {
+      void saveImagesToDisk(files);
     },
     addImages(files: File[]) {
       processImageFiles(files);
@@ -670,6 +679,46 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
       pendingImageCountRef.current -= imageFiles.length;
     }
   }, []);
+
+  /**
+   * Save pasted/dropped images to disk (via /api/attachments) and insert their
+   * absolute paths into the message as @-mentions, so the agent can read them
+   * even when the active model has no vision support.
+   */
+  const saveImagesToDisk = useCallback(async (files: File[]) => {
+    const imageFiles = files.filter(
+      (f) => f.type.startsWith("image/") && f.size > 0 && f.size <= MAX_ATTACHED_IMAGE_BYTES,
+    ).slice(0, MAX_ATTACHED_IMAGES);
+    if (!imageFiles.length) return;
+
+    setAttachmentError(null);
+    const body = new FormData();
+    for (const file of imageFiles) body.append("files", file);
+    try {
+      const response = await fetch("/api/attachments", { method: "POST", body });
+      if (!response.ok) {
+        let message = `Failed to save image (HTTP ${response.status})`;
+        try {
+          const data = await response.json() as { error?: string };
+          if (data.error) message = data.error;
+        } catch {
+          // keep default message
+        }
+        setAttachmentError(message);
+        return;
+      }
+      const data = await response.json() as { paths?: string[] };
+      const paths = data.paths ?? [];
+      if (!paths.length) {
+        setAttachmentError("No image paths returned");
+        return;
+      }
+      const mention = paths.map((p) => `@${p}`).join(" ") + " ";
+      insertTextAtCursor(mention);
+    } catch {
+      setAttachmentError("Failed to save image (network error)");
+    }
+  }, [insertTextAtCursor]);
 
   const removeImage = useCallback((index: number) => {
     setAttachedImages((prev) => {
@@ -1178,8 +1227,8 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
     if (!imageItems.length) return;
     e.preventDefault();
     const files = imageItems.map((item) => item.getAsFile()).filter((f): f is File => f !== null);
-    processImageFiles(files);
-  }, [processImageFiles]);
+    void saveImagesToDisk(files);
+  }, [saveImagesToDisk]);
 
   useEffect(() => {
     if (slashQuery === null) {
@@ -1375,13 +1424,27 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
         style={{ display: "none" }}
         onChange={(e) => {
           const files = Array.from(e.target.files ?? []);
-          processImageFiles(files);
+          void saveImagesToDisk(files);
           e.target.value = "";
         }}
       />
       <div style={{ maxWidth: 820, margin: "0 auto" }}>
         <ModelErrorBanner error={modelError} />
         <ModelScopeWarningBanner warnings={modelScopeWarnings} />
+        {attachmentError && (
+          <div style={{
+            marginBottom: 8,
+            padding: "6px 10px",
+            borderRadius: 6,
+            background: "color-mix(in srgb, #ef4444 10%, var(--bg-panel))",
+            border: "1px solid color-mix(in srgb, #ef4444 45%, var(--border))",
+            color: "#f87171",
+            fontSize: 12,
+            lineHeight: 1.4,
+          }}>
+            {attachmentError}
+          </div>
+        )}
         {/* Queued steering / follow-up messages (delivered by pi on upcoming turns) */}
         {((queuedMessages?.steering.length ?? 0) + (queuedMessages?.followUp.length ?? 0)) > 0 && (
           <div style={{
