@@ -1641,7 +1641,7 @@ export function AppShell() {
         }
       }
     `}</style>
-    <div style={{
+    <div id="pi-app-root" style={{
       display: "flex",
       width: "100%",
       height: "var(--app-viewport-height, 100dvh)",

@@ -970,13 +970,14 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
       )}
       {/* Header */}
       <div
+        className="pi-sidebar-header"
         style={{
           padding: "12px 10px 10px",
           borderBottom: "1px solid var(--border)",
           flexShrink: 0,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+        <div className="pi-sidebar-header-row" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
           <PiWebTitle />
           <div style={{ display: "flex", gap: 6 }}>
             <button
@@ -1063,6 +1064,7 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
         <div ref={dropdownRef} style={{ position: "relative" }}>
           <button
             onClick={() => setDropdownOpen((v) => !v)}
+            className="pi-sidebar-cwd"
             title={selectedProject?.root ?? selectedCwd ?? ""}
             style={{
               width: "100%",
