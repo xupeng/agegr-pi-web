@@ -1,14 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Noto_Sans_Mono } from "next/font/google";
 import { PwaRegistration } from "@/components/PwaRegistration";
 import "katex/dist/katex.min.css";
 import "./globals.css";
-
-const notoSansMono = Noto_Sans_Mono({
-  subsets: ["latin", "cyrillic"],
-  variable: "--font-noto-mono",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "Pi Web",
@@ -58,9 +51,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" translate="no" className={`${notoSansMono.variable} notranslate`} suppressHydrationWarning>
+    <html lang="en" translate="no" className="notranslate" suppressHydrationWarning>
       <head>
         <meta name="google" content="notranslate" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* App Router has no _document.js; this rule targets Pages Router only. */}
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Oxanium:wght@300..700&display=swap"
+          rel="stylesheet"
+        />
+        <link
+          href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.7.0/style.css"
+          rel="stylesheet"
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem("pi-theme");var dark=t==="dark"||((t==null||t===""||t==="auto")&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(dark)document.documentElement.classList.add("dark")}catch(e){}})();`,
