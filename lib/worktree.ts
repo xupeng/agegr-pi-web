@@ -4,6 +4,7 @@ import { basename, dirname, join, resolve } from "path";
 import { promisify } from "util";
 import { allowFileRoot } from "./allowed-roots";
 import { samePath, toNativePath } from "./paths";
+import { clearCachedProjectsOnDisk } from "./session-list-cache";
 
 const execFileAsync = promisify(execFile);
 
@@ -50,6 +51,7 @@ function getProjectCache(): Map<string, { info: ProjectInfo; expiresAt: number }
 
 export function invalidateProjectCache(): void {
   globalThis.__piProjectCache?.clear();
+  clearCachedProjectsOnDisk();
 }
 
 async function git(cwd: string, args: string[]): Promise<string> {

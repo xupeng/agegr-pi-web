@@ -5,13 +5,23 @@ import {
   getAgentDir,
 } from "@earendil-works/pi-coding-agent";
 import { closeSync, openSync, readSync } from "fs";
-import { normalize as normalizePath } from "path";
+import { readdir, stat } from "fs/promises";
+import { join, normalize as normalizePath } from "path";
 import type { AgentMessage, SessionEntry, SessionHeader, SessionInfo, SessionContext } from "./types";
-import type { SessionEntry as PiSessionEntry, SessionInfo as PiSessionInfo } from "@earendil-works/pi-coding-agent";
+import type { SessionEntry as PiSessionEntry } from "@earendil-works/pi-coding-agent";
 import { normalizeToolCalls } from "./normalize";
 import { projectIdentityKey } from "./project-identity";
 import { sessionPathKey } from "./session-path";
 import { resolveProject, type ProjectInfo } from "./worktree";
+import {
+  type CachedSessionEntry,
+  type SessionListCacheFile,
+  getCachedProjects,
+  loadSessionListCacheFile,
+  readSessionInfoFast,
+  saveSessionListCacheFile,
+  setCachedProjects,
+} from "./session-list-cache";
 
 export { getAgentDir };
 
@@ -21,7 +31,10 @@ export async function attachSessionProjectInfo(sessions: SessionInfo[]): Promise
   await Promise.all(uniqueCwds.map(async (cwd) => {
     projectByCwd.set(cwd, await resolveProject(cwd));
   }));
+  return withProjectInfo(sessions, projectByCwd);
+}
 
+function withProjectInfo(sessions: SessionInfo[], projectByCwd: Map<string, ProjectInfo>): SessionInfo[] {
   return sessions.map((session) => {
     const project = session.cwd ? projectByCwd.get(session.cwd) : undefined;
     const projectRoot = project?.projectRoot ?? session.cwd;
@@ -45,31 +58,148 @@ export function mergeSessionLists(
   return [...byId.values()].sort((a, b) => b.modified.localeCompare(a.modified));
 }
 
-async function loadAllSessions(): Promise<SessionInfo[]> {
-  const piSessions: PiSessionInfo[] = await SessionManager.listAll();
-  const pathToId = new Map<string, string>();
-  for (const s of piSessions) pathToId.set(sessionPathKey(s.path), s.id);
-
-  const sessions = piSessions.map((s) => {
-    cacheSessionPath(s.id, s.path);
-    return {
-      path: s.path,
-      id: s.id,
-      cwd: s.cwd,
-      name: s.name,
-      created: s.created instanceof Date ? s.created.toISOString() : String(s.created),
-      modified: s.modified instanceof Date ? s.modified.toISOString() : String(s.modified),
-      messageCount: s.messageCount,
-      firstMessage: s.firstMessage || "(no messages)",
-      parentSessionId: s.parentSessionPath ? pathToId.get(sessionPathKey(s.parentSessionPath)) : undefined,
-      transient: false,
-    };
-  });
-  return attachSessionProjectInfo(sessions);
+/** Mirror of pi's directory layout: <sessionsDir>/<encoded-cwd>/<file>.jsonl */
+async function collectSessionFiles(): Promise<string[]> {
+  const sessionsDir = join(getAgentDir(), "sessions");
+  try {
+    const dirs = (await readdir(sessionsDir, { withFileTypes: true }))
+      .filter((entry) => entry.isDirectory() || entry.isSymbolicLink())
+      .map((entry) => normalizePath(`${sessionsDir}/${entry.name}`));
+    const files: string[] = [];
+    for (const dir of dirs) {
+      try {
+        const names = await readdir(dir);
+        for (const name of names) {
+          if (name.endsWith(".jsonl")) files.push(normalizePath(`${dir}/${name}`));
+        }
+      } catch {
+        // unreadable dir (vanished cwd, permissions) — skip it
+      }
+    }
+    return files;
+  } catch {
+    return [];
+  }
 }
 
+async function mapWithConcurrency<T, R>(
+  items: readonly T[],
+  limit: number,
+  fn: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let next = 0;
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (next < items.length) {
+      const index = next++;
+      results[index] = await fn(items[index]);
+    }
+  });
+  await Promise.all(workers);
+  return results;
+}
+
+/**
+ * Incremental scan: stat every session file (~46ms for ~3000 files), reuse
+ * summaries from the on-disk cache for unchanged files, and re-read only the
+ * files whose mtime changed. Falls back to a full read when no cache exists
+ * (first cold start of a fresh machine / deleted cache file).
+ */
+async function loadAllSessions(): Promise<SessionInfo[]> {
+  const files = await collectSessionFiles();
+  const stats = await mapWithConcurrency(files, 64, async (path) => {
+    try {
+      const s = await stat(path);
+      return { path, mtimeMs: s.mtimeMs };
+    } catch {
+      return null;
+    }
+  });
+
+  const diskCache = loadSessionListCacheFile();
+  const mtimeByPath = new Map<string, number>();
+  const sessionsByPath = new Map<string, CachedSessionEntry>();
+  const changedPaths: string[] = [];
+  for (const st of stats) {
+    if (!st) continue;
+    mtimeByPath.set(st.path, st.mtimeMs);
+    const cached = diskCache?.sessions[st.path];
+    if (cached && Math.abs(cached.mtimeMs - st.mtimeMs) < 1) {
+      sessionsByPath.set(st.path, cached.info);
+    } else {
+      changedPaths.push(st.path);
+    }
+  }
+
+  const freshInfos = await mapWithConcurrency(changedPaths, 32, async (path) => {
+    const info = await readSessionInfoFast(path, mtimeByPath.get(path) ?? 0);
+    return info ? { path, info } : null;
+  });
+  for (const entry of freshInfos) {
+    if (entry) sessionsByPath.set(entry.path, entry.info);
+  }
+
+  const pathToId = new Map<string, string>();
+  for (const info of sessionsByPath.values()) pathToId.set(sessionPathKey(info.path), info.id);
+
+  const sessions: SessionInfo[] = [];
+  for (const info of sessionsByPath.values()) {
+    cacheSessionPath(info.id, info.path);
+    sessions.push({
+      path: info.path,
+      id: info.id,
+      cwd: info.cwd,
+      name: info.name,
+      created: info.created,
+      modified: info.modified,
+      messageCount: info.messageCount,
+      firstMessage: info.firstMessage,
+      parentSessionId: info.parentSessionPath ? pathToId.get(sessionPathKey(info.parentSessionPath)) : undefined,
+      transient: false,
+    });
+  }
+
+  // Project info: disk cache (same TTL as the in-memory project cache) first,
+  // otherwise resolveProject (which itself checks its in-memory cache before
+  // spawning git).
+  const uniqueCwds = [...new Set(sessions.map((s) => s.cwd).filter(Boolean))];
+  const projectByCwd = new Map<string, ProjectInfo>();
+  const now = Date.now();
+  const cachedProjects = getCachedProjects(diskCache, uniqueCwds, now, PROJECT_CACHE_TTL_MS);
+  for (const [cwd, info] of cachedProjects) projectByCwd.set(cwd, info as ProjectInfo);
+  const missingCwds = uniqueCwds.filter((cwd) => !projectByCwd.has(cwd));
+  await Promise.all(missingCwds.map(async (cwd) => {
+    projectByCwd.set(cwd, await resolveProject(cwd));
+  }));
+
+  // Persist the refreshed cache (best-effort, never blocks the response).
+  const newCache: SessionListCacheFile = { version: 1, sessions: {}, projects: {} };
+  for (const [path, info] of sessionsByPath) {
+    newCache.sessions[path] = { mtimeMs: mtimeByPath.get(path) ?? 0, info };
+  }
+  setCachedProjects(newCache, projectByCwd, now);
+  saveSessionListCacheFile(newCache);
+
+  return withProjectInfo(sessions, projectByCwd);
+}
+
+/** Mirrors worktree.ts's in-memory project cache TTL. */
+const PROJECT_CACHE_TTL_MS = 600_000;
+
 export async function listAllSessions(options: { force?: boolean } = {}): Promise<SessionInfo[]> {
-  if (options.force) invalidateSessionListCache();
+  if (options.force) {
+    // Wait for any in-flight scan to settle before invalidating, so a force
+    // refresh arriving mid-scan does not start a second full scan in parallel.
+    const inflight = globalThis.__piSessionListPromise;
+    if (inflight) {
+      try {
+        await inflight;
+      } catch {
+        // ignore — the fresh scan below is the source of truth
+      }
+    }
+    invalidateSessionListCache();
+  }
   const generation = globalThis.__piSessionListGeneration ?? 0;
 
   // Return cached result if still fresh (avoids re-scanning session files

@@ -33,6 +33,28 @@ Browser                Next.js Server              AgentSession (in-process)
 **Session browsing** (read-only): reads `.jsonl` files through SDK `SessionManager` helpers and `lib/session-reader.ts` — no AgentSession created.  
 **Sending a message**: `startRpcSession()` in `lib/rpc-manager.ts` creates an AgentSession in-process.
 
+### Session list scanning (performance)
+
+`listAllSessions()` (in `lib/session-reader.ts`) never calls the SDK's
+`SessionManager.listAll()` on the hot path — that re-parses every session
+`.jsonl` (~3.4s for ~3000 files / 846 MB). Instead it does an **incremental
+scan** backed by `lib/session-list-cache.ts`:
+
+- `stat` every session file (~46ms for 3000) and compare mtimes against the
+  on-disk cache at `~/.pi/agent/pi-web-session-list-cache.json` (0600, atomic
+  write). Unchanged files reuse their cached summary; only new/changed files
+  are re-read via `readSessionInfoFast()` (same semantics as pi's
+  `buildSessionInfo`, minus the unused `allMessagesText`).
+- Project info (git-backed) is cached in the same file with the same 10-minute
+  TTL as the in-memory `resolveProject` cache; `invalidateProjectCache()`
+  (`lib/worktree.ts`) also clears the on-disk project entries.
+- The 30s in-memory list cache, generation invalidation
+  (`invalidateSessionListCache()`) and the single-flight promise stay; a
+  `force=1` refresh first awaits any in-flight scan before invalidating, so
+  concurrent refreshes do not start two full scans.
+- Measured: cold (no disk cache) ~3.6s once, warm ~54ms, hot ~0ms; end-to-end
+  `/api/sessions` second request ~14ms (was ~158ms, first cold load 8.8s).
+
 ---
 
 ## File Map
@@ -77,7 +99,8 @@ lib/
   npx.ts               npx runner used by skill install
   pi-types.ts          local structural types for pi SDK objects
   rpc-manager.ts      AgentSessionWrapper + registry + startRpcSession
-  session-reader.ts   SessionManager wrappers + path cache + buildSessionContext adapter
+  session-reader.ts   incremental session scan (disk cache) + path cache + buildSessionContext adapter
+  session-list-cache.ts  persistent mtime-keyed cache for the session list + fast per-file reader
   tool-presets.ts     PRESET_NONE/READ_ONLY/DEFAULT/FULL + getPresetFromTools()
   tool-preset-preference.ts  browser-persisted default for fresh sessions
   types.ts            shared TypeScript types
