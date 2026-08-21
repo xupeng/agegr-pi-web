@@ -2188,7 +2188,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
               outline: "none",
               resize: "none",
               color: "var(--text)",
-              fontSize: 14,
+              fontSize: 15,
               lineHeight: 1.6,
               fontFamily: "inherit",
               minHeight: 24,
