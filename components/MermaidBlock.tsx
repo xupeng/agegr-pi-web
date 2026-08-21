@@ -288,7 +288,12 @@ export const CodeBlock = memo(function CodeBlock({ code, lang, headerAction, isS
             fontSize: 14,
             lineHeight: 1.62,
             borderRadius: 0,
-            background: "color-mix(in srgb, var(--bg) 92%, var(--bg-panel))",
+            // 主题里 vs 用 backgroundColor、vscDarkPlus 用 background，
+            // customStyle 必须与当前主题同一种写法，否则简写/非简写并存
+            // 会触发 React 的 style 冲突警告（dev-only）
+            ...(isDark
+              ? { background: "color-mix(in srgb, var(--bg) 92%, var(--bg-panel))" }
+              : { backgroundColor: "color-mix(in srgb, var(--bg) 92%, var(--bg-panel))" }),
           }}
           codeTagProps={{ style: { fontFamily: "var(--font-mono)" } }}
         >
