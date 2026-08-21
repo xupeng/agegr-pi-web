@@ -326,3 +326,20 @@ export interface SessionContext {
   thinkingLevel: string;
   model: { provider: string; modelId: string } | null;
 }
+
+/** Lightweight per-project summary for the sidebar's first-load request.
+ *  Carries the full session id set (not the summaries) so the client can
+ *  compute cross-project unread/running counts and prune stale unread marks
+ *  without downloading every session's firstMessage etc. */
+export interface ProjectSummary {
+  /** Stable server-computed project identity (projectKey). */
+  key: string;
+  /** projectRoot of the most recently active session (display path). */
+  root: string;
+  /** Latest session modified timestamp in the project (sort key). */
+  modified: string;
+  sessionCount: number;
+  sessionIds: string[];
+  /** Count of running sessions in this project (server-computed). */
+  runningCount: number;
+}

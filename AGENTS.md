@@ -55,6 +55,24 @@ scan** backed by `lib/session-list-cache.ts`:
 - Measured: cold (no disk cache) ~3.6s once, warm ~54ms, hot ~0ms; end-to-end
   `/api/sessions` second request ~14ms (was ~158ms, first cold load 8.8s).
 
+### On-demand session loading (sidebar)
+
+The sidebar no longer downloads every session summary on first load:
+
+- `GET /api/projects` returns only per-project summaries (key/root/modified/
+  sessionCount/runningCount plus the **full session id set**, ~125KB for 46
+  projects vs ~1.9MB for all 2990 summaries). The id set lets the client prune
+  stale unread marks and compute cross-project running/unread dots without the
+  summaries.
+- Entering a project triggers `GET /api/sessions?projectKey=<key>`; results are
+  cached per project key in `SessionSidebar` and refetched only on project
+  switch, manual refresh, or a forced refresh (`refreshKey` bump / `force=1`).
+- URL restore (`?session=<id>`) and transient-session hydration use the
+  lightweight `GET /api/sessions?sessionId=<id>` single-session lookup instead
+  of the full list. `AppShell.restoreWorkspaceContext` uses `?projectKey=`.
+- A forced project refresh drops cached per-project lists; the running poll
+  (every 2.5s) patches `runningCount` into the project list without refetching.
+
 ---
 
 ## File Map
@@ -62,6 +80,7 @@ scan** backed by `lib/session-list-cache.ts`:
 ```
 app/api/
   sessions/route.ts               GET  list all sessions
+  projects/route.ts               GET  lightweight per-project summaries (first load)
   sessions/[id]/route.ts          GET/PATCH/DELETE session
   sessions/[id]/context/route.ts  GET ?leafId= — context for a specific leaf
   sessions/[id]/export/route.ts   GET exported HTML for a session

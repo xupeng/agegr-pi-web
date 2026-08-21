@@ -56,12 +56,23 @@ test("offers the downstream context-menu hook only on a normal session row", () 
   );
 });
 
-test("manual and lifecycle refreshes bypass the server session-list cache", () => {
-  assert.match(source, /force \? "\/api\/sessions\?force=1" : "\/api\/sessions"/);
+test("manual and lifecycle refreshes bypass the server project-list cache", () => {
+  assert.match(source, /force \? "\/api\/projects\?force=1" : "\/api\/projects"/);
   assert.match(source, /cache: "no-store"/);
-  assert.match(source, /loadSessions\(isFirst, !isFirst\)/);
-  assert.match(source, /onClick=\{\(\) => loadSessions\(false, true\)\}/);
-  assert.match(source, /loadSessions\(false, true\);[\s\S]*?onBackgroundTaskDone/);
+  assert.match(source, /loadProjects\(isFirst, !isFirst\)/);
+  assert.match(source, /onClick=\{\(\) => void refreshLists\(true\)\}/);
+  assert.match(source, /refreshLists\(true\);[\s\S]*?onBackgroundTaskDone/);
+});
+
+test("sessions load per project on demand and are cached by project key", () => {
+  assert.match(source, /\/api\/sessions\?projectKey=\$\{encodeURIComponent\(projectKey\)\}/);
+  assert.match(source, /projectSessionsByKey\.get\(selectedProjectKey\)/);
+  assert.match(source, /loadProjectSessions\(selectedProjectKey\)/);
+  assert.match(source, /projectSessionsLoadingKey === selectedProjectKey/);
+});
+
+test("URL restore uses a lightweight single-session lookup", () => {
+  assert.match(source, /\/api\/sessions\?sessionId=\$\{encodeURIComponent\(initialSessionId\)\}/);
 });
 
 test("does not expose disk-backed actions for transient sessions", () => {

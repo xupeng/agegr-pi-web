@@ -16,11 +16,18 @@ const { GET: getSessionDetail } = await jiti.import("./[id]/route.ts");
 const { GET: getSessionState } = await jiti.import("./[id]/state/route.ts");
 
 test("session listing merges live registry snapshots and honors force refresh", () => {
-  assert.match(listRoute, /searchParams\.get\("force"\) === "1"/);
+  assert.match(listRoute, /params\.get\("force"\) === "1"/);
   assert.match(listRoute, /listAllSessions\(\{ force \}\)/);
   assert.match(listRoute, /attachSessionProjectInfo\(getRpcSessionInfos\(\)\)/);
   assert.match(listRoute, /mergeSessionLists\(persistedSessions, runtimeSessions\)/);
   assert.match(listRoute, /"Cache-Control": "no-store"/);
+});
+
+test("session listing scopes to a project or a single session on demand", () => {
+  assert.match(listRoute, /projectKey = params\.get\("projectKey"\)/);
+  assert.match(listRoute, /sessionId = params\.get\("sessionId"\)/);
+  assert.match(listRoute, /all\.filter\(\(s\) => \(s\.projectKey \?\? s\.projectRoot \?\? s\.cwd\) === projectKey\)/);
+  assert.match(listRoute, /const target = all\.find\(\(s\) => s\.id === sessionId\)/);
 });
 
 test("session reads use the live SessionManager before requiring a JSONL path", () => {

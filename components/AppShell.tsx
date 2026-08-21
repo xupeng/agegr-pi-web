@@ -457,7 +457,7 @@ export function AppShell() {
     const token = ++workspaceRestoreTokenRef.current;
     const lastOpenSessionId = getLastOpenSession(projectKey);
     if (!lastOpenSessionId) return;
-    void fetch("/api/sessions")
+    void fetch(`/api/sessions?projectKey=${encodeURIComponent(projectKey)}`)
       .then((r) => (r.ok ? (r.json() as Promise<{ sessions: SessionInfo[] }>) : null))
       .then((d) => {
         if (token !== workspaceRestoreTokenRef.current) return; // stale switch
@@ -616,7 +616,7 @@ export function AppShell() {
   // handleCwdChange relies on. Hydrate it from the session list so switching
   // worktrees right after creating a session doesn't close the chat.
   const hydrateSelectedSession = useCallback((sessionId: string) => {
-    void fetch("/api/sessions", { cache: "no-store" })
+    void fetch(`/api/sessions?sessionId=${encodeURIComponent(sessionId)}`, { cache: "no-store" })
       .then((r) => (r.ok ? (r.json() as Promise<{ sessions: SessionInfo[] }>) : null))
       .then((d) => {
         const full = d?.sessions.find((s) => s.id === sessionId);

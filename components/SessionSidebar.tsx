@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useState, useCallback, useMemo, useRef, type CSSProperties, type ReactNode } from "react";
-import type { SessionInfo } from "@/lib/types";
+import type { ProjectSummary, SessionInfo } from "@/lib/types";
 import { loadExplorerOpen, saveExplorerOpen } from "@/lib/file-explorer-state";
 import { dispatchSessionRowContextMenu } from "@/lib/session-row-context-menu";
 import { skillExpansionToCommand } from "@/lib/slash-display";
-import { getProjectActivity, getRecentProjects, sessionsForProject } from "@/lib/project-groups";
-import { workspaceKeyOf } from "@/lib/workspace-memory";
 import { useI18n } from "@/hooks/useI18n";
 import { DirectoryPicker } from "./DirectoryPicker";
 import { FileExplorer, type FileExplorerHandle } from "./FileExplorer";
@@ -394,7 +392,16 @@ function PiWebTitle() {
 
 export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSession, initialSessionId, skipInitialProjectSelection, onInitialRestoreDone, refreshKey, onSessionDeleted, selectedCwd: selectedCwdProp, onCwdChange, onOpenFile, explorerRefreshKey, onExplorerRefresh, onAtMention, onAtMentions, onBackgroundTaskDone, onRunningSessionIdsChange }: Props) {
   const { t } = useI18n();
-  const [allSessions, setAllSessions] = useState<SessionInfo[]>([]);
+  const [projects, setProjects] = useState<ProjectSummary[]>([]);
+  const [projectSessionsByKey, setProjectSessionsByKey] = useState<Map<string, SessionInfo[]>>(new Map());
+  /** Project key whose sessions are currently being fetched (for local spinners). */
+  const [projectSessionsLoadingKey, setProjectSessionsLoadingKey] = useState<string | null>(null);
+  /** Full set of every session id across all projects — for unread pruning and
+   *  detecting brand-new sessions during the running poll. */
+  const allSessionIdsRef = useRef<Set<string>>(new Set());
+  const projectSessionsByKeyRef = useRef<Map<string, SessionInfo[]>>(new Map());
+  const projectSessionsLoadingRef = useRef<Set<string>>(new Set());
+  const selectedProjectKeyRef = useRef<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCwd, setSelectedCwd] = useState<string | null>(null);
@@ -436,22 +443,30 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
   const explorerRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fileExplorerRef = useRef<FileExplorerHandle>(null);
 
-  const loadSessions = useCallback(async (showLoading = false, force = false) => {
+  const loadProjects = useCallback(async (showLoading = false, force = false) => {
     try {
       if (showLoading) setLoading(true);
-      const res = await fetch(force ? "/api/sessions?force=1" : "/api/sessions", {
+      const res = await fetch(force ? "/api/projects?force=1" : "/api/projects", {
         cache: "no-store",
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json() as { sessions: SessionInfo[]; runningSessionIds?: string[] };
-      setAllSessions(data.sessions);
+      const data = await res.json() as { projects: ProjectSummary[]; runningSessionIds?: string[] };
+      setProjects(data.projects);
+      allSessionIdsRef.current = new Set(data.projects.flatMap((p) => p.sessionIds));
+      // A forced project refresh means sessions may have been created, renamed
+      // or deleted; drop cached per-project lists so the active project (and
+      // any later switch) refetches them.
+      if (force) {
+        projectSessionsByKeyRef.current = new Map();
+        setProjectSessionsByKey(new Map());
+      }
       // Treat the fetched running set as an initial fallback only. Once the
       // lightweight poll is live, a slow session-list fetch cannot overwrite it.
       if (!runningPollAuthoritativeRef.current) {
         setRunningSessionIds(new Set(data.runningSessionIds ?? []));
       }
       // Drop unread markers for sessions that no longer exist (e.g. deleted).
-      const existingIds = new Set(data.sessions.map((s) => s.id));
+      const existingIds = allSessionIdsRef.current;
       setUnreadSessionIds((prev) => {
         if (prev.size === 0) return prev;
         const next = new Set([...prev].filter((id) => existingIds.has(id)));
@@ -470,12 +485,53 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
     }
   }, []);
 
+  /** Load (and cache) the session summaries of one project on demand. */
+  const loadProjectSessions = useCallback(async (projectKey: string, force = false) => {
+    if (!force) {
+      if (projectSessionsLoadingRef.current.has(projectKey)) return;
+      if (projectSessionsByKeyRef.current.has(projectKey)) return;
+    }
+    projectSessionsLoadingRef.current.add(projectKey);
+    setProjectSessionsLoadingKey(projectKey);
+    try {
+      const res = await fetch(`/api/sessions?projectKey=${encodeURIComponent(projectKey)}`, {
+        cache: "no-store",
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json() as { sessions: SessionInfo[] };
+      projectSessionsByKeyRef.current.set(projectKey, data.sessions);
+      setProjectSessionsByKey((prev) => {
+        const next = new Map(prev);
+        next.set(projectKey, data.sessions);
+        return next;
+      });
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      projectSessionsLoadingRef.current.delete(projectKey);
+      setProjectSessionsLoadingKey((cur) => (cur === projectKey ? null : cur));
+    }
+  }, []);
+
+  /** Refresh both levels: project list plus the active project's sessions. */
+  const refreshLists = useCallback(async (force = false) => {
+    await loadProjects(false, force);
+    const key = selectedProjectKeyRef.current;
+    if (key) await loadProjectSessions(key, force);
+  }, [loadProjects, loadProjectSessions]);
+
   const initialLoadDone = useRef(false);
   useEffect(() => {
     const isFirst = !initialLoadDone.current;
     initialLoadDone.current = true;
-    loadSessions(isFirst, !isFirst);
-  }, [loadSessions, refreshKey]);
+    void loadProjects(isFirst, !isFirst);
+    // Session mutations (create/rename/delete) bump refreshKey. The forced
+    // project refresh above invalidated the cached lists, so also refetch the
+    // active project's sessions to surface the change immediately.
+    if (!isFirst && selectedProjectKeyRef.current) {
+      void loadProjectSessions(selectedProjectKeyRef.current, true);
+    }
+  }, [loadProjects, loadProjectSessions, refreshKey]);
 
   // Browser storage is unavailable during server rendering. Restore the panel
   // preference after hydration so a collapsed explorer stays collapsed on reload.
@@ -519,7 +575,14 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
         const data = await res.json() as { runningSessionIds?: string[] };
         if (stopped || controller !== current) return;
         runningPollAuthoritativeRef.current = true;
-        setRunningSessionIds(new Set(data.runningSessionIds ?? []));
+        const runningSet = new Set(data.runningSessionIds ?? []);
+        setRunningSessionIds(runningSet);
+        // Keep the workspace selector's per-project running dots live without
+        // refetching the project list (the poll is the lightweight path).
+        setProjects((prev) => prev.map((p) => ({
+          ...p,
+          runningCount: p.sessionIds.filter((id) => runningSet.has(id)).length,
+        })));
       } catch {
         // Keep the last known state; the next visible-tab poll retries.
       } finally {
@@ -566,17 +629,17 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
       });
     }
     const hasUnlistedRunningSession = newlyRunning.some(
-      (id) => !allSessions.some((session) => session.id === id),
+      (id) => !allSessionIdsRef.current.has(id),
     );
     if (completedInBackground.length > 0 || hasUnlistedRunningSession) {
-      loadSessions(false, true);
+      refreshLists(true);
     }
     if (completedInBackground.length > 0) {
       onBackgroundTaskDone?.();
     }
 
     previousRunningSessionIdsRef.current = runningSessionIds;
-  }, [runningSessionIds, selectedSessionId, allSessions, loadSessions, onBackgroundTaskDone]);
+  }, [runningSessionIds, selectedSessionId, refreshLists, onBackgroundTaskDone]);
 
   useEffect(() => {
     if (!selectedSessionId) return;
@@ -621,13 +684,17 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
     if (worktreeState?.worktrees.some((w) => w.path === cwd)) {
       return projectSelection(worktreeState.projectRoot, worktreeState.projectKey);
     }
-    const match = allSessions.find((session) => (
-      session.cwd === cwd || (session.projectRoot ?? session.cwd) === cwd
-    ));
-    return match
-      ? projectSelection(match.projectRoot ?? match.cwd, workspaceKeyOf(match))
-      : projectSelection(cwd, cwd);
-  }, [validatedProject, worktreeState, allSessions, projectSelection]);
+    const match = projects.find((p) => p.root === cwd);
+    if (match) return projectSelection(match.root, match.key);
+    // Fall back to already-loaded project sessions: covers worktrees (whose
+    // paths differ from the main project root) and repo subdirectories before
+    // the worktree state for the new cwd has been fetched.
+    for (const [key, sessions] of projectSessionsByKey) {
+      const found = sessions.find((s) => s.cwd === cwd || (s.projectRoot ?? s.cwd) === cwd);
+      if (found) return projectSelection(found.projectRoot ?? found.cwd, key);
+    }
+    return projectSelection(cwd, cwd);
+  }, [validatedProject, worktreeState, projects, projectSessionsByKey, projectSelection]);
 
   // A worktree/session refresh can hydrate the stable key without changing
   // cwd, so notify when either changes. The parent treats same-cwd key changes
@@ -697,25 +764,37 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
 
   // Auto-select cwd and restore session from URL on first load
   useEffect(() => {
-    if (allSessions.length === 0 || skipInitialProjectSelection) return;
+    if (skipInitialProjectSelection) return;
 
     if (selectedCwd === null) {
       // If restoring a session, set cwd to match that session
       if (initialSessionId && !restoredRef.current) {
         restoredRef.current = true;
-        const target = allSessions.find((s) => s.id === initialSessionId);
-        if (target) {
-          setSelectedCwd(target.cwd);
-          onSelectSession(target, true);
-          return;
-        }
-        // Session not found — notify parent so it can show the placeholder
-        onInitialRestoreDone?.();
+        // Lightweight single-session lookup — downloading every project's
+        // summaries just to find one session would defeat the on-demand load.
+        void fetch(`/api/sessions?sessionId=${encodeURIComponent(initialSessionId)}`, { cache: "no-store" })
+          .then((r) => (r.ok ? (r.json() as Promise<{ sessions: SessionInfo[] }>) : null))
+          .then((d) => {
+            const target = d?.sessions?.[0];
+            if (target) {
+              setSelectedCwd(target.cwd);
+              onSelectSession(target, true);
+              return;
+            }
+            // Session not found — notify parent so it can show the placeholder,
+            // then fall back to the most recent project.
+            onInitialRestoreDone?.();
+            if (projects.length > 0) setSelectedCwd(projects[0].root);
+          })
+          .catch(() => {
+            onInitialRestoreDone?.();
+            if (projects.length > 0) setSelectedCwd(projects[0].root);
+          });
+        return;
       }
-      const projects = getRecentProjects(allSessions);
       if (projects.length > 0) setSelectedCwd(projects[0].root);
     }
-  }, [allSessions, selectedCwd, initialSessionId, skipInitialProjectSelection, onSelectSession, onInitialRestoreDone]);
+  }, [projects, selectedCwd, initialSessionId, skipInitialProjectSelection, onSelectSession, onInitialRestoreDone]);
 
   // Prefer an exact UI selection while a refetch is in flight. Once the
   // response catches up, the server-resolved path handles Windows case and
@@ -894,7 +973,8 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
     onNewSession?.(tempId, selectedCwd);
   }, [selectedCwd, onNewSession]);
 
-  const recentProjects = getRecentProjects(allSessions);
+  // The projects endpoint is already sorted by most recent activity.
+  const recentProjects = projects.map((p) => ({ key: p.key, root: p.root }));
   const showProjectFilter = recentProjects.length > 8;
   const visibleProjects = projectFilter.trim()
     ? recentProjects.filter((project) => project.root.toLowerCase().includes(projectFilter.trim().toLowerCase()))
@@ -902,12 +982,34 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
 
   // Sessions of every worktree in the selected project are shown together
   const selectedProject = projectFor(selectedCwd);
+  const selectedProjectKey = selectedProject?.key ?? null;
+  selectedProjectKeyRef.current = selectedProjectKey;
+
+  // Load the selected project's sessions on demand (and cache them).
+  useEffect(() => {
+    if (!selectedProjectKey) return;
+    void loadProjectSessions(selectedProjectKey);
+  }, [selectedProjectKey, loadProjectSessions]);
+
+  const projectSessions = selectedProjectKey ? projectSessionsByKey.get(selectedProjectKey) : undefined;
+  const projectSessionsLoading = selectedProjectKey !== null && projectSessionsLoadingKey === selectedProjectKey;
 
   // Per-project activity counts (running / unread) for the workspace selector.
-  // Uses the same stable server key as the project list and filtering.
+  // Running counts come from the projects endpoint (kept live by the running
+  // poll); unread counts are computed locally from the full session id set.
   const projectActivity = useMemo(
-    () => getProjectActivity(allSessions, runningSessionIds, unreadSessionIds),
-    [allSessions, runningSessionIds, unreadSessionIds],
+    () => {
+      const map = new Map<string, { running: number; unread: number }>();
+      for (const p of projects) {
+        let unread = 0;
+        for (const id of p.sessionIds) {
+          if (unreadSessionIds.has(id)) unread++;
+        }
+        map.set(p.key, { running: p.runningCount, unread });
+      }
+      return map;
+    },
+    [projects, unreadSessionIds],
   );
 
   // Any activity in a project other than the one currently selected — shown as
@@ -920,9 +1022,7 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
     [projectActivity, selectedProject],
   );
 
-  const filteredSessions = selectedProject
-    ? sessionsForProject(allSessions, selectedProject.key)
-    : allSessions;
+  const filteredSessions = selectedProjectKey ? (projectSessions ?? []) : [];
   const showWorktreeSwitcher = Boolean(
     worktreeState?.isGit
     && worktreeState.isTopLevel
@@ -1019,7 +1119,7 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
               {t("sidebar.new")}
             </button>
             <button
-              onClick={() => loadSessions(false, true)}
+              onClick={() => void refreshLists(true)}
               style={{
                 display: "flex", alignItems: "center", justifyContent: "center",
                 background: sessionRefreshDone ? "rgba(74,222,128,0.18)" : "var(--bg-hover)",
@@ -1632,7 +1732,12 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
             {error}
           </div>
         )}
-        {!loading && !error && filteredSessions.length === 0 && (
+        {!loading && !error && projectSessionsLoading && filteredSessions.length === 0 && (
+          <div style={{ padding: "16px 14px", color: "var(--text-muted)", fontSize: 12 }}>
+            {t("sidebar.loading")}
+          </div>
+        )}
+        {!loading && !error && !projectSessionsLoading && filteredSessions.length === 0 && (
           <div style={{ padding: "16px 14px", color: "var(--text-muted)", fontSize: 12 }}>
             {t("sidebar.noSessions")}
           </div>
@@ -1645,10 +1750,10 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
             runningSessionIds={runningSessionIds}
             unreadSessionIds={unreadSessionIds}
             onSelectSession={handleSelectSessionFromList}
-            onRenamed={loadSessions}
+            onRenamed={() => void refreshLists(true)}
             onSessionDeleted={(id) => {
               onSessionDeleted?.(id);
-              loadSessions();
+              void refreshLists(true);
             }}
             depth={0}
           />
