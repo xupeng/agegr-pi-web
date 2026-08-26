@@ -30,6 +30,8 @@ test("exposes the polled running-session set to the shell", () => {
   assert.match(source, /onRunningSessionIdsChange\?\.\(runningSessionIds\)/);
 });
 
+
+
 test("includes project activity counts in accessible labels", () => {
   assert.match(
     source,
@@ -40,6 +42,7 @@ test("includes project activity counts in accessible labels", () => {
     /aria-label=\{`\$\{t\("sidebar\.newSessionActivity"\)\} \(\$\{activity\.unread\}\)`\}/,
   );
 });
+
 
 test("does not persist an unchanged fallback title ending in whitespace", () => {
   assert.match(
@@ -79,3 +82,4 @@ test("does not expose disk-backed actions for transient sessions", () => {
   assert.match(sessionItemSource, /if \(session\.transient\) return;/);
   assert.match(sessionItemSource, /\{hovered && !session\.transient && \(/);
 });
+

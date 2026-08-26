@@ -46,3 +46,4 @@ next-env.d.ts
 # pi-web runtime attachments & local packages
 .pi-web/
 *.tgz
+e2e_*.mjs

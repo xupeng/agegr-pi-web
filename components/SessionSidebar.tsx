@@ -100,6 +100,8 @@ interface Props {
    *  Lets the app play a cross-workspace completion tone. */
   onBackgroundTaskDone?: () => void;
   onRunningSessionIdsChange?: (ids: Set<string>) => void;
+  /** Fired with the sessions loaded so far (on-demand per-project loads). */
+  onSessionsChange?: (sessions: SessionInfo[]) => void;
 }
 
 interface WorktreeEntry {
@@ -135,7 +137,26 @@ interface ValidatedProject {
 }
 
 const UNREAD_SESSIONS_STORAGE_KEY = "pi-web:unread-session-ids";
+const LAST_CUSTOM_CWD_STORAGE_KEY = "pi-web:last-custom-cwd";
 const RUNNING_SESSIONS_POLL_MS = 2500;
+
+function loadLastCustomCwd(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    return window.localStorage.getItem(LAST_CUSTOM_CWD_STORAGE_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function saveLastCustomCwd(cwd: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(LAST_CUSTOM_CWD_STORAGE_KEY, cwd);
+  } catch {
+    // Persistence is best-effort.
+  }
+}
 
 function loadUnreadSessionIds(): Set<string> {
   if (typeof window === "undefined") return new Set();
@@ -390,7 +411,7 @@ function PiWebTitle() {
   );
 }
 
-export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSession, initialSessionId, skipInitialProjectSelection, onInitialRestoreDone, refreshKey, onSessionDeleted, selectedCwd: selectedCwdProp, onCwdChange, onOpenFile, explorerRefreshKey, onExplorerRefresh, onAtMention, onAtMentions, onBackgroundTaskDone, onRunningSessionIdsChange }: Props) {
+export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSession, initialSessionId, skipInitialProjectSelection, onInitialRestoreDone, refreshKey, onSessionDeleted, selectedCwd: selectedCwdProp, onCwdChange, onOpenFile, explorerRefreshKey, onExplorerRefresh, onAtMention, onAtMentions, onBackgroundTaskDone, onRunningSessionIdsChange, onSessionsChange }: Props) {
   const { t } = useI18n();
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [projectSessionsByKey, setProjectSessionsByKey] = useState<Map<string, SessionInfo[]>>(new Map());
@@ -410,7 +431,7 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
   const [projectFilter, setProjectFilter] = useState("");
   const [wtFilter, setWtFilter] = useState("");
   const [customPathOpen, setCustomPathOpen] = useState(false);
-  const [customPathValue, setCustomPathValue] = useState("");
+  const [customPathValue, setCustomPathValue] = useState(loadLastCustomCwd);
   const [customPathError, setCustomPathError] = useState<string | null>(null);
   const [customPathValidating, setCustomPathValidating] = useState(false);
   const [validatedProject, setValidatedProject] = useState<ValidatedProject | null>(null);
@@ -485,6 +506,15 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
     }
   }, []);
 
+  /** Flatten the per-project session cache into one list (deduped by id). */
+  const mergeLoadedSessions = useCallback((byKey: Map<string, SessionInfo[]>): SessionInfo[] => {
+    const byId = new Map<string, SessionInfo>();
+    for (const sessions of byKey.values()) {
+      for (const session of sessions) byId.set(session.id, session);
+    }
+    return [...byId.values()].sort((a, b) => b.modified.localeCompare(a.modified));
+  }, []);
+
   /** Load (and cache) the session summaries of one project on demand. */
   const loadProjectSessions = useCallback(async (projectKey: string, force = false) => {
     if (!force) {
@@ -505,13 +535,14 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
         next.set(projectKey, data.sessions);
         return next;
       });
+      onSessionsChange?.(mergeLoadedSessions(projectSessionsByKeyRef.current));
     } catch (e) {
       setError(String(e));
     } finally {
       projectSessionsLoadingRef.current.delete(projectKey);
       setProjectSessionsLoadingKey((cur) => (cur === projectKey ? null : cur));
     }
-  }, []);
+  }, [onSessionsChange, mergeLoadedSessions]);
 
   /** Refresh both levels: project list plus the active project's sessions. */
   const refreshLists = useCallback(async (force = false) => {
@@ -835,6 +866,7 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
         root: data.projectRoot,
         key: data.projectKey,
       });
+      saveLastCustomCwd(data.cwd);
       setSelectedCwd(data.cwd);
       setCustomPathOpen(false);
       setCustomPathValue("");
@@ -1061,6 +1093,7 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
         <DirectoryPicker
           busy={customPathValidating}
           error={customPathError}
+          initialPath={customPathValue}
           onCancel={() => {
             setCustomPathOpen(false);
             setCustomPathError(null);
