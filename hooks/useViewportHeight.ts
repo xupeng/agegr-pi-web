@@ -41,6 +41,7 @@ export function useViewportHeight(): void {
 
     const root = document.documentElement;
     let frameId: number | null = null;
+    let lastKeyboardOpen = false;
 
     const update = () => {
       frameId = null;
@@ -56,11 +57,20 @@ export function useViewportHeight(): void {
         root.style.removeProperty("--app-viewport-height");
       }
 
-      const pageWasShifted = window.scrollX !== 0 || window.scrollY !== 0;
+      // Restore the page position only at the keyboard open/close transition.
+      // iOS pushes the layout viewport while the keyboard is up, so the page
+      // can come back shifted; scrolling it back on *every* visualViewport
+      // event (which also fires during rubber-band overscroll at the top of
+      // the chat list) fights the user's gesture and makes the page jitter
+      // near the composer. A single scrollTo at the transition restores the
+      // shifted page without that fight.
       const isUnscaled = Math.abs(viewport.scale - 1) < 0.01;
-      if (pageWasShifted && isUnscaled) {
-        window.scrollTo(0, 0);
+      if (keyboardOpen !== lastKeyboardOpen && isUnscaled) {
+        if (window.scrollX !== 0 || window.scrollY !== 0) {
+          window.scrollTo(0, 0);
+        }
       }
+      lastKeyboardOpen = keyboardOpen;
     };
 
     // WebKit can dispatch the resize event before visualViewport.height has
