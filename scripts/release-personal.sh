@@ -5,17 +5,19 @@
 # 流程：bump version → next build → npm pack → push 分支 → tag+push → gh release create
 #
 # 用法：
-#   ./scripts/release-personal.sh                # 自动递增 patch（0.8.9-personal.N → N+1）
-#   ./scripts/release-personal.sh 0.8.9-personal.4   # 指定版本
+#   ./scripts/release-personal.sh                # 自动递增 patch（0.8.x-personal.N → N+1）
+#   ./scripts/release-personal.sh 0.8.11-personal.6   # 指定版本
 #
 # 前置要求：
 #   - 当前在 personal 分支且工作区干净
 #   - gh CLI 已安装并认证（gh auth login）
+#   - 可选：PI_WEB_RELEASE_PROXY 环境变量指定代理（默认 http://192.168.11.12:6789）
 #
 set -euo pipefail
 
 REPO="xupeng/agegr-pi-web"
 BRANCH="personal"
+PROXY="${PI_WEB_RELEASE_PROXY:-http://192.168.11.12:6789}"
 
 cd "$(dirname "$0")/.."
 
@@ -46,25 +48,26 @@ CURRENT="$(node -p "require('./package.json').version")"
 if [[ $# -ge 1 ]]; then
   NEW="$1"
 else
-  if [[ "$CURRENT" =~ ^0\.8\.9-personal\.([0-9]+)$ ]]; then
-    NEW="0.8.9-personal.$(( ${BASH_REMATCH[1]} + 1 ))"
+  if [[ "$CURRENT" =~ ^0\.8\.([0-9]+)-personal\.([0-9]+)$ ]]; then
+    NEW="0.8.${BASH_REMATCH[1]}-personal.$(( ${BASH_REMATCH[2]} + 1 ))"
   else
     echo "错误：无法从当前版本自动递增（$CURRENT），请显式传版本号" >&2
     exit 1
   fi
 fi
-if [[ ! "$NEW" =~ ^0\.8\.9-personal\.[0-9]+$ ]]; then
-  echo "错误：版本号格式应为 0.8.9-personal.N，收到：$NEW" >&2
+if [[ ! "$NEW" =~ ^0\.8\.[0-9]+-personal\.[0-9]+$ ]]; then
+  echo "错误：版本号格式应为 0.8.x-personal.N，收到：$NEW" >&2
   exit 1
 fi
 
 N="${NEW##*.}"
-TAG="personal-0.8.9.${N}"
+MINOR="$(echo "$NEW" | sed -E 's/^0\.8\.([0-9]+)-personal\..*$/\1/')"
+TAG="personal-0.8.${MINOR}.${N}"
 TARBALL="xupeng-pi-web-${NEW}.tgz"
 RELEASE_URL="https://github.com/${REPO}/releases/download/${TAG}/${TARBALL}"
 
 # 上一个 personal tag（用于生成"相对上一版新增"）
-PREV_TAG="$(git tag -l 'personal-0.8.9.*' | sort -V | tail -1 || true)"
+PREV_TAG="$(git tag -l 'personal-0.8.*' | sort -V | tail -1 || true)"
 
 echo "==> 发布 $CURRENT -> $NEW"
 echo "    tag:     $TAG"
@@ -99,14 +102,14 @@ npm pack >/dev/null
 git add package.json
 git commit -m "chore: bump version to $NEW"
 echo "==> push $BRANCH"
-git push origin "$BRANCH"
+git -c http.proxy="$PROXY" -c https.proxy="$PROXY" push origin "$BRANCH"
 
 # ---------------------------------------------------------------------------
 # 5. tag + push
 # ---------------------------------------------------------------------------
 echo "==> tag $TAG"
 git tag "$TAG"
-git push origin "$TAG"
+git -c http.proxy="$PROXY" -c https.proxy="$PROXY" push origin "$TAG"
 
 # ---------------------------------------------------------------------------
 # 6. gh release create（notes 含安装 oneliner）
@@ -136,7 +139,8 @@ trap 'rm -f "$NOTES"' EXIT
 } > "$NOTES"
 
 echo "==> gh release create $TAG"
-gh release create "$TAG" --repo "$REPO" --title "pi-web $NEW" --notes-file "$NOTES" "$TARBALL"
+HTTPS_PROXY="$PROXY" HTTP_PROXY="$PROXY" https_proxy="$PROXY" http_proxy="$PROXY" \
+  gh release create "$TAG" --repo "$REPO" --title "pi-web $NEW" --notes-file "$NOTES" "$TARBALL"
 
 echo
 echo "✅ 发布完成：$RELEASE_URL"
