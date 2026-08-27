@@ -4,7 +4,10 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import { useTheme, type ThemePreference } from "@/hooks/useTheme";
 import { sendAgentCommand } from "@/lib/agent-client";
-import type { ShellToolSettingsResponse } from "@/lib/api-types";
+import type {
+  ExtensionUiVisibilitySettingsResponse,
+  ShellToolSettingsResponse,
+} from "@/lib/api-types";
 import {
   setLastSettingsSection,
   type SettingsSection,
@@ -59,6 +62,11 @@ function GeneralSettings({ sessionId, onSessionReloaded }: Pick<Props, "sessionI
   const [shellSettings, setShellSettings] = useState<ShellToolSettingsResponse | null>(null);
   const [shellSaving, setShellSaving] = useState(false);
   const [shellError, setShellError] = useState<string | null>(null);
+  const [extensionUiSettings, setExtensionUiSettings] = useState<ExtensionUiVisibilitySettingsResponse | null>(null);
+  const [hiddenWidgetKeys, setHiddenWidgetKeys] = useState("");
+  const [hiddenStatusKeys, setHiddenStatusKeys] = useState("");
+  const [extensionUiSaving, setExtensionUiSaving] = useState(false);
+  const [extensionUiError, setExtensionUiError] = useState<string | null>(null);
   const themeOptions: { id: ThemePreference; label: string }[] = [
     { id: "light", label: t("settings.themeLight") },
     { id: "dark", label: t("settings.themeDark") },
@@ -67,17 +75,56 @@ function GeneralSettings({ sessionId, onSessionReloaded }: Pick<Props, "sessionI
 
   useEffect(() => {
     let cancelled = false;
-    void fetch("/api/tools/settings")
-      .then(async (response) => {
+    void Promise.all([
+      fetch("/api/tools/settings").then(async (response) => {
         const data = await response.json() as ShellToolSettingsResponse & { error?: string };
         if (!response.ok || data.error) throw new Error(data.error ?? `HTTP ${response.status}`);
         if (!cancelled) setShellSettings(data);
-      })
-      .catch((cause) => {
+      }).catch((cause) => {
         if (!cancelled) setShellError(cause instanceof Error ? cause.message : String(cause));
-      });
+      }),
+      fetch("/api/extension-ui/settings").then(async (response) => {
+        const data = await response.json() as ExtensionUiVisibilitySettingsResponse & { error?: string };
+        if (!response.ok || data.error) throw new Error(data.error ?? `HTTP ${response.status}`);
+        if (cancelled) return;
+        setExtensionUiSettings(data);
+        setHiddenWidgetKeys(data.hiddenWidgetKeys.join("\n"));
+        setHiddenStatusKeys(data.hiddenStatusKeys.join("\n"));
+      }).catch((cause) => {
+        if (!cancelled) setExtensionUiError(cause instanceof Error ? cause.message : String(cause));
+      }),
+    ]);
     return () => { cancelled = true; };
   }, []);
+
+  const saveExtensionUiSettings = async () => {
+    setExtensionUiSaving(true);
+    setExtensionUiError(null);
+    try {
+      const parseRules = (value: string) => value.split("\n").map((rule) => rule.trim()).filter(Boolean);
+      const response = await fetch("/api/extension-ui/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          hiddenWidgetKeys: parseRules(hiddenWidgetKeys),
+          hiddenStatusKeys: parseRules(hiddenStatusKeys),
+        }),
+      });
+      const data = await response.json() as ExtensionUiVisibilitySettingsResponse & { error?: string };
+      if (!response.ok || data.error) throw new Error(data.error ?? `HTTP ${response.status}`);
+      setExtensionUiSettings(data);
+      setHiddenWidgetKeys(data.hiddenWidgetKeys.join("\n"));
+      setHiddenStatusKeys(data.hiddenStatusKeys.join("\n"));
+      if (sessionId) {
+        await sendAgentCommand(sessionId, { type: "reload" });
+        onSessionReloaded();
+      }
+    } catch (cause) {
+      setExtensionUiError(cause instanceof Error ? cause.message : String(cause));
+    } finally {
+      setExtensionUiSaving(false);
+    }
+  };
 
   const togglePowerShell = async (enabled: boolean) => {
     setShellSaving(true);
@@ -127,6 +174,45 @@ function GeneralSettings({ sessionId, onSessionReloaded }: Pick<Props, "sessionI
             );
           })}
         </div>
+      </section>
+
+      <section className="settings-general-section">
+        <h3 className="settings-general-heading">{t("settings.extensionUi")}</h3>
+        <p className="settings-general-description">{t("settings.extensionUiDescription")}</p>
+        <div className="settings-extension-ui-grid">
+          <label className="settings-extension-ui-field">
+            <span>{t("settings.hiddenWidgetKeys")}</span>
+            <textarea
+              value={hiddenWidgetKeys}
+              onChange={(event) => setHiddenWidgetKeys(event.target.value)}
+              placeholder="powerline-*"
+              rows={3}
+              spellCheck={false}
+              disabled={!extensionUiSettings || extensionUiSaving}
+            />
+          </label>
+          <label className="settings-extension-ui-field">
+            <span>{t("settings.hiddenStatusKeys")}</span>
+            <textarea
+              value={hiddenStatusKeys}
+              onChange={(event) => setHiddenStatusKeys(event.target.value)}
+              placeholder={t("settings.extensionUiEmpty")}
+              rows={3}
+              spellCheck={false}
+              disabled={!extensionUiSettings || extensionUiSaving}
+            />
+          </label>
+        </div>
+        <p className="settings-extension-ui-hint">{t("settings.extensionUiHint")}</p>
+        <button
+          type="button"
+          className="settings-extension-ui-save"
+          onClick={() => void saveExtensionUiSettings()}
+          disabled={!extensionUiSettings || extensionUiSaving}
+        >
+          {extensionUiSaving ? t("settings.extensionUiSaving") : t("settings.extensionUiSave")}
+        </button>
+        {extensionUiError && <p role="alert" className="settings-general-error">{extensionUiError}</p>}
       </section>
 
       {shellSettings?.isWindows && (

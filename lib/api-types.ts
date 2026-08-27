@@ -14,6 +14,11 @@ export interface ShellToolSettingsResponse {
   powerShellEnabled: boolean;
 }
 
+export interface ExtensionUiVisibilitySettingsResponse {
+  hiddenWidgetKeys: string[];
+  hiddenStatusKeys: string[];
+}
+
 export interface SkillSearchResult {
   package: string;
   installs: string;

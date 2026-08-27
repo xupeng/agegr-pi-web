@@ -58,6 +58,18 @@ test("offers direct light, dark, and system theme selection", () => {
   assert.match(themeSource, /const setThemePreference = useCallback/);
 });
 
+test("configures extension widget and status visibility from General", () => {
+  assert.match(panelSource, /fetch\("\/api\/extension-ui\/settings"\)/);
+  assert.match(panelSource, /hiddenWidgetKeys: parseRules\(hiddenWidgetKeys\)/);
+  assert.match(panelSource, /hiddenStatusKeys: parseRules\(hiddenStatusKeys\)/);
+  assert.match(panelSource, /sendAgentCommand\(sessionId, \{ type: "reload" \}\)/);
+  assert.match(panelSource, /settings\.hiddenWidgetKeys/);
+  assert.match(panelSource, /settings\.hiddenStatusKeys/);
+  assert.match(cssSource, /\.settings-extension-ui-grid/);
+  assert.match(enSource, /"settings\.extensionUi": "Extension UI"/);
+  assert.match(zhSource, /"settings\.extensionUi": "扩展界面"/);
+});
+
 test("keeps General free of divider rows", () => {
   assert.match(panelSource, /className="settings-dialog-header"/);
   assert.match(cssSource, /\.settings-dialog-header \{[\s\S]*?display: flex[\s\S]*?align-items: center[\s\S]*?min-height: 50px/);

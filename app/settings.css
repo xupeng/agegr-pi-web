@@ -1046,10 +1046,87 @@
   font-size: 12px;
 }
 
+.settings-extension-ui-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.settings-extension-ui-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.settings-extension-ui-field textarea {
+  width: 100%;
+  min-height: 76px;
+  resize: vertical;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-panel);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.settings-extension-ui-field textarea:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.settings-extension-ui-field textarea:disabled {
+  opacity: 0.55;
+}
+
+.settings-extension-ui-hint {
+  margin: 8px 0 10px;
+  color: var(--text-dim);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.settings-extension-ui-save {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg-panel);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.settings-extension-ui-save:not(:disabled):hover,
+.settings-extension-ui-save:not(:disabled):focus-visible {
+  border-color: var(--accent);
+  background: var(--bg-hover);
+  outline: none;
+}
+
+.settings-extension-ui-save:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .settings-general-error {
   margin: 8px 0 0;
   color: #ef4444;
   font-size: 11px;
+}
+
+@media (max-width: 520px) {
+  .settings-extension-ui-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 640px) {

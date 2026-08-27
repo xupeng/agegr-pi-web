@@ -40,6 +40,10 @@ import {
 import { createSubagentController } from "./subagent-runtime";
 import { isBuiltInSubagentsEnabled } from "./subagent-settings";
 import { resolveShellTools } from "./powershell-settings";
+import {
+  isExtensionStatusVisible,
+  isExtensionWidgetVisible,
+} from "./extension-ui-settings";
 import { CHAT_ONLY_RESOURCE_LOADER_OPTIONS, contextFilesSystemPrompt } from "./chat-only";
 import {
   appendSessionToolSelection,
@@ -867,6 +871,15 @@ export class AgentSessionWrapper {
       case "reload": {
         const activeToolNames = this.inner.getActiveToolNames();
         await this.waitForExtensionsBound();
+        for (const key of this.extensionStatuses.keys()) {
+          this.emit({
+            type: "extension_ui_request",
+            id: randomUUID(),
+            method: "setStatus",
+            statusKey: key,
+            statusText: undefined,
+          } as ExtensionUiRequest as AgentEvent);
+        }
         this.extensionStatuses.clear();
         this.resetExtensionWidgetsForReload();
         this.syncProjectTrust();
@@ -1018,11 +1031,13 @@ export class AgentSessionWrapper {
   }
 
   private getExtensionStatuses(): Array<{ key: string; text: string }> {
-    return Array.from(this.extensionStatuses, ([key, text]) => ({ key, text }));
+    return Array.from(this.extensionStatuses, ([key, text]) => ({ key, text }))
+      .filter(({ key }) => isExtensionStatusVisible(key));
   }
 
   private getExtensionWidgets(): ExtensionWidgetItem[] {
-    return Array.from(this.extensionWidgets.values());
+    return Array.from(this.extensionWidgets.values())
+      .filter(({ key }) => isExtensionWidgetVisible(key));
   }
 
   private nextExtensionWidgetGeneration(key: string): number {
@@ -1076,11 +1091,9 @@ export class AgentSessionWrapper {
   private resetExtensionWidgetsForReload(): void {
     this.extensionWidgetsResetting = true;
     try {
-      const factoryKeys = [...this.activeExtensionWidgets.keys()];
-      for (const key of factoryKeys) this.clearExtensionWidget(key);
-      // Keep the existing array-widget reload behavior: snapshots are reset and
-      // the next extension session_start repopulates them.
-      this.extensionWidgets.clear();
+      // Clear every browser snapshot before extensions re-register under the
+      // latest visibility policy. The guard ignores dispose-time registrations.
+      this.clearExtensionWidgets(true);
     } finally {
       this.extensionWidgetsResetting = false;
     }
@@ -1438,6 +1451,19 @@ export class AgentSessionWrapper {
       },
       onTerminalInput: () => () => {},
       setStatus: (key, text) => {
+        if (!isExtensionStatusVisible(key)) {
+          const hadPrevious = this.extensionStatuses.delete(key);
+          if (hadPrevious) {
+            this.emit({
+              type: "extension_ui_request",
+              id: randomUUID(),
+              method: "setStatus",
+              statusKey: key,
+              statusText: undefined,
+            } as ExtensionUiRequest as AgentEvent);
+          }
+          return;
+        }
         if (text === undefined) this.extensionStatuses.delete(key);
         else this.extensionStatuses.set(key, text);
         this.emit({
@@ -1454,6 +1480,11 @@ export class AgentSessionWrapper {
       setHiddenThinkingLabel: () => {},
       setWidget: (key, content, options) => {
         if (!this._alive || this.extensionWidgetsResetting) return;
+        if (!isExtensionWidgetVisible(key)) {
+          const hadPrevious = this.extensionWidgets.has(key) || this.activeExtensionWidgets.has(key);
+          this.clearExtensionWidget(key, hadPrevious);
+          return;
+        }
         if (typeof content === "function") {
           this.setExtensionWidgetFactory(
             key,
