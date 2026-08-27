@@ -1,0 +1,32 @@
+{
+  "id": "markdown-table-horizontal-scroll",
+  "name": "markdown-table-horizontal-scroll",
+  "title": "改进 Markdown 表格横向滚动",
+  "description": "避免 Markdown 表格列在窄屏中过度压缩，改为保持可读列宽并在容器内横向滚动。",
+  "status": "in_progress",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "xupeng",
+  "assignee": "xupeng",
+  "createdAt": "2026-08-27",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [
+    "app/globals.css",
+    "components/MarkdownBody.test.mjs",
+    "eslint.config.mjs"
+  ],
+  "notes": "Implementation and regression coverage complete. Full npm test and TypeScript checks pass; scoped lint passes. Full-project lint remains blocked by pre-existing React Compiler memoization findings.",
+  "meta": {
+    "verification": "tests-and-typecheck-passed"
+  }
+}

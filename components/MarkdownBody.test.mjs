@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -10,6 +11,7 @@ const jiti = createJiti(import.meta.url, {
 });
 const { MarkdownBody } = await jiti.import("./MarkdownBody.tsx");
 const { normalizeDisplayMath } = await jiti.import("../lib/markdown.ts");
+const globalCss = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
 
 function renderMarkdown(markdown) {
   return renderToStaticMarkup(
@@ -35,6 +37,22 @@ test("keeps local file markdown links in the app", () => {
 
   assert.match(html, /<a href="components\/MarkdownBody\.tsx">file<\/a>/);
   assert.doesNotMatch(html, /target=|rel=|\snode=/);
+});
+
+test("sizes Markdown table columns by content inside a horizontal scroll container", () => {
+  const html = renderMarkdown(`| # | Tool | Description |
+|---|---|---|
+| 1 | douban_current_user | Returns the current user |`);
+
+  assert.match(
+    html,
+    /<div class="markdown-table-wrap"><table><thead>/,
+  );
+  assert.match(html, /<tbody><tr><td>1<\/td>/);
+  assert.match(globalCss, /\.markdown-table-wrap\s*\{[^}]*overflow-x:\s*auto/s);
+  assert.match(globalCss, /\.markdown-body table\s*\{[^}]*width:\s*max-content[^}]*min-width:\s*100%/s);
+  assert.match(globalCss, /\.markdown-body th, \.markdown-body td\s*\{[^}]*max-width:\s*32rem/s);
+  assert.doesNotMatch(globalCss, /\.markdown-body th, \.markdown-body td\s*\{[^}]*min-width:/s);
 });
 
 test("keeps single-tilde CJK numeric ranges literal instead of striking them", () => {

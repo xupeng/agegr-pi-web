@@ -543,24 +543,30 @@ pre, code {
 }
 .markdown-table-wrap {
   width: 100%;
+  max-width: 100%;
   margin: 8px 0;
   overflow-x: auto;
   overflow-y: hidden;
+  overscroll-behavior-x: contain;
   border: 1px solid var(--border);
   border-radius: 7px;
 }
 .markdown-body table {
+  width: max-content;
+  min-width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  min-width: 100%;
   font-size: 13px;
 }
 .markdown-body th, .markdown-body td {
+  max-width: 32rem;
   border: 0;
   border-bottom: 1px solid var(--border);
   padding: 6px 10px;
   text-align: left;
   vertical-align: top;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 .markdown-body tr:last-child td { border-bottom: 0; }
 .markdown-body th {
