@@ -214,6 +214,70 @@ export interface ExtensionWidgetItem {
   placement: "aboveEditor" | "belowEditor";
 }
 
+// ---------------------------------------------------------------------------
+// ask_user support
+// Mirrors lib/ask-user/types.ts so the browser can import these without
+// pulling in server-only modules.
+// ---------------------------------------------------------------------------
+
+export interface AskUserQuestionOption {
+  value: string;
+  label: string;
+  detail?: string;
+}
+
+export interface AskUserQuestion {
+  id: string;
+  question: string;
+  detail?: string;
+  options: AskUserQuestionOption[];
+  multiple?: boolean;
+}
+
+export interface PendingAskUser {
+  askId: string;
+  askedAt: string;
+  questions: AskUserQuestion[];
+}
+
+export interface AskUserAnswer {
+  id: string;
+  values: string[];
+  otherText?: string;
+}
+
+export interface AskUserSubmission {
+  answers: AskUserAnswer[];
+}
+
+export type AskUserCloseReason = "submitted" | "superseded" | "cancelled";
+
+export interface AskUserQuestionRecord {
+  question: AskUserQuestion;
+  answered: boolean;
+  values: string[];
+  otherText?: string;
+}
+
+export interface AskUserOutcome {
+  askId: string;
+  reason: AskUserCloseReason;
+  askedAt: string;
+  closedAt: string;
+  questions: AskUserQuestionRecord[];
+  answeredCount: number;
+  unansweredIds: string[];
+  summary: string;
+}
+
+export type AskUserCloseResponse =
+  | { result: "closed"; outcome: AskUserOutcome; pendingAsk?: PendingAskUser }
+  | { result: "stale"; pendingAsk?: PendingAskUser };
+
+export type AskUserEvent =
+  | { type: "ask.opened"; ask: PendingAskUser }
+  | { type: "ask.closed"; askId: string; reason: AskUserCloseReason };
+
 export interface SessionMessageEntry extends SessionEntryBase {
   type: "message";
   message: AgentMessage;

@@ -31,6 +31,7 @@ import {
   createSubagentExtension,
   preferPiWebSubagentExtension,
 } from "./subagent-extension";
+import { createAskUserExtension } from "./ask-user/extension";
 import {
   listSubagentProfiles,
   readSubagentRun,
@@ -50,6 +51,19 @@ import {
   readSessionToolSelection,
   validateSessionToolSelection,
 } from "./session-tool-selection";
+import {
+  ASK_USER_ANSWERS_CUSTOM_TYPE,
+  PendingAskStore,
+  renderAskUserAnswersText,
+  type AskUserAnswer,
+  type AskUserCloseResponse,
+  type AskUserInvocation,
+  type AskUserOutcome,
+  type AskUserSubmission,
+  type PendingAskCloseResult,
+  type PendingAskOpenResult,
+  type PendingAskUser,
+} from "./ask-user";
 
 // ============================================================================
 // Types
@@ -176,6 +190,15 @@ class PlainTextTheme extends Theme {
 const PLAIN_TEXT_THEME = new PlainTextTheme();
 const CUSTOM_UI_KEYBINDINGS = new TuiKeybindingsManager(TUI_KEYBINDINGS);
 
+declare global {
+  var __piAskUserStore: PendingAskStore | undefined;
+}
+
+function getAskUserStore(): PendingAskStore {
+  if (!globalThis.__piAskUserStore) globalThis.__piAskUserStore = new PendingAskStore();
+  return globalThis.__piAskUserStore;
+}
+
 function withExtensionTools(session: AgentSessionLike, toolNames: string[]): string[] {
   if (toolNames.length === 0) return [];
 
@@ -294,6 +317,102 @@ export class AgentSessionWrapper {
     } catch (error) {
       console.error("[pi-web] completion listener failed:", error instanceof Error ? error.message : error);
     }
+  }
+
+  /**
+   * Register the question set an agent wants the user to answer as the
+   * session's open ask. Deliberately does not wait for the user: `ask_user`
+   * terminates the run and the submitted answers come back later as a
+   * follow-up message.
+   *
+   * Rejected question sets throw {@link PendingAskValidationError}, which the
+   * agent loop reports to the model as an error tool result.
+   */
+  openAsk(input: AskUserInvocation): Promise<PendingAskOpenResult> {
+    const result = getAskUserStore().open(input);
+    // A supersede closes the earlier ask, so the browsers watching it must
+    // hear that before they hear about its replacement.
+    if (result.superseded !== undefined) this.emitAskClosed(input.sessionId, result.superseded);
+    this.emit({
+      type: "ask.opened",
+      ask: result.ask,
+    });
+    return Promise.resolve(result);
+  }
+
+  /** The session's open ask, for `get_state` and stale-close rehydration. */
+  get pendingAsk(): PendingAskUser | undefined {
+    return getAskUserStore().pendingAsk(this.sessionId);
+  }
+
+  /**
+   * Record the user's answers to the session's open ask and hand them to the
+   * model. The answers travel as a system-authored custom message rather than
+   * a user message, so they are not attributed to the human in the transcript;
+   * they still wake an idle session (`triggerTurn`) and queue behind in-flight
+   * work (`deliverAs: "followUp"`), which is how the run that `ask_user`
+   * terminated continues.
+   */
+  async submitAsk(askId: string, submission: AskUserSubmission): Promise<AskUserCloseResponse> {
+    const result = getAskUserStore().submit(this.sessionId, askId, submission);
+    return this.closeAsk(result);
+  }
+
+  /**
+   * Close the open ask without answers. The model is still told, naming every
+   * question as unanswered: it was promised a follow-up message and would
+   * otherwise wait for one that never comes.
+   */
+  async cancelAsk(askId: string): Promise<AskUserCloseResponse> {
+    const result = getAskUserStore().cancel(this.sessionId, askId);
+    return this.closeAsk(result);
+  }
+
+  private async closeAsk(result: PendingAskCloseResult): Promise<AskUserCloseResponse> {
+    if (result.status === "stale") return { result: "stale", pendingAsk: this.pendingAsk };
+    const { outcome } = result;
+    this.emitAskClosed(this.sessionId, outcome);
+    await this.inner.sendCustomMessage(
+      {
+        customType: ASK_USER_ANSWERS_CUSTOM_TYPE,
+        content: renderAskUserAnswersText(outcome),
+        display: true,
+        details: outcome,
+      },
+      { triggerTurn: true, deliverAs: "followUp" },
+    );
+    return { result: "closed", outcome, pendingAsk: this.pendingAsk };
+  }
+
+  /**
+   * Void the session's open ask because the user sent a chat message instead
+   * of answering it. Every browser closes the card as cancelled, and the model
+   * is told — without being woken — so the notice rides into the turn the
+   * message itself triggers rather than becoming a turn of its own.
+   */
+  voidOpenAskForUserMessage(): void {
+    const outcome = getAskUserStore().cancelOpen(this.sessionId);
+    if (outcome === undefined) return;
+    this.emitAskClosed(this.sessionId, outcome);
+    void this.inner.sendCustomMessage(
+      {
+        customType: ASK_USER_ANSWERS_CUSTOM_TYPE,
+        content: renderAskUserAnswersText(outcome),
+        display: true,
+        details: outcome,
+      },
+      { triggerTurn: false, deliverAs: "followUp" },
+    ).catch((error) => {
+      console.error("[pi-web] failed to void open ask:", error instanceof Error ? error.message : error);
+    });
+  }
+
+  private emitAskClosed(sessionId: string, outcome: AskUserOutcome): void {
+    this.emit({
+      type: "ask.closed",
+      askId: outcome.askId,
+      reason: outcome.reason,
+    });
   }
 
   beginExtensionBinding(): void {
@@ -562,6 +681,10 @@ export class AgentSessionWrapper {
               this.agentRunNeedsCompletion = true;
               if (preflightSettled) return;
               preflightSettled = true;
+              // The user sent a chat message instead of answering the open ask:
+              // void it so the model is told (without a turn of its own) and
+              // no browser keeps showing a stale card.
+              this.voidOpenAskForUserMessage();
               resolve();
             };
             rejectPreflight = (error) => {
@@ -667,6 +790,7 @@ export class AgentSessionWrapper {
           thinkingLevel: this.inner.agent.state?.thinkingLevel ?? "off",
           extensionStatuses: this.getExtensionStatuses(),
           extensionWidgets: this.getExtensionWidgets(),
+          pendingAsk: this.pendingAsk,
         };
       }
 
@@ -908,6 +1032,20 @@ export class AgentSessionWrapper {
         return null;
       }
 
+      case "ask_submit": {
+        const askId = command.askId as string | undefined;
+        const answers = command.answers as AskUserAnswer[] | undefined;
+        if (typeof askId !== "string" || askId === "") throw new Error("ask_submit requires an askId");
+        if (!Array.isArray(answers)) throw new Error("ask_submit requires an answers array");
+        return this.submitAsk(askId, { answers });
+      }
+
+      case "ask_cancel": {
+        const askId = command.askId as string | undefined;
+        if (typeof askId !== "string" || askId === "") throw new Error("ask_cancel requires an askId");
+        return this.cancelAsk(askId);
+      }
+
       case "set_auto_retry": {
         this.inner.setAutoRetryEnabled(command.enabled as boolean);
         return null;
@@ -954,6 +1092,7 @@ export class AgentSessionWrapper {
   destroy(): void {
     if (!this._alive) return;
     this._alive = false;
+    getAskUserStore().forgetSession(this.sessionId);
     if (this.idleTimer) clearTimeout(this.idleTimer);
     if (this.inner.isBashRunning) this.inner.abortBash();
     this.unsubscribe?.();
@@ -1985,6 +2124,7 @@ export async function startRpcSession(
                 () => listSubagentProfiles(sessionCwd),
                 isBuiltInSubagentsEnabled,
               ),
+              createAskUserExtension((sessionId) => getRegistry().get(sessionId)),
             ],
             extensionsOverride: (base) => preferUserBashExtension(preferPiWebSubagentExtension(base)),
           },

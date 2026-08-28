@@ -3,10 +3,13 @@
 import { useState, useCallback, useRef, useEffect, useLayoutEffect, useMemo, useReducer } from "react";
 import type {
   AgentMessage,
+  AskUserAnswer,
+  AskUserCloseResponse,
   BlockingExtensionUiRequest,
   ExtensionStatusItem,
   ExtensionUiRequest,
   ExtensionWidgetItem,
+  PendingAskUser,
   SessionInfo,
   SessionTreeNode,
   UserMessage,
@@ -76,6 +79,7 @@ type AgentStateResponse = {
   isCompacting?: boolean;
   extensionStatuses?: ExtensionStatusItem[];
   extensionWidgets?: ExtensionWidgetItem[];
+  pendingAsk?: PendingAskUser | null;
   queuedMessages?: { steering?: string[]; followUp?: string[] } | null;
 };
 
@@ -318,6 +322,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
   const [extensionCustomUi, setExtensionCustomUi] = useState<ExtensionUiCustomRequest | null>(null);
   const [extensionStatuses, setExtensionStatuses] = useState<ExtensionStatusItem[]>([]);
   const [extensionWidgets, setExtensionWidgets] = useState<ExtensionWidgetItem[]>([]);
+  const [pendingAsk, setPendingAsk] = useState<PendingAskUser | null>(null);
   const [queuedMessages, setQueuedMessages] = useState<QueuedMessages>({ steering: [], followUp: [] });
 
   const eventConnectionRef = useRef<AgentEventConnection | null>(null);
@@ -757,6 +762,39 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
     }
   }, []);
 
+  const syncPendingAsk = useCallback((response: AskUserCloseResponse | undefined) => {
+    if (response && response.pendingAsk !== undefined) setPendingAsk(response.pendingAsk ?? null);
+  }, []);
+
+  const submitAsk = useCallback(async (askId: string, answers: AskUserAnswer[]) => {
+    const sid = sessionIdRef.current;
+    if (!sid) return;
+    try {
+      const response = await sendAgentCommand<AskUserCloseResponse>(sid, {
+        type: "ask_submit",
+        askId,
+        answers,
+      });
+      syncPendingAsk(response);
+    } catch (e) {
+      console.error("Failed to submit ask:", e);
+    }
+  }, [syncPendingAsk]);
+
+  const cancelAsk = useCallback(async (askId: string) => {
+    const sid = sessionIdRef.current;
+    if (!sid) return;
+    try {
+      const response = await sendAgentCommand<AskUserCloseResponse>(sid, {
+        type: "ask_cancel",
+        askId,
+      });
+      syncPendingAsk(response);
+    } catch (e) {
+      console.error("Failed to cancel ask:", e);
+    }
+  }, [syncPendingAsk]);
+
   const addNotice = useCallback((notice: { id?: string; message: string; type?: NoticeType }) => {
     const message = notice.message.trim();
     if (!message) return;
@@ -1007,6 +1045,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         if (state.systemPrompt !== undefined) setSystemPrompt(state.systemPrompt ?? null);
         if (state.extensionStatuses !== undefined) setExtensionStatuses(state.extensionStatuses ?? []);
         if (state.extensionWidgets !== undefined) setExtensionWidgets(state.extensionWidgets ?? []);
+        if (state.pendingAsk !== undefined) setPendingAsk(state.pendingAsk ?? null);
       }
       await finishPromptWithoutStream(sid, runId);
     } catch {
@@ -1080,6 +1119,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
               if (d.state?.systemPrompt !== undefined) setSystemPrompt(d.state.systemPrompt ?? null);
               if (d.state?.extensionStatuses !== undefined) setExtensionStatuses(d.state.extensionStatuses ?? []);
               if (d.state?.extensionWidgets !== undefined) setExtensionWidgets(d.state.extensionWidgets ?? []);
+              if (d.state?.pendingAsk !== undefined) setPendingAsk(d.state.pendingAsk ?? null);
               // Aborted turns can leave messages queued in pi (delivered with the
               // next turn); dead wrapper (no state) means the queue is gone.
               setQueuedMessages(normalizeQueuedMessages(d.state?.queuedMessages));
@@ -1266,6 +1306,18 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
           if (sessionIdRef.current) loadSession(sessionIdRef.current);
         }
         break;
+      case "ask.opened": {
+        setPendingAsk((event as { type: "ask.opened"; ask: PendingAskUser }).ask ?? null);
+        break;
+      }
+      case "ask.closed": {
+        setPendingAsk((current) => {
+          if (current === null) return null;
+          const { askId } = event as { type: "ask.closed"; askId: string };
+          return askId !== current.askId ? current : null;
+        });
+        break;
+      }
       case "extension_ui_request":
         handleExtensionUiRequest(event as ExtensionUiRequest);
         break;
@@ -2010,6 +2062,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
     isCompacting, compactError, compactResult, currentModel, displayModel, modelSwitching, sessionStats,
     slashCommands, slashCommandsLoading, queuedMessages,
     notices: noticeState.visible, extensionDialog, extensionCustomUi, extensionStatuses, extensionWidgets, respondToExtensionUi, sendExtensionCustomInput,
+    pendingAsk, submitAsk, cancelAsk,
     isAutoModelSelection: isNew && newSessionModel === null,
     agentPhase,
     isNew,

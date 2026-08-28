@@ -67,6 +67,10 @@ function GeneralSettings({ sessionId, onSessionReloaded }: Pick<Props, "sessionI
   const [hiddenStatusKeys, setHiddenStatusKeys] = useState("");
   const [extensionUiSaving, setExtensionUiSaving] = useState(false);
   const [extensionUiError, setExtensionUiError] = useState<string | null>(null);
+  const [askUserEnabled, setAskUserEnabled] = useState<boolean | null>(null);
+  const [askUserSaving, setAskUserSaving] = useState(false);
+  const [askUserError, setAskUserError] = useState<string | null>(null);
+  const [askUserReloadNeeded, setAskUserReloadNeeded] = useState(false);
   const themeOptions: { id: ThemePreference; label: string }[] = [
     { id: "light", label: t("settings.themeLight") },
     { id: "dark", label: t("settings.themeDark") },
@@ -93,9 +97,47 @@ function GeneralSettings({ sessionId, onSessionReloaded }: Pick<Props, "sessionI
       }).catch((cause) => {
         if (!cancelled) setExtensionUiError(cause instanceof Error ? cause.message : String(cause));
       }),
+      fetch("/api/settings/ask-user").then(async (response) => {
+        const data = await response.json() as { askUser?: boolean; error?: string };
+        if (!response.ok || data.error) throw new Error(data.error ?? `HTTP ${response.status}`);
+        if (!cancelled) setAskUserEnabled(data.askUser ?? true);
+      }).catch((cause) => {
+        if (!cancelled) setAskUserError(cause instanceof Error ? cause.message : String(cause));
+      }),
     ]);
     return () => { cancelled = true; };
   }, []);
+
+  const toggleAskUser = async (enabled: boolean) => {
+    setAskUserSaving(true);
+    setAskUserError(null);
+    try {
+      const response = await fetch("/api/settings/ask-user", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled }),
+      });
+      const data = await response.json() as { askUser?: boolean; error?: string };
+      if (!response.ok || data.error) throw new Error(data.error ?? `HTTP ${response.status}`);
+      setAskUserEnabled(data.askUser ?? enabled);
+      setAskUserReloadNeeded(true);
+    } catch (cause) {
+      setAskUserError(cause instanceof Error ? cause.message : String(cause));
+    } finally {
+      setAskUserSaving(false);
+    }
+  };
+
+  const reloadAskUserSession = async () => {
+    if (!sessionId) return;
+    try {
+      await sendAgentCommand(sessionId, { type: "reload" });
+      setAskUserReloadNeeded(false);
+      onSessionReloaded();
+    } catch (cause) {
+      setAskUserError(cause instanceof Error ? cause.message : String(cause));
+    }
+  };
 
   const saveExtensionUiSettings = async () => {
     setExtensionUiSaving(true);
@@ -213,6 +255,35 @@ function GeneralSettings({ sessionId, onSessionReloaded }: Pick<Props, "sessionI
           {extensionUiSaving ? t("settings.extensionUiSaving") : t("settings.extensionUiSave")}
         </button>
         {extensionUiError && <p role="alert" className="settings-general-error">{extensionUiError}</p>}
+      </section>
+
+      <section className="settings-general-section">
+        <h3 className="settings-general-heading">{t("settings.askUserTitle")}</h3>
+        <p className="settings-general-description">{t("settings.askUserDescription")}</p>
+        <div className="settings-shell-option">
+          <span>{t("settings.askUserTitle")}</span>
+          <ConfigSwitch
+            checked={askUserEnabled ?? true}
+            disabled={askUserEnabled === null}
+            loading={askUserSaving}
+            label={t("settings.askUserTitle")}
+            onChange={(enabled) => void toggleAskUser(enabled)}
+          />
+        </div>
+        {askUserReloadNeeded && sessionId && (
+          <div className="settings-ask-user-reload">
+            <span role="status">{t("agents.reloadRequired")}</span>
+            <button
+              type="button"
+              className="settings-extension-ui-save"
+              onClick={() => void reloadAskUserSession()}
+              disabled={askUserSaving}
+            >
+              {t("agents.reloadSession")}
+            </button>
+          </div>
+        )}
+        {askUserError && <p role="alert" className="settings-general-error">{askUserError}</p>}
       </section>
 
       {shellSettings?.isWindows && (

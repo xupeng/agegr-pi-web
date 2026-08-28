@@ -8,6 +8,7 @@ import { countToolCallBlocks, getAssistantErrorMessage, getDisplayableAssistantB
 import { extractTurnWrittenFiles, type WrittenFile } from "@/lib/turn-written-files";
 import { MessageView } from "./MessageView";
 import { ChatInput, type ChatInputHandle } from "./ChatInput";
+import { AskUserCard } from "./AskUserCard";
 import { ChatMinimap, useMessageRefs } from "./ChatMinimap";
 import { ExtensionStatusBar } from "./ExtensionStatusBar";
 import { AnsiText } from "./AnsiText";
@@ -286,6 +287,7 @@ export function ChatWindow({ session, sessionRunning, newSessionCwd, newSessionD
     isCompacting, compactError, compactResult, displayModel: displayModelValue, modelSwitching, sessionStats,
     slashCommands, slashCommandsLoading, queuedMessages,
     notices, extensionDialog, extensionCustomUi, extensionStatuses, extensionWidgets, respondToExtensionUi, sendExtensionCustomInput, setNoticePaused,
+    pendingAsk, submitAsk, cancelAsk,
     isAutoModelSelection,
     agentPhase,
     isNew,
@@ -600,6 +602,14 @@ export function ChatWindow({ session, sessionRunning, newSessionCwd, newSessionD
     />
   );
 
+  const askUserCardElement = pendingAsk ? (
+    <AskUserCard
+      ask={pendingAsk}
+      onSubmit={(askId, answers) => void submitAsk(askId, answers)}
+      onCancel={(askId) => void cancelAsk(askId)}
+    />
+  ) : null;
+
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center text-text-muted">
@@ -717,6 +727,7 @@ export function ChatWindow({ session, sessionRunning, newSessionCwd, newSessionD
                 </span>
               </div>
             </div>
+            {askUserCardElement}
             {chatInputElement}
             <ExtensionStatusBar statuses={extensionStatuses} widgets={extensionWidgets} />
           </div>
@@ -962,6 +973,7 @@ export function ChatWindow({ session, sessionRunning, newSessionCwd, newSessionD
       </div>
 
       <div className="relative">
+        {askUserCardElement}
         {chatInputElement}
         <ExtensionStatusBar statuses={extensionStatuses} widgets={extensionWidgets} />
       </div>
