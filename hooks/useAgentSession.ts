@@ -763,7 +763,11 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
   }, []);
 
   const syncPendingAsk = useCallback((response: AskUserCloseResponse | undefined) => {
-    if (response && response.pendingAsk !== undefined) setPendingAsk(response.pendingAsk ?? null);
+    // Always apply the server's current open ask: undefined means the ask is
+    // closed and nothing replaced it, so the card must disappear even when the
+    // SSE ask.closed event never arrives (e.g. the stream closed after the run
+    // ended). A stale close carries the real open ask for rehydration.
+    setPendingAsk(response?.pendingAsk ?? null);
   }, []);
 
   const submitAsk = useCallback(async (askId: string, answers: AskUserAnswer[]) => {
