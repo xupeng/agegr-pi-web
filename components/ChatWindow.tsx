@@ -603,11 +603,21 @@ export function ChatWindow({ session, sessionRunning, newSessionCwd, newSessionD
   );
 
   const askUserCardElement = pendingAsk ? (
-    <AskUserCard
-      ask={pendingAsk}
-      onSubmit={(askId, answers) => void submitAsk(askId, answers)}
-      onCancel={(askId) => void cancelAsk(askId)}
-    />
+    <div
+      style={{
+        // Match the ChatInput column exactly (16px sides, plus the desktop
+        // minimap allowance) so the card lines up with the input and the
+        // message column; the bottom padding separates it from the input.
+        padding: "0 16px 12px",
+        paddingRight: isMobile ? 16 : 52,
+      }}
+    >
+      <AskUserCard
+        ask={pendingAsk}
+        onSubmit={(askId, answers) => void submitAsk(askId, answers)}
+        onCancel={(askId) => void cancelAsk(askId)}
+      />
+    </div>
   ) : null;
 
   if (loading) {
