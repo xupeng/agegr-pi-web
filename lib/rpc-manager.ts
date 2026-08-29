@@ -64,6 +64,7 @@ import {
   type PendingAskOpenResult,
   type PendingAskUser,
 } from "./ask-user";
+import { forgetPersistedAsk, persistOpenAsk, readPersistedAsk } from "./ask-user/persist";
 
 // ============================================================================
 // Types
@@ -337,6 +338,10 @@ export class AgentSessionWrapper {
       type: "ask.opened",
       ask: result.ask,
     });
+    // Mirror to disk (replacing any superseded ask) so the question survives
+    // wrapper idle shutdown and server restarts. Best-effort; a write failure
+    // leaves the in-memory store authoritative for this run.
+    persistOpenAsk(input.sessionId, result.ask);
     return Promise.resolve(result);
   }
 
@@ -372,7 +377,17 @@ export class AgentSessionWrapper {
     if (result.status === "stale") return { result: "stale", pendingAsk: this.pendingAsk };
     const { outcome } = result;
     this.emitAskClosed(this.sessionId, outcome);
-    await this.inner.sendCustomMessage(
+    // Drop the disk copy before waking the model: even if the follow-up send
+    // fails, memory and disk agree the ask is closed and it cannot reappear as
+    // a ghost card after a reload.
+    forgetPersistedAsk(this.sessionId);
+    // Fire-and-forget: with the agent idle (ask_user terminated the run),
+    // triggerTurn sends the answers through the full agent prompt, whose
+    // promise resolves only when that whole turn finishes. Awaiting it here
+    // would hold the ask_submit response open for the entire run and leave the
+    // browser card stuck in its "submitted" state while the agent works.
+    // Delivery failures are logged; the ask is already closed either way.
+    void this.inner.sendCustomMessage(
       {
         customType: ASK_USER_ANSWERS_CUSTOM_TYPE,
         content: renderAskUserAnswersText(outcome),
@@ -380,7 +395,9 @@ export class AgentSessionWrapper {
         details: outcome,
       },
       { triggerTurn: true, deliverAs: "followUp" },
-    );
+    ).catch((error) => {
+      console.error("[pi-web] failed to deliver ask answers to the model:", error instanceof Error ? error.message : error);
+    });
     return { result: "closed", outcome, pendingAsk: this.pendingAsk };
   }
 
@@ -394,6 +411,7 @@ export class AgentSessionWrapper {
     const outcome = getAskUserStore().cancelOpen(this.sessionId);
     if (outcome === undefined) return;
     this.emitAskClosed(this.sessionId, outcome);
+    forgetPersistedAsk(this.sessionId);
     void this.inner.sendCustomMessage(
       {
         customType: ASK_USER_ANSWERS_CUSTOM_TYPE,
@@ -1761,6 +1779,12 @@ function registerRpcWrapper(wrapper: AgentSessionWrapper): void {
   const sessionId = wrapper.sessionId;
   if (wrapper.sessionFile) cacheSessionPath(sessionId, wrapper.sessionFile);
   wrapper.onDestroy(() => registry.delete(sessionId));
+  // Rehydrate a persisted open ask (it survives wrapper idle shutdown and
+  // server restarts) before the wrapper becomes visible to `get_state`, so a
+  // reopened session still shows the pending question and `ask_submit` matches
+  // its original askId. No-op when nothing is persisted for this session.
+  const persisted = readPersistedAsk(sessionId);
+  if (persisted !== undefined) getAskUserStore().restore(sessionId, persisted);
   registry.set(sessionId, wrapper);
   wrapper.start();
   if (!wrapper.isChatOnly()) wrapper.beginExtensionBinding();

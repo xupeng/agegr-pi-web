@@ -12,6 +12,7 @@ import {
   readSessionHeader,
 } from "@/lib/session-reader";
 import { sessionPathKey } from "@/lib/session-path";
+import { forgetPersistedAsk } from "@/lib/ask-user/persist";
 import { getRpcSession } from "@/lib/rpc-manager";
 import { projectTreeForResponse } from "@/lib/project-tree";
 import { computeSessionTotalActiveMs } from "@/lib/session-timing";
@@ -204,6 +205,7 @@ export async function DELETE(
 
     await getRpcSession(id)?.shutdown();
     unlinkSync(filePath);
+    forgetPersistedAsk(id);
     invalidateSessionPathCache(id);
     invalidateSessionListCache();
     return NextResponse.json({ ok: true });

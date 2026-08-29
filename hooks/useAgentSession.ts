@@ -170,6 +170,7 @@ const PROMPT_SETTLE_POLL_MS = 600;
 const PROMPT_SETTLE_MAX_MS = 20_000;
 const EVENT_STREAM_IDLE_GRACE_MS = 30_000;
 const AGENT_STATE_RECONCILE_MS = 15_000;
+const ASK_USER_STATE_POLL_MS = 3_000;
 const BASH_STATE_RECONCILE_MS = 1_000;
 const EVENT_STREAM_READY_TIMEOUT_MS = 60_000;
 const EVENT_STREAM_RECONNECT_DELAY_MS = 1_000;
@@ -508,8 +509,10 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
           if (liveState.extensionStatuses !== undefined) setExtensionStatuses(liveState.extensionStatuses ?? []);
           if (liveState.extensionWidgets !== undefined) setExtensionWidgets(liveState.extensionWidgets ?? []);
           if (liveState.queuedMessages !== undefined) setQueuedMessages(normalizeQueuedMessages(liveState.queuedMessages));
+          if (liveState.pendingAsk !== undefined) setPendingAsk(liveState.pendingAsk ?? null);
         } else if (!agentState.running) {
           setQueuedMessages({ steering: [], followUp: [] });
+          setPendingAsk(null);
         }
         return agentState;
       } catch (e) {
@@ -1086,6 +1089,37 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
   useEffect(() => {
     agentRunningRef.current = agentRunning;
   }, [agentRunning]);
+
+  // Cross-device ask sync: a remote device's submit/cancel closes the ask
+  // server-side, but its ask.closed SSE event only reaches that device's own
+  // live stream — an idle session closes the local SSE after the grace
+  // window, so this browser would never hear about the close. While a card is
+  // open, poll the server state (which also falls back to the persisted ask)
+  // and mirror the server's open ask within a few seconds.
+  useEffect(() => {
+    if (!pendingAsk) return;
+    const sid = sessionIdRef.current;
+    if (!sid) return;
+    const timer = setInterval(() => {
+      fetch(`/api/sessions/${encodeURIComponent(sid)}/state`)
+        .then((r) => r.json())
+        .then((d: { state?: AgentStateResponse }) => {
+          if (sessionIdRef.current !== sid) return;
+          const remote = d.state?.pendingAsk;
+          if (remote === undefined || remote === null) {
+            setPendingAsk(null);
+            return;
+          }
+          if (remote.askId !== pendingAsk.askId) {
+            setPendingAsk(remote);
+          }
+        })
+        .catch(() => {
+          // Network hiccup — the next tick retries.
+        });
+    }, ASK_USER_STATE_POLL_MS);
+    return () => clearInterval(timer);
+  }, [pendingAsk]);
 
   const handleAgentEvent = useCallback((event: AgentEvent) => {
     switch (event.type) {
@@ -1930,6 +1964,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
           if (agentState.state.extensionStatuses !== undefined) setExtensionStatuses(agentState.state.extensionStatuses ?? []);
           if (agentState.state.extensionWidgets !== undefined) setExtensionWidgets(agentState.state.extensionWidgets ?? []);
           if (agentState.state.queuedMessages !== undefined) setQueuedMessages(normalizeQueuedMessages(agentState.state.queuedMessages));
+          if (agentState.state.pendingAsk !== undefined) setPendingAsk(agentState.state.pendingAsk ?? null);
         }
       });
     }

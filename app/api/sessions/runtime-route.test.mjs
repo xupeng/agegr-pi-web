@@ -9,6 +9,7 @@ const listRoute = await readFile(new URL("./route.ts", import.meta.url), "utf8")
 const detailRoute = await readFile(new URL("./[id]/route.ts", import.meta.url), "utf8");
 const contextRoute = await readFile(new URL("./[id]/context/route.ts", import.meta.url), "utf8");
 const stateRoute = await readFile(new URL("./[id]/state/route.ts", import.meta.url), "utf8");
+const agentStateRoute = await readFile(new URL("../agent/[id]/route.ts", import.meta.url), "utf8");
 const jiti = createJiti(import.meta.url, {
   alias: { "@": process.cwd() },
   interopDefault: true,
@@ -56,6 +57,18 @@ test("live agent state is available before the session file is persisted", () =>
   assert.ok(liveLookup >= 0);
   assert.ok(pathLookup > liveLookup);
   assert.match(stateRoute, /if \(rpc\?\.isAlive\(\)\)/);
+});
+
+test("state routes serve a persisted open ask when the wrapper is gone", () => {
+  // An unanswered ask_user must survive wrapper idle shutdown and server
+  // restarts: both state routes fall back to the persisted ask so a reloaded
+  // or remote browser can still render the card. The persistence round-trip
+  // itself is covered by lib/ask-user/persist.test.mjs.
+  for (const source of [stateRoute, agentStateRoute]) {
+    assert.match(source, /readPersistedAsk\(id\)/);
+    assert.match(source, /state: \{ pendingAsk: persisted \}/);
+    assert.match(source, /running: false/);
+  }
 });
 
 test("deleting an intermediate subagent reparents both relation representations", async (t) => {

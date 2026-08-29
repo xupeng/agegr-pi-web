@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readPersistedAsk } from "@/lib/ask-user/persist";
 import { resolveSessionPath } from "@/lib/session-reader";
 import { startRpcSession, getRpcSession, setRpcSessionTools } from "@/lib/rpc-manager";
 
@@ -79,6 +80,12 @@ export async function GET(
   try {
     const session = getRpcSession(id);
     if (!session || !session.isAlive()) {
+      // Wrapper gone but the session may still have a persisted open ask; keep
+      // serving it so a reconnecting browser rehydrates the question card.
+      const persisted = readPersistedAsk(id);
+      if (persisted !== undefined) {
+        return NextResponse.json({ running: false, state: { pendingAsk: persisted } });
+      }
       return NextResponse.json({ running: false });
     }
 

@@ -144,6 +144,40 @@ export class PendingAskStore {
     this.openBySessionId.delete(requireSessionId(sessionId));
   }
 
+  /**
+   * Re-register a previously persisted open ask after its session runtime was
+   * rebuilt (idle shutdown, server restart). The original askId is kept so
+   * browsers whose card is keyed by it and `ask_submit` calls still match.
+   *
+   * The record is trusted to have been validated when it was first opened, so
+   * only a light structural check runs; malformed records are dropped. When
+   * the session already has an open ask the live store wins and the restore is
+   * skipped.
+   */
+  restore(
+    sessionId: string,
+    ask: { askId: string; askedAt: string; questions: AskUserQuestion[] } | undefined,
+  ): boolean {
+    const sid = requireSessionId(sessionId);
+    if (!ask || typeof ask !== "object") return false;
+    if (typeof ask.askId !== "string" || ask.askId === "") return false;
+    if (typeof ask.askedAt !== "string" || ask.askedAt === "") return false;
+    if (!Array.isArray(ask.questions) || ask.questions.length === 0) return false;
+    if (!ask.questions.every((question) => (
+      question && typeof question === "object"
+      && typeof question.id === "string"
+      && typeof question.question === "string"
+      && Array.isArray(question.options)
+    ))) return false;
+    if (this.openBySessionId.has(sid)) return false;
+    this.openBySessionId.set(sid, {
+      askId: ask.askId,
+      askedAt: ask.askedAt,
+      questions: ask.questions.map(cloneQuestion),
+    });
+    return true;
+  }
+
   private requireClose(
     sessionId: string,
     reason: AskUserCloseReason,
