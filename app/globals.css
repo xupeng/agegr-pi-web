@@ -422,7 +422,10 @@ pre, code {
   min-width: 0;
   max-width: 100%;
   overflow-x: hidden;
-  font-size: 15.5px;
+  /* 对话区字号：基础字号 + 设置中可调的相对偏移（--chat-font-size-offset
+    由 ChatWindow 注入，未注入处回落 0px，因此文件预览等区域不受影响）。 */
+  --chat-font-size-base: 15.5px;
+  font-size: calc(var(--chat-font-size-base) + var(--chat-font-size-offset, 0px));
   font-family: "Oxanium", "LXGW WenKai GB Screen", "LXGW WenKai Screen", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
   font-weight: 500;
   line-height: 1.75;
@@ -431,12 +434,12 @@ pre, code {
 }
 @media (min-width: 768px) {
   .markdown-body {
-    font-size: 17px;
+    --chat-font-size-base: 17px;
   }
 }
 @media (min-width: 1024px) {
   .markdown-body {
-    font-size: 16px;
+    --chat-font-size-base: 16px;
   }
 }
 .markdown-body p { margin: 0 0 8px; }

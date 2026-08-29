@@ -3,6 +3,12 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import { useTheme, type ThemePreference } from "@/hooks/useTheme";
+import { useChatFontSize } from "@/hooks/useChatFontSize";
+import {
+  CHAT_FONT_SIZE_OFFSET_MAX,
+  CHAT_FONT_SIZE_OFFSET_MIN,
+  normalizeChatFontSizeOffset,
+} from "@/lib/chat-font-preference";
 import { sendAgentCommand } from "@/lib/agent-client";
 import type {
   ExtensionUiVisibilitySettingsResponse,
@@ -54,6 +60,54 @@ function ThemeIcon({ preference }: { preference: ThemePreference }) {
     return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" /></svg>;
   }
   return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2" /><path d="M8 21h8M12 17v4" /></svg>;
+}
+
+function ChatFontSizeControl() {
+  const { t } = useI18n();
+  const { chatFontSizeOffset, setChatFontSizeOffset } = useChatFontSize();
+  const normalizedOffset = normalizeChatFontSizeOffset(chatFontSizeOffset);
+  const offsetLabel =
+    normalizedOffset === 0
+      ? t("settings.fontSizeDefault")
+      : `${normalizedOffset > 0 ? "+" : ""}${normalizedOffset}px`;
+
+  return (
+    <div className="settings-font-size">
+      <div className="settings-font-size__main">
+        <span className="settings-font-size__label">{t("settings.chatFontSize")}</span>
+        <span className="settings-font-size__value">{offsetLabel}</span>
+      </div>
+      <div className="settings-font-size__controls" aria-label={t("settings.chatFontSize")}>
+        <button
+          type="button"
+          aria-label={t("settings.fontSizeDecrease")}
+          title={t("settings.fontSizeDecrease")}
+          disabled={normalizedOffset <= CHAT_FONT_SIZE_OFFSET_MIN}
+          onClick={() => setChatFontSizeOffset(normalizedOffset - 1)}
+        >
+          −
+        </button>
+        <button
+          type="button"
+          aria-label={t("settings.fontSizeReset")}
+          title={t("settings.fontSizeReset")}
+          disabled={normalizedOffset === 0}
+          onClick={() => setChatFontSizeOffset(0)}
+        >
+          {t("settings.fontSizeDefault")}
+        </button>
+        <button
+          type="button"
+          aria-label={t("settings.fontSizeIncrease")}
+          title={t("settings.fontSizeIncrease")}
+          disabled={normalizedOffset >= CHAT_FONT_SIZE_OFFSET_MAX}
+          onClick={() => setChatFontSizeOffset(normalizedOffset + 1)}
+        >
+          +
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function GeneralSettings({ sessionId, onSessionReloaded }: Pick<Props, "sessionId" | "onSessionReloaded">) {
@@ -216,6 +270,12 @@ function GeneralSettings({ sessionId, onSessionReloaded }: Pick<Props, "sessionI
             );
           })}
         </div>
+      </section>
+
+      <section className="settings-general-section">
+        <h3 className="settings-general-heading">{t("settings.chatFontSize")}</h3>
+        <p className="settings-general-description">{t("settings.chatFontSizeDescription")}</p>
+        <ChatFontSizeControl />
       </section>
 
       <section className="settings-general-section">

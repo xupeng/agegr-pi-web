@@ -15,8 +15,11 @@
   inset: 0;
   z-index: 1000;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  /* 不使用 align-items/justify-content 居中：依赖子元素 margin:auto。
+     iOS Safari 上 100dvh/100vh 可能算出大于可视区的高度，若居中会把弹窗
+     顶部（含标题栏与关闭按钮）顶出屏幕导致无法关闭；margin:auto 在空间
+     不足时回落顶部对齐，容器可滚动查看全部内容。 */
+  overflow-y: auto;
   background: rgba(0, 0, 0, 0.35);
 }
 
@@ -40,6 +43,7 @@
 .config-panel-root.is-modal > .config-panel-surface {
   width: min(var(--config-panel-width), calc(100vw - 16px));
   height: min(var(--config-panel-height), calc(100dvh - 16px));
+  margin: auto;
   border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
@@ -739,8 +743,9 @@
   inset: 0;
   z-index: 1000;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  /* 同 .config-panel-root.is-modal：margin:auto 居中，超高时顶部对齐可滚动，
+     避免 iOS 上标题栏/关闭按钮被顶出屏幕。 */
+  overflow-y: auto;
   background: rgba(0, 0, 0, 0.38);
 }
 
@@ -751,6 +756,7 @@
   max-width: calc(100vw - 16px);
   height: 84vh;
   max-height: calc(100dvh - 16px);
+  margin: auto;
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -864,7 +870,9 @@
 
 .settings-dialog-close {
   position: absolute;
-  top: 10px;
+  /* absolute 定位相对 padding box 边框、不受 header 的 padding 影响；
+     必须显式叠加安全区，否则在 viewport-fit:cover 下被状态栏盖住。 */
+  top: calc(10px + env(safe-area-inset-top));
   right: 14px;
 }
 
@@ -887,6 +895,11 @@
 .settings-general {
   width: 100%;
   max-width: 680px;
+  /* 高度必须受 host 约束，overflow-y: auto 才有溢出可滚；
+     否则高度随内容伸展、永不溢出，内容被 .settings-dialog-main
+     的 overflow: hidden 直接裁剪且无法滚动。 */
+  height: 100%;
+  min-height: 0;
   padding: 26px clamp(18px, 4vw, 40px) 40px;
   overflow-y: auto;
 }
@@ -965,6 +978,76 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.settings-font-size {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  max-width: 420px;
+  margin: 14px 0 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.settings-font-size__main {
+  min-width: 0;
+}
+
+.settings-font-size__label,
+.settings-font-size__value {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-font-size__label {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.settings-font-size__value {
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.settings-font-size__controls {
+  display: grid;
+  grid-template-columns: 34px 56px 34px;
+  gap: 6px;
+}
+
+.settings-font-size__controls button {
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-panel);
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.settings-font-size__controls button:not(:disabled):hover,
+.settings-font-size__controls button:not(:disabled):focus-visible {
+  background: var(--bg-hover);
+  outline: none;
+}
+
+.settings-font-size__controls button:disabled {
+  color: var(--text-dim);
+  cursor: default;
 }
 
 .settings-language-options {
@@ -1162,8 +1245,34 @@
   }
 
   .settings-dialog-surface {
-    width: calc(100vw - 12px);
-    height: calc(100dvh - 12px);
+    /* 小屏幕：全屏设置页而非弹窗。弹窗在 iOS 上受状态栏/工具栏视口影响，
+       顶部标题栏与关闭按钮容易被顶出或遮住；全屏 + 安全区 padding 最稳。 */
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .settings-dialog-backdrop {
+    padding: 0;
+  }
+
+  .settings-dialog-header {
+    /* 状态栏安全区：全屏模式下 header 顶部对齐视口顶，用 env() 避开
+       iOS 状态栏/刘海，保证标题与 × 关闭按钮始终可见可点。 */
+    padding-top: max(env(safe-area-inset-top), 0px);
+  }
+
+  .settings-dialog-close {
+    /* 在 header 内容区（安全区下方 50px）垂直居中，44pt 点击目标。 */
+    top: calc(3px + env(safe-area-inset-top));
+    width: 44px;
+    height: 44px;
+    font-size: 24px;
   }
 
   .settings-section-tabs {
@@ -1201,7 +1310,6 @@
    status-bar edge and cap dialog surfaces to the resulting safe box. */
 @supports (-webkit-touch-callout: none) {
   @media (display-mode: standalone) {
-    .settings-dialog-backdrop,
     .config-panel-root.is-modal {
       padding-top: max(59px, env(safe-area-inset-top));
       padding-right: max(8px, env(safe-area-inset-right));
@@ -1209,15 +1317,18 @@
       padding-left: max(8px, env(safe-area-inset-left));
     }
 
-    .settings-dialog-surface,
     .config-panel-root.is-modal > .config-panel-surface {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    .settings-dialog-surface {
       max-width: 100%;
       max-height: 100%;
     }
   }
 
   @media (display-mode: standalone) and (orientation: landscape) {
-    .settings-dialog-backdrop,
     .config-panel-root.is-modal {
       padding-top: max(8px, env(safe-area-inset-top));
       padding-right: max(59px, env(safe-area-inset-right));
