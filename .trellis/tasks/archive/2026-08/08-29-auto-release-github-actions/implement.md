@@ -16,7 +16,7 @@
   - gh release create，notes 照搬原脚本（changelog + npm/pnpm 安装命令）
 - [x] `scripts/release-personal.sh` 瘦身：只保留前置检查 + bump + commit + push 分支 + push tag；删除 next build / npm pack / gh release create；去掉 gh 依赖检查；保留本地代理
 - [x] 验证：bash -n 通过；PyYAML 解析通过（on 关键字为 YAML 1.1 布尔怪癖，GitHub 正常处理）；tag 解析 2 个用例通过；步骤清单 10 步齐全
-- [ ] 提交
+- [x] 提交（d993480）
 
 ## 备注
 - 不真正推送 tag 触发 CI（需要真实发布，由用户下次发版时验证）
