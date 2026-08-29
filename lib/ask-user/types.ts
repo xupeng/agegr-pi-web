@@ -83,6 +83,8 @@ export interface AskUserAnswer {
 /** One submit of the open ask: answers for some or all of its questions. */
 export interface AskUserSubmission {
   answers: AskUserAnswer[];
+  /** Free text the user adds beyond the questions; optional. */
+  supplement?: string;
 }
 
 /**
@@ -111,6 +113,8 @@ export interface AskUserOutcome {
   answeredCount: number;
   /** Ids of the questions left unanswered, in the order they were asked. */
   unansweredIds: string[];
+  /** Free text the user added beyond the questions, when provided. */
+  supplement?: string;
   /** One line, for example `Answered 3 of 5; unanswered: q2, q5`. */
   summary: string;
 }

@@ -17,6 +17,7 @@ import type {
 import { isBlockingExtensionUiRequest } from "@/lib/browser-notifications";
 import { normalizeToolCalls } from "@/lib/normalize";
 import { isPromptRejectedError, sendAgentCommand } from "@/lib/agent-client";
+import { resolvePendingAskAfterClose } from "@/lib/ask-user/resolve-pending-ask";
 import { clearDraft, rekeyDraft, restoreDraftSubmission } from "@/lib/draft-store";
 import { getPreferredToolPreset, setPreferredToolPreset } from "@/lib/tool-preset-preference";
 import { getPresetFromToolNames, getToolNamesForPreset, type ToolEntry, type ToolPreset } from "@/lib/tool-presets";
@@ -762,15 +763,15 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
     }
   }, []);
 
-  const syncPendingAsk = useCallback((response: AskUserCloseResponse | undefined) => {
+  const syncPendingAsk = useCallback((response: AskUserCloseResponse | undefined, submittedAskId?: string) => {
     // Always apply the server's current open ask: undefined means the ask is
     // closed and nothing replaced it, so the card must disappear even when the
     // SSE ask.closed event never arrives (e.g. the stream closed after the run
     // ended). A stale close carries the real open ask for rehydration.
-    setPendingAsk(response?.pendingAsk ?? null);
+    setPendingAsk((current) => resolvePendingAskAfterClose(current, submittedAskId, response));
   }, []);
 
-  const submitAsk = useCallback(async (askId: string, answers: AskUserAnswer[]) => {
+  const submitAsk = useCallback(async (askId: string, answers: AskUserAnswer[], supplement?: string) => {
     const sid = sessionIdRef.current;
     if (!sid) return;
     try {
@@ -778,8 +779,9 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         type: "ask_submit",
         askId,
         answers,
+        ...(supplement !== undefined && supplement.trim() !== "" ? { supplement } : {}),
       });
-      syncPendingAsk(response);
+      syncPendingAsk(response, askId);
     } catch (e) {
       console.error("Failed to submit ask:", e);
     }
@@ -793,7 +795,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         type: "ask_cancel",
         askId,
       });
-      syncPendingAsk(response);
+      syncPendingAsk(response, askId);
     } catch (e) {
       console.error("Failed to cancel ask:", e);
     }

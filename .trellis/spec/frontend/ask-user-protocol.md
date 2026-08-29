@@ -27,6 +27,24 @@
 - `forgetSession`：wrapper `destroy()` 时清理。
 - store 为进程级单例（`globalThis.__piAskUserStore`，与 `__piSessions` 同模式防 Next.js 热重载丢失）。
 
+### 补充输入项（supplement）
+
+- `AskUserSubmission.supplement?`：用户补充的问题之外的自由文本（多行输入框，≤4000，trim 空丢弃），随 `ask_submit` 提交；`AskUserOutcome.supplement?` 记录。
+- `renderAskUserAnswersText` 末尾附加 `Supplement (user-provided, beyond the questions): <json>`，模型可据此获取补充信息。
+- 浏览器侧 `submitAsk(askId, answers, supplement?)` 传递；`AskUserCard` 底部"补充信息（可选）"多行框。
+
+### 提交锁定
+
+- `AskUserCard` 提交/取消后进入 `submitted`/`cancelling` 状态（`locked`）：选项按钮 disabled、输入 readOnly、操作栏显示"已提交 ✓"、每题下渲染提交摘要（`✓ values · otherText`）。
+- 正常路径 `syncPendingAsk(response)`（pendingAsk undefined）使卡片消失；若因 SSE 关闭/重水合竞态卡片残留，`locked` 保证不可再编辑——答案已交付，避免"不确定最终提交了什么"。
+- 单选问题：选选项清空自定义文本、输入自定义文本取消选项（互斥）；多选问题选项与自定义可共存，自定义输入框占位文案区分（`askUserMultipleOtherPlaceholder`）。
+
+### 状态残留与关闭竞态
+
+- `ChatWindow` 中 `<AskUserCard key={pendingAsk.askId} ...>`：ask 切换必须重建组件，否则旧 ask 的 `status`（submitting/locked）、drafts、supplement 会泄漏到新卡片（表现为新卡片选项无反应、输入禁用）。
+- 关闭命令（submit/cancel）响应可能晚于新 ask 打开到达：此时服务端对旧 askId 返回 stale，响应无 `pendingAsk` 时不得清掉已打开的新 ask。解析逻辑在 `lib/ask-user/resolve-pending-ask.ts` 的 `resolvePendingAskAfterClose(current, submittedAskId, response)`：当前 ask 与提交 askId 不同 → 保留当前（除非响应显式带替换）。
+- 该模块必须保持零依赖（无 `@/` 别名、无框架导入），才能被纯 Node 测试 jiti 导入。
+
 ## 事件与命令协议
 
 - SSE 事件：`ask.opened`（`{ type, ask }`）、`ask.closed`（`{ type, askId, reason }`）。浏览器据此维护卡片；supersede 时先发旧 `ask.closed` 再发新 `ask.opened`。
@@ -53,3 +71,11 @@
 - 扩展的 `open` 在工具执行时按 `sessionId` 从 `getRegistry()` 查 wrapper（注册先于扩展绑定，无时序问题）。
 - 工具注入代码在 server 端模块，旧 dev server 进程不会热加载（验证时需重启 dev server）。
 - 开关变更只影响 reload 后的会话；已存在会话的扩展绑定在 reload 时重建。
+
+## UI 布局（卡片随消息流滚动）
+
+- 非空会话：`AskUserCard` 渲染在消息滚动容器内（`messageContentRef` 内、`{rendered.slice(startIndex)}` 之后），跟随对话滚动，输入框上方不再固定占位，消息可视区域保持全高。卡片无固定高度上限、无内部滚动，问题较多时由整个滚动区承担滚动。
+- 空会话（新会话页）：卡片在 header 与 composer 之间，保持 `padding: 0 16px 12px`（桌面端 `paddingRight: 52`）的列对齐包装。
+- 命名约定（`ChatWindow.tsx`）：`askUserCardElement` 是裸卡片（滚动流内使用），`askUserCardInColumn` 是带列对齐 padding 的包装（仅空会话使用）。改动布局时注意两处引用语义不同。
+- ask 出现时无需额外滚动逻辑：`prompt_done`/`agent_end` 使 `agentRunning` 置 false 后，现有 `useLayoutEffect` 在 `isNearBottom` 时 `scrollToBottom`，卡片自动进入视野；用户已上滚查看历史时不打扰。ask 与 agent running 不同时存在，`promptAnchorSpacer` 测量不受影响。
+- 回归测试：`components/ChatWindow.ask-user-layout.test.mjs`（源码断言）覆盖卡片在滚动容器内、composer 区不再承载卡片、空会话包装、卡片无 maxHeight/内部滚动。

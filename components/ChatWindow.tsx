@@ -602,21 +602,31 @@ export function ChatWindow({ session, sessionRunning, newSessionCwd, newSessionD
     />
   );
 
+  // Bare card rendered inside the message scroll column (non-empty sessions):
+  // it scrolls with the conversation instead of pinning above the composer,
+  // so the message viewport keeps its full height while an ask is open.
   const askUserCardElement = pendingAsk ? (
+    <AskUserCard
+      // Rebuild the card for every new ask: the component owns draft/lock
+      // state, and when a close response for the previous ask lands after the
+      // next ask opened, React would otherwise reuse the instance with the old
+      // "submitting" lock and stale drafts still attached.
+      key={pendingAsk.askId}
+      ask={pendingAsk}
+      onSubmit={(askId, answers, supplement) => void submitAsk(askId, answers, supplement)}
+      onCancel={(askId) => void cancelAsk(askId)}
+    />
+  ) : null;
+  // Column-aligned wrapper used by the empty-new-session page, where the card
+  // sits between the header and the composer (same padding as ChatInput).
+  const askUserCardInColumn = askUserCardElement ? (
     <div
       style={{
-        // Match the ChatInput column exactly (16px sides, plus the desktop
-        // minimap allowance) so the card lines up with the input and the
-        // message column; the bottom padding separates it from the input.
         padding: "0 16px 12px",
         paddingRight: isMobile ? 16 : 52,
       }}
     >
-      <AskUserCard
-        ask={pendingAsk}
-        onSubmit={(askId, answers) => void submitAsk(askId, answers)}
-        onCancel={(askId) => void cancelAsk(askId)}
-      />
+      {askUserCardElement}
     </div>
   ) : null;
 
@@ -737,7 +747,7 @@ export function ChatWindow({ session, sessionRunning, newSessionCwd, newSessionD
                 </span>
               </div>
             </div>
-            {askUserCardElement}
+            {askUserCardInColumn}
             {chatInputElement}
             <ExtensionStatusBar statuses={extensionStatuses} widgets={extensionWidgets} />
           </div>
@@ -936,6 +946,9 @@ export function ChatWindow({ session, sessionRunning, newSessionCwd, newSessionD
                 </>
               );
             })()}
+            {askUserCardElement && (
+              <div style={{ paddingBottom: 12 }}>{askUserCardElement}</div>
+            )}
             {streamState.isStreaming && hasStreamingContent && streamState.streamingMessage && (
               <MessageView message={streamState.streamingMessage as AgentMessage} isStreaming modelNames={modelNames} cwd={messageCwd} onOpenFile={onOpenFile} onOpenSession={onOpenSession} />
             )}
@@ -983,7 +996,6 @@ export function ChatWindow({ session, sessionRunning, newSessionCwd, newSessionD
       </div>
 
       <div className="relative">
-        {askUserCardElement}
         {chatInputElement}
         <ExtensionStatusBar statuses={extensionStatuses} widgets={extensionWidgets} />
       </div>

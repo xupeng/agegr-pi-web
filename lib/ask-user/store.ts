@@ -115,7 +115,8 @@ export class PendingAskStore {
     // Validate before closing so a submission that does not fit its questions
     // leaves the ask open for the browser to correct.
     const answers = validateSubmission(ask, submission);
-    return { status: "closed", outcome: this.requireClose(sessionId, "submitted", answers) };
+    const supplement = normalizeSupplement(submission.supplement);
+    return { status: "closed", outcome: this.requireClose(sessionId, "submitted", answers, supplement) };
   }
 
   /**
@@ -147,8 +148,9 @@ export class PendingAskStore {
     sessionId: string,
     reason: AskUserCloseReason,
     answers: RecordedAnswers,
+    supplement?: string,
   ): AskUserOutcome {
-    const outcome = this.close(sessionId, reason, this.timestamp(), answers);
+    const outcome = this.close(sessionId, reason, this.timestamp(), answers, supplement);
     if (outcome === undefined) throw new Error(`Pending ask of session ${sessionId} disappeared while closing`);
     return outcome;
   }
@@ -158,11 +160,12 @@ export class PendingAskStore {
     reason: AskUserCloseReason,
     closedAt: string,
     answers: RecordedAnswers,
+    supplement?: string,
   ): AskUserOutcome | undefined {
     const ask = this.openBySessionId.get(sessionId);
     if (ask === undefined) return undefined;
     this.openBySessionId.delete(sessionId);
-    return askUserOutcome(ask, answers, reason, closedAt);
+    return askUserOutcome(ask, answers, reason, closedAt, supplement);
   }
 
   private timestamp(): string {
@@ -178,7 +181,10 @@ export function renderAskUserAnswersText(outcome: AskUserOutcome): string {
   const lead = outcome.reason === "submitted"
     ? "The user submitted answers to your questions."
     : `The question set was closed (${outcome.reason}) before it was fully answered.`;
-  return [lead, "", ...outcome.questions.map(questionLines).flat(), "", outcome.summary].join("\n");
+  const supplementLine = outcome.supplement === undefined
+    ? []
+    : ["", `Supplement (user-provided, beyond the questions): ${JSON.stringify(outcome.supplement)}`];
+  return [lead, "", ...outcome.questions.map(questionLines).flat(), "", outcome.summary, ...supplementLine].join("\n");
 }
 
 /**
@@ -205,6 +211,7 @@ function askUserOutcome(
   answers: RecordedAnswers,
   reason: AskUserCloseReason,
   closedAt: string,
+  supplement?: string,
 ): AskUserOutcome {
   const questions = ask.questions.map((question) => questionRecord(question, answers.get(question.id)));
   const unansweredIds = questions.filter((record) => !record.answered).map((record) => record.question.id);
@@ -217,6 +224,7 @@ function askUserOutcome(
     questions,
     answeredCount,
     unansweredIds,
+    ...(supplement === undefined ? {} : { supplement }),
     summary: summaryLine(questions.length, answeredCount, unansweredIds),
   };
 }
@@ -321,6 +329,15 @@ function normalizeOtherText(question: AskUserQuestion, otherText: string | undef
     throw new PendingAskValidationError(`Other text of question ${question.id} exceeds its length limit`);
   }
   const trimmed = otherText.trim();
+  return trimmed === "" ? undefined : trimmed;
+}
+
+function normalizeSupplement(supplement: string | undefined): string | undefined {
+  if (supplement === undefined) return undefined;
+  if (supplement.length > ASK_USER_OTHER_TEXT_MAX_LENGTH) {
+    throw new PendingAskValidationError("Supplement exceeds its length limit");
+  }
+  const trimmed = supplement.trim();
   return trimmed === "" ? undefined : trimmed;
 }
 

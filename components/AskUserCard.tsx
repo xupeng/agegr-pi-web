@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { AskUserAnswer, AskUserQuestion, PendingAskUser } from "@/lib/types";
+import { ASK_USER_OTHER_TEXT_MAX_LENGTH } from "@/lib/ask-user/types";
 import { useI18n } from "@/hooks/useI18n";
 
 interface QuestionDraft {
@@ -15,11 +16,16 @@ export function AskUserCard({
   onCancel,
 }: {
   ask: PendingAskUser;
-  onSubmit: (askId: string, answers: AskUserAnswer[]) => void;
+  onSubmit: (askId: string, answers: AskUserAnswer[], supplement?: string) => void;
   onCancel: (askId: string) => void;
 }) {
   const { t } = useI18n();
   const [drafts, setDrafts] = useState<Record<string, QuestionDraft>>({});
+  const [supplement, setSupplement] = useState("");
+  // Locks the card once the user submits/cancels so a card that survives a
+  // slow close cannot be edited again; the answers were already delivered.
+  const [status, setStatus] = useState<"idle" | "submitting" | "cancelling">("idle");
+  const locked = status !== "idle";
 
   const draftFor = (id: string): QuestionDraft => drafts[id] ?? { values: [], otherText: "" };
 
@@ -57,6 +63,7 @@ export function AskUserCard({
   }).length;
 
   const handleSubmit = () => {
+    if (locked) return;
     const answers: AskUserAnswer[] = [];
     for (const question of ask.questions) {
       const draft = draftFor(question.id);
@@ -65,7 +72,9 @@ export function AskUserCard({
       if (values.length === 0 && otherText === "") continue;
       answers.push({ id: question.id, values, ...(otherText !== "" ? { otherText } : {}) });
     }
-    onSubmit(ask.askId, answers);
+    const trimmedSupplement = supplement.trim();
+    setStatus("submitting");
+    onSubmit(ask.askId, answers, trimmedSupplement === "" ? undefined : trimmedSupplement);
   };
 
   return (
@@ -84,7 +93,6 @@ export function AskUserCard({
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
-        maxHeight: "min(640px, calc(100vh - 160px))",
       }}
     >
       <div
@@ -107,7 +115,7 @@ export function AskUserCard({
         </div>
       </div>
 
-      <div style={{ flex: "1 1 auto", minHeight: 0, overflowY: "auto", padding: "12px 14px", display: "grid", gap: 14 }}>
+      <div style={{ padding: "12px 14px", display: "grid", gap: 14 }}>
         {ask.questions.map((question, index) => {
           const draft = draftFor(question.id);
           return (
@@ -137,6 +145,7 @@ export function AskUserCard({
                         key={option.value}
                         type="button"
                         onClick={() => toggleOption(question, option.value)}
+                        disabled={locked}
                         style={{
                           display: "flex",
                           alignItems: "flex-start",
@@ -147,7 +156,8 @@ export function AskUserCard({
                           border: "1px solid var(--border)",
                           background: selected ? "var(--accent)" : "var(--bg)",
                           color: selected ? "#fff" : "var(--text)",
-                          cursor: "pointer",
+                          cursor: locked ? "default" : "pointer",
+                          opacity: locked ? 0.75 : 1,
                           fontSize: 13,
                           lineHeight: 1.4,
                         }}
@@ -199,7 +209,12 @@ export function AskUserCard({
                     type="text"
                     value={draft.otherText}
                     onChange={(event) => setOtherText(question, event.target.value)}
-                    placeholder={t("chat.askUserOtherPlaceholder")}
+                    disabled={locked}
+                    placeholder={
+                      question.multiple === true
+                        ? t("chat.askUserMultipleOtherPlaceholder")
+                        : t("chat.askUserOtherPlaceholder")
+                    }
                     style={{
                       flex: 1,
                       minWidth: 0,
@@ -212,9 +227,47 @@ export function AskUserCard({
                   />
                 </div>
               </div>
+              {locked && (draft.values.length > 0 || draft.otherText.trim() !== "") && (
+                <div style={{ marginTop: 6, paddingLeft: 20, color: "var(--text-muted)", fontSize: 11.5, lineHeight: 1.4 }}>
+                  <span style={{ color: "#10b981" }}>✓</span>{" "}
+                  {[
+                    ...draft.values,
+                    ...(draft.otherText.trim() !== "" ? [draft.otherText.trim()] : []),
+                  ].join(" · ")}
+                </div>
+              )}
             </div>
           );
         })}
+      </div>
+
+      <div style={{ padding: "0 14px 12px", borderTop: "1px solid var(--border)" }}>
+        <div style={{ margin: "10px 0 6px", color: "var(--text)", fontSize: 12, fontWeight: 600 }}>
+          {t("chat.askUserSupplementTitle")}
+        </div>
+        <textarea
+          value={supplement}
+          onChange={(event) => setSupplement(event.target.value)}
+          disabled={locked}
+          placeholder={t("chat.askUserSupplementPlaceholder")}
+          rows={2}
+          maxLength={ASK_USER_OTHER_TEXT_MAX_LENGTH}
+          style={{
+            width: "100%",
+            minWidth: 0,
+            boxSizing: "border-box",
+            resize: "none",
+            padding: "8px 10px",
+            borderRadius: 7,
+            border: "1px dashed var(--border)",
+            background: "var(--bg)",
+            outline: "none",
+            color: "var(--text)",
+            fontSize: 13,
+            lineHeight: 1.5,
+            fontFamily: "inherit",
+          }}
+        />
       </div>
 
       <div
@@ -229,42 +282,55 @@ export function AskUserCard({
           background: "var(--bg)",
         }}
       >
-        <div style={{ color: "var(--text-dim)", fontSize: 11.5, lineHeight: 1.45 }}>
-          {t("chat.askUserHint")}
-        </div>
-        <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-          <button
-            type="button"
-            onClick={() => onCancel(ask.askId)}
-            style={{
-              padding: "7px 14px",
-              borderRadius: 7,
-              border: "1px solid var(--border)",
-              background: "var(--bg-panel)",
-              color: "var(--text-muted)",
-              cursor: "pointer",
-              fontSize: 13,
-            }}
-          >
-            {t("chat.cancel")}
-          </button>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            style={{
-              padding: "7px 16px",
-              borderRadius: 7,
-              border: "1px solid var(--accent)",
-              background: "var(--accent)",
-              color: "#fff",
-              cursor: "pointer",
-              fontSize: 13,
-              fontWeight: 600,
-            }}
-          >
-            {t("chat.submit")}
-          </button>
-        </div>
+        {locked ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--text-muted)", fontSize: 12.5 }}>
+            <span style={{ color: "#10b981", fontWeight: 700 }}>✓</span>
+            {status === "submitting" ? t("chat.askUserSubmitted") : t("chat.askUserCancelling")}
+          </div>
+        ) : (
+          <>
+            <div style={{ color: "var(--text-dim)", fontSize: 11.5, lineHeight: 1.45 }}>
+              {t("chat.askUserHint")}
+            </div>
+            <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+              <button
+                type="button"
+                onClick={() => {
+                  if (locked) return;
+                  setStatus("cancelling");
+                  onCancel(ask.askId);
+                }}
+                style={{
+                  padding: "7px 14px",
+                  borderRadius: 7,
+                  border: "1px solid var(--border)",
+                  background: "var(--bg-panel)",
+                  color: "var(--text-muted)",
+                  cursor: "pointer",
+                  fontSize: 13,
+                }}
+              >
+                {t("chat.cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                style={{
+                  padding: "7px 16px",
+                  borderRadius: 7,
+                  border: "1px solid var(--accent)",
+                  background: "var(--accent)",
+                  color: "#fff",
+                  cursor: "pointer",
+                  fontSize: 13,
+                  fontWeight: 600,
+                }}
+              >
+                {t("chat.submit")}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

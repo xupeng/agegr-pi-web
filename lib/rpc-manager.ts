@@ -1035,9 +1035,10 @@ export class AgentSessionWrapper {
       case "ask_submit": {
         const askId = command.askId as string | undefined;
         const answers = command.answers as AskUserAnswer[] | undefined;
+        const supplement = command.supplement as string | undefined;
         if (typeof askId !== "string" || askId === "") throw new Error("ask_submit requires an askId");
         if (!Array.isArray(answers)) throw new Error("ask_submit requires an answers array");
-        return this.submitAsk(askId, { answers });
+        return this.submitAsk(askId, { answers, ...(typeof supplement === "string" ? { supplement } : {}) });
       }
 
       case "ask_cancel": {
