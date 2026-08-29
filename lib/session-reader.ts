@@ -238,33 +238,7 @@ async function loadAllSessions(): Promise<SessionInfo[]> {
 
   const sessions: SessionInfo[] = [];
   for (const info of sessionsByPath.values()) {
-    cacheSessionPath(info.id, info.path);
-    const originSessionId = info.parentSessionPath
-      ? pathToId.get(sessionPathKey(info.parentSessionPath))
-      : undefined;
-    let subagent = null;
-    if (info.parentSessionPath) {
-      try {
-        subagent = readSubagentRun(readSessionRelationEntries(info.path), info.id, info.path);
-      } catch { /* malformed or concurrently removed session */ }
-    }
-    sessions.push({
-      path: info.path,
-      id: info.id,
-      cwd: info.cwd,
-      name: info.name,
-      created: info.created,
-      modified: info.modified,
-      messageCount: info.messageCount,
-      firstMessage: info.firstMessage,
-      parentSessionId: originSessionId,
-      ...(subagent
-        ? { relation: { kind: "subagent" as const, parentSessionId: subagent.parentSessionId, profile: subagent.profile, description: subagent.description, status: subagent.status } }
-        : info.parentSessionPath
-          ? { relation: { kind: "fork" as const, ...(originSessionId ? { originSessionId } : {}) } }
-          : {}),
-      transient: false,
-    });
+    sessions.push(await toSessionInfo(info, (parentPath) => pathToId.get(sessionPathKey(parentPath))));
   }
 
   // Project info: disk cache (same TTL as the in-memory project cache) first,
@@ -289,6 +263,66 @@ async function loadAllSessions(): Promise<SessionInfo[]> {
   saveSessionListCacheFile(newCache);
 
   return withProjectInfo(sessions, projectByCwd);
+}
+
+/**
+ * Build a SessionInfo from a cached per-file summary. `resolveParentId` maps
+ * a parent .jsonl path to its session id: the list path uses the in-memory
+ * path→id map, the single-session path resolves just that one file.
+ */
+async function toSessionInfo(
+  info: CachedSessionEntry,
+  resolveParentId: (parentPath: string) => string | undefined,
+): Promise<SessionInfo> {
+  cacheSessionPath(info.id, info.path);
+  const originSessionId = info.parentSessionPath ? resolveParentId(info.parentSessionPath) : undefined;
+  let subagent = null;
+  if (info.parentSessionPath) {
+    try {
+      subagent = readSubagentRun(readSessionRelationEntries(info.path), info.id, info.path);
+    } catch { /* malformed or concurrently removed session */ }
+  }
+  return {
+    path: info.path,
+    id: info.id,
+    cwd: info.cwd,
+    name: info.name,
+    created: info.created,
+    modified: info.modified,
+    messageCount: info.messageCount,
+    firstMessage: info.firstMessage,
+    parentSessionId: originSessionId,
+    ...(subagent
+      ? { relation: { kind: "subagent" as const, parentSessionId: subagent.parentSessionId, profile: subagent.profile, description: subagent.description, status: subagent.status } }
+      : info.parentSessionPath
+        ? { relation: { kind: "fork" as const, ...(originSessionId ? { originSessionId } : {}) } }
+        : {}),
+    transient: false,
+  };
+}
+
+/**
+ * Targeted single-session read: locate one .jsonl file (path cache or
+ * filename match) and build its summary without scanning the whole sessions
+ * directory or invalidating the in-memory list cache. Returns null when the
+ * session file is missing or malformed — callers fall back to runtime info.
+ * Powers the lightweight ?sessionId= lookup (URL restore, transient-session
+ * hydration, and the sidebar's per-run row refresh).
+ */
+export async function readSessionById(sessionId: string): Promise<SessionInfo | null> {
+  const path = await resolveSessionPath(sessionId);
+  if (!path) return null;
+  let mtimeMs: number;
+  try {
+    mtimeMs = (await stat(path)).mtimeMs;
+  } catch {
+    return null;
+  }
+  const info = await readSessionInfoFast(path, mtimeMs);
+  if (!info) return null;
+  const session = await toSessionInfo(info, (parentPath) => findSessionIdByPath(parentPath));
+  const [withProject] = await attachSessionProjectInfo([session]);
+  return withProject ?? null;
 }
 
 /** Mirrors worktree.ts's in-memory project cache TTL. */
