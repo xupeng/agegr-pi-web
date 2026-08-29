@@ -30,7 +30,7 @@ import {
   resolveMentionPath,
 } from "@/lib/image-mentions";
 import { FolderIcon, getFileIcon } from "./FileIcons";
-import { useIsMobile } from "@/hooks/useIsMobile";
+import { useIsMobile, useIsTouchDevice } from "@/hooks/useIsMobile";
 import { useI18n } from "@/hooks/useI18n";
 import type { ToolPreset } from "@/lib/tool-presets";
 import { ModelSelector, type ModelSelectorOption } from "./ModelSelector";
@@ -554,6 +554,11 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
 }: Props, ref) {
   const { t } = useI18n();
   const isMobile = useIsMobile();
+  const isTouchDevice = useIsTouchDevice();
+  // Touch devices keep Enter as newline even when the viewport is wider than
+  // the 640px mobile breakpoint (e.g. iPad mini portrait at 744px with the
+  // WeChat keyboard), where the on-screen "newline" key must not send.
+  const isMobileOrTouch = isMobile || isTouchDevice;
   const supportsInlineImages = useMemo(
     () => modelSupportsImageInput(model, modelList),
     [model, modelList],
@@ -1340,7 +1345,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
       const nativeEvent = e.nativeEvent;
-      const sendShortcut = e.key === "Enter" && !e.shiftKey && (!isMobile || e.ctrlKey || e.metaKey);
+      const sendShortcut = e.key === "Enter" && !e.shiftKey && (!isMobileOrTouch || e.ctrlKey || e.metaKey);
       const recentlyComposed = Date.now() - lastCompositionEndAtRef.current < COMPOSITION_END_ENTER_GRACE_MS;
       const isComposing =
         isComposingRef.current ||
@@ -1472,7 +1477,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
         }
       }
     },
-    [isMobile, isStreaming, onSteer, onFollowUp, onAbort, slashMenuOpen, slashQuery, displayedSlashCommands, slashActiveIndex, applySlashCommand, sendQueued, handleSend, getNextSlashIndex, atMenuOpen, atQuery, atMatches, atActiveIndex, applyAtCompletion, historyMenuOpen, inputHistory, historyActiveIndex, applyHistoryInput, value]
+    [isMobileOrTouch, isStreaming, onSteer, onFollowUp, onAbort, slashMenuOpen, slashQuery, displayedSlashCommands, slashActiveIndex, applySlashCommand, sendQueued, handleSend, getNextSlashIndex, atMenuOpen, atQuery, atMatches, atActiveIndex, applyAtCompletion, historyMenuOpen, inputHistory, historyActiveIndex, applyHistoryInput, value]
   );
 
   const handleInput = useCallback(() => {
@@ -2235,6 +2240,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
               updateAtQuery(el.value, el.selectionStart);
             }}
             onInput={handleInput}
+            enterKeyHint="enter"
             onPaste={handlePaste}
             placeholder={
               isStreaming && (onSteer || onFollowUp)

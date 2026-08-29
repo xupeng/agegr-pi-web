@@ -21,6 +21,7 @@ This directory contains guidelines for frontend development. Fill in each file w
 | [Quality Guidelines](./quality-guidelines.md) | Code standards, forbidden patterns | To fill |
 | [Type Safety](./type-safety.md) | Type patterns, validation | To fill |
 | [ask_user 提问协议](./ask-user-protocol.md) | ask_user 工具契约、状态机、事件/命令协议 | Written |
+| [移动端键盘与视口高度](./mobile-keyboard-viewport.md) | useViewportHeight 机制、focus 重试、WKWebView 兜底 | Written |
 
 ---
 

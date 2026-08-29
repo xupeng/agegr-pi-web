@@ -28,9 +28,14 @@ test("tracks the visual viewport while the software keyboard is open", () => {
   assert.match(appShellSource, /height: "var\(--app-viewport-height, 100dvh\)"/);
   assert.match(appShellSource, /data-mobile-toolbar-file=\{mobile \? "true" : undefined\}/);
   assert.match(viewportHookSource, /window\.visualViewport/);
-  assert.match(viewportHookSource, /window\.requestAnimationFrame\(update\)/);
+  assert.match(viewportHookSource, /window\.requestAnimationFrame\(runUpdate\)/);
   assert.match(viewportHookSource, /window\.addEventListener\("resize", scheduleUpdate\)/);
-  assert.match(viewportHookSource, /window\.addEventListener\("focusout", scheduleUpdate\)/);
+  assert.match(viewportHookSource, /window\.addEventListener\("focusout", onFocusOut\)/);
+  // Focus retries cover the keyboard slide-in animation for shells that skip
+  // the visualViewport resize event while the keyboard is opening.
+  assert.match(viewportHookSource, /window\.addEventListener\("focusin", onFocusIn\)/);
+  assert.match(viewportHookSource, /scheduleRetries\(\)/);
+  assert.match(viewportHookSource, /KEYBOARD_RETRY_DELAYS/);
   assert.match(viewportHookSource, /--app-viewport-height/);
   assert.match(viewportHookSource, /window\.scrollTo\(0, 0\)/);
   assert.match(cssSource, /height: var\(--app-viewport-height, 100dvh\)/);
