@@ -102,6 +102,9 @@ interface Props {
   onRunningSessionIdsChange?: (ids: Set<string>) => void;
   /** Fired with the sessions loaded so far (on-demand per-project loads). */
   onSessionsChange?: (sessions: SessionInfo[]) => void;
+  /** Fired when the selected session finishes an agent run; the sidebar does a
+   *  lightweight single-session refresh instead of a full forced scan. */
+  sessionActivity?: { id: string; ts: number } | null;
 }
 
 interface WorktreeEntry {
@@ -411,7 +414,7 @@ function PiWebTitle() {
   );
 }
 
-export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSession, initialSessionId, skipInitialProjectSelection, onInitialRestoreDone, refreshKey, onSessionDeleted, selectedCwd: selectedCwdProp, onCwdChange, onOpenFile, explorerRefreshKey, onExplorerRefresh, onAtMention, onAtMentions, onBackgroundTaskDone, onRunningSessionIdsChange, onSessionsChange }: Props) {
+export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSession, initialSessionId, skipInitialProjectSelection, onInitialRestoreDone, refreshKey, onSessionDeleted, selectedCwd: selectedCwdProp, onCwdChange, onOpenFile, explorerRefreshKey, onExplorerRefresh, onAtMention, onAtMentions, onBackgroundTaskDone, onRunningSessionIdsChange, onSessionsChange, sessionActivity }: Props) {
   const { t } = useI18n();
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [projectSessionsByKey, setProjectSessionsByKey] = useState<Map<string, SessionInfo[]>>(new Map());
@@ -463,6 +466,21 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
   const sessionRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const explorerRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fileExplorerRef = useRef<FileExplorerHandle>(null);
+  /** Sequence for the lightweight single-session refresh; only the latest
+   *  response may write, so back-to-back agent ends cannot race each other. */
+  const sessionActivitySeqRef = useRef(0);
+  /** Per-project request sequence: guards the shared per-project cache from
+   *  out-of-order responses when multiple refreshers race on the same key. */
+  const projectSessionsReqSeqRef = useRef<Map<string, number>>(new Map());
+  /** Project keys whose cached rows may be stale after a forced structural
+   *  refresh (create/delete/fork/rename). The old rows stay visible — no
+   *  clear — but switching to one of these projects re-fetches instead of
+   *  showing deleted/renamed sessions. */
+  const staleProjectKeysRef = useRef<Set<string>>(new Set());
+  /** Latest per-row summaries from lightweight single-session refreshes,
+   *  keyed by session id. Merged into project-list responses so an older
+   *  list snapshot (30s server cache) can never roll back a fresh row. */
+  const sessionRowOverridesRef = useRef<Map<string, SessionInfo>>(new Map());
 
   const loadProjects = useCallback(async (showLoading = false, force = false) => {
     try {
@@ -474,12 +492,18 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
       const data = await res.json() as { projects: ProjectSummary[]; runningSessionIds?: string[] };
       setProjects(data.projects);
       allSessionIdsRef.current = new Set(data.projects.flatMap((p) => p.sessionIds));
-      // A forced project refresh means sessions may have been created, renamed
-      // or deleted; drop cached per-project lists so the active project (and
-      // any later switch) refetches them.
+      // Do NOT clear the per-project session caches here. A forced refresh
+      // previously dropped them and relied on a later refetch — but that
+      // refetch races this response, so the clear could land *after* the
+      // session data arrived and leave the sidebar empty until a manual
+      // refresh. The old rows now stay visible until the follow-up
+      // loadProjectSessions(force) replaces them. Mark the other projects
+      // stale instead, so switching to them re-fetches (deleted/renamed
+      // sessions disappear there too) while their rows never blank out.
       if (force) {
-        projectSessionsByKeyRef.current = new Map();
-        setProjectSessionsByKey(new Map());
+        for (const key of projectSessionsByKeyRef.current.keys()) {
+          staleProjectKeysRef.current.add(key);
+        }
       }
       // Treat the fetched running set as an initial fallback only. Once the
       // lightweight poll is live, a slow session-list fetch cannot overwrite it.
@@ -517,32 +541,90 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
 
   /** Load (and cache) the session summaries of one project on demand. */
   const loadProjectSessions = useCallback(async (projectKey: string, force = false) => {
-    if (!force) {
+    const stale = staleProjectKeysRef.current.has(projectKey);
+    if (!force && !stale) {
       if (projectSessionsLoadingRef.current.has(projectKey)) return;
       if (projectSessionsByKeyRef.current.has(projectKey)) return;
     }
     projectSessionsLoadingRef.current.add(projectKey);
     setProjectSessionsLoadingKey(projectKey);
+    // Only the latest response for this key may write the shared cache; a
+    // stale response landing after a newer one must not overwrite it (and,
+    // combined with the no-clear policy above, must never produce an empty
+    // list). Also keep the loading flag owned by the latest request.
+    const seq = (projectSessionsReqSeqRef.current.get(projectKey) ?? 0) + 1;
+    projectSessionsReqSeqRef.current.set(projectKey, seq);
     try {
       const res = await fetch(`/api/sessions?projectKey=${encodeURIComponent(projectKey)}`, {
         cache: "no-store",
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json() as { sessions: SessionInfo[] };
-      projectSessionsByKeyRef.current.set(projectKey, data.sessions);
+      if (projectSessionsReqSeqRef.current.get(projectKey) !== seq) return;
+      staleProjectKeysRef.current.delete(projectKey);
+      // A lightweight row refresh (sessionActivity) may have landed after this
+      // list request started; preserve those fresher rows over the snapshot.
+      const overrides = sessionRowOverridesRef.current;
+      const sessions = overrides.size > 0
+        ? data.sessions.map((s) => overrides.get(s.id) ?? s)
+        : data.sessions;
+      projectSessionsByKeyRef.current.set(projectKey, sessions);
       setProjectSessionsByKey((prev) => {
         const next = new Map(prev);
-        next.set(projectKey, data.sessions);
+        next.set(projectKey, sessions);
         return next;
       });
       onSessionsChange?.(mergeLoadedSessions(projectSessionsByKeyRef.current));
     } catch (e) {
-      setError(String(e));
+      // Only the latest request may report errors; a stale failure must not
+      // persist past a newer successful refresh.
+      if (projectSessionsReqSeqRef.current.get(projectKey) === seq) {
+        setError(String(e));
+      }
     } finally {
-      projectSessionsLoadingRef.current.delete(projectKey);
-      setProjectSessionsLoadingKey((cur) => (cur === projectKey ? null : cur));
+      if (projectSessionsReqSeqRef.current.get(projectKey) === seq) {
+        projectSessionsLoadingRef.current.delete(projectKey);
+        setProjectSessionsLoadingKey((cur) => (cur === projectKey ? null : cur));
+      }
     }
   }, [onSessionsChange, mergeLoadedSessions]);
+
+  /** Lightweight single-session refresh (agent-run end): fetch one session's
+   *  latest summary via ?sessionId= — the server reads just that .jsonl file,
+   *  no full scan — then patch the cached row and the owning project's
+   *  modified time so ordering stays fresh. */
+  const refreshSessionRow = useCallback(async (sessionId: string) => {
+    const seq = ++sessionActivitySeqRef.current;
+    try {
+      const res = await fetch(`/api/sessions?sessionId=${encodeURIComponent(sessionId)}`, {
+        cache: "no-store",
+      });
+      if (!res.ok) return;
+      const data = await res.json() as { sessions: SessionInfo[] };
+      if (seq !== sessionActivitySeqRef.current) return; // 过期响应丢弃
+      const updated = data.sessions?.[0];
+      if (!updated) return;
+      const key = updated.projectKey ?? updated.projectRoot ?? updated.cwd;
+      const nextByKey = new Map(
+        [...projectSessionsByKeyRef.current.entries()].map(([k, list]) => [
+          k,
+          k === key ? list.map((s) => (s.id === sessionId ? updated : s)) : list,
+        ]),
+      );
+      projectSessionsByKeyRef.current = nextByKey;
+      setProjectSessionsByKey(nextByKey);
+      sessionRowOverridesRef.current.set(sessionId, updated);
+      onSessionsChange?.(mergeLoadedSessions(nextByKey));
+      // Keep the owning project's modified fresh so the workspace selector
+      // ordering reflects recent activity (array order settles on the next
+      // full loadProjects).
+      setProjects((prev) => prev.map((p) =>
+        p.key === key && updated.modified > p.modified ? { ...p, modified: updated.modified } : p,
+      ));
+    } catch {
+      // Best-effort: keep the current row; the next full refresh corrects it.
+    }
+  }, [mergeLoadedSessions, onSessionsChange]);
 
   /** Refresh both levels: project list plus the active project's sessions. */
   const refreshLists = useCallback(async (force = false) => {
@@ -555,14 +637,25 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
   useEffect(() => {
     const isFirst = !initialLoadDone.current;
     initialLoadDone.current = true;
-    void loadProjects(isFirst, !isFirst);
-    // Session mutations (create/rename/delete) bump refreshKey. The forced
-    // project refresh above invalidated the cached lists, so also refetch the
-    // active project's sessions to surface the change immediately.
-    if (!isFirst && selectedProjectKeyRef.current) {
-      void loadProjectSessions(selectedProjectKeyRef.current, true);
-    }
+    void (async () => {
+      // Serialize: pull the project list before sessions so a forced refresh
+      // can never clear per-project data after a session response already
+      // landed (the empty-list race). loadProjects swallows errors, so this
+      // cannot stall on a failed request.
+      await loadProjects(isFirst, !isFirst);
+      // Session mutations (create/rename/delete) bump refreshKey. The forced
+      // project refresh above refreshed the project list, so also refetch the
+      // active project's sessions to surface the change immediately.
+      if (!isFirst && selectedProjectKeyRef.current) {
+        await loadProjectSessions(selectedProjectKeyRef.current, true);
+      }
+    })();
   }, [loadProjects, loadProjectSessions, refreshKey]);
+
+  useEffect(() => {
+    if (!sessionActivity?.id) return;
+    void refreshSessionRow(sessionActivity.id);
+  }, [sessionActivity, refreshSessionRow]);
 
   // Browser storage is unavailable during server rendering. Restore the panel
   // preference after hydration so a collapsed explorer stays collapsed on reload.

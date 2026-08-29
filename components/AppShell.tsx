@@ -130,6 +130,9 @@ export function AppShell() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [sessionKey, setSessionKey] = useState(0);
   const [explorerRefreshKey, setExplorerRefreshKey] = useState(0);
+  /** Lightweight signal that the selected session finished an agent run — the
+   *  sidebar refreshes just that row (?sessionId=) instead of a full force scan. */
+  const [sessionActivity, setSessionActivity] = useState<{ id: string; ts: number } | null>(null);
   const [settingsSection, setSettingsSection] = useState<SettingsSection | null>(null);
   const [modelsRefreshKey, setModelsRefreshKey] = useState(0);
   const [projectTrust, setProjectTrust] = useState<ProjectTrustStatus | null>(null);
@@ -759,7 +762,11 @@ export function AppShell() {
   }, [handleSelectSession, locale]);
 
   const handleAgentEnd = useCallback(() => {
-    setRefreshKey((k) => k + 1);
+    // A finished run only changes the current session's summary (modified,
+    // messageCount). Refresh that row directly; full forced scans stay
+    // reserved for structural changes (create/delete/fork/rename), which
+    // still bump refreshKey.
+    if (selectedSession) setSessionActivity({ id: selectedSession.id, ts: Date.now() });
     setExplorerRefreshKey((k) => k + 1);
     if (selectedSession) hydrateSelectedSession(selectedSession.id);
 
@@ -1012,6 +1019,7 @@ export function AppShell() {
         onBackgroundTaskDone={handleBackgroundTaskDone}
         onRunningSessionIdsChange={handleRunningSessionIdsChange}
         onSessionsChange={handleSessionsChange}
+        sessionActivity={sessionActivity}
       />
       <div style={{ padding: "8px", flexShrink: 0, display: "flex", justifyContent: "space-between", gap: 4 }}>
         {([
