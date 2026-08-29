@@ -1,0 +1,115 @@
+name: release-personal
+
+on:
+  push:
+    tags:
+      - "personal-*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Full history so the previous personal tag and changelog are available.
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Parse version from tag
+        id: version
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF#refs/tags/}"
+          # personal-0.8.9.2 -> 0.8.9-personal.2
+          REST="${TAG#personal-}"
+          LAST="${REST##*.}"
+          BASE="${REST%.*}"
+          VERSION="${BASE}-personal.${LAST}"
+          echo "tag=${TAG}"
+          echo "version=${VERSION}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify version matches package.json
+        run: |
+          set -euo pipefail
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          if [[ "$PKG_VERSION" != "${{ steps.version.outputs.version }}" ]]; then
+            echo "::error::package.json version is $PKG_VERSION but tag implies ${{ steps.version.outputs.version }}. Bump first (scripts/release-personal.sh) then retag."
+            exit 1
+          fi
+          echo "version OK: ${PKG_VERSION}"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: npm run build
+
+      - name: Pack tarball
+        run: npm pack
+
+      - name: Find previous personal tag
+        id: prevtag
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.version.outputs.tag }}"
+          PREV="$(git tag -l 'personal-0.8.*' | sort -V | grep -v "^${TAG}$" | tail -1 || true)"
+          echo "prev=${PREV}"
+          echo "prev=${PREV}" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.version.outputs.tag }}"
+          VERSION="${{ steps.version.outputs.version }}"
+          PREV_TAG="${{ steps.prevtag.outputs.prev }}"
+          TARBALL="xupeng-pi-web-${VERSION}.tgz"
+          RELEASE_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/${TARBALL}"
+
+          NOTES="$(mktemp)"
+          trap 'rm -f "$NOTES"' EXIT
+
+          {
+            echo "预构建 tarball（next build 产物），其他机器安装后通过 \`next start\` 运行。"
+            echo
+            echo "相对上一版新增："
+            if [[ -n "$PREV_TAG" ]]; then
+              git log --oneline --no-merges "${PREV_TAG}..HEAD" | sed 's/^/- /' || true
+            else
+              git log --oneline --no-merges -5 | sed 's/^/- /' || true
+            fi
+            echo
+            echo "安装（npm / pnpm 任选其一，可分别一键复制）："
+            echo '**npm：**'
+            echo '```bash'
+            echo "npm install -g ${RELEASE_URL}"
+            echo '```'
+            echo '**pnpm：**'
+            echo '```bash'
+            echo "pnpm add -g ${RELEASE_URL}"
+            echo '```'
+          } > "$NOTES"
+
+          gh release create "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "pi-web $VERSION" \
+            --notes-file "$NOTES" \
+            "$TARBALL"
