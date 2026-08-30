@@ -2,9 +2,11 @@
 
 [中文文档](./README.zh-CN.md) | [日本語](./README.ja.md) | [Русский](./README.ru.md)
 
+> Forked from [agegr/pi-web](https://github.com/agegr/pi-web) (MIT). Personal fork published as [@xup3ng/pi-web](https://www.npmjs.com/package/@xup3ng/pi-web).
+
 Local browser UI for the [pi coding agent](https://github.com/earendil-works/pi). Pi Web uses the same local configuration and session files as pi, so you can browse and resume conversations, run agent turns, configure models and resources, and inspect project files from a browser.
 
-![Pi Web displaying a pi session with structured Markdown, tool calls, and project navigation](https://raw.githubusercontent.com/agegr/pi-web/main/docs/screenshot2.png)
+![Pi Web displaying a pi session with structured Markdown, tool calls, and project navigation](https://raw.githubusercontent.com/xupeng/agegr-pi-web/main/docs/screenshot2.png)
 
 ## Features
 
@@ -20,7 +22,7 @@ Local browser UI for the [pi coding agent](https://github.com/earendil-works/pi)
 Pi Web requires Node.js 22.19.0 or newer. Check your version with `node --version`, then run:
 
 ```bash
-npx @agegr/pi-web@latest
+npx @xup3ng/pi-web@latest
 ```
 
 The CLI opens a browser after the server is ready. If it does not, open [http://127.0.0.1:30141](http://127.0.0.1:30141). Pi Web listens only on `127.0.0.1` by default.
@@ -30,11 +32,11 @@ If no model provider is configured yet, open the **Models** panel to sign in or 
 To install the `pi-web` command globally:
 
 ```bash
-npm install -g @agegr/pi-web@latest
+npm install -g @xup3ng/pi-web@latest
 pi-web
 ```
 
-To update, stop the running process with `Ctrl+C` and run the same install command again. To uninstall, run `npm uninstall -g @agegr/pi-web`.
+To update, stop the running process with `Ctrl+C` and run the same install command again. To uninstall, run `npm uninstall -g @xup3ng/pi-web`.
 
 ## Configuration
 
@@ -77,7 +79,7 @@ On macOS or Linux:
 HTTP_PROXY=http://127.0.0.1:7890 \
 HTTPS_PROXY=http://127.0.0.1:7890 \
 NO_PROXY=localhost,127.0.0.1 \
-npx @agegr/pi-web@latest
+npx @xup3ng/pi-web@latest
 ```
 
 On Windows PowerShell:
@@ -86,7 +88,7 @@ On Windows PowerShell:
 $env:HTTP_PROXY = "http://127.0.0.1:7890"
 $env:HTTPS_PROXY = "http://127.0.0.1:7890"
 $env:NO_PROXY = "localhost,127.0.0.1"
-npx @agegr/pi-web@latest
+npx @xup3ng/pi-web@latest
 ```
 
 ## Notes
