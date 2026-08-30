@@ -115,7 +115,7 @@ npm run lint
 
 Не запускайте `next build` или `npm run build` во время обычной разработки. Эти команды записывают данные в `.next/` и могут помешать работе сервера разработки; выполняйте сборку только при подготовке релиза.
 
-Руководства для участников: [Internationalization](./docs/i18n.md) и [Release process](./docs/release.md).
+Руководства для участников: [Internationalization](./docs/i18n.md) и [Release process](./docs/release-npm.md).
 
 ## Структура репозитория
 

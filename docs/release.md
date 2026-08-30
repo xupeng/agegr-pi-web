@@ -1,5 +1,10 @@
 # Release Checklist
 
+> **本 fork 的 npm 包发布**（`@xup3ng/pi-web`，含 2FA web auth、传播延迟等注意
+> 事项）见 [`release-npm.md`](./release-npm.md)，推荐直接使用
+> `./scripts/release-npm.sh`。以下为 upstream 的 GitHub Release + npm 清单，
+> 与本 fork 的 GitHub 发布流程（`./scripts/release-personal.sh`）不完全一致。
+
 This repo publishes two artifacts for each release:
 
 - npm package: `@agegr/pi-web`

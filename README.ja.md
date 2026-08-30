@@ -115,7 +115,7 @@ npm run lint
 
 通常の開発中は `next build` または `npm run build` を実行しないでください。`.next/` に書き込まれ、開発サーバーに影響する可能性があります。ビルドはリリース作業時にのみ実行してください。
 
-コントリビューター向けガイド：[Internationalization](./docs/i18n.md) と [Release process](./docs/release.md)。
+コントリビューター向けガイド：[Internationalization](./docs/i18n.md) と [Release process](./docs/release-npm.md)。
 
 ## リポジトリ構成
 

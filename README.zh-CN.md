@@ -117,7 +117,7 @@ npm run lint
 
 日常开发时不要运行 `next build` 或 `npm run build`。它们会写入 `.next/`，可能干扰开发服务器；仅在发布流程中执行构建。
 
-贡献者文档：[国际化](./docs/i18n.md)和[发布流程](./docs/release.md)。
+贡献者文档：[国际化](./docs/i18n.md)和[发布流程](./docs/release-npm.md)。
 
 ## 仓库结构
 
