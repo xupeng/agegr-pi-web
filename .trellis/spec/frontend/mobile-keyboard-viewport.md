@@ -4,7 +4,7 @@
 
 ## 机制（`hooks/useViewportHeight.ts`）
 
-- app 根节点高度 = `var(--app-viewport-height, 100dvh)`（`AppShell.tsx` 的 `#pi-app-root`）。
+- app 根节点高度 = `var(--app-viewport-height, 100dvh)`（`AppShell.tsx` 的根 `<div>`）。
 - 键盘打开时设置 `--app-viewport-height` 为 `visualViewport.height`，关闭时移除（回退 `100dvh`）。
 - 判定（纯函数 `shouldUseVisualViewportHeight`）：焦点在可编辑元素（INPUT/SELECT/TEXTAREA/contentEditable）且未缩放且 `innerHeight - viewportHeight > 1`。
 - 驱动事件：visualViewport resize/scroll、window resize、focusin/focusout、pageshow，全部经 rAF 节流。

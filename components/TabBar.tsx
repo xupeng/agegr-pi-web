@@ -28,7 +28,6 @@ export function TabBar({ tabs, activeTabId, onSelectTab, onCloseTab }: Props) {
 
   return (
     <div
-      className="pi-tabbar"
       style={{
         display: "flex",
         alignItems: "flex-end",

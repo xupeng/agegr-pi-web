@@ -106,33 +106,6 @@ html.dark .catppuccin-file-icon {
   background-image: var(--catppuccin-icon-dark);
 }
 
-/* Electron desktop shell (pi-desktop): reserve space for the enlarged macOS
-   traffic lights so the app's own top bar is not clipped underneath them.
-   The safe-area strip blends into the sidebar colour instead of showing as a
-   contrasting white band. Purely cosmetic in a plain browser. */
-html.electron #pi-app-root {
-  box-sizing: border-box !important;
-  padding-top: 30px !important;
-  background: var(--bg-panel) !important;
-}
-/* Slim the app's own header inside the Electron shell so the reserved
-   traffic-light strip plus the header does not eat too much vertical space. */
-html.electron .pi-sidebar-header {
-  padding-top: 2px !important;
-  padding-bottom: 6px !important;
-}
-html.electron .pi-sidebar-header-row {
-  margin-bottom: 5px !important;
-}
-html.electron .pi-sidebar-cwd {
-  padding-top: 3px !important;
-  padding-bottom: 3px !important;
-}
-html.electron .pi-tabbar,
-html.electron .pi-tabbar > div {
-  height: 30px !important;
-}
-
 /* Use the SVG alpha channel as a mask so file icons follow the app's
    restrained text palette instead of Catppuccin's language-specific colors. */
 @supports (mask-image: url("mask.svg")) or (-webkit-mask-image: url("mask.svg")) {
