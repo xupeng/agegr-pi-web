@@ -1,0 +1,4 @@
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"合并验证质量规范"}
+{"file":".trellis/spec/frontend/ask-user-protocol.md","reason":"保留个人 ask_user 行为"}
+{"file":".trellis/spec/frontend/session-list-refresh.md","reason":"缓存及侧栏合并契约"}
+{"file":"docs/release-npm.md","reason":"npm 发布约定"}
