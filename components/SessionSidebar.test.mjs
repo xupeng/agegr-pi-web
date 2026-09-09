@@ -1,8 +1,79 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { createJiti } from "jiti";
+
+const jiti = createJiti(import.meta.url, { jsx: { runtime: "automatic" }, tsconfigPaths: true });
+const { getSessionListIndices, getVisibleSessionRows } = await jiti.import("./SessionSidebar.tsx");
 const source = await readFile(new URL("./SessionSidebar.tsx", import.meta.url), "utf8");
 const sessionItemSource = source.slice(source.indexOf("function SessionItem("));
+
+function session(id, modified, options = {}) {
+  return {
+    path: `/tmp/${id}.jsonl`,
+    id,
+    cwd: "/tmp",
+    created: modified,
+    modified,
+    messageCount: 1,
+    firstMessage: id,
+    ...options,
+  };
+}
+
+test("scrolling keeps the focused row and viewport mounted without expanding the window", () => {
+  for (const [scrollTop, focusedIndex] of [[0, 1999], [10000, 0]]) {
+    const indices = getSessionListIndices(2000, scrollTop, 335, focusedIndex);
+    const firstVisible = Math.floor(scrollTop / 54);
+    const lastVisible = Math.ceil((scrollTop + 335) / 54) - 1;
+    for (let index = firstVisible; index <= lastVisible; index++) assert.ok(indices.includes(index));
+    assert.ok(indices.includes(focusedIndex));
+    assert.equal(indices.length, 24);
+    assert.equal(new Set(indices).size, indices.length);
+    assert.deepEqual(indices, [...indices].sort((a, b) => a - b));
+  }
+  assert.equal(getSessionListIndices(2000, 0, 335, 3).length, 23);
+  const blurred = getSessionListIndices(2000, 10000, 335);
+  assert.equal(blurred.length, 23);
+  assert.ok(!blurred.includes(0));
+});
+
+test("session windows stay valid after a project shrinks and before viewport measurement", () => {
+  assert.deepEqual(getSessionListIndices(5, 80000, 335, 1999), [0, 1, 2, 3, 4]);
+  assert.deepEqual(getSessionListIndices(0, 80000, 335, 1999), []);
+  assert.equal(getSessionListIndices(2000, 0, 0).length, 28);
+});
+
+test("visible rows preserve fork nesting while folding subagents into their owner", () => {
+  const main = session("main", "2026-01-04T00:00:00.000Z");
+  const fork = session("fork", "2026-01-02T00:00:00.000Z", {
+    parentSessionId: "main",
+    relation: { kind: "fork", originSessionId: "main" },
+  });
+  const subagent = session("subagent", "2026-01-05T00:00:00.000Z", {
+    parentSessionId: "main",
+    relation: {
+      kind: "subagent",
+      parentSessionId: "main",
+      profile: "review",
+      description: "Review",
+      status: "completed",
+    },
+  });
+  const other = session("other", "2026-01-03T00:00:00.000Z");
+
+  const rows = getVisibleSessionRows([fork, other, subagent, main], new Set());
+  assert.deepEqual(rows.map((row) => [row.family.root.id, row.depth]), [
+    ["main", 0],
+    ["fork", 1],
+    ["other", 0],
+  ]);
+  assert.deepEqual(rows[0].family.subagents.map((item) => item.id), ["subagent"]);
+  assert.equal(rows[0].family.latestModified, subagent.modified);
+
+  const collapsed = getVisibleSessionRows([fork, other, subagent, main], new Set(["main"]));
+  assert.deepEqual(collapsed.map((row) => row.family.root.id), ["main", "other"]);
+});
 
 test("only Shift+click bypasses session deletion confirmation", () => {
   assert.match(
@@ -29,7 +100,27 @@ test("exposes the polled running-session set to the shell", () => {
   assert.match(source, /onRunningSessionIdsChange\?\.\(runningSessionIds\)/);
 });
 
+test("publishes the on-demand session catalog to the shell", () => {
+  assert.match(source, /onSessionsChange\?: \(sessions: SessionInfo\[\]\) => void/);
+  assert.match(source, /onSessionsChange\?\.\(mergeLoadedSessions\(projectSessionsByKeyRef\.current\)\)/);
+});
 
+test("subagent completion stays silent and aggregates into its owner row", () => {
+  assert.match(source, /completionNotificationSuppressedSessionIds\?: string\[\]/);
+  assert.match(
+    source,
+    /completedWithNotifications = completedInBackground\.filter\([\s\S]*?!previousSuppressedCompletionSessionIdsRef\.current\.has\(id\)[\s\S]*?!knownSubagentIds\.has\(id\)/,
+  );
+  assert.match(source, /completedWithNotifications\.forEach\(\(id\) => next\.add\(id\)\)/);
+  assert.match(source, /listSessionFamilies\(sessions\)/);
+  assert.match(source, /familySessions\.some\(\(session\) => runningSessionIds\.has\(session\.id\)\)/);
+});
+
+test("formats session timestamps with the active locale", () => {
+  assert.match(source, /import \{ formatRelativeTime \} from "@\/lib\/i18n\/format"/);
+  assert.match(sessionItemSource, /const \{ locale, t \} = useI18n\(\)/);
+  assert.match(sessionItemSource, /formatRelativeTime\(session\.modified, locale\)/);
+});
 
 test("includes project activity counts in accessible labels", () => {
   assert.match(
@@ -75,6 +166,19 @@ test("sessions load per project on demand and are cached by project key", () => 
 
 test("URL restore uses a lightweight single-session lookup", () => {
   assert.match(source, /\/api\/sessions\?sessionId=\$\{encodeURIComponent\(initialSessionId\)\}/);
+});
+
+test("session search forwards the matched entry target to the shell", () => {
+  assert.match(source, /handleSelectSessionFromList = useCallback\(\(s: SessionInfo, entryId\?: string, blockIndex\?: number\)/);
+  assert.match(source, /onSelectSession\(s, false, entryId, blockIndex\)/);
+  assert.match(source, /onSelectSession=\{handleSelectSessionFromList\}/);
+});
+
+test("keeps the upstream file-search control wired into the explorer", () => {
+  assert.match(source, /setFileSearchOpen\(\(open\) => !open\)/);
+  assert.match(source, /title=\{t\("sidebar\.searchFiles"\)\}/);
+  assert.match(source, /fileSearchOpen=\{fileSearchOpen\}/);
+  assert.match(source, /onFileSearchOpenChange=\{setFileSearchOpen\}/);
 });
 
 test("does not expose disk-backed actions for transient sessions", () => {

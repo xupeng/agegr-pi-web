@@ -9,7 +9,13 @@ const settingsPanel = await readFile(new URL("./SettingsPanel.tsx", import.meta.
 const globals = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
 const chatAppearanceHook = await readFile(new URL("../hooks/useChatAppearance.ts", import.meta.url), "utf8");
 const jiti = createJiti(import.meta.url);
-const { clampChatContentWidth, clampChatContentFontSize } = await jiti.import("../hooks/useChatAppearance.ts");
+const {
+  CHAT_CONTENT_FONT_SIZE_STORAGE_KEY,
+  LEGACY_CHAT_FONT_SIZE_OFFSET_STORAGE_KEY,
+  clampChatContentWidth,
+  clampChatContentFontSize,
+  readStoredChatContentFontSize,
+} = await jiti.import("../hooks/useChatAppearance.ts");
 
 const widthVariable = /var\(--chat-content-max-width, 820px\)/g;
 
@@ -48,4 +54,35 @@ test("chat font size preserves the default and bounds stored or supplied values"
   assert.equal(clampChatContentFontSize("18"), 18);
   assert.equal(clampChatContentFontSize(18.7), 19);
   assert.equal(clampChatContentFontSize(30), 24);
+});
+
+test("migrates the former relative font offset into the canonical absolute preference", () => {
+  function storageWith(entries) {
+    const values = new Map(entries);
+    return {
+      values,
+      storage: {
+        getItem(key) { return values.get(key) ?? null; },
+        setItem(key, value) { values.set(key, value); },
+      },
+    };
+  }
+
+  const legacy = storageWith([[LEGACY_CHAT_FONT_SIZE_OFFSET_STORAGE_KEY, JSON.stringify(3)]]);
+  assert.equal(readStoredChatContentFontSize(legacy.storage), 17);
+  assert.equal(legacy.values.get(CHAT_CONTENT_FONT_SIZE_STORAGE_KEY), "17");
+
+  const clamped = storageWith([[LEGACY_CHAT_FONT_SIZE_OFFSET_STORAGE_KEY, JSON.stringify(-4)]]);
+  assert.equal(readStoredChatContentFontSize(clamped.storage), 12);
+  assert.equal(clamped.values.get(CHAT_CONTENT_FONT_SIZE_STORAGE_KEY), "12");
+
+  const currentWins = storageWith([
+    [CHAT_CONTENT_FONT_SIZE_STORAGE_KEY, "19"],
+    [LEGACY_CHAT_FONT_SIZE_OFFSET_STORAGE_KEY, JSON.stringify(4)],
+  ]);
+  assert.equal(readStoredChatContentFontSize(currentWins.storage), 19);
+  assert.equal(currentWins.values.get(CHAT_CONTENT_FONT_SIZE_STORAGE_KEY), "19");
+
+  assert.equal(readStoredChatContentFontSize(null), 14);
+  assert.doesNotMatch(globals, /Fork defaults: larger comfortable chat font/);
 });

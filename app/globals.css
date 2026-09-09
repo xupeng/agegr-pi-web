@@ -700,19 +700,6 @@ pre, code {
   --chat-font-size-offset: calc(var(--chat-content-font-size, 14px) - 14px);
 }
 
-/* Fork defaults: larger comfortable chat font by viewport (personal tuning).
-   The settings slider overrides --chat-content-font-size via inline style, so
-   these only apply until the user touches the control. */
-@media (max-width: 767.98px) {
-  :root { --chat-content-font-size: 15.5px; }
-}
-@media (min-width: 768px) and (max-width: 1023.98px) {
-  :root { --chat-content-font-size: 17px; }
-}
-@media (min-width: 1024px) {
-  :root { --chat-content-font-size: 16px; }
-}
-
 .markdown-body {
   min-width: 0;
   max-width: 100%;

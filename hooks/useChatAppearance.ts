@@ -10,6 +10,11 @@ export const CHAT_CONTENT_FONT_SIZE_DEFAULT = 14;
 export const CHAT_CONTENT_FONT_SIZE_MIN = 12;
 export const CHAT_CONTENT_FONT_SIZE_MAX = 24;
 export const CHAT_CONTENT_FONT_SIZE_STORAGE_KEY = "pi-chat-content-font-size";
+export const LEGACY_CHAT_FONT_SIZE_OFFSET_STORAGE_KEY = "pi-chat-font-offset";
+const LEGACY_CHAT_FONT_SIZE_OFFSET_MIN = -4;
+const LEGACY_CHAT_FONT_SIZE_OFFSET_MAX = 4;
+
+type PreferenceStorage = Pick<Storage, "getItem" | "setItem">;
 
 interface ChatAppearance {
   width: number;
@@ -43,6 +48,46 @@ function readStoredPreference(key: string): string | null {
   }
 }
 
+function getPreferenceStorage(): PreferenceStorage | null {
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
+/** Migrate the fork's former relative offset into upstream's absolute setting. */
+export function readStoredChatContentFontSize(
+  storage: PreferenceStorage | null,
+): number {
+  if (!storage) return CHAT_CONTENT_FONT_SIZE_DEFAULT;
+  try {
+    const current = storage.getItem(CHAT_CONTENT_FONT_SIZE_STORAGE_KEY);
+    if (current !== null) return clampChatContentFontSize(current);
+
+    const legacy = storage.getItem(LEGACY_CHAT_FONT_SIZE_OFFSET_STORAGE_KEY);
+    if (legacy === null) return CHAT_CONTENT_FONT_SIZE_DEFAULT;
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(legacy);
+    } catch {
+      parsed = legacy;
+    }
+    const numericOffset = Number(parsed);
+    const offset = Number.isFinite(numericOffset)
+      ? Math.max(
+          LEGACY_CHAT_FONT_SIZE_OFFSET_MIN,
+          Math.min(LEGACY_CHAT_FONT_SIZE_OFFSET_MAX, Math.round(numericOffset)),
+        )
+      : 0;
+    const migrated = clampChatContentFontSize(CHAT_CONTENT_FONT_SIZE_DEFAULT + offset);
+    storage.setItem(CHAT_CONTENT_FONT_SIZE_STORAGE_KEY, String(migrated));
+    return migrated;
+  } catch {
+    return CHAT_CONTENT_FONT_SIZE_DEFAULT;
+  }
+}
+
 function applyAppearance({ width, fontSize }: ChatAppearance): void {
   if (typeof document === "undefined") return;
   document.documentElement.style.setProperty("--chat-content-max-width", `${width}px`);
@@ -54,7 +99,7 @@ function getSnapshot(): ChatAppearance {
   if (!appearance) {
     appearance = {
       width: clampChatContentWidth(readStoredPreference(CHAT_CONTENT_WIDTH_STORAGE_KEY)),
-      fontSize: clampChatContentFontSize(readStoredPreference(CHAT_CONTENT_FONT_SIZE_STORAGE_KEY)),
+      fontSize: readStoredChatContentFontSize(getPreferenceStorage()),
     };
     applyAppearance(appearance);
   }

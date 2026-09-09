@@ -12,6 +12,7 @@ test("projects route is a lightweight per-project summary endpoint", () => {
   assert.match(route, /listAllSessions\(\{ force \}\)/);
   assert.match(route, /session\.projectKey \?\? session\.projectRoot \?\? session\.cwd/);
   assert.match(route, /runningCount: entry\.ids\.filter\(\(id\) => running\.has\(id\)\)\.length/);
+  assert.match(route, /completionNotificationSuppressedSessionIds: getCompletionNotificationSuppressedRpcSessionIds\(\)/);
   assert.match(route, /\.sort\(\(a, b\) => b\.modified\.localeCompare\(a\.modified\)\)/);
   assert.match(route, /"Cache-Control": "no-store"/);
 });
@@ -59,6 +60,7 @@ test("projects endpoint groups sessions by stable project identity", async () =>
     assert.deepEqual(data.projects[1].sessionIds, ["a1", "a2"]);
     assert.equal(data.projects[1].modified, "2026-01-01T00:01:00.000Z");
     assert.ok(Array.isArray(data.runningSessionIds));
+    assert.ok(Array.isArray(data.completionNotificationSuppressedSessionIds));
   } finally {
     delete process.env.PI_CODING_AGENT_DIR;
     rmSync(dir, { recursive: true, force: true });

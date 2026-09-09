@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { listAllSessions } from "@/lib/session-reader";
-import { getRunningRpcSessionIds } from "@/lib/rpc-manager";
+import {
+  getCompletionNotificationSuppressedRpcSessionIds,
+  getRunningRpcSessionIds,
+} from "@/lib/rpc-manager";
 import type { ProjectSummary } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -50,7 +53,11 @@ export async function GET(req: Request) {
       .sort((a, b) => b.modified.localeCompare(a.modified));
 
     return NextResponse.json(
-      { projects, runningSessionIds: [...running] },
+      {
+        projects,
+        runningSessionIds: [...running],
+        completionNotificationSuppressedSessionIds: getCompletionNotificationSuppressedRpcSessionIds(),
+      },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {

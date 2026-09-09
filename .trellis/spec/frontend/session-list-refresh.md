@@ -53,6 +53,13 @@
 4. **stale 标记**（`staleProjectKeysRef`）：force 成功后把其他已缓存项目标记 stale，切换项目时重拉（旧行可见、不空白，删除/重命名的会话在其他项目也能及时消失）。
 5. **单行刷新 overrides 合并**（`sessionRowOverridesRef`）：`loadProjectSessions` 写入时合并 `refreshSessionRow` 的新行，防止较早发出的列表响应用 30s 旧快照回退单行新数据。
 
+## 大项目列表窗口化
+
+- 按项目加载只减少网络数据量，单个大项目仍可能包含数千条会话；会话区必须保持固定 54px 行高并通过 `getSessionListIndices()` 只挂载可视窗口与 overscan。
+- fork 仍按 `parentSessionId` 展示层级；持久化 subagent 不单独占行，而是通过 `listSessionFamilies()` 把 selected/running/unread/modified 聚合到所属 main/fork 行。
+- 折叠状态必须由 `SessionSidebar` 持有，不能放在会被窗口化卸载的行组件中；正在重命名的聚焦行即使滚出 overscan 也必须继续挂载。
+- `/api/projects` 和 running poll 都要携带 `completionNotificationSuppressedSessionIds`，否则按需加载尚未访问项目时无法识别 subagent 完成事件，会错误标未读并播放完成音。
+
 ## 测试要求
 
 - `lib/session-reader.test.mjs`：`readSessionById` 定向读取必须断言 `SessionManager.listAll` mock 计数为 0（不触发全量扫描）。

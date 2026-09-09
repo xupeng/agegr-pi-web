@@ -49,6 +49,48 @@ test("detects image input support from exact model metadata", () => {
   assert.equal(modelSupportsImageInput({ provider: "deepseek", modelId: "deepseek-v4-flash" }, undefined), false);
 });
 
+test("renders warnings when a restored inline image is incompatible with exact model metadata", () => {
+  const draftKey = "new:/tmp/image-warning-default";
+  const modelList = [
+    { id: "text-only", name: "Text Only", provider: "custom", input: ["text"] },
+    { id: "vision", name: "Vision", provider: "custom", input: ["text", "image"] },
+    { id: "unknown", name: "Unknown", provider: "custom" },
+  ];
+  setDraft(draftKey, {
+    value: "Describe this image",
+    images: [{ data: "aW1hZ2U=", mimeType: "image/png" }],
+  });
+
+  try {
+    for (const [modelId, warningExpected] of [["text-only", true], ["vision", false], ["unknown", true], [null, true]]) {
+      const html = renderToStaticMarkup(
+        React.createElement(
+          I18nProvider,
+          null,
+          React.createElement(ChatInput, {
+            onSend() {},
+            onAbort() {},
+            isStreaming: false,
+            isAutoModelSelection: true,
+            model: modelId ? { provider: "custom", modelId } : null,
+            modelList,
+            draftKey,
+          }),
+        ),
+      );
+
+      assert.match(html, /<img/);
+      assert.equal(html.includes("Images may not be sent"), warningExpected, `default model: ${modelId}`);
+      if (modelId === "text-only") {
+        assert.match(html, /The selected model \(Text Only\) does not support image input/);
+        assert.ok(html.indexOf('role="alert"') < html.indexOf("<textarea"));
+      }
+    }
+  } finally {
+    clearDraft(draftKey);
+  }
+});
+
 test("routes image attachments by current model capability", async () => {
   const source = await readFile(new URL("./ChatInput.tsx", import.meta.url), "utf-8");
   const processStart = source.indexOf("const processImageFiles");
