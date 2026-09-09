@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
   attachSessionProjectInfo,
+  getSessionListVersion,
   listAllSessions,
   mergeSessionLists,
   readSessionById,
@@ -21,6 +22,9 @@ export async function GET(req: Request) {
     const projectKey = params.get("projectKey");
     const sessionId = params.get("sessionId");
     const runtimeSessions = await attachSessionProjectInfo(getRpcSessionInfos());
+    // Capture before awaiting the disk scan: mutations during the scan still
+    // require a later client refresh (see lib/session-reader).
+    const sessionListVersion = getSessionListVersion();
     let sessions: SessionInfo[];
     if (sessionId) {
       // Transient sessions exist only in the RPC registry (the first JSONL
@@ -47,6 +51,7 @@ export async function GET(req: Request) {
     return NextResponse.json(
       {
         sessions,
+        sessionListVersion,
         runningSessionIds: getRunningRpcSessionIds(),
         completionNotificationSuppressedSessionIds: getCompletionNotificationSuppressedRpcSessionIds(),
       },

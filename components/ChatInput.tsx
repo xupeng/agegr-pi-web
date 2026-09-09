@@ -32,6 +32,7 @@ import {
 import { FolderIcon, getFileIcon } from "./FileIcons";
 import { useIsMobile, useIsTouchDevice } from "@/hooks/useIsMobile";
 import { useI18n } from "@/hooks/useI18n";
+import { useChatAppearance } from "@/hooks/useChatAppearance";
 import type { ToolPreset } from "@/lib/tool-presets";
 import { ModelSelector, type ModelSelectorOption } from "./ModelSelector";
 
@@ -60,6 +61,8 @@ interface Props {
   onFollowUp?: (message: string, images?: AttachedImage[]) => void;
   onPromptWithStreamingBehavior?: (message: string, behavior: "steer" | "followUp", images?: AttachedImage[]) => void;
   isStreaming: boolean;
+  /** Text-only composer without the session controls or outer spacing. */
+  compact?: boolean;
   model?: { provider: string; modelId: string } | null;
   isAutoModelSelection?: boolean;
   modelNames?: Record<string, string>;
@@ -122,6 +125,32 @@ const ANCHORED_MENU_GAP = 8;
 
 export function getUpwardMenuMaxHeight(menuBottom: number, visibleTop: number, gap = ANCHORED_MENU_GAP): number {
   return Math.max(0, Math.floor(menuBottom - visibleTop - gap));
+}
+
+export function replaceLinksWithMarkdown(
+  text: string,
+  links: Iterable<{ label: string; href: string; occurrence: number }>,
+): string | null {
+  let result = "";
+  let searchFrom = 0;
+  let replaced = false;
+
+  for (const { label, href, occurrence } of links) {
+    if (!label || !href) continue;
+    let index = 0;
+    for (let match = 0; match <= occurrence; match++) {
+      index = text.indexOf(label, match ? index + label.length : 0);
+      if (index < 0) break;
+    }
+    if (index < searchFrom) continue;
+    const escapedLabel = label.replace(/([\\[\]])/g, "\\$1");
+    const escapedHref = href.replace(/([\\()])/g, "\\$1");
+    result += `${text.slice(searchFrom, index)}[${escapedLabel}](${escapedHref})`;
+    searchFrom = index + label.length;
+    replaced = true;
+  }
+
+  return replaced ? result + text.slice(searchFrom) : null;
 }
 
 function getVisibleTopBoundary(element: HTMLElement): number {
@@ -478,7 +507,7 @@ function QueuedMessageRow({ kind, text }: { kind: "steer" | "follow-up"; text: s
   );
 }
 
-function ModelNoticeBanner({ tone, title, body }: { tone: "error" | "warning"; title: string; body: string }) {
+function ModelNoticeBanner({ tone, title, body, onClose }: { tone: "error" | "warning"; title: string; body: string; onClose?: () => void }) {
   const color = tone === "error" ? "239,68,68" : "234,179,8";
   return (
     <div
@@ -515,26 +544,48 @@ function ModelNoticeBanner({ tone, title, body }: { tone: "error" | "warning"; t
         <line x1="12" y1="9" x2="12" y2="13" />
         <line x1="12" y1="17" x2="12.01" y2="17" />
       </svg>
-      <div style={{ minWidth: 0 }}>
+      <div style={{ minWidth: 0, flex: 1 }}>
         <div style={{ fontWeight: 600 }}>{title}</div>
         <div style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{body}</div>
       </div>
+      {onClose && (
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Dismiss"
+          style={{
+            flexShrink: 0,
+            background: "none",
+            border: "none",
+            padding: "0 2px",
+            cursor: "pointer",
+            color: "inherit",
+            opacity: 0.7,
+            fontSize: 13,
+            lineHeight: 1,
+          }}
+        >
+          ×
+        </button>
+      )}
     </div>
   );
 }
 
 export function ModelErrorBanner({ error }: { error?: string | null }) {
+  const { t } = useI18n();
   if (!error) return null;
-  return <ModelNoticeBanner tone="error" title="Model error" body={error} />;
+  return <ModelNoticeBanner tone="error" title={t("chat.modelError")} body={error} />;
 }
 
 /** Surfaces `enabledModels` patterns that matched nothing, so a typo is visible (#307). */
 export function ModelScopeWarningBanner({ warnings }: { warnings?: string[] }) {
+  const { t } = useI18n();
   if (!warnings || warnings.length === 0) return null;
   return (
     <ModelNoticeBanner
       tone="warning"
-      title={warnings.length > 1 ? "Model scope warnings" : "Model scope warning"}
+      title={warnings.length > 1 ? t("chat.modelScopeWarnings") : t("chat.modelScopeWarning")}
       body={warnings.join("\n")}
     />
   );
@@ -551,8 +602,10 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
   onPromptWithStreamingBehavior,
   draftKey,
   cwd,
+  compact = false,
 }: Props, ref) {
   const { t } = useI18n();
+  const { fontSize } = useChatAppearance();
   const isMobile = useIsMobile();
   const isTouchDevice = useIsTouchDevice();
   // Touch devices keep Enter as newline even when the viewport is wider than
@@ -599,6 +652,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
   const [atQuery, setAtQuery] = useState<AtQueryMatch | null>(null);
   const [atMenuOpen, setAtMenuOpen] = useState(false);
   const [atActiveIndex, setAtActiveIndex] = useState(0);
+  const [imageWarningDismissed, setImageWarningDismissed] = useState(false);
   const [historyMenuOpen, setHistoryMenuOpen] = useState(false);
   const [historyActiveIndex, setHistoryActiveIndex] = useState(0);
   const [fileIndex, setFileIndex] = useState<{ cwd: string; entries: FileIndexEntry[]; truncated: boolean } | null>(null);
@@ -830,6 +884,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
   }));
 
   const processImageFiles = useCallback(async (files: File[]) => {
+    if (compact) return;
     const remaining = Math.max(
       0,
       MAX_ATTACHED_IMAGES - attachedImagesRef.current.length - pendingImageCountRef.current,
@@ -873,7 +928,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
         return next;
       });
     }
-  }, []);
+  }, [compact]);
 
   /**
    * Save pasted/dropped images to disk (via /api/attachments) and insert their
@@ -1021,12 +1076,28 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
     });
   }, [draftKey]);
 
-  useEffect(() => {
+  const resizeTextarea = useCallback(() => {
     const ta = textareaRef.current;
     if (!ta) return;
     ta.style.height = "auto";
-    if (value) ta.style.height = `${Math.min(ta.scrollHeight, 200)}px`;
-  }, [value]);
+    if (ta.value) ta.style.height = `${Math.min(ta.scrollHeight, 200)}px`;
+  }, []);
+
+  useLayoutEffect(resizeTextarea, [value, fontSize, resizeTextarea]);
+
+  useEffect(() => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    let previousWidth = -1;
+    const observer = new ResizeObserver(([entry]) => {
+      // Height updates also notify the observer; only remeasure on width changes.
+      if (entry.contentRect.width === previousWidth) return;
+      previousWidth = entry.contentRect.width;
+      resizeTextarea();
+    });
+    observer.observe(ta);
+    return () => observer.disconnect();
+  }, [resizeTextarea]);
 
   useEffect(() => {
     return () => {
@@ -1055,7 +1126,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
     onSend(msg, attachedImages.length ? attachedImages : undefined);
   }, [value, attachedImages, hasPendingImages, isStreaming, runBuiltinCommand, onSend, clearInput, onAudioUnlock]);
 
-  const slashQuery = value.startsWith("/") && !/\s/.test(value.slice(1))
+  const slashQuery = !compact && value.startsWith("/") && !/\s/.test(value.slice(1))
     ? value.slice(1).toLowerCase()
     : null;
 
@@ -1093,6 +1164,16 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
   const pendingImageActionLabel = hasPendingDiskImages
     ? t("chat.uploadingImage")
     : t("chat.processingImage");
+  // Warn when images are attached but the selected model is known not to accept
+  // image input (#584), including a resolved default. Unknown models stay silent.
+  const showImageUnsupportedWarning = (
+    attachedImages.length > 0
+    && !modelSupportsImageInput(model, modelList)
+    && !imageWarningDismissed
+  );
+  useEffect(() => {
+    if (attachedImages.length === 0) setImageWarningDismissed(false);
+  }, [attachedImages.length]);
 
   // ── @ file autocomplete ──────────────────────────────────────────────────
   // Recomputed from the text before the caret on every change/caret move.
@@ -1470,8 +1551,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
       if (sendShortcut) {
         e.preventDefault();
         if (isStreaming && (onSteer || onFollowUp)) {
-          // Default Enter sends as steer if available, else followup
-          sendQueued(onSteer ? "steer" : "followup");
+          sendQueued((e.altKey && onFollowUp) || !onSteer ? "followup" : "steer");
         } else {
           handleSend();
         }
@@ -1487,14 +1567,47 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
     ta.style.height = `${Math.min(ta.scrollHeight, 200)}px`;
   }, []);
 
-  const handlePaste = useCallback((e: React.ClipboardEvent) => {
+  const handlePaste = useCallback((e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const items = Array.from(e.clipboardData?.items ?? []);
     const imageItems = items.filter((item) => item.type.startsWith("image/"));
-    if (!imageItems.length) return;
+    if (!compact && imageItems.length) {
+      e.preventDefault();
+      const files = imageItems.map((item) => item.getAsFile()).filter((f): f is File => f !== null);
+      processImageFiles(files);
+      return;
+    }
+
+    const html = e.clipboardData.getData("text/html");
+    const text = e.clipboardData.getData("text/plain");
+    if (!html || !text) return;
+    const document = new DOMParser().parseFromString(html, "text/html");
+    const links = Array.from(document.querySelectorAll("a[href]"), (link) => {
+      const label = link.textContent ?? "";
+      const range = document.createRange();
+      range.setStart(document.body, 0);
+      range.setEndBefore(link);
+      return {
+        label,
+        href: link.getAttribute("href")?.trim() ?? "",
+        occurrence: label ? range.toString().split(label).length - 1 : 0,
+      };
+    });
+    const markdown = replaceLinksWithMarkdown(text, links);
+    if (markdown === null) return;
+
+    const ta = e.currentTarget;
+    const start = ta.selectionStart;
+    const nextValue = ta.value.slice(0, start) + markdown + ta.value.slice(ta.selectionEnd);
     e.preventDefault();
-    const files = imageItems.map((item) => item.getAsFile()).filter((f): f is File => f !== null);
-    attachImageFiles(files);
-  }, [attachImageFiles]);
+    valueRef.current = nextValue;
+    setValue(nextValue);
+    setHistoryMenuOpen(false);
+    updateAtQuery(nextValue, start + markdown.length);
+    requestAnimationFrame(() => {
+      ta.focus();
+      ta.setSelectionRange(start + markdown.length, start + markdown.length);
+    });
+  }, [compact, processImageFiles, updateAtQuery]);
 
   useEffect(() => {
     if (slashQuery === null) {
@@ -1656,12 +1769,12 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
       style={{
         flexShrink: 0,
         background: "transparent",
-        padding: "0 16px 8px",
-        paddingRight: isMobile ? 16 : 52, // desktop: 16px base + 36px for ChatMinimap alignment
+        padding: compact ? 0 : "0 16px 8px",
+        paddingRight: compact ? 0 : isMobile ? 16 : 52, // desktop: 16px base + 36px for ChatMinimap alignment
       }}
     >
       {/* Hidden file input */}
-      <input
+      {!compact && <input
         ref={fileInputRef}
         type="file"
         accept="image/*"
@@ -1672,8 +1785,8 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
           attachImageFiles(files);
           e.target.value = "";
         }}
-      />
-      <div style={{ maxWidth: 820, margin: "0 auto" }}>
+      />}
+      <div style={{ maxWidth: "var(--chat-content-max-width, 820px)", margin: "0 auto" }}>
         <ModelErrorBanner error={modelError} />
         <ModelScopeWarningBanner warnings={modelScopeWarnings} />
         {attachmentError && (
@@ -1690,6 +1803,17 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
             {attachmentError}
           </div>
         )}
+        {showImageUnsupportedWarning && (() => {
+          const entry = modelList?.find((m) => m.provider === model?.provider && m.id === model?.modelId);
+          return (
+            <ModelNoticeBanner
+              tone="warning"
+              title={t("chat.imageNotSupportedTitle")}
+              body={t("chat.imageNotSupportedBody", { model: entry?.name || model?.modelId || "" })}
+              onClose={() => setImageWarningDismissed(true)}
+            />
+          );
+        })()}
         {/* Queued steering / follow-up messages (delivered by pi on upcoming turns) */}
         {((queuedMessages?.steering.length ?? 0) + (queuedMessages?.followUp.length ?? 0)) > 0 && (
           <div style={{
@@ -1883,7 +2007,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
               }}
             >
               <div
-                title="Input history"
+                title={t("chat.inputHistory")}
                 style={{
                   height: 30,
                   padding: "0 10px",
@@ -2204,20 +2328,23 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
             style={{
               minWidth: 0,
               display: "flex",
+              flexDirection: compact ? "column" : "row",
               gap: 8,
-              alignItems: "center",
+              alignItems: compact ? "stretch" : "center",
               background: "var(--bg)",
-              border: `1px solid ${bashMode ? "var(--tool-bg)" : isStreaming && (onSteer || onFollowUp)
+              border: compact ? "none" : `1px solid ${bashMode ? "var(--tool-bg)" : isStreaming && (onSteer || onFollowUp)
                 ? "rgba(234,179,8,0.4)"
                 : "color-mix(in srgb, var(--border) 70%, transparent)"}`,
-              borderRadius: 14,
-              padding: "10px 10px 10px 14px",
-              boxShadow: "0 1px 2px rgba(15,23,42,0.04), 0 8px 24px -12px rgba(15,23,42,0.10)",
+              borderRadius: compact ? 0 : 14,
+              padding: compact ? 0 : "10px 10px 10px 14px",
+              boxShadow: compact ? "none" : "0 1px 2px rgba(15,23,42,0.04), 0 8px 24px -12px rgba(15,23,42,0.10)",
               transition: "border-color 0.15s, background 0.15s, box-shadow 0.15s",
             } as React.CSSProperties}
           >
           <textarea
             ref={textareaRef}
+            className="chat-input-textarea"
+            aria-label={compact ? t("chat.quoteQuestion") : undefined}
             value={value}
             onChange={(e) => {
               valueRef.current = e.target.value;
@@ -2250,7 +2377,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
             }
             rows={1}
             style={{
-              flex: 1,
+              flex: compact ? "none" : 1,
               minWidth: 0,
               width: "100%",
               background: "none",
@@ -2258,10 +2385,10 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
               outline: "none",
               resize: "none",
               color: "var(--text)",
-              fontSize: 15,
+              fontSize: "var(--chat-content-font-size, 14px)",
               lineHeight: 1.6,
               fontFamily: "inherit",
-              minHeight: 24,
+              minHeight: compact ? 96 : 24,
               maxHeight: 200,
               overflow: "auto",
             }}
@@ -2273,7 +2400,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
                 <button
                   onClick={() => sendQueued("steer")}
                   disabled={!canQueueStreamingMessage}
-                  title="Interrupt the current run and inject this message now"
+                  title={t("chat.steerHint")}
                   style={{
                     display: "flex", alignItems: "center", gap: 5,
                     padding: "7px 12px",
@@ -2296,7 +2423,8 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
                 <button
                   onClick={() => sendQueued("followup")}
                   disabled={!canQueueStreamingMessage}
-                  title="Queue this message after the agent finishes"
+                  title={`${t("chat.followUpHint")} (${isMobile ? "Ctrl/Cmd+" : ""}Alt/Option+Enter)`}
+                  aria-keyshortcuts={isMobile ? "Control+Alt+Enter Meta+Alt+Enter" : "Alt+Enter"}
                   style={{
                     display: "flex", alignItems: "center", gap: 5,
                     padding: "7px 12px",
@@ -2330,12 +2458,12 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
                 background: canSubmitMessage ? "var(--accent)" : "var(--bg-panel)",
                 border: "none",
                 borderRadius: 8,
-                color: canSubmitMessage ? "#fff" : "var(--text-dim)",
+                color: canSubmitMessage ? "var(--accent-contrast)" : "var(--text-dim)",
                 cursor: canSubmitMessage ? "pointer" : "not-allowed",
                 fontSize: 13,
                 fontWeight: 600,
                 letterSpacing: "-0.01em",
-                boxShadow: canSubmitMessage ? "0 1px 3px rgba(37,99,235,0.25)" : "none",
+                boxShadow: canSubmitMessage ? "0 1px 3px color-mix(in srgb, var(--accent) 25%, transparent)" : "none",
                 transition: "background 0.15s, box-shadow 0.15s",
               }}
             >
@@ -2363,7 +2491,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
         )}
 
         {/* Bottom bar: left | center (context) | right */}
-        <div style={{
+        {!compact && <div style={{
           marginTop: 8,
           display: isMobile ? "grid" : "flex",
           gridTemplateColumns: isMobile ? "minmax(0, 1fr) auto" : undefined,
@@ -2818,7 +2946,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
             </div>
           </div>
 
-        </div>
+        </div>}
       </div>
     </div>
   );

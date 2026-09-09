@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { PwaRegistration } from "@/components/PwaRegistration";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "katex/dist/katex.min.css";
 import "./globals.css";
 import "./settings.css";
@@ -69,7 +70,7 @@ export default function RootLayout({
         />
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem("pi-theme");var dark=t==="dark"||((t==null||t===""||t==="auto")&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(dark)document.documentElement.classList.add("dark")}catch(e){}})();`,
+            __html: THEME_INIT_SCRIPT,
           }}
         />
       </head>

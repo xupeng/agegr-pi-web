@@ -7,6 +7,7 @@ import { dispatchSessionRowContextMenu } from "@/lib/session-row-context-menu";
 import { skillExpansionToCommand } from "@/lib/slash-display";
 import { useI18n } from "@/hooks/useI18n";
 import { DirectoryPicker } from "./DirectoryPicker";
+import { SessionSearch } from "./SessionSearch";
 import { FileExplorer, type FileExplorerHandle } from "./FileExplorer";
 
 declare global {
@@ -92,6 +93,8 @@ interface Props {
     projectKey?: string | null,
   ) => void;
   onOpenFile?: (filePath: string, fileName: string, options?: { sourceSessionId?: string | null; modeHint?: "diff" }) => void;
+  /** Open a workspace terminal rooted at the given cwd (file-panel toolbar). */
+  onOpenTerminal?: (cwd: string) => void;
   explorerRefreshKey?: number;
   onExplorerRefresh?: () => void;
   onAtMention?: (relativePath: string, isDir: boolean) => void;
@@ -414,7 +417,7 @@ function PiWebTitle() {
   );
 }
 
-export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSession, initialSessionId, skipInitialProjectSelection, onInitialRestoreDone, refreshKey, onSessionDeleted, selectedCwd: selectedCwdProp, onCwdChange, onOpenFile, explorerRefreshKey, onExplorerRefresh, onAtMention, onAtMentions, onBackgroundTaskDone, onRunningSessionIdsChange, onSessionsChange, sessionActivity }: Props) {
+export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSession, initialSessionId, skipInitialProjectSelection, onInitialRestoreDone, refreshKey, onSessionDeleted, selectedCwd: selectedCwdProp, onCwdChange, onOpenFile, onOpenTerminal, explorerRefreshKey, onExplorerRefresh, onAtMention, onAtMentions, onBackgroundTaskDone, onRunningSessionIdsChange, onSessionsChange, sessionActivity }: Props) {
   const { t } = useI18n();
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [projectSessionsByKey, setProjectSessionsByKey] = useState<Map<string, SessionInfo[]>>(new Map());
@@ -456,6 +459,10 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
   const [changesCount, setChangesCount] = useState(0);
   const [changesCollapsed, setChangesCollapsed] = useState(true);
   const [sessionRefreshDone, setSessionRefreshDone] = useState(false);
+  const [sessionSearchOpen, setSessionSearchOpen] = useState(false);
+  const [sessionSearchQuery, setSessionSearchQuery] = useState("");
+  const sessionSearchActive = sessionSearchOpen && Boolean(sessionSearchQuery.trim());
+  const [searchRefreshKey, setSearchRefreshKey] = useState(0);
   const [explorerRefreshDone, setExplorerRefreshDone] = useState(false);
   const [runningSessionIds, setRunningSessionIds] = useState<Set<string>>(() => new Set());
   const [unreadSessionIds, setUnreadSessionIds] = useState<Set<string>>(() => loadUnreadSessionIds());
@@ -631,6 +638,9 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
     await loadProjects(false, force);
     const key = selectedProjectKeyRef.current;
     if (key) await loadProjectSessions(key, force);
+    // Bump the session-search refresh key so open results refetch after any
+    // list mutation (mirrors the server's sessionListVersion signal).
+    setSearchRefreshKey((current) => current + 1);
   }, [loadProjects, loadProjectSessions]);
 
   const initialLoadDone = useRef(false);
@@ -1282,6 +1292,17 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
                 </svg>
               )}
             </button>
+            <ToolbarIconButton
+              onClick={() => setSessionSearchOpen((open) => !open)}
+              title={t("sidebar.toggleSessionSearch")}
+              ariaPressed={sessionSearchOpen}
+              color={sessionSearchOpen ? "var(--accent)" : "var(--text-muted)"}
+              background={sessionSearchOpen ? "var(--bg-selected)" : "none"}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" />
+              </svg>
+            </ToolbarIconButton>
           </div>
         </div>
 
@@ -1845,6 +1866,26 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
       </div>
 
       {/* Session list */}
+      {sessionSearchOpen && (
+        <input
+          id="session-search-input"
+          type="search"
+          autoFocus
+          value={sessionSearchQuery}
+          maxLength={200}
+          aria-label={t("sidebar.searchSessions")}
+          placeholder={t("sidebar.searchSessions")}
+          onChange={(event) => setSessionSearchQuery(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              event.stopPropagation();
+              setSessionSearchQuery("");
+            }
+          }}
+          style={{ margin: "6px 10px 0", width: "calc(100% - 20px)", height: 29, borderRadius: 7, border: "1px solid var(--border)", background: "var(--bg)", padding: "0 10px", fontSize: 12, color: "var(--text)", outline: "none" }}
+        />
+      )}
+      <SessionSearch open={sessionSearchOpen} query={sessionSearchQuery} refreshKey={searchRefreshKey} selectedSessionId={selectedSessionId} onSelectSession={(session) => handleSelectSessionFromList(session)}>
       <div style={{ flex: explorerOpen && (selectedCwdProp || selectedCwd) ? "1 1 0" : "1 1 auto", overflowY: "auto", padding: "0", minHeight: 80 }}>
         {loading && (
           <div style={{ padding: "16px 14px", color: "var(--text-muted)", fontSize: 12 }}>
@@ -1883,6 +1924,7 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
           />
         ))}
       </div>
+      </SessionSearch>
 
       {/* File Explorer section */}
       {(selectedCwdProp || selectedCwd) && (
@@ -1929,6 +1971,17 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
               </svg>
               {t("files.explorer")}
             </button>
+            {onOpenTerminal && (
+              <ToolbarIconButton
+                onClick={() => onOpenTerminal(selectedCwd ?? selectedCwdProp ?? "")}
+                title={t("terminal.open")}
+                color="var(--text-dim)"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <polyline points="4 17 10 11 4 5" /><line x1="12" y1="19" x2="20" y2="19" />
+                </svg>
+              </ToolbarIconButton>
+            )}
             {explorerOpen && changesCount > 0 && (
               <ToolbarIconButton
                 onClick={() => setChangesCollapsed((v) => !v)}
