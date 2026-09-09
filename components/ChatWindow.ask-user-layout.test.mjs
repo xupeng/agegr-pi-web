@@ -19,16 +19,20 @@ test("ask_user card scrolls inside the message column on non-empty sessions", ()
 });
 
 test("composer area no longer hosts the ask_user card", () => {
-  // The fixed bottom area keeps only the composer and extension status bar.
-  const bottomArea = chatWindowSource.match(/<div className="relative">([\s\S]*?)\{chatInputElement\}/);
-  assert.ok(bottomArea, "bottom composer area exists");
-  assert.doesNotMatch(bottomArea[1], /askUserCard/);
+  // The fixed bottom strip holds only the composer and extension status bar;
+  // the card lives above it (header/column region) or inside the scroll column.
+  const bottomStrip = chatWindowSource.slice(
+    chatWindowSource.indexOf('<div className="relative shrink-0">'),
+    chatWindowSource.indexOf("{chatInputElement}", chatWindowSource.indexOf('<div className="relative shrink-0">')),
+  );
+  assert.ok(chatWindowSource.includes('<div className="relative shrink-0">'), "bottom composer strip exists");
+  assert.doesNotMatch(bottomStrip, /askUserCard/);
 });
 
 test("empty new-session page keeps the column-aligned ask_user card", () => {
   assert.match(
     chatWindowSource,
-    /\{askUserCardInColumn\}\s*\{chatInputElement\}/,
+    /\{askUserCardInColumn\}\s*<div className="relative shrink-0">\s*\{chatInputElement\}/,
   );
 });
 

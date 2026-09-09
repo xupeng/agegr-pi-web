@@ -72,6 +72,8 @@ test("configures extension widget and status visibility from General", () => {
   assert.match(cssSource, /\.settings-extension-ui-grid/);
   assert.match(enSource, /"settings\.extensionUi": "Extension UI"/);
   assert.match(zhSource, /"settings\.extensionUi": "扩展界面"/);
+});
+
 test("groups chat display controls together without row backgrounds", () => {
   const appearanceSection = panelSource.slice(
     panelSource.indexOf('{t("settings.appearance")}'),
