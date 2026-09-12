@@ -1,0 +1,8 @@
+{"file":".trellis/spec/frontend/trellis-subagent-records.md","reason":"Preserve exact decoder, bounded branch projection, evidence/watermark and hook/SSE/callback ownership; reconcile new upstream replay wording"}
+{"file":".trellis/spec/frontend/session-list-refresh.md","reason":"Preserve targeted reads, force-refresh race prevention, incremental cache and family/virtualization semantics"}
+{"file":".trellis/spec/frontend/ask-user-protocol.md","reason":"Preserve persistence, follow-up, cross-device close and per-deleted-session cleanup"}
+{"file":".trellis/spec/frontend/mobile-keyboard-viewport.md","reason":"Preserve viewport focus recovery and touch/tablet Enter behavior during composer merge"}
+{"file":".trellis/spec/frontend/settings-dialog-mobile.md","reason":"Preserve safe-area and scrolling layout; old relative-font implementation is superseded by current migration as documented in merge research"}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Trace RPC/history/compression/hook/UI boundaries and maintain single contract owners"}
+{"file":".trellis/tasks/09-12-sync-upstream-v091/research/merge-plan.md","reason":"Fixed hashes, actual ten conflicts, P01-P14 retention matrix, semantic design and isolation evidence"}
+{"file":".trellis/tasks/09-12-sync-upstream-v091/research/inventory.md","reason":"Complete base-to-personal path/commit inventory and all upstream updates, including deleted/superseded code"}
