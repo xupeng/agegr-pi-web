@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { jsonResponse } from "@/lib/json-response";
 import {
   attachSessionProjectInfo,
   getSessionListVersion,
@@ -48,7 +49,7 @@ export async function GET(req: Request) {
         sessions = sessions.filter((s) => (s.projectKey ?? s.projectRoot ?? s.cwd) === projectKey);
       }
     }
-    return NextResponse.json(
+    return jsonResponse(req,
       {
         sessions,
         sessionListVersion,

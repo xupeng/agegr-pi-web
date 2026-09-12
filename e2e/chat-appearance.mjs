@@ -84,11 +84,25 @@ export async function checkChatAppearance(page) {
   await checkChatAppearanceReset(page);
   for (const viewport of [{ width: 1280, height: 600 }, { width: 320, height: 568 }]) {
     await page.setViewportSize(viewport);
-    await page.locator(".settings-general").evaluate((el) => { el.scrollTop = el.scrollHeight; });
-    assert.equal(await page.locator(".settings-language-options button:last-child").evaluate((el) => {
-      const rect = el.getBoundingClientRect();
-      return el.contains(document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2));
-    }), true, "Every language option must remain reachable in a short settings panel");
+    const languageOptions = page.locator(".settings-language-options button");
+    for (let index = 0; index < await languageOptions.count(); index += 1) {
+      const option = languageOptions.nth(index);
+      // Language is no longer the final General section. Scroll the control
+      // itself into view; forcing the whole pane to its bottom can move this
+      // otherwise reachable section above the viewport and produces a false
+      // hit-test failure.
+      await option.scrollIntoViewIfNeeded();
+      assert.equal(await option.evaluate((el) => {
+        const rect = el.getBoundingClientRect();
+        const centerX = rect.x + rect.width / 2;
+        const centerY = rect.y + rect.height / 2;
+        return centerX >= 0
+          && centerX <= innerWidth
+          && centerY >= 0
+          && centerY <= innerHeight
+          && el.contains(document.elementFromPoint(centerX, centerY));
+      }), true, "Every language option must remain reachable in a short settings panel");
+    }
   }
   await fontSize.press("Home");
   await closeSettings();

@@ -63,6 +63,14 @@ test("detail route adds the bounded Trellis projection without changing chat pag
   // The chat context is still the default 50-tail slice.
   assert.match(routeSrc, /tail = Number\.isFinite\(rawTail\) && rawTail > 0 \? Math\.min\(rawTail, 1000\) : 50/);
   // No session-list scan or cache invalidation was introduced for the projection.
-  assert.doesNotMatch(routeSrc, /listAllSessions\(/);
-  assert.doesNotMatch(routeSrc, /invalidateSessionListCache\(\)[\s\S]{0,200}trellisSubagentRecords/);
+  // Scope this to the GET (detail read) path: upstream's DELETE descendant
+  // traversal legitimately calls listAllSessions, but detail reads must stay
+  // targeted and never fall back to a full scan.
+  const getBody = routeSrc.slice(
+    routeSrc.indexOf("export async function GET"),
+    routeSrc.indexOf("// PATCH /api/sessions/[id]"),
+  );
+  assert.ok(getBody.length > 0, "GET body extracted");
+  assert.doesNotMatch(getBody, /listAllSessions\(/);
+  assert.doesNotMatch(getBody, /invalidateSessionListCache\(\)[\s\S]{0,200}trellisSubagentRecords/);
 });

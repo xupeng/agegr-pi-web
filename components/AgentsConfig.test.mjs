@@ -25,7 +25,10 @@ test("offers a persisted built-in sub-agent switch with explicit session reload"
   assert.match(source, /<ConfigSwitch[\s\S]*?checked=\{builtInEnabled\}[\s\S]*?t\("agents\.builtInTitle"\)/);
   assert.match(source, /sendAgentCommand\(sessionId, \{ type: "reload" \}\)/);
   assert.match(source, /reloadNeeded && sessionId/);
+  assert.match(source, /className="agents-concurrency-control"[\s\S]*?t\("agents\.maxConcurrent"\)/);
+  assert.equal((source.match(/className="agents-feature-setting"/g) ?? []).length, 1);
   assert.match(cssSource, /\.agents-feature-setting \{[\s\S]*?border-bottom: 1px solid var\(--border\)/);
+  assert.match(cssSource, /\.agents-concurrency-control \{[\s\S]*?white-space: nowrap;/);
 });
 
 test("marks profiles shadowed by a higher-precedence source", () => {
@@ -54,6 +57,17 @@ test("uses the shared sidebar action for new profiles", () => {
 test("sends the selected scope for saves and the source scope for deletes", () => {
   assert.match(source, /JSON\.stringify\(\{ cwd, scope: targetScope, profile: draft \}\)/);
   assert.match(source, /JSON\.stringify\(\{ cwd, scope: selected\.scope, name: selected\.name \}\)/);
+});
+
+test("keeps profile fields that the editor does not expose", () => {
+  const editableSource = source.slice(
+    source.indexOf("function editableProfile"),
+    source.indexOf("function profileKey"),
+  );
+  assert.match(editableSource, /extensionTools: \[\.\.\.profile\.extensionTools\]/);
+  assert.match(editableSource, /color: profile\.color/);
+  assert.match(editableSource, /isolation: profile\.isolation/);
+  assert.match(editableSource, /persistSession: profile\.persistSession/);
 });
 
 test("shows a Skills-style path row with the same switch in editable and readonly modes", () => {

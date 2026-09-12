@@ -270,8 +270,13 @@ try {
   browser = await chromium.launch(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
     ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
     : {});
-  for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 }]) {
-    context = await browser.newContext({ viewport, locale: "en-US" });
+  for (const device of [
+    { viewport: { width: 1280, height: 800 }, hasTouch: false },
+    { viewport: { width: 744, height: 1133 }, hasTouch: true },
+    { viewport: { width: 390, height: 844 }, hasTouch: false },
+  ]) {
+    const { viewport, hasTouch } = device;
+    context = await browser.newContext({ viewport, hasTouch, locale: "en-US" });
     await context.addInitScript((targetSession) => {
       const OriginalEventSource = window.EventSource;
       class MockEventSource {
@@ -296,11 +301,17 @@ try {
       window.EventSource = MockEventSource;
       window.__emitTrellisAgentEvent = (event, index = -1) => {
         const sources = window.__trellisMockSources ?? [];
-        const source = index < 0 ? sources.at(-1) : sources[index];
+        // Target the source the app currently maintains: upstream closes and
+        // reopens selected-session streams, so an earlier mock source may be
+        // discarded even though its onmessage is still assigned.
+        const open = sources.filter((source) => source.readyState === 1);
+        const source = index < 0 ? open.at(-1) ?? sources.at(-1) : sources[index];
         source?.onmessage?.({ data: JSON.stringify(event) });
       };
       window.__failTrellisAgentEvent = () => {
-        const source = (window.__trellisMockSources ?? []).at(-1);
+        const sources = window.__trellisMockSources ?? [];
+        const open = sources.filter((source) => source.readyState === 1);
+        const source = open.at(-1) ?? sources.at(-1);
         source?.onerror?.(new Event("error"));
       };
     }, BRANCH);
@@ -308,6 +319,7 @@ try {
     page.setDefaultTimeout(30_000);
     const errors = [];
     const requests = [];
+    const branchCommands = [];
     let branchRunning = false;
     let intentional404 = false;
     page.on("pageerror", (error) => errors.push(error.message));
@@ -323,8 +335,19 @@ try {
         ? { running: true, state: { isStreaming: true, isPromptRunning: false, isCompacting: false } }
         : { running: false },
     }));
-    await page.route(`**/api/agent/${BRANCH}`, (route) => route.fulfill({
-      json: { running: branchRunning, state: branchRunning ? { isStreaming: true, isPromptRunning: false } : undefined },
+    await page.route(`**/api/agent/${BRANCH}`, (route) => {
+      if (route.request().method() === "POST") {
+        try { branchCommands.push(route.request().postDataJSON()); } catch { /* ignore malformed fixture commands */ }
+      }
+      return route.fulfill({
+        json: { running: branchRunning, state: branchRunning ? { isStreaming: true, isPromptRunning: false } : undefined },
+      });
+    });
+    // Upstream keeps the selected session's SSE warm via a lease. The SSE
+    // itself is mocked, so the server never holds a lease; report renewed:0 so
+    // the app's lifecycle-resume path reopens the stream deterministically.
+    await page.route(`**/api/agent/${BRANCH}/lease`, (route) => route.fulfill({
+      json: { success: true, renewed: 0 },
     }));
 
     const openAgents = async (expectTrellis = true) => {
@@ -383,6 +406,19 @@ try {
       await page.locator("[data-mobile-toolbar-more='true']").click();
     }
     assert.equal(await page.getByRole("button", { name: "Agents", exact: true }).count(), 0);
+    if (viewport.width === 744) {
+      assert.equal(
+        await page.evaluate(() => matchMedia("(pointer: coarse)").matches),
+        true,
+        "744px touch emulation must expose a coarse primary pointer",
+      );
+      const textarea = page.locator(".chat-input-textarea");
+      await textarea.fill("tablet first line");
+      await textarea.press("Enter");
+      await textarea.type("tablet second line");
+      assert.equal(await textarea.inputValue(), "tablet first line\ntablet second line");
+      await textarea.fill("");
+    }
 
     await page.goto(`${base}/?session=${BRANCH}`, { waitUntil: "domcontentloaded" });
     await page.getByText("Delegating", { exact: true }).last().waitFor();
@@ -438,14 +474,19 @@ try {
       await page.locator(`[title="Records A session"]`).click();
       await page.getByText("A filler 59", { exact: true }).waitFor();
       intentional404 = true;
+      const failedBResponse = page.waitForResponse((response) => (
+        response.status() === 404 && response.url().includes(`/api/sessions/${RECORDS_B}`)
+      ));
       releaseB404();
-      await delay(300);
-      intentional404 = false;
+      await failedBResponse;
       await openAgents();
       const restoredARecord = page.getByRole("button", { name: /trellis-check .* Succeeded/ });
       if (await restoredARecord.getAttribute("aria-expanded") !== "true") await restoredARecord.click();
       await page.getByText("A durable result", { exact: true }).waitFor();
       await page.unroute(bRoute);
+      // The exact failed response, rather than an arbitrary delay, bounds the
+      // expected stale-request 404 suppression window.
+      intentional404 = false;
 
       // X -> Y -> X with the first X response released after the second.
       await page.goto(`${base}/?session=${BRANCH}`, { waitUntil: "domcontentloaded" });
@@ -481,12 +522,87 @@ try {
       assert.equal(await page.getByText("Y durable result", { exact: true }).count(), 0);
       await page.unroute(contextRoute);
 
+      // A stale Y context must not issue navigate_tree after X has taken
+      // ownership. The API route is mocked, so inspect the real browser command
+      // stream rather than inferring server state from the mock response.
+      let releaseY;
+      let sawY;
+      let continuedY;
+      const ySeen = new Promise((resolve) => { sawY = resolve; });
+      const yRelease = new Promise((resolve) => { releaseY = resolve; });
+      const yContinued = new Promise((resolve) => { continuedY = resolve; });
+      await page.route(contextRoute, async (route) => {
+        const leaf = new URL(route.request().url()).searchParams.get("leafId");
+        if (leaf?.startsWith("branch-y")) {
+          sawY();
+          await yRelease;
+          await route.continue().catch(() => {});
+          continuedY();
+          return;
+        }
+        await route.continue().catch(() => {});
+      });
+      await openBranches();
+      await page.locator("span").filter({ hasText: /^Branch Y choice$/ }).click();
+      await ySeen;
+      await page.locator("span").filter({ hasText: /^Branch X choice$/ }).click();
+      await page.locator("[data-entry-id='branch-x']:not([data-message-role])").waitFor();
+      const commandCountBeforeStaleY = branchCommands.length;
+      releaseY();
+      await yContinued;
+      await delay(200);
+      assert.equal(
+        branchCommands.slice(commandCountBeforeStaleY).some((command) => (
+          command?.type === "navigate_tree" && String(command.targetId).startsWith("branch-y")
+        )),
+        false,
+        "a stale Y response must not navigate the server away from X",
+      );
+      await page.unroute(contextRoute);
+
       // Synthetic SSE partial -> reconnect -> final, then settle while viewing X.
       branchRunning = true;
       await page.goto(`${base}/?session=${BRANCH}`, { waitUntil: "domcontentloaded" });
-      await page.waitForFunction(() => (window.__trellisMockSources?.length ?? 0) >= 1);
+      // Wait for the app's full-branch history load before injecting a live
+      // partial: ownership/allowed calls for a replayed update come from the
+      // viewed branch, so injecting earlier would legitimately be rejected.
+      await openAgents();
+      await page.getByText("Y prompt", { exact: true }).waitFor();
+      // The selected-session stream must survive React StrictMode's effect
+      // replay without test-only lifecycle intervention.
+      await page.waitForFunction(() => (window.__trellisMockSources ?? []).some((source) => source.readyState === 1));
+      // The mocked SSE cannot create a server lease. Exercise renewed:0 as a
+      // separate lifecycle path and require it to replace the source.
+      const sourceCountBeforeLeaseRecovery = await page.evaluate(() => window.__trellisMockSources?.length ?? 0);
+      await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+      await page.waitForFunction((previousCount) => (
+        (window.__trellisMockSources?.length ?? 0) > previousCount
+        && (window.__trellisMockSources ?? []).some((source) => source.readyState === 1)
+      ), sourceCountBeforeLeaseRecovery);
       await page.evaluate(() => window.__emitTrellisAgentEvent({ type: "connected", isStreaming: true }));
       await delay(200);
+      const ephemeralBeforeReconnect = progressDetails("ephemeral-run", "Ephemeral replay prompt", "running", "", false);
+      ephemeralBeforeReconnect.runs[0].textTail = "Before reconnect output";
+      await page.evaluate((details) => {
+        // This ownership exists only in the current live assistant delta, not
+        // in the persisted branch envelope. A reconnect must retain it for the
+        // server's active-tool replay.
+        window.__emitTrellisAgentEvent({
+          type: "message_update",
+          assistantMessageEvent: {
+            type: "toolcall_start",
+            contentIndex: 0,
+            id: "ephemeral-tool",
+            toolName: "trellis_subagent",
+          },
+        });
+        window.__emitTrellisAgentEvent({
+          type: "tool_execution_update",
+          toolCallId: "ephemeral-tool",
+          toolName: "trellis_subagent",
+          partialResult: { content: [{ type: "text", text: "subagent running" }], details },
+        });
+      }, ephemeralBeforeReconnect);
       await page.evaluate((details) => window.__emitTrellisAgentEvent({
         type: "tool_execution_update",
         toolCallId: "live-tool",
@@ -494,13 +610,52 @@ try {
         partialResult: { content: [{ type: "text", text: "subagent running" }], details },
       }), progressDetails("live-run", "Live reconnect prompt", "running", "", false));
       await openAgents();
-      await page.getByRole("button", { name: /trellis-check .* Running/ }).waitFor();
+      await page.getByRole("button", { name: /trellis-check .* Running/ })
+        .filter({ hasText: "Ephemeral replay prompt" }).waitFor();
       await page.evaluate(() => window.__failTrellisAgentEvent());
-      await page.waitForFunction(() => (window.__trellisMockSources?.length ?? 0) >= 2);
+      await page.waitForFunction(() => (window.__trellisMockSources ?? []).filter((source) => source.readyState === 1).length >= 1 && (window.__trellisMockSources ?? []).length >= 2);
       await page.evaluate(() => window.__emitTrellisAgentEvent({ type: "connected", isStreaming: true }));
+      const snapshotReplay = progressDetails("snapshot-run", "Snapshot-owned replay prompt", "running", "", false);
+      snapshotReplay.runs[0].textTail = "Replay buffered before snapshot";
+      await page.evaluate((details) => {
+        // The real stream replays active tool updates before its assistant
+        // snapshot. The update must wait for snapshot ownership, not disappear
+        // or authorize itself.
+        window.__emitTrellisAgentEvent({
+          type: "tool_execution_update",
+          toolCallId: "snapshot-tool",
+          toolName: "trellis_subagent",
+          partialResult: { content: [{ type: "text", text: "subagent still running" }], details },
+        });
+        window.__emitTrellisAgentEvent({
+          type: "message_start",
+          message: {
+            role: "assistant",
+            provider: "test",
+            model: "test",
+            content: [{ type: "toolCall", id: "snapshot-tool", name: "trellis_subagent", arguments: {} }],
+            timestamp: Date.now(),
+          },
+        });
+      }, snapshotReplay);
+      const ephemeralReplay = progressDetails("ephemeral-run", "Ephemeral replay prompt", "running", "", false);
+      ephemeralReplay.runs[0].textTail = "Replay progressed output";
+      await page.evaluate((details) => window.__emitTrellisAgentEvent({
+        type: "tool_execution_update",
+        toolCallId: "ephemeral-tool",
+        toolName: "trellis_subagent",
+        partialResult: { content: [{ type: "text", text: "subagent still running" }], details },
+      }), ephemeralReplay);
       await delay(250);
       await openAgents();
-      await page.getByRole("button", { name: /trellis-check .* Running/ }).click();
+      await page.getByRole("button", { name: /trellis-check .* Running/ })
+        .filter({ hasText: "Snapshot-owned replay prompt" }).click();
+      await page.getByText("Replay buffered before snapshot", { exact: true }).waitFor();
+      await page.getByRole("button", { name: /trellis-check .* Running/ })
+        .filter({ hasText: "Ephemeral replay prompt" }).click();
+      await page.getByText("Replay progressed output", { exact: true }).waitFor();
+      await page.getByRole("button", { name: /trellis-check .* Running/ })
+        .filter({ hasText: "Live reconnect prompt" }).click();
       await page.getByText("Not backed by a persisted record", { exact: true }).waitFor();
       const finalDetails = progressDetails("live-run", "Live reconnect prompt", "succeeded", "Live final result", true);
       await page.evaluate((details) => {

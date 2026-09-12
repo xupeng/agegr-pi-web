@@ -40,8 +40,9 @@ test("loadContext clears the previous branch synchronously and rejects stale pag
 
 test("live tool events feed the shared decoder and are gated by branch ownership", () => {
   const eventsSource = slice("const handleAgentEvent = useCallback", "handleAgentEventRef.current = handleAgentEvent");
+  assert.match(eventsSource, /case "connected"[\s\S]*?trellisHistoryCallsRef\.current,[\s\S]*?trellisAllowedCallsRef\.current,[\s\S]*?trellisReplayPendingRef\.current = event\.isStreaming === true[\s\S]*?markOverlaysStale/);
   assert.match(eventsSource, /case "connected"[\s\S]*?event\.isStreaming !== true[\s\S]*?!agentRunningRef\.current[\s\S]*?trellisHistoryRequestsInFlightRef\.current === 0[\s\S]*?refreshViewedSession/);
-  assert.match(eventsSource, /case "message_start"[\s\S]*?allowTrellisCallsFromMessage\(msg\)/);
+  assert.match(eventsSource, /case "message_start"[\s\S]*?allowTrellisCallsFromMessage\(msg\);[\s\S]*?flushTrellisReplay\(\)/);
   assert.match(eventsSource, /delta\.toolName === TRELLIS_SUBAGENT_TOOL_NAME[\s\S]*?trellisAllowedCallsRef\.current\.add\(delta\.id\)/);
   assert.match(eventsSource, /case "tool_execution_update"[\s\S]*?ingestTrellisToolDetails\(id, name, partial\?\.details, "partial"\)/);
   assert.match(eventsSource, /case "tool_execution_end"[\s\S]*?ingestTrellisToolDetails\(id, name, result\?\.details, "tool-end"\)/);
@@ -54,6 +55,8 @@ test("live tool events feed the shared decoder and are gated by branch ownership
 test("ingest keeps generic tools out and rejects live events for an unviewed branch", () => {
   const ingestSource = slice("  const ingestTrellisToolDetails = useCallback", "  const trellisSelection = useMemo");
   assert.match(ingestSource, /if \(toolName !== TRELLIS_SUBAGENT_TOOL_NAME\) return/);
+  assert.match(ingestSource, /trellisReplayPendingRef\.current[\s\S]*?length < 32[\s\S]*?trellisReplayBufferRef\.current\.push/);
+  assert.match(ingestSource, /sessionIdRef\.current !== owner\.sessionId[\s\S]*?trellisViewGenerationRef\.current !== owner\.viewGeneration/);
   assert.match(ingestSource, /!liveEventsBelongToView\(\) \|\| !trellisAllowedCallsRef\.current\.has\(toolCallId\)/);
   assert.match(ingestSource, /projectTrellisSubagentRecords\(\{/);
 });

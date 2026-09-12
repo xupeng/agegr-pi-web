@@ -69,13 +69,18 @@ export async function PATCH(req: Request) {
       description: source.description,
       systemPrompt: source.systemPrompt,
       tools: source.tools,
+      extensionTools: source.extensionTools,
       loadSkills: source.loadSkills,
       loadExtensions: source.loadExtensions,
+      promptMode: source.promptMode,
       model: source.model,
       thinking: source.thinking,
       maxTurns: source.maxTurns,
       inheritContext: source.inheritContext,
       runInBackground: source.runInBackground,
+      color: source.color,
+      isolation: source.isolation,
+      persistSession: source.persistSession,
       enabled: source.enabled,
     };
     return NextResponse.json({ profile: saveSubagentProfile(cwd, scope, { ...profile, enabled: body.enabled }) });

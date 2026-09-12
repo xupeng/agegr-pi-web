@@ -4,6 +4,8 @@ import { dirname, join } from "path";
 import { SessionManager } from "@earendil-works/pi-coding-agent";
 import {
   attachSessionProjectInfo,
+  listAllSessions,
+  mergeSessionLists,
   resolveSessionPath,
   resolveSessionIdByPath,
   invalidateSessionPathCache,
@@ -13,7 +15,7 @@ import {
 } from "@/lib/session-reader";
 import { sessionPathKey } from "@/lib/session-path";
 import { forgetPersistedAsk } from "@/lib/ask-user/persist";
-import { getRpcSession } from "@/lib/rpc-manager";
+import { abortSubagent, getRpcSession, getRpcSessionInfos } from "@/lib/rpc-manager";
 import { projectTreeForResponse } from "@/lib/project-tree";
 import { computeSessionTotalActiveMs } from "@/lib/session-timing";
 import { computeSessionStats } from "@/lib/session-stats";
@@ -21,6 +23,7 @@ import type { SessionEntry } from "@/lib/types";
 import { readSubagentRun, readSubagentSessionResources, SUBAGENT_META_TYPE } from "@/lib/subagents";
 import { readSessionToolSelection } from "@/lib/session-tool-selection";
 import { projectTrellisSubagentHistory } from "@/lib/trellis-subagent-history";
+import { jsonResponse } from "@/lib/json-response";
 
 export async function GET(
   req: Request,
@@ -101,7 +104,7 @@ export async function GET(
       transient: !filePath || !existsSync(filePath),
     }]))[0] : null;
 
-    return NextResponse.json({
+    return jsonResponse(req, {
       sessionId: id,
       filePath,
       info,
@@ -151,6 +154,10 @@ export async function PATCH(
 }
 
 // DELETE /api/sessions/[id]
+function isInactiveSubagentError(error: unknown): boolean {
+  return error instanceof Error && error.message === "Subagent is not running";
+}
+
 export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -180,16 +187,119 @@ export async function DELETE(
       }
     }
 
-    // Re-attach all direct children to this session's parent (cascade re-parent)
-    // Scan sibling files in the same directory
     const targetPathKey = sessionPathKey(filePath);
     const dir = dirname(filePath);
+    // Deleting a session also deletes every persisted or live subagent below it.
+    const sessions = mergeSessionLists(
+      await listAllSessions({ force: true }),
+      getRpcSessionInfos({ includeTransient: true }),
+    );
+    const childrenByParent = new Map<string, string[]>();
+    const retainedWorktreeErrors = new Map<string, string>();
+    for (const session of sessions) {
+      if (session.relation?.kind !== "subagent") continue;
+      const children = childrenByParent.get(session.relation.parentSessionId) ?? [];
+      children.push(session.id);
+      childrenByParent.set(session.relation.parentSessionId, children);
+    }
+    const sessionPaths = new Map(sessions.map((session) => [session.id, session.path]));
+    // Include local files even when the global catalogue is stale or incomplete.
+    try {
+      for (const file of readdirSync(dir).filter((name) => name.endsWith(".jsonl"))) {
+        const childPath = join(dir, file);
+        if (sessionPathKey(childPath) === targetPathKey) continue;
+        try {
+          const lines = readFileSync(childPath, "utf8").split("\n");
+          const header = JSON.parse(lines[0]) as { type?: string; id?: string };
+          if (header.type !== "session" || typeof header.id !== "string") continue;
+          const entries = lines.slice(1).flatMap((line) => {
+            try { return [JSON.parse(line) as SessionEntry]; } catch { return []; }
+          });
+          const subagent = readSubagentRun(entries, header.id, childPath);
+          if (!subagent) continue;
+          const children = childrenByParent.get(subagent.parentSessionId) ?? [];
+          children.push(header.id);
+          childrenByParent.set(subagent.parentSessionId, children);
+          sessionPaths.set(header.id, childPath);
+          if (subagent.worktreeCleanupError && subagent.worktreePath && existsSync(subagent.worktreePath)) {
+            retainedWorktreeErrors.set(header.id, subagent.worktreeCleanupError);
+          }
+        } catch { /* skip malformed or concurrently removed sessions */ }
+      }
+    } catch { /* skip if dir unreadable */ }
+    const deletedSessionIds = new Set<string>([id]);
+    const pending = [id];
+    while (pending.length > 0) {
+      const parentId = pending.pop()!;
+      for (const childId of childrenByParent.get(parentId) ?? []) {
+        if (deletedSessionIds.has(childId)) continue;
+        deletedSessionIds.add(childId);
+        pending.push(childId);
+      }
+    }
+    // A previous abort may have persisted a cleanup failure and removed its
+    // transient execution record. Refuse retries while that worktree still
+    // exists; once the user removes it manually the session can be deleted.
+    for (const session of sessions) {
+      if (!deletedSessionIds.has(session.id) || session.relation?.kind !== "subagent") continue;
+      try {
+        const runtime = getRpcSession(session.id);
+        const entries = runtime?.isAlive()
+          ? runtime.inner.sessionManager.getEntries()
+          : SessionManager.open(session.path).getEntries();
+        const subagent = readSubagentRun(entries as SessionEntry[], session.id, session.path);
+        if (subagent?.worktreeCleanupError && subagent.worktreePath && existsSync(subagent.worktreePath)) {
+          retainedWorktreeErrors.set(session.id, subagent.worktreeCleanupError);
+        }
+      } catch { /* a current abort below remains authoritative */ }
+    }
+    for (const deletedId of deletedSessionIds) {
+      const cleanupError = retainedWorktreeErrors.get(deletedId);
+      if (cleanupError) throw new Error(cleanupError);
+    }
+    const deletedPaths = new Map<string, string>([[id, filePath]]);
+    for (const deletedId of deletedSessionIds) {
+      const sessionPath = sessionPaths.get(deletedId);
+      if (sessionPath) deletedPaths.set(deletedId, sessionPath);
+    }
+    for (const deletedId of deletedSessionIds) {
+      if (deletedPaths.has(deletedId)) continue;
+      const runtimePath = getRpcSession(deletedId)?.sessionFile;
+      if (runtimePath) deletedPaths.set(deletedId, runtimePath);
+      else {
+        const resolvedPath = await resolveSessionPath(deletedId);
+        if (resolvedPath) deletedPaths.set(deletedId, resolvedPath);
+      }
+    }
+    const deletedPathKeys = new Set([...deletedPaths.values()].map((path) => sessionPathKey(path)));
+
+    for (const deletedId of [...deletedSessionIds].reverse()) {
+      if (deletedId === id) continue;
+      try {
+        await abortSubagent(deletedId);
+      } catch (error) {
+        // Completed descendants have no active runtime. Cleanup failures from
+        // active descendants must abort the whole deletion before any unlink.
+        if (!isInactiveSubagentError(error)) throw error;
+      }
+      await getRpcSession(deletedId)?.shutdown();
+    }
+    try {
+      await abortSubagent(id);
+    } catch (error) {
+      if (!isInactiveSubagentError(error)) throw error;
+    }
+    await getRpcSession(id)?.shutdown();
+
+    // Re-attach ordinary forks only after every deleted runtime has settled.
+    // A cleanup failure must return 500 without rewriting survivor metadata.
     try {
       const files = readdirSync(dir).filter(
         (file) => file.endsWith(".jsonl") && sessionPathKey(join(dir, file)) !== targetPathKey,
       );
       for (const file of files) {
         const childPath = join(dir, file);
+        if (deletedPathKeys.has(sessionPathKey(childPath))) continue;
         try {
           const content = readFileSync(childPath, "utf8");
           const lines = content.split("\n");
@@ -199,7 +309,6 @@ export async function DELETE(
             header.parentSession &&
             sessionPathKey(header.parentSession) === targetPathKey
           ) {
-            // Rewrite header with new parentSession
             header.parentSession = parentSessionPath;
             lines[0] = JSON.stringify(header);
             if (parentSessionPath && parentSessionId) {
@@ -232,13 +341,17 @@ export async function DELETE(
       }
     } catch { /* skip if dir unreadable */ }
 
-    await getRpcSession(id)?.shutdown();
-    try {
-      unlinkSync(filePath);
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    for (const [deletedId, deletedPath] of deletedPaths) {
+      try {
+        unlinkSync(deletedPath);
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+      }
+      invalidateSessionPathCache(deletedId);
     }
-    forgetPersistedAsk(id);
+    for (const deletedId of deletedSessionIds) {
+      forgetPersistedAsk(deletedId);
+    }
     invalidateSessionPathCache(id);
     invalidateSessionListCache();
     return NextResponse.json({ ok: true });

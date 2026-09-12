@@ -89,7 +89,13 @@ test("profiles route keeps same-name global and project profiles independently e
   let response = await PUT(jsonRequest("PUT", {
     cwd,
     scope: "global",
-    profile: profile({ description: "Global profile" }),
+    profile: profile({
+      description: "Global profile",
+      extensionTools: ["ext:review/search"],
+      color: "cyan",
+      isolation: "worktree",
+      persistSession: true,
+    }),
   }));
   assert.equal(response.status, 200);
   assert.equal((await response.json()).profile.scope, "global");
@@ -123,7 +129,16 @@ test("profiles route keeps same-name global and project profiles independently e
   assert.equal(toggledSources.find((item) => item.scope === "global").description, "Global profile");
   assert.equal(toggledSources.find((item) => item.scope === "global").loadSkills, true);
   assert.equal(toggledSources.find((item) => item.scope === "global").loadExtensions, true);
+  assert.deepEqual(toggledSources.find((item) => item.scope === "global").extensionTools, ["ext:review/search"]);
+  assert.equal(toggledSources.find((item) => item.scope === "global").color, "cyan");
+  assert.equal(toggledSources.find((item) => item.scope === "global").isolation, "worktree");
+  assert.equal(toggledSources.find((item) => item.scope === "global").persistSession, true);
   assert.equal(toggledSources.find((item) => item.scope === "project").enabled, true);
+  const toggledSource = await readFile(join(testAgentDir, "agents", "api-test-agent.md"), "utf8");
+  assert.match(toggledSource, /tools: ext:review\/search/);
+  assert.match(toggledSource, /color: cyan/);
+  assert.match(toggledSource, /isolation: worktree/);
+  assert.match(toggledSource, /persist_session: true/);
 
   response = await DELETE(jsonRequest("DELETE", { cwd, scope: "project", name: "api-test-agent" }));
   assert.equal(response.status, 200);
