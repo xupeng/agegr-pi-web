@@ -1,0 +1,8 @@
+{"file":".trellis/spec/frontend/trellis-subagent-records.md","reason":"Independent verification of bounded projection, branch/root/pagination, replay ownership and read-only UI"}
+{"file":".trellis/spec/frontend/session-list-refresh.md","reason":"Check cache, targeted API, refresh race and real built-in family preservation"}
+{"file":".trellis/spec/frontend/ask-user-protocol.md","reason":"Check async close, rehydration, stale ask ownership, stream layout and descendant deletion cleanup"}
+{"file":".trellis/spec/frontend/mobile-keyboard-viewport.md","reason":"Check touch Enter, viewport focus retries and no scroll-jitter regression"}
+{"file":".trellis/spec/frontend/settings-dialog-mobile.md","reason":"Check new Settings controls remain accessible without reverting current absolute font-size migration"}
+{"file":".trellis/tasks/09-11-subagents-entry-visibility/research/check-report.md","reason":"Historical 1164 tests, 16 exact baseline lint errors and original E2E failure; require fresh same-environment comparison, not automatic waiver"}
+{"file":".trellis/tasks/09-12-sync-upstream-v091/research/merge-plan.md","reason":"Verify ten text conflicts plus semantic conflicts, P01-P14 checklist, dependency/version and service/data isolation constraints"}
+{"file":".trellis/tasks/09-12-sync-upstream-v091/research/inventory.md","reason":"Audit every local customization from base and upstream commit, not only fdb21ff"}
