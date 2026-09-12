@@ -15,6 +15,11 @@ import { BranchNavigator, hasSessionBranches } from "./BranchNavigator";
 import { SystemPromptPanel } from "./SystemPromptPanel";
 import { ToolDefinitionsPanel } from "./ToolDefinitionsPanel";
 import { AgentSessionPanel } from "./AgentSessionPanel";
+import { TrellisSubagentRecords } from "./TrellisSubagentRecords";
+import {
+  shouldAcceptTrellisSnapshot,
+  type TrellisSubagentRecordsSnapshot,
+} from "@/lib/trellis-subagent-records";
 import { TerminalPanel } from "./TerminalPanel";
 import { newTerminalTab, restoreTerminalTabs, TERMINAL_TABS_KEY, type TerminalTab } from "./terminal-tab-state";
 import { useTheme } from "@/hooks/useTheme";
@@ -138,6 +143,40 @@ export function AppShell() {
     [selectedSession?.id, sessionsWithSelection],
   );
   const hasSubagentSessions = Boolean(activeSessionFamily?.subagents.length);
+  // Trellis execution snapshots published by the mounted ChatWindow's hook.
+  const [trellisSnapshot, setTrellisSnapshot] = useState<TrellisSubagentRecordsSnapshot | null>(null);
+  const trellisOwnerRef = useRef(0);
+  const trellisSelectedSessionIdRef = useRef<string | null>(null);
+  trellisSelectedSessionIdRef.current = selectedSession?.id ?? null;
+  const handleSubagentRecordsChange = useCallback((snapshot: TrellisSubagentRecordsSnapshot) => {
+    // A cleanup can clear only its own mounted owner. This covers both commit
+    // orders during keyed ChatWindow replacement: old-cleanup/new-publish and
+    // new-publish/late-old-cleanup.
+    if (!shouldAcceptTrellisSnapshot(trellisOwnerRef.current, snapshot)) return;
+    trellisOwnerRef.current = snapshot.owner;
+    const selectedId = trellisSelectedSessionIdRef.current;
+    if (!snapshot.parentSessionId || !selectedId || snapshot.parentSessionId !== selectedId) {
+      setTrellisSnapshot(null);
+      return;
+    }
+    setTrellisSnapshot(snapshot);
+  }, []);
+  const trellisRecords = useMemo(
+    () => trellisSnapshot && trellisSnapshot.parentSessionId === selectedSession?.id
+      ? trellisSnapshot.records
+      : [],
+    [trellisSnapshot, selectedSession?.id],
+  );
+  const hasTrellisRecords = trellisRecords.length > 0;
+  const hasSubagentsEntry = hasSubagentSessions || hasTrellisRecords;
+  const subagentsEntryCount = (activeSessionFamily?.subagents.length ?? 0) + trellisRecords.length;
+  // Trellis records can make the entry visible without any persisted child
+  // session; fall back to the selected session as the built-in main row.
+  const effectiveAgentFamily = useMemo(() => {
+    if (activeSessionFamily) return activeSessionFamily;
+    if (!selectedSession) return null;
+    return { root: selectedSession, subagents: [], latestModified: selectedSession.modified };
+  }, [activeSessionFamily, selectedSession]);
   const [runningSessionIds, setRunningSessionIds] = useState<Set<string>>(() => new Set());
   const handleRunningSessionIdsChange = useCallback((ids: Set<string>) => {
     setRunningSessionIds((previous) => {
@@ -332,10 +371,10 @@ export function AppShell() {
   }, [sessionHasBranches]);
 
   useEffect(() => {
-    if (!hasSubagentSessions) {
+    if (!hasSubagentsEntry) {
       setActiveTopPanel((panel) => panel === "agents" ? null : panel);
     }
-  }, [hasSubagentSessions]);
+  }, [hasSubagentsEntry]);
 
   const toggleTopPanel = useCallback((
     panel: "agents" | "branches" | "system" | "tools" | "session" | "language" | "theme",
@@ -1523,7 +1562,7 @@ export function AppShell() {
             </button>
           );
         })()}
-        {hasSubagentSessions && (
+        {hasSubagentsEntry && (
           <button
             type="button"
             onClick={() => toggleTopPanel("agents", mobile)}
@@ -1558,7 +1597,7 @@ export function AppShell() {
                 ...(mobile ? { position: "absolute", top: 2, right: 2, minWidth: 13, height: 13, padding: "0 3px", fontSize: 9 } : {}),
               }}
             >
-              {activeSessionFamily!.subagents.length}
+              {subagentsEntryCount}
             </span>
           </button>
         )}
@@ -2241,14 +2280,21 @@ export function AppShell() {
                   ))}
                 </div>
               )}
-              {activeTopPanel === "agents" && activeSessionFamily && selectedSession && (
-                <AgentSessionPanel
-                  rootSession={activeSessionFamily.root}
-                  subagents={activeSessionFamily.subagents}
-                  selectedSessionId={selectedSession.id}
-                  runningSessionIds={runningSessionIds}
-                  onSelectSession={handleSelectSession}
-                />
+              {activeTopPanel === "agents" && effectiveAgentFamily && selectedSession && (
+                <>
+                  <AgentSessionPanel
+                    rootSession={effectiveAgentFamily.root}
+                    subagents={effectiveAgentFamily.subagents}
+                    selectedSessionId={selectedSession.id}
+                    runningSessionIds={runningSessionIds}
+                    onSelectSession={handleSelectSession}
+                  />
+                  <TrellisSubagentRecords
+                    records={trellisRecords}
+                    truncated={trellisSnapshot?.truncated ?? false}
+                    historyCoverage={trellisSnapshot?.historyCoverage ?? "none"}
+                  />
+                </>
               )}
               {activeTopPanel === "system" && (
                 <SystemPromptPanel
@@ -2497,6 +2543,7 @@ export function AppShell() {
               modelsRefreshKey={modelsRefreshKey}
               chatInputRef={chatInputRef}
               onBranchDataChange={handleBranchDataChange}
+              onSubagentRecordsChange={handleSubagentRecordsChange}
               onSystemPromptChange={handleSystemPromptChange}
               onSystemToolsChange={handleSystemToolsChange}
               onSystemInfoLoaderChange={handleSystemInfoLoaderChange}

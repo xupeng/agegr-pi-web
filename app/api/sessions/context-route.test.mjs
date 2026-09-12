@@ -15,11 +15,14 @@ const jiti = createJiti(import.meta.url, {
   moduleCache: false,
 });
 const { buildSessionContext } = await jiti.import("@/lib/session-reader");
+const { projectTrellisSubagentHistory } = await jiti.import("@/lib/trellis-subagent-history");
 
 test("context route parses ?tail and ?before, excluding the boundary on paging", () => {
   assert.match(routeSrc, /const tail = Number\.isFinite\(rawTail\) && rawTail > 0 \? Math\.min\(rawTail, 1000\) : 50/);
   assert.match(routeSrc, /const before = url\.searchParams\.get\("before"\)/);
-  assert.match(routeSrc, /buildSessionContext\(sm\.getEntries\(\) as never, before \?\? leafId, \{[^}]*excludeLeaf: Boolean\(before\)/);
+  assert.match(routeSrc, /const entries = sm\.getEntries\(\) as never/);
+  assert.match(routeSrc, /const contextLeaf = rootOnly \? null : \(before \?\? leafId\)/);
+  assert.match(routeSrc, /buildSessionContext\(entries, contextLeaf, \{[^}]*excludeLeaf: Boolean\(before\)/);
 });
 
 test("context route: ?before pages upward without duplicating the boundary", () => {
@@ -43,4 +46,28 @@ test("context route data reports when pagination reaches the root", () => {
   const page = buildSessionContext(entries, "e0", { tail: 50, excludeLeaf: true });
   assert.deepEqual(page.entryIds, []);
   assert.equal(page.hasMore, false);
+});
+
+test("context route resolves an explicit effective leaf and honors root=1", () => {
+  assert.match(routeSrc, /const rootOnly = url\.searchParams\.get\("root"\) === "1"/);
+  assert.match(routeSrc, /const effectiveLeafId = rootOnly \? null : \(leafId \?\? sm\.getLeafId\(\)\)/);
+});
+
+test("context route sends the Trellis projection only off the pagination path", () => {
+  assert.match(routeSrc, /if \(before\) \{\s*return NextResponse\.json\(\{ context, tail, before: before \?\? null \}\);/);
+  assert.match(routeSrc, /trellisSubagentRecords: \{/);
+  assert.match(routeSrc, /projectTrellisSubagentHistory\(entries, effectiveLeafId, id\)/);
+  assert.doesNotMatch(routeSrc, /listAllSessions\(/);
+});
+
+test("root=1 and invalid leaves never leak another branch's records", () => {
+  const entries = [
+    { id: "root", parentId: null, type: "message", timestamp: new Date(1000).toISOString(), message: { role: "user", content: "hi" } },
+    { id: "a", parentId: "root", type: "message", timestamp: new Date(1001).toISOString(), message: { role: "assistant", content: [{ type: "toolCall", toolCallId: "c1", toolName: "trellis_subagent", input: {} }] } },
+    { id: "t", parentId: "a", type: "message", timestamp: new Date(1002).toISOString(), message: { role: "toolResult", toolCallId: "c1", toolName: "trellis_subagent", content: [], details: { kind: "trellis-subagent-progress", agent: "a", mode: "single", final: true, runs: [{ id: "r1", status: "succeeded", finalText: "ok", textTail: "", thinkingTail: "", stderrTail: "", tools: [] }] } } },
+  ];
+  assert.equal(projectTrellisSubagentHistory(entries, null, "p").records.length, 0);
+  assert.equal(projectTrellisSubagentHistory(entries, "missing", "p").leafValid, false);
+  assert.equal(projectTrellisSubagentHistory(entries, "missing", "p").records.length, 0);
+  assert.equal(projectTrellisSubagentHistory(entries, "t", "p").records.length, 1);
 });

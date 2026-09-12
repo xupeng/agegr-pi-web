@@ -34,6 +34,12 @@ Coverage:
 - Unknown sessions and paths outside the fixture project are rejected.
 - A local extension checks dialog keyboard navigation, Esc cancellation,
   collapse/expand draft preservation, countdown display, and server-side expiry.
+- Trellis execution snapshots cover records-only and mixed built-in views on
+  desktop/mobile, restore beyond 50 entries, A-B-A/session and X-Y-X/branch
+  races, synthetic SSE reconnect/final reconciliation, and historical-branch
+  settlement without navigating back to head.
+
+Run only the Trellis feature browser regression with `npm run test:e2e:subagents`.
 
 Model prompts, live model streaming, and agent execution are outside this suite.
 Failures save a screenshot, Playwright trace, and server log under

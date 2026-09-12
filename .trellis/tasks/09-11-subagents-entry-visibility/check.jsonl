@@ -1,0 +1,4 @@
+{"file":".trellis/spec/frontend/session-list-refresh.md","reason":"Reject built-in behavior regressions, whole-list scans/force refresh, registry changes and deferred structural-version implementation."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Verify real details round-trip, active-branch history coverage, bounded payload projection and lifecycle ownership at every boundary."}
+{"file":".trellis/spec/guides/code-reuse-thinking-guide.md","reason":"Require tests of production decoder/reducer rather than copied predicates; shared identity/status/bounds logic."}
+{"file":".trellis/tasks/09-11-subagents-entry-visibility/research/adapter-context.md","reason":"Review mapped source evidence and invariants: three modes, 50-entry gap, stale scopes, bounded validation, snapshot-only status and read-only actions; full findings remain manually readable."}

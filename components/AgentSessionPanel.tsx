@@ -228,7 +228,7 @@ export function AgentSessionPanel({ rootSession, subagents, selectedSessionId, r
               onSelect={() => onSelectSession(session)}
             />
           ))}
-          {visibleSubagents.length === 0 && (
+          {subagents.length > 0 && visibleSubagents.length === 0 && (
             <div style={{ padding: "22px 12px", color: "var(--text-dim)", fontSize: 12, textAlign: "center" }}>
               {t("agentSwitcher.noMatches")}
             </div>

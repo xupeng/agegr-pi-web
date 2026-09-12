@@ -52,3 +52,17 @@ test("detail route with an out-of-range tail still caps at 1000", () => {
   const ctx = buildSessionContext(entries, "e4999", { tail: 5000 });
   assert.equal(ctx.messages.length, 5000);
 });
+
+test("detail route adds the bounded Trellis projection without changing chat pagination", () => {
+  assert.match(routeSrc, /projectTrellisSubagentHistory\(/);
+  assert.match(routeSrc, /trellisSubagentRecords: \{/);
+  assert.match(routeSrc, /parentSessionId: id/);
+  assert.match(routeSrc, /leafId: trellisProjection\.leafId/);
+  assert.match(routeSrc, /truncated: trellisProjection\.truncated/);
+  assert.match(routeSrc, /records: trellisProjection\.records/);
+  // The chat context is still the default 50-tail slice.
+  assert.match(routeSrc, /tail = Number\.isFinite\(rawTail\) && rawTail > 0 \? Math\.min\(rawTail, 1000\) : 50/);
+  // No session-list scan or cache invalidation was introduced for the projection.
+  assert.doesNotMatch(routeSrc, /listAllSessions\(/);
+  assert.doesNotMatch(routeSrc, /invalidateSessionListCache\(\)[\s\S]{0,200}trellisSubagentRecords/);
+});

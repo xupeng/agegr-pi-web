@@ -1,0 +1,4 @@
+{"file":".trellis/spec/frontend/session-list-refresh.md","reason":"Preserve built-in family/list caching and targeted refresh; do not add structural-version or force-refresh work."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Trace partial/final events through persistence and history; one typed contract owner and explicit boundary validation."}
+{"file":".trellis/spec/guides/code-reuse-thinking-guide.md","reason":"Share Trellis decoder/projection/reducer between live/history/UI; no duplicated unknown casts."}
+{"file":".trellis/tasks/09-11-subagents-entry-visibility/research/adapter-context.md","reason":"Bounded research context: original findings references, Trellis details round-trip, pagination gap, ownership races, explicit scope/approval gate and test patterns; avoids truncating full findings."}

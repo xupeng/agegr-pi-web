@@ -20,6 +20,7 @@ import { computeSessionStats } from "@/lib/session-stats";
 import type { SessionEntry } from "@/lib/types";
 import { readSubagentRun, readSubagentSessionResources, SUBAGENT_META_TYPE } from "@/lib/subagents";
 import { readSessionToolSelection } from "@/lib/session-tool-selection";
+import { projectTrellisSubagentHistory } from "@/lib/trellis-subagent-history";
 
 export async function GET(
   req: Request,
@@ -51,6 +52,13 @@ export async function GET(
       sessionId: id, // local: lazy URLs for historical tool-result images
     });
     const totalActiveMs = computeSessionTotalActiveMs(entries);
+    // Bounded read-only Trellis snapshot projection over the full active branch,
+    // independent of the default 50-entry chat page. Additive field only.
+    const trellisProjection = projectTrellisSubagentHistory(
+      entries as never,
+      leafId,
+      id,
+    );
     // Cumulative usage over ALL entries, including history compacted away —
     // the same aggregation the SDK's getSessionStats() uses. Lets the client
     // keep monotonic token/cost counters across compaction and page reloads.
@@ -102,6 +110,15 @@ export async function GET(
       context,
       stats,
       totalActiveMs,
+      trellisSubagentRecords: {
+        parentSessionId: id,
+        leafId: trellisProjection.leafId,
+        leafValid: trellisProjection.leafValid,
+        truncated: trellisProjection.truncated,
+        hasRecords: trellisProjection.records.length > 0,
+        branchToolCallIds: trellisProjection.branchToolCallIds,
+        records: trellisProjection.records,
+      },
       ...(toolNames !== undefined ? { toolNames } : {}),
     });
   } catch (error) {

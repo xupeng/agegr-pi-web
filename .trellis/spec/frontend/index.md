@@ -20,6 +20,7 @@ This directory contains guidelines for frontend development. Fill in each file w
 | [State Management](./state-management.md) | Local state, global state, server state | To fill |
 | [Quality Guidelines](./quality-guidelines.md) | Code standards, forbidden patterns | To fill |
 | [Type Safety](./type-safety.md) | Type patterns, validation | To fill |
+| [Trellis subagent execution snapshots](./trellis-subagent-records.md) | Single owner for exact tool/kind gate, bounded branch API projection, evidence/watermarks, scoped hook ownership and read-only UI | Written |
 | [ask_user 提问协议](./ask-user-protocol.md) | ask_user 工具契约、状态机、事件/命令协议 | Written |
 | [移动端键盘与视口高度](./mobile-keyboard-viewport.md) | useViewportHeight 机制、focus 重试、WKWebView 兜底 | Written |
 | [会话列表刷新机制](./session-list-refresh.md) | 两级按需加载、缓存层级、刷新触发点、强制刷新竞态防护 | Written |

@@ -27,6 +27,20 @@ import { userMessageKey } from "@/lib/prompt-recovery";
 import { AgentEventConnection } from "@/lib/agent-event-connection";
 import { getToolExecutionProgress } from "@/lib/tool-execution-progress";
 import {
+  collectTrellisToolCallIdsFromMessage,
+  createTrellisStore,
+  nextTrellisOwner,
+  projectTrellisSubagentRecords,
+  reduceTrellisStore,
+  selectTrellisRecords,
+  shouldFollowTrellisHeadRefresh,
+  TRELLIS_SUBAGENT_TOOL_NAME,
+  type TrellisSubagentRecordsEnvelope,
+  type TrellisSubagentRecordsSnapshot,
+  type TrellisSubagentRecord,
+} from "@/lib/trellis-subagent-records";
+import { projectTrellisSubagentContextMessages } from "@/lib/trellis-subagent-history";
+import {
   CHAT_SCROLL_REATTACH_TOLERANCE,
   CHAT_SCROLL_TAIL_TOLERANCE,
   getLiveFollowAttached,
@@ -54,6 +68,8 @@ export interface SessionData {
   };
   /** Cumulative usage over ALL session-file entries (incl. compacted history). */
   stats?: SessionFileStats;
+  /** Additive bounded Trellis subagent snapshot projection. */
+  trellisSubagentRecords?: TrellisSubagentRecordsEnvelope;
 }
 
 interface AgentEvent {
@@ -155,6 +171,8 @@ export interface UseAgentSessionOptions {
   modelsRefreshKey?: number;
   chatInputRef?: React.RefObject<ChatInputHandle | null>;
   onBranchDataChange?: (tree: SessionTreeNode[], activeLeafId: string | null, onLeafChange: (leafId: string | null) => void) => void;
+  /** Scoped Trellis execution snapshot publication for the shared top entry. */
+  onSubagentRecordsChange?: (snapshot: TrellisSubagentRecordsSnapshot) => void;
   onSystemPromptChange?: (prompt: string | null) => void;
   onSystemToolsChange?: (tools: ToolEntry[] | null) => void;
   /** Registers an action that lazily starts the session and loads its prompt and tools. */
@@ -280,7 +298,7 @@ type SlashCommandsResponse = {
 export function useAgentSession(opts: UseAgentSessionOptions) {
   const {
     session, sessionRunning, newSessionCwd, newSessionDraftKey, onAgentEnd, onAttentionNeeded, onSessionCreated, onSessionForked,
-    modelsRefreshKey, onBranchDataChange, onSystemPromptChange, onSystemToolsChange, onSystemInfoLoaderChange, onSessionStatsPanelOpen,
+    modelsRefreshKey, onBranchDataChange, onSubagentRecordsChange, onSystemPromptChange, onSystemToolsChange, onSystemInfoLoaderChange, onSessionStatsPanelOpen,
   } = opts;
 
   const isNew = session === null && newSessionCwd !== null;
@@ -329,6 +347,24 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
   const [extensionWidgets, setExtensionWidgets] = useState<ExtensionWidgetItem[]>([]);
   const [pendingAsk, setPendingAsk] = useState<PendingAskUser | null>(null);
   const [queuedMessages, setQueuedMessages] = useState<QueuedMessages>({ steering: [], followUp: [] });
+
+  // Trellis subagent snapshots are derived read-only state, separate from the
+  // ephemeral one-line `agentPhase` indicator.
+  const [trellisStore, dispatchTrellis] = useReducer(reduceTrellisStore, undefined, createTrellisStore);
+  const trellisOwnerRef = useRef(0);
+  if (trellisOwnerRef.current === 0) trellisOwnerRef.current = nextTrellisOwner();
+  const trellisEventWatermarkRef = useRef(0);
+  const trellisAllowedCallsRef = useRef<Set<string>>(new Set());
+  const trellisHistoryCallsRef = useRef<Set<string>>(new Set());
+  const trellisLatestLeafRef = useRef<string | null>(null);
+  const trellisActiveLeafRef = useRef<string | null>(null);
+  const trellisViewGenerationRef = useRef(0);
+  const trellisPromptViewGenerationRef = useRef<number | null>(null);
+  const contextReqSeqRef = useRef(0);
+  const sessionReqSeqRef = useRef(0);
+  const trellisHistoryRequestsInFlightRef = useRef(0);
+  const onSubagentRecordsChangeRef = useRef(onSubagentRecordsChange);
+  onSubagentRecordsChangeRef.current = onSubagentRecordsChange;
 
   const eventConnectionRef = useRef<AgentEventConnection | null>(null);
   const eventStreamGraceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -463,14 +499,168 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
     } satisfies SessionStatsInfo;
   }, [messages, sessionStatsOverride, contextUsage, data?.context.messages, data?.filePath, data?.totalActiveMs, data?.stats, session?.id, session?.name]);
 
+  // ── Trellis execution snapshot scope ────────────────────────────────
+  const resetTrellisScope = useCallback(() => {
+    trellisViewGenerationRef.current += 1;
+    trellisActiveLeafRef.current = null;
+    trellisLatestLeafRef.current = null;
+    trellisAllowedCallsRef.current = new Set();
+    trellisHistoryCallsRef.current = new Set();
+    trellisPromptViewGenerationRef.current = null;
+    dispatchTrellis({ type: "reset" });
+  }, []);
+
+  const applyTrellisHistory = useCallback((
+    sid: string,
+    envelope: TrellisSubagentRecordsEnvelope | undefined,
+    messages: unknown[],
+    responseLeafId: string | null,
+    requestWatermark: number,
+    options?: { latest?: boolean },
+  ) => {
+    // A full session load views the head; a branch replacement keeps the
+    // previously known head so live-event ownership is not misclassified.
+    if (options?.latest) trellisLatestLeafRef.current = responseLeafId ?? null;
+    trellisActiveLeafRef.current = responseLeafId ?? null;
+    if (
+      envelope
+      && envelope.parentSessionId === sid
+      && envelope.leafId === responseLeafId
+    ) {
+      const records = envelope.leafValid && Array.isArray(envelope.records) ? envelope.records : [];
+      const callIds = envelope.leafValid && Array.isArray(envelope.branchToolCallIds)
+        ? envelope.branchToolCallIds.filter((id): id is string => typeof id === "string")
+        : [];
+      trellisHistoryCallsRef.current = new Set(callIds);
+      trellisAllowedCallsRef.current = new Set(callIds);
+      dispatchTrellis({
+        type: "history",
+        records,
+        watermark: requestWatermark,
+        truncated: Boolean(envelope.truncated),
+      });
+      return;
+    }
+    // Older API response: derive from the already-loaded page and label the
+    // coverage incomplete rather than claiming full history.
+    trellisHistoryCallsRef.current = new Set();
+    trellisAllowedCallsRef.current = new Set();
+    dispatchTrellis({
+      type: "history",
+      records: projectTrellisSubagentContextMessages(messages, sid),
+      watermark: requestWatermark,
+      truncated: true,
+    });
+  }, []);
+
+  const ingestTrellisRecords = useCallback((
+    records: TrellisSubagentRecord[],
+    truncated = false,
+  ) => {
+    if (records.length === 0) return;
+    trellisEventWatermarkRef.current += 1;
+    const watermark = trellisEventWatermarkRef.current;
+    dispatchTrellis({
+      type: "event",
+      records: records.map((record) => ({ ...record, stamp: watermark })),
+      watermark,
+      truncated,
+    });
+  }, []);
+
+  const liveEventsBelongToView = useCallback(() => shouldFollowTrellisHeadRefresh(
+    trellisActiveLeafRef.current,
+    trellisLatestLeafRef.current,
+    trellisPromptViewGenerationRef.current,
+    trellisViewGenerationRef.current,
+  ), []);
+
+  const allowTrellisCallsFromMessage = useCallback((message: unknown) => {
+    if (!liveEventsBelongToView()) return;
+    for (const toolCallId of collectTrellisToolCallIdsFromMessage(message)) {
+      trellisAllowedCallsRef.current.add(toolCallId);
+    }
+  }, [liveEventsBelongToView]);
+
+  const ingestTrellisToolDetails = useCallback((
+    toolCallId: string,
+    toolName: string,
+    details: unknown,
+    evidence: "partial" | "tool-end" | "message",
+    entryId?: string,
+  ) => {
+    if (toolName !== TRELLIS_SUBAGENT_TOOL_NAME) return;
+    const sid = sessionIdRef.current;
+    if (!sid) return;
+    // Branch ownership: the call must have appeared on the accepted viewed
+    // branch, and the active prompt must still belong to this view generation.
+    if (!liveEventsBelongToView() || !trellisAllowedCallsRef.current.has(toolCallId)) return;
+    const projection = projectTrellisSubagentRecords({
+      parentSessionId: sid,
+      toolCallId,
+      toolName,
+      evidence,
+      details,
+      ...(entryId ? { entryId } : {}),
+    });
+    if (!projection || projection.records.length === 0) return;
+    ingestTrellisRecords(
+      projection.records,
+      projection.omittedRuns > 0 || projection.malformedRuns > 0,
+    );
+  }, [ingestTrellisRecords, liveEventsBelongToView]);
+
+  const trellisSelection = useMemo(() => selectTrellisRecords(trellisStore), [trellisStore]);
+
+  useEffect(() => {
+    const publish = onSubagentRecordsChangeRef.current;
+    if (!publish) return;
+    publish({
+      parentSessionId: sessionIdRef.current ?? session?.id ?? null,
+      owner: trellisOwnerRef.current,
+      records: trellisSelection.records,
+      truncated: trellisSelection.truncated,
+      historyCoverage: trellisSelection.historyCoverage,
+    });
+  }, [trellisSelection, session?.id]);
+
+  useEffect(() => {
+    // Session replacement clears the previous parent's scope synchronously.
+    resetTrellisScope();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.id]);
+
+  useEffect(() => () => {
+    // Publish this hook's own owner. AppShell only accepts a clear from the
+    // owner currently displayed, so a late old cleanup cannot erase a newer
+    // keyed ChatWindow mount.
+    onSubagentRecordsChangeRef.current?.({
+      parentSessionId: null,
+      owner: trellisOwnerRef.current,
+      records: [],
+      truncated: false,
+      historyCoverage: "none",
+    });
+  }, []);
+
   const loadSession = useCallback(async (sid: string, showLoading = false, includeState = false) => {
     let messagesLoaded = false;
+    const requestSeq = ++sessionReqSeqRef.current;
+    // A full session load replaces the viewed branch; supersede pending pages.
+    contextReqSeqRef.current += 1;
+    const requestWatermark = trellisEventWatermarkRef.current;
+    trellisHistoryRequestsInFlightRef.current += 1;
     try {
       if (showLoading) setLoading(true);
       const params = new URLSearchParams({ deferThinking: "1", deferMedia: "1" });
       const res = await fetch(`/api/sessions/${encodeURIComponent(sid)}?${params}`);
       if (res.status === 404) {
-        if (showLoading) {
+        if (
+          showLoading
+          && sessionHookMountedRef.current
+          && sessionIdRef.current === sid
+          && requestSeq === sessionReqSeqRef.current
+        ) {
           setData(null);
           setActiveLeafId(null);
           setMessages([]);
@@ -478,12 +668,17 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
           setHistoryCursor(null);
           setHasEarlierMessages(false);
           setError(null);
+          resetTrellisScope();
         }
         return null;
       }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const d = await res.json() as SessionData;
-      if (sessionIdRef.current !== sid) return null;
+      if (
+        !sessionHookMountedRef.current
+        || sessionIdRef.current !== sid
+        || requestSeq !== sessionReqSeqRef.current
+      ) return null;
       const persistedMessages = d.context.messages;
       setData(d);
       setActiveLeafId(d.leafId);
@@ -491,6 +686,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
       setEntryIds(d.context.entryIds ?? []);
       setHistoryCursor(d.context.oldestEntryId);
       setHasEarlierMessages(d.context.hasMore);
+      applyTrellisHistory(sid, d.trellisSubagentRecords, persistedMessages, d.leafId ?? null, requestWatermark, { latest: true });
       setToolPresetState(d.toolNames !== undefined ? getPresetFromToolNames(d.toolNames) : "default");
       setCurrentModelOverride((current) => modelSwitchPendingRef.current ? current : null);
       setError(null);
@@ -506,7 +702,11 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         const stateRes = await fetch(`/api/sessions/${encodeURIComponent(sid)}/state`);
         if (!stateRes.ok) throw new Error(`HTTP ${stateRes.status}`);
         const agentState = await stateRes.json() as { running: boolean; state?: AgentStateResponse };
-        if (sessionIdRef.current !== sid) return null;
+        if (
+          !sessionHookMountedRef.current
+          || sessionIdRef.current !== sid
+          || requestSeq !== sessionReqSeqRef.current
+        ) return null;
 
         const liveState = agentState.state;
         if (liveState) {
@@ -527,17 +727,48 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         return null;
       }
     } catch (e) {
-      setError(String(e));
+      if (
+        sessionHookMountedRef.current
+        && sessionIdRef.current === sid
+        && requestSeq === sessionReqSeqRef.current
+      ) setError(String(e));
       return null;
     } finally {
-      if (showLoading && !messagesLoaded) setLoading(false);
+      trellisHistoryRequestsInFlightRef.current -= 1;
+      if (
+        showLoading
+        && !messagesLoaded
+        && sessionHookMountedRef.current
+        && sessionIdRef.current === sid
+        && requestSeq === sessionReqSeqRef.current
+      ) setLoading(false);
     }
-  }, [setToolPresetState]);
+  }, [resetTrellisScope, applyTrellisHistory, setToolPresetState]);
 
   const loadContext = useCallback(async (sid: string, leafId: string | null, before?: string | null, options?: { tail?: number; signal?: AbortSignal }) => {
+    const isReplacement = !before;
+    if (!isReplacement && trellisActiveLeafRef.current !== leafId) return;
+    const requestSeq = ++contextReqSeqRef.current;
+    const requestWatermark = trellisEventWatermarkRef.current;
+    const requestViewGeneration = isReplacement
+      ? ++trellisViewGenerationRef.current
+      : trellisViewGenerationRef.current;
+    if (isReplacement) {
+      // A branch replacement also invalidates an older full-session refresh;
+      // otherwise agent settlement could resolve late and jump back to head.
+      sessionReqSeqRef.current += 1;
+      // Synchronously drop both records and call ownership before awaiting the
+      // new branch. A buffered event from the prior branch cannot be retagged.
+      trellisActiveLeafRef.current = leafId;
+      trellisAllowedCallsRef.current = new Set();
+      trellisHistoryCallsRef.current = new Set();
+      dispatchTrellis({ type: "reset" });
+    }
+    trellisHistoryRequestsInFlightRef.current += 1;
     try {
       const params = new URLSearchParams({ deferThinking: "1", deferMedia: "1" });
       if (leafId) params.set("leafId", leafId);
+      else params.set("root", "1");
       // Page upward: ask the server for the `tail` ancestors preceding `before`,
       // then prepend them. Omitting `before` fetches the most-recent `tail`.
       if (before) params.set("before", before);
@@ -545,8 +776,18 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
       const url = `/api/sessions/${encodeURIComponent(sid)}/context?${params}`;
       const res = await fetch(url, { signal: options?.signal });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const d = await res.json() as { context: SessionData["context"] };
-      if (sessionIdRef.current !== sid || options?.signal?.aborted || !sessionHookMountedRef.current) return;
+      const d = await res.json() as {
+        context: SessionData["context"];
+        trellisSubagentRecords?: TrellisSubagentRecordsEnvelope;
+      };
+      if (
+        sessionIdRef.current !== sid
+        || options?.signal?.aborted
+        || !sessionHookMountedRef.current
+        || requestSeq !== contextReqSeqRef.current
+        || requestViewGeneration !== trellisViewGenerationRef.current
+        || trellisActiveLeafRef.current !== leafId
+      ) return;
       setHistoryCursor(d.context.oldestEntryId);
       setHasEarlierMessages(d.context.hasMore);
       setData((prev) => {
@@ -561,18 +802,41 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         return { ...prev, context };
       });
       if (before) {
-        // Older page: prepend so scroll position stays anchored.
+        // Older page: prepend so scroll position stays anchored. Pagination
+        // never recomputes the Trellis record scope.
         setMessages((prev) => [...d.context.messages, ...prev]);
         setEntryIds((prev) => [...d.context.entryIds, ...prev]);
       } else {
         setMessages(d.context.messages);
         setEntryIds(d.context.entryIds ?? []);
+        applyTrellisHistory(sid, d.trellisSubagentRecords, d.context.messages, leafId, requestWatermark);
       }
       return d.context;
     } catch (e) {
-      if (!options?.signal?.aborted) console.error("Failed to load context:", e);
+      if (
+        !options?.signal?.aborted
+        && sessionHookMountedRef.current
+        && sessionIdRef.current === sid
+        && requestSeq === contextReqSeqRef.current
+        && requestViewGeneration === trellisViewGenerationRef.current
+        && trellisActiveLeafRef.current === leafId
+      ) console.error("Failed to load context:", e);
+    } finally {
+      trellisHistoryRequestsInFlightRef.current -= 1;
     }
-  }, []);
+  }, [applyTrellisHistory]);
+
+  const refreshViewedSession = useCallback(async (sid: string) => {
+    if (shouldFollowTrellisHeadRefresh(
+      trellisActiveLeafRef.current,
+      trellisLatestLeafRef.current,
+      trellisPromptViewGenerationRef.current,
+      trellisViewGenerationRef.current,
+    )) {
+      return loadSession(sid);
+    }
+    return loadContext(sid, trellisActiveLeafRef.current);
+  }, [loadContext, loadSession]);
 
   const loadTools = useCallback(async (sid: string) => {
     try {
@@ -959,13 +1223,14 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
     // must not overwrite the messages of the run currently streaming.
     if (promptRunIdRef.current !== runId) return;
     try {
-      if (sid) await loadSession(sid);
+      if (sid) await refreshViewedSession(sid);
     } finally {
       if (promptRunIdRef.current !== runId) return;
       const promptWasPending = rpcPromptPendingRef.current;
       const agentWasActive = sdkAgentActiveRef.current;
       rpcPromptPendingRef.current = false;
       sdkAgentActiveRef.current = false;
+      trellisPromptViewGenerationRef.current = null;
       optimisticUserMessageKeyRef.current = null;
       const wasRunning = settleUiStage();
       if (promptWasPending) {
@@ -975,7 +1240,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
       }
       if (sid) scheduleEventStreamClose(sid);
     }
-  }, [loadSession, notifyPromptStage, onAgentEnd, scheduleEventStreamClose, settleUiStage]);
+  }, [notifyPromptStage, onAgentEnd, refreshViewedSession, scheduleEventStreamClose, settleUiStage]);
 
   const waitForPromptSettlement = useCallback(async (sid: string, runId?: number) => {
     await delay(PROMPT_SETTLE_INITIAL_DELAY_MS);
@@ -1134,6 +1399,25 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
     switch (event.type) {
       case "connected": {
         dispatch({ type: "end" });
+        // A reconnect has no durable tool-progress replay. Retire call IDs that
+        // were learned only from the prior stream, qualify retained overlays as
+        // stale snapshots, and reconcile the currently viewed branch.
+        trellisAllowedCallsRef.current = new Set(trellisHistoryCallsRef.current);
+        dispatchTrellis({ type: "markOverlaysStale" });
+        const connectedSid = sessionIdRef.current;
+        // An in-flight history read already reconciles this scope. While the
+        // parent is active, a second read could also replace streaming chat;
+        // settlement performs the durable refresh instead.
+        if (
+          connectedSid
+          && event.isStreaming !== true
+          && !agentRunningRef.current
+          && !rpcPromptPendingRef.current
+          && !sdkAgentActiveRef.current
+          && trellisHistoryRequestsInFlightRef.current === 0
+        ) {
+          void refreshViewedSession(connectedSid);
+        }
         if (event.isStreaming === true) {
           cancelEventStreamGrace();
           sdkAgentActiveRef.current = true;
@@ -1160,7 +1444,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         setRetryInfo(null);
         dispatch({ type: "end" });
         if (sessionIdRef.current) {
-          loadSession(sessionIdRef.current);
+          void refreshViewedSession(sessionIdRef.current);
           fetch(`/api/agent/${encodeURIComponent(sessionIdRef.current)}`)
             .then((r) => r.json())
             .then((d: { state?: AgentStateResponse }) => {
@@ -1185,9 +1469,10 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         const wasRunning = settleUiStage();
         setIsCompacting(false);
         if (sid) {
-          void loadSession(sid);
+          void refreshViewedSession(sid);
           scheduleEventStreamClose(sid);
         }
+        trellisPromptViewGenerationRef.current = null;
         if (wasRunning) onAgentEnd?.();
         break;
       }
@@ -1201,12 +1486,13 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
           if (!promptWasPending && !firstNotification) break;
 
           const sid = sessionIdRef.current;
-          if (sid) void loadSession(sid);
+          if (sid) void refreshViewedSession(sid);
           // An extension-injected agent may already have started before the
           // command's prompt_done. Keep that active stage visible and let its
           // agent_settled event perform the next completion transition.
           if (!sdkAgentActiveRef.current) {
             settleUiStage();
+            trellisPromptViewGenerationRef.current = null;
             if (sid) scheduleEventStreamClose(sid);
           }
         }
@@ -1230,6 +1516,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
           const msg = event.message as AgentMessage | undefined;
           if (msg?.role === "user") break;
           if (msg?.role === "assistant") {
+            allowTrellisCallsFromMessage(msg);
             dispatch({ type: "snapshot", message: msg });
             if (msg.content.length > 0) setAgentPhase(null);
           } else if (msg) {
@@ -1238,6 +1525,16 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         } else {
           const delta = event.assistantMessageEvent as ClientAssistantMessageEvent | undefined;
           if (delta) {
+            if (
+              (delta.type === "toolcall_start" || delta.type === "toolcall_delta")
+              && delta.toolName === TRELLIS_SUBAGENT_TOOL_NAME
+              && typeof delta.id === "string"
+              && delta.id.length > 0
+              && delta.id.length <= 256
+              && liveEventsBelongToView()
+            ) {
+              trellisAllowedCallsRef.current.add(delta.id);
+            }
             dispatch({ type: "delta", event: delta });
             if (delta.type !== "toolcall_start" && delta.type !== "toolcall_delta") {
               setAgentPhase(null);
@@ -1281,6 +1578,17 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
             return [...prev, delivered];
           });
         } else if (completed) {
+          if (completed.role === "assistant") allowTrellisCallsFromMessage(completed);
+          if (completed.role === "toolResult") {
+            ingestTrellisToolDetails(
+              completed.toolCallId,
+              completed.toolName ?? "",
+              completed.details,
+              "message",
+            );
+          }
+          // Preserve the existing chat behavior for every completed message,
+          // including generic and Trellis tool results.
           setMessages((prev) => [...prev, normalizeToolCalls(completed)]);
         }
         dispatch({ type: "end" });
@@ -1290,6 +1598,8 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
       case "tool_execution_start": {
         const id = event.toolCallId as string;
         const name = event.toolName as string;
+        // Tool-call ownership comes from the assistant message/delta on the
+        // viewed branch, not from a start event that may have been buffered.
         setAgentPhase((prev) => {
           const tools = prev?.kind === "running_tools" ? [...prev.tools] : [];
           if (!tools.some((t) => t.id === id)) tools.push({ id, name });
@@ -1301,6 +1611,10 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         const id = event.toolCallId as string;
         const name = event.toolName as string;
         const progress = getToolExecutionProgress(event.partialResult);
+        if (name === TRELLIS_SUBAGENT_TOOL_NAME) {
+          const partial = event.partialResult as { details?: unknown } | undefined;
+          ingestTrellisToolDetails(id, name, partial?.details, "partial");
+        }
         setAgentPhase((prev) => {
           const tools = prev?.kind === "running_tools" ? [...prev.tools] : [];
           const existing = tools.find((tool) => tool.id === id);
@@ -1318,6 +1632,11 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
       }
       case "tool_execution_end": {
         const id = event.toolCallId as string;
+        const name = event.toolName as string;
+        if (name === TRELLIS_SUBAGENT_TOOL_NAME) {
+          const result = event.result as { details?: unknown } | undefined;
+          ingestTrellisToolDetails(id, name, result?.details, "tool-end");
+        }
         setAgentPhase((prev) => {
           if (prev?.kind !== "running_tools") return prev;
           const tools = prev.tools.filter((t) => t.id !== id);
@@ -1352,7 +1671,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
           setCompactResult(null);
         } else if (!event.aborted) {
           setCompactResult(readCompactResult(event.result, (event.reason as string | undefined) ?? "auto"));
-          if (sessionIdRef.current) loadSession(sessionIdRef.current);
+          if (sessionIdRef.current) void refreshViewedSession(sessionIdRef.current);
         }
         break;
       case "ask.opened": {
@@ -1374,7 +1693,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         setExtensionDialog((current) => current?.id === event.id ? null : current);
         break;
     }
-  }, [addNotice, cancelEventStreamGrace, handleExtensionUiRequest, loadSession, notifyPromptStage, onAgentEnd, scheduleEventStreamClose, scrollToBottom, settleUiStage]);
+  }, [addNotice, allowTrellisCallsFromMessage, cancelEventStreamGrace, handleExtensionUiRequest, ingestTrellisToolDetails, liveEventsBelongToView, notifyPromptStage, onAgentEnd, refreshViewedSession, scheduleEventStreamClose, scrollToBottom, settleUiStage]);
   handleAgentEventRef.current = handleAgentEvent;
 
   const handleSend = useCallback(async (message: string, images?: AttachedImage[]) => {
@@ -1399,6 +1718,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
     }
 
     const promptRunId = promptRunIdRef.current + 1;
+    trellisPromptViewGenerationRef.current = trellisViewGenerationRef.current;
     cancelEventStreamGrace();
     rpcPromptPendingRef.current = true;
 
@@ -1472,6 +1792,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         return;
       }
       rpcPromptPendingRef.current = false;
+      trellisPromptViewGenerationRef.current = null;
       setMessages((prev) => {
         const optimisticIndex = prev.lastIndexOf(userMsg);
         return optimisticIndex === -1
