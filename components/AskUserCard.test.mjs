@@ -4,6 +4,29 @@ import test from "node:test";
 
 const source = await readFile(new URL("./AskUserCard.tsx", import.meta.url), "utf8");
 
+test("questions use the full available width across details, options and custom input", () => {
+  const question = source.match(/<div key=\{question\.id\} style=\{\{[\s\S]*?\}\}>/)?.[0];
+  assert.ok(question);
+  assert.match(question, /width: "100%"/);
+  assert.match(question, /minWidth: 0/);
+  assert.doesNotMatch(question, /maxWidth/);
+  assert.match(question, /fontSize: 12\.5/);
+  assert.match(source, /gridTemplateColumns: "20px minmax\(0, 1fr\)"/);
+});
+
+test("question details have breathing room and wrap long unbroken text", () => {
+  const detail = source.match(/question\.detail !== undefined && \([\s\S]*?<\/p>/)?.[0];
+  assert.ok(detail);
+  assert.match(detail, /padding: "10px 12px"/);
+  assert.match(detail, /marginTop: 8/);
+  assert.match(detail, /marginBottom: 6/);
+  assert.match(detail, /lineHeight: 1\.9/);
+  assert.match(detail, /whiteSpace: "pre-wrap"/);
+  assert.match(detail, /overflowWrap: "anywhere"/);
+  assert.doesNotMatch(detail, /maxWidth/);
+  assert.match(detail, /marginTop: paragraphIndex === 0 \? 0 : 6/);
+});
+
 test("locks the card after submit so a surviving card cannot be edited again", () => {
   assert.match(source, /useState<"idle" \| "submitting" \| "cancelling">\("idle"\)/);
   assert.match(source, /const locked = status !== "idle";/);

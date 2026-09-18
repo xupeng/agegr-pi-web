@@ -119,8 +119,13 @@ export function AskUserCard({
         {ask.questions.map((question, index) => {
           const draft = draftFor(question.id);
           return (
-            <div key={question.id}>
-              <div style={{ display: "flex", gap: 8, alignItems: "baseline" }}>
+            <div key={question.id} style={{
+              width: "100%",
+              minWidth: 0,
+              fontSize: 12.5,
+              overflowWrap: "anywhere",
+            }}>
+              <div style={{ display: "grid", gridTemplateColumns: "20px minmax(0, 1fr)", alignItems: "baseline" }}>
                 <span style={{ color: "var(--accent)", fontSize: 12, fontWeight: 700, flexShrink: 0 }}>
                   {index + 1}.
                 </span>
@@ -129,8 +134,24 @@ export function AskUserCard({
                     {question.question}
                   </div>
                   {question.detail !== undefined && (
-                    <div style={{ marginTop: 2, color: "var(--text-muted)", fontSize: 12, lineHeight: 1.45, whiteSpace: "pre-wrap" }}>
-                      {question.detail}
+                    <div style={{
+                      marginTop: 8,
+                      marginBottom: 6,
+                      padding: "10px 12px",
+                      borderLeft: "3px solid var(--border)",
+                      borderRadius: 4,
+                      background: "var(--bg)",
+                      color: "var(--text-muted)",
+                      fontSize: 12.5,
+                      lineHeight: 1.9,
+                      whiteSpace: "pre-wrap",
+                      overflowWrap: "anywhere",
+                    }}>
+                      {question.detail.split(/\r?\n(?:[\t ]*\r?\n)+/).map((paragraph, paragraphIndex) => (
+                        <p key={paragraphIndex} style={{ margin: 0, marginTop: paragraphIndex === 0 ? 0 : 6 }}>
+                          {paragraph}
+                        </p>
+                      ))}
                     </div>
                   )}
                 </div>
