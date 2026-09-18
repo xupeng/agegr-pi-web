@@ -310,3 +310,43 @@ AC4 原文为"两锁 diff 只涉及 next 家族"，实测：
 - `/tmp` 仍占用 ~349 MiB，其中含 **上一个任务遗留** 的 worktree `/tmp/pi-web-0.9.2-verify`
   （本任务未创建、未删除）。
 - 本次临时对象：tree `ef455ab`、commit `751a925`（无 ref 引用，验证完成后可被 gc；不进入提交历史）。
+
+## 15. A7/A8 提交结果（冻结提交 H）
+
+用户裁定：R4 锁范围按上游原样接受（D6）；A7 按 3 个提交执行；并发改动排除即可；
+dev server 现在重启。
+
+```
+b92d4b7  chore(task): record post-v0.9.1 upstream sync        <- 冻结提交 H
+9176b2d  chore(task): archive 09-09-sync-upstream-release     <- task.py archive 自动提交
+2fb2d11  chore: sync pnpm lockfile for next 16.3.5
+e5806e6  merge: integrate upstream v0.9.1..860698a             <- 两父：391c141 + 860698a
+```
+
+```
+$ git rev-parse HEAD                       # b92d4b7f7a5de61bd0c9f9b996b778b1346684e5
+$ git rev-list --parents -1 e5806e6        # e5806e6 391c141 860698a
+$ git rev-parse e5806e6^{tree}             # ef455ab48a24eb8cf7d1579c28f1f27d930ac68f
+$ git merge-base --is-ancestor upstream/main HEAD && echo ok    # ok
+$ git show --name-only --format= e5806e6 | grep -cE 'AskUserCard|\.pi/agents/trellis'   # 0
+```
+
+关键点：合并提交的 tree 与 §11 里在隔离 worktree 验证过的树（`ef455ab`）**完全相同**，
+即那份 tsc 0 / lint 0 / 1239 pass 的验证结果精确对应本提交内容。
+`pnpm-lock.yaml` 单独成 commit；`task.py archive` 的自动提交经核对只含
+`09-09-sync-upstream-release` 的目录移动（6 个文件，2 增 2 删），未夹带用户文件或并发改动。
+
+提交后 `git status`：仅剩用户 3 个 `.pi/agents/trellis-*.md`、另一会话的
+`components/AskUserCard{,.test}.mjs`，以及未跟踪的 `.trellis/tasks/09-13-npm-patch-release/`，
+均按裁定排除在提交之外。
+
+## 16. Phase 3.3 spec 更新
+
+- `.trellis/spec/frontend/settings-dialog-mobile.md`：把过时的"整数 offset + `--chat-font-size-base`"
+  小节重写为当前实现（`hooks/useChatAppearance.ts`：绝对字号 12–24 / 内容宽度 820–2000、
+  旧 `pi-chat-font-offset` 仅作迁移来源、`.chat-content` 换算 `--chat-font-size-offset`、
+  正文/表格/扩展 widget 三处 `calc(X + offset)`），并写明约束与历史教训（widget 写死 14px 的回归）。
+- `.trellis/spec/frontend/quality-guidelines.md`：新增"验证基线必须来自与锁文件一致的依赖树"，
+  把本次 14 条幻影 lint 诊断的归因过程、交叉验证方法（`git write-tree` + `commit-tree` +
+  独立 worktree `npm ci`）与 `/tmp` 是 tmpfs 的坑写进规范。
+- `.trellis/spec/frontend/index.md`：同步两处目录描述状态。

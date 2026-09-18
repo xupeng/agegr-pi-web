@@ -42,14 +42,22 @@
   高度受 host 容器约束（host 有 `height: 100%`，父链 `flex: 1; min-height: 0`）。
 - 参照 `.config-detail { flex: 1; min-height: 0; overflow-y: auto; }` 的滚动链模式。
 
-## 对话区字号（相对缩放）模式
+## 对话区字号与内容宽度模式
 
-- 偏好存 localStorage 的整数 offset（px），默认 0，clamp `[-4, +4]`；
-  读取/写入都经 `normalizeChatFontSizeOffset`，损坏回落 0
-  （`lib/chat-font-preference.ts`，参照 banban detailFontSizePreference）。
-- hook 用 `useSyncExternalStore` + 模块级 listeners（对齐 `hooks/useTheme.ts`），
-  设置面板与对话区即时同步，跨标签页经 storage 事件。
-- 应用：对话容器注入 CSS 变量 `--chat-font-size-offset`，`.markdown-body` 字号 =
-  `calc(var(--chat-font-size-base) + var(--chat-font-size-offset, 0px))`，
-  三个响应式断点只改变量 `--chat-font-size-base`（15.5/17/16px）。
-  未注入处回落 0px，文件预览等其余区域天然不受影响。
+- 唯一的偏好入口是 `hooks/useChatAppearance.ts`（`useSyncExternalStore` + 模块级
+  listeners，对齐 `hooks/useTheme.ts`；设置面板与对话区即时同步，跨标签页经 storage 事件）：
+  - 字号是**绝对值**：key `pi-chat-content-font-size`，默认 `14`，clamp `[12, 24]`
+    （`clampChatContentFontSize`）。旧的相对 offset key（`pi-chat-font-offset`，
+    clamp `[-4, +4]`）只作为迁移来源保留，读到时换算成绝对值。
+  - 内容宽度：key `pi-chat-content-width`，默认 `820`，clamp `[820, 2000]`。
+  - 损坏/缺失一律回落默认值，不对 localStorage 抛异常（读写都包 try/catch）。
+- 应用链（`app/globals.css`）：`.chat-content` 把绝对字号换算成相对量
+  `--chat-font-size-offset: calc(var(--chat-content-font-size, 14px) - 14px)`，
+  各排版表面统一用 `calc(Xpx + var(--chat-font-size-offset, 0px))` 缩放：
+  正文 `X=14`、表格 `X=13`、**扩展 widget 内容 `X=14`**（`.extension-widget-content`）。
+  载体变量 `--chat-content-font-size` 由 `:root` 兜底 `14px`，滚动条等非对话区域不消费该 offset，
+  因此天然不受影响；`ChatInput` 的 textarea 直接用 `var(--chat-content-font-size, 14px)`。
+- 约束：**新增任何对话区排版表面时，字号必须写成 `calc(X + var(--chat-font-size-offset, 0px))`，
+  不要写死 `rem/px`，也不要把 offset 直接套到非对话区域**（例如文件预览、设置面板）。
+  历史教训：扩展 widget 曾写死 `14px`，导致字号滑块对它无效（上游 `860698a` 修的就是这处）。
+- `lib/chat-font-preference.ts` 与 `--chat-font-size-base` 已不存在；不要再引用它们。
