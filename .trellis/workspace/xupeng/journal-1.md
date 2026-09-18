@@ -188,3 +188,49 @@ trellis-check 独立审查（无 P0，5 项待修，均已修复）：
 - Electron 顶部留白根因与移除：fork 曾在 personal 加 `html.electron` UA 嗅探（layout.tsx 内联脚本）+ `#pi-app-root { padding-top: 30px }`（d8469b5，为 pi-desktop 无边框壳的 macOS 红绿灯预留）；任何 Electron 渲染器都会命中 → 自带 chrome 的壳顶部出现多余空带。上游 agegr/pi-web 无此代码。已在 64341e0 整块移除、与上游一致（删 id/class/UA 脚本/CSS 共 5 文件，另更新 mobile-keyboard-viewport spec 中过时引用）。
 - git 同步：fork 的 GitHub origin/main 本就已是上游 v0.8.11（28bab3c），无需推送；origin/personal 已推送至 d4aa179。
 - 环境修复：~/.gitconfig 的 gh credential helper 路径写死 /usr/local/bin/gh（不存在，gh 实际在 /usr/bin/gh）→ git push 报 "could not read Username"；已改为 /usr/bin/gh。
+
+
+## Session 2: 同步上游 v0.9.1 之后的 9 个提交并发布 0.9.4
+
+**Date**: 2026-09-18
+**Task**: 同步上游 v0.9.1 之后的 9 个提交并发布 0.9.4
+**Branch**: `personal`
+
+### Summary
+
+把 upstream/main 在 v0.9.1 之后新增的 9 个提交合入 personal（唯一次冲突 components/ChatWindow.tsx 按设计表解决），同步 next 16.3.5 与两个锁文件，并在隔离 release root 中审计、打包、冒烟后发布 @xup3ng/pi-web@0.9.4（远端 tarball 与本地审计产物逐字节相同）。
+
+### Main Changes
+
+- merge: integrate upstream v0.9.1..860698a（9 提交；冲突块只取上游新视觉 + 保留 personal 的列内 ask_user 结构）
+- chore: sync pnpm lockfile for next 16.3.5（time-based 解析，无无关漂移）
+- docs(spec): 记录对话区字号/内容宽度链路与「验证基线必须来自锁一致依赖树」
+- chore: release 0.9.4（本地历史跨过 registry 已占用的 0.9.3；只改 2 个版本文件）
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `e5806e6` | (see git log) |
+| `2fb2d11` | (see git log) |
+| `d044656` | (see git log) |
+| `3fad0a6` | (see git log) |
+| `57924e3` | (see git log) |
+| `c634468` | (see git log) |
+
+### Testing
+
+- [OK] tsc exit 0；eslint 462 文件 0 诊断（干净安装真基线同样 0；历史 14 条来自陈旧 node_modules）
+- [OK] 全量单测 1239 pass / 0 fail（工作树与隔离候选树一致）；上游 5 个测试文件专项 27 pass
+- [OK] 隔离 npm ci / next build / tgz 审计 / 生产安装 smoke / publish dry-run 全部 exit 0
+- [OK] 远端 0.9.4 的 SHA512 SRI 与本地审计值一致且 tarball cmp 逐字节相同
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 可选：push origin/personal、打 tag、建 GitHub Release（需另行授权，本任务明确不做）
+- 可选：归档 09-12-sync-upstream-v091 / 09-13-npm-patch-release（本次未动）
+- 未覆盖：e2e/run.mjs 与浏览器交互 smoke（D5 验证深度不含）
