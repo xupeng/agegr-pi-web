@@ -1,0 +1,7 @@
+{"file": ".trellis/tasks/09-18-sync-upstream-post-v091/research/merge-forecast.md", "reason": "本次任务的实测证据：9 个提交逐条文件清单、merge-tree 预演结果、唯一冲突的冲突块原文、自动合并文件的语义核对、pnpm 锁同步探针结论。执行前必须先读，A3/A4 的判据全部来自这里。"}
+{"file": ".trellis/tasks/09-18-sync-upstream-post-v091/design.md", "reason": "技术设计：冲突解决逐项取值表（§2.3）、自动合并文件语义复核表（§2.4）、锁文件同步方式（§2.5）、验证设计（§2.6）、发布设计与门禁（§3）、回滚点（§2.8）。"}
+{"file": ".trellis/tasks/09-18-sync-upstream-post-v091/implement.md", "reason": "执行手册：A0–A8 / B1–B12 的有序步骤、GATE 停止点、每条命令与断言、回滚速查与不做清单。"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "frontend 层入口：开发前检查清单与质量检查入口，本任务改动集中在 ChatWindow/globals.css/i18n 属该层。"}
+{"file": ".trellis/spec/frontend/ask-user-protocol.md", "reason": "解 ChatWindow 冲突的核心判据：'UI 布局（卡片随消息流滚动）'小节明确空会话 ask_user 卡片必须在 header 与 composer 之间并保持 `padding: 0 16px 12px`（桌面 paddingRight 52），以及 askUserCardElement / askUserCardInColumn 的命名语义。冲突方案不得破坏这些约定。"}
+{"file": ".trellis/spec/frontend/settings-dialog-mobile.md", "reason": "对话区字号相对缩放模式与 `--chat-font-size-offset` 的既有约定；用于核对上游 860698a（扩展 widget 字号跟随聊天字号）合并后 CSS 变量语义是否成立。"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "上游 20ad98b（auth 限流）跨 route handler + 登录页 + i18n 三语 + 新 lib 模块；合并后需按跨层清单核对数据流与错误分支。"}

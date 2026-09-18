@@ -1,0 +1,28 @@
+{
+  "id": "sync-upstream-post-v091",
+  "name": "sync-upstream-post-v091",
+  "title": "同步上游 v0.9.1 之后的 9 个提交",
+  "description": "",
+  "status": "in_progress",
+  "dev_type": null,
+  "scope": "frontend",
+  "package": null,
+  "priority": "P2",
+  "creator": "xupeng",
+  "assignee": "xupeng",
+  "createdAt": "2026-09-18",
+  "completedAt": null,
+  "branch": "personal",
+  "base_branch": "personal",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {
+    "dev_type": "merge-and-release"
+  }
+}

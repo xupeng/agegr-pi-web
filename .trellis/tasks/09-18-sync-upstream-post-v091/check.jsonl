@@ -1,0 +1,8 @@
+{"file": ".trellis/tasks/09-18-sync-upstream-post-v091/research/merge-forecast.md", "reason": "检查的基准证据：9 个提交各自应产生的代码效果、唯一冲突的原文、自动合并文件的语义核对表、pnpm 锁最小化同步的实测结论。逐项对照它判断'上游改动是否真的落地'。"}
+{"file": ".trellis/tasks/09-18-sync-upstream-post-v091/prd.md", "reason": "R1–R8 要求与 AC1–AC7 验收标准；检查必须按 AC 逐条给结论，并确认未执行项（E2E/浏览器 smoke）被显式列为未覆盖。"}
+{"file": ".trellis/tasks/09-18-sync-upstream-post-v091/design.md", "reason": "冲突解决取值表与语义复核表是判断实现是否偏离设计的标准；§3.4 发布门禁清单是阶段 B 的检查依据。"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "frontend 层质量检查入口：确认本轮改动已按该层的 Pre-Development Checklist 与 Quality Check 走完。"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "代码标准与禁止模式；用于判断 diff 是否引入违规写法（注意：该文件目前是占位模板，不能当作 lint 全绿豁免依据）。"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "类型模式约定；上游改动含新模块 lib/auth-throttle.ts 与 lib/file-paths.ts 的路径处理，需核对类型边界。"}
+{"file": ".trellis/spec/frontend/ask-user-protocol.md", "reason": "复核 ChatWindow 冲突解是否保持空会话卡片列对齐 padding 与 askUserCardInColumn 语义（AC2 的核心判据）。"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "auth 限流的 route/UI/i18n 跨层一致性核对，以及'改了 A 层是否漏改 B 层'的检查清单。"}
