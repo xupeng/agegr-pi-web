@@ -3,6 +3,7 @@
 import { memo, useState, useRef, useEffect, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import { MarkdownBody } from "./MarkdownBody";
+import { PathText } from "./PathText";
 import { ImagePreview } from "./ImagePreview";
 import { ThinkingIcon } from "./ThinkingIcon";
 import { copyText } from "@/lib/clipboard";
@@ -18,7 +19,9 @@ import {
 } from "@/lib/image-mentions";
 import { isThinkingExpandedByDefault, THINKING_EXPANDED_EVENT } from "@/lib/thinking-expansion-preference";
 import { TurnWrittenFiles } from "./TurnWrittenFiles";
+import type { OpenWrittenFileHandler } from "./TurnWrittenFiles";
 import type { WrittenFile } from "@/lib/turn-written-files";
+import { extractSubagentSnapshotWrittenFiles, resolveAndMergeWrittenFiles } from "@/lib/written-file-sources";
 import { skillExpansionToCommand } from "@/lib/slash-display";
 import type { SubagentToolDetails } from "@/lib/subagent-extension";
 import type {
@@ -211,7 +214,7 @@ interface Props {
   toolResults?: Map<string, ToolResultMessage>;
   modelNames?: Record<string, string>;
   cwd?: string;
-  onOpenFile?: (filePath: string) => void;
+  onOpenFile?: OpenWrittenFileHandler;
   onOpenSession?: (sessionId: string) => void;
   entryId?: string;
   searchBlock?: AssistantContentBlock;
@@ -657,7 +660,7 @@ function AssistantMessageView({
   toolResults?: Map<string, ToolResultMessage>;
   modelNames?: Record<string, string>;
   cwd?: string;
-  onOpenFile?: (filePath: string) => void;
+  onOpenFile?: OpenWrittenFileHandler;
   onOpenSession?: (sessionId: string) => void;
   showTimestamp?: boolean;
   prevTimestamp?: number;
@@ -933,7 +936,7 @@ function BlockView({ block, searchTarget, toolResults, isStreaming, streamingDur
     const tc = block as ToolCallContent;
     const result = toolResults?.get(tc.toolCallId);
     const duration = toolCallDurations?.get(tc.toolCallId);
-    return <ToolCallBlock block={tc} result={result} duration={duration} onOpenSession={onOpenSession} />;
+    return <ToolCallBlock block={tc} result={result} duration={duration} onOpenFile={onOpenFile} onOpenSession={onOpenSession} />;
   }
   return null;
 }
@@ -1063,7 +1066,7 @@ function isSubagentToolDetails(value: unknown): value is SubagentToolDetails {
   return details.kind === "pi-web-subagent" && typeof details.sessionId === "string";
 }
 
-function ToolCallBlock({ block, result, duration, onOpenSession }: { block: ToolCallContent; result?: ToolResultMessage; duration?: number; onOpenSession?: (sessionId: string) => void }) {
+function ToolCallBlock({ block, result, duration, onOpenFile, onOpenSession }: { block: ToolCallContent; result?: ToolResultMessage; duration?: number; onOpenFile?: (filePath: string) => void; onOpenSession?: (sessionId: string) => void }) {
   const { t } = useI18n();
   const [expanded, setExpanded] = useState(false);
   const inputStr = getToolCallInputText(block);
@@ -1151,7 +1154,7 @@ function ToolCallBlock({ block, result, duration, onOpenSession }: { block: Tool
             wordBreak: "break-all",
           }}
         >
-          {inputStr}
+          <PathText text={inputStr} onOpenFile={onOpenFile} />
         </pre>
       )}
 
@@ -1167,6 +1170,7 @@ function ToolCallBlock({ block, result, duration, onOpenSession }: { block: Tool
             images={resultImages}
             isEmpty={resultIsEmpty}
             isError={isError}
+            onOpenFile={onOpenFile}
           />
         )
       )}
@@ -1410,11 +1414,12 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function PairedResult({ text, images, isEmpty, isError }: {
+function PairedResult({ text, images, isEmpty, isError, onOpenFile }: {
   text: string;
   images: ImageContent[];
   isEmpty: boolean;
   isError: boolean;
+  onOpenFile?: (filePath: string) => void;
 }) {
   const { t } = useI18n();
   const showText = !isEmpty || images.length === 0;
@@ -1472,7 +1477,7 @@ function PairedResult({ text, images, isEmpty, isError }: {
             opacity: isEmpty ? 0.6 : 1,
           }}
         >
-           {isEmpty ? t("i18n.noOutput") : text}
+           {isEmpty ? t("i18n.noOutput") : <PathText text={text} onOpenFile={onOpenFile} />}
         </pre>
       )}
     </div>
@@ -1562,7 +1567,7 @@ function CompactionFileList({ title, files }: { title: string; files: string[] }
   );
 }
 
-function CustomMessageView({ message, cwd, onOpenFile }: { message: CustomMessage; cwd?: string; onOpenFile?: (filePath: string) => void }) {
+function CustomMessageView({ message, cwd, onOpenFile }: { message: CustomMessage; cwd?: string; onOpenFile?: OpenWrittenFileHandler }) {
   const { t } = useI18n();
   const isHiddenDisplay = message.display === false;
   const [contentExpanded, setContentExpanded] = useState(!isHiddenDisplay);
@@ -1572,6 +1577,9 @@ function CustomMessageView({ message, cwd, onOpenFile }: { message: CustomMessag
   const images = getMessageImages(message.content);
   const hasDetails = message.details !== undefined;
   const detailsText = hasDetails ? safeJson(message.details) : "";
+  const writtenFiles = useMemo(() => message.customType === "pi-web:subagent-notification"
+    ? resolveAndMergeWrittenFiles(extractSubagentSnapshotWrittenFiles(message.details), cwd)
+    : [], [message.customType, message.details, cwd]);
   const title = formatCustomType(message.customType);
   const time = formatTime(message.timestamp);
 
@@ -1718,10 +1726,11 @@ function CustomMessageView({ message, cwd, onOpenFile }: { message: CustomMessag
               fontFamily: "var(--font-mono)",
             }}
           >
-            {detailsText}
+            <PathText text={detailsText} onOpenFile={onOpenFile} />
           </pre>
         )}
       </div>
+      <TurnWrittenFiles files={writtenFiles} onOpenFile={onOpenFile} />
     </div>
   );
 }

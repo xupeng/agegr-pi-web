@@ -49,6 +49,41 @@ export function getFileExt(filePath: string): string {
   return getBaseName(filePath).toLowerCase().split(".").pop() ?? "";
 }
 
+export type FileCategory = "document" | "code" | "image" | "data" | "config" | "other";
+
+const DOCUMENT_EXTENSIONS = new Set([
+  "md", "markdown", "mdx", "txt", "text", "rst", "adoc", "pdf", "doc", "docx", "odt", "rtf", "tex",
+]);
+const CODE_EXTENSIONS = new Set([
+  "ts", "tsx", "mts", "cts", "js", "jsx", "mjs", "cjs", "py", "pyi", "rb", "go", "rs", "java", "kt", "kts",
+  "c", "h", "cc", "cpp", "cxx", "hpp", "hh", "cs", "php", "swift", "scala", "sh", "bash", "zsh", "fish",
+  "sql", "html", "htm", "css", "scss", "sass", "less", "vue", "svelte", "lua", "r", "pl", "pm", "ex", "exs",
+  "erl", "hs", "clj", "cljs", "dart", "zig", "nim", "v", "asm", "gradle", "proto",
+]);
+const DATA_EXTENSIONS = new Set([
+  "json", "jsonc", "json5", "jsonl", "ndjson", "yaml", "yml", "toml", "csv", "tsv", "xml", "db", "sqlite",
+  "sqlite3", "parquet", "avro", "har",
+]);
+const CONFIG_EXTENSIONS = new Set([
+  "ini", "cfg", "conf", "properties", "env", "lock", "editorconfig", "gitignore", "gitattributes", "dockerignore",
+  "npmrc", "nvmrc", "babelrc", "eslintrc", "prettierrc", "terraformrc",
+]);
+
+/**
+ * Coarse bucket used by the turn artifact card's type line. Falls back to
+ * `other` for extension-less files (e.g. `Makefile`) and anything unrecognized.
+ */
+export function getFileCategory(filePath: string): FileCategory {
+  const ext = getFileExt(filePath);
+  if (!ext) return "other";
+  if (IMAGE_EXT_TO_MIME[ext]) return "image";
+  if (DOCUMENT_EXTENSIONS.has(ext)) return "document";
+  if (CODE_EXTENSIONS.has(ext)) return "code";
+  if (DATA_EXTENSIONS.has(ext)) return "data";
+  if (CONFIG_EXTENSIONS.has(ext)) return "config";
+  return "other";
+}
+
 export function getImageMime(filePath: string): string | null {
   return IMAGE_EXT_TO_MIME[getFileExt(filePath)] ?? null;
 }

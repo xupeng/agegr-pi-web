@@ -10,6 +10,8 @@ const jiti = createJiti(import.meta.url, {
   tsconfigPaths: true,
 });
 const { MarkdownBody } = await jiti.import("./MarkdownBody.tsx");
+const { FileIndexProvider } = await jiti.import("./FileIndexContext.tsx");
+const { buildFileIndexLookup } = await jiti.import("../lib/path-linkify.ts");
 const { normalizeDisplayMath } = await jiti.import("../lib/markdown.ts");
 const globalCss = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
 const { I18nProvider } = await jiti.import("@/hooks/useI18n");
@@ -24,6 +26,25 @@ function renderMarkdown(markdown, props = {}) {
         onOpenFile() {},
         ...props,
       }, markdown),
+    ),
+  );
+}
+
+function renderMarkdownWithIndex(markdown, files, props = {}) {
+  const lookup = buildFileIndexLookup(files, "/home/me/project");
+  return renderToStaticMarkup(
+    React.createElement(
+      I18nProvider,
+      null,
+      React.createElement(
+        FileIndexProvider,
+        { lookup },
+        React.createElement(MarkdownBody, {
+          cwd: "/home/me/project",
+          onOpenFile() {},
+          ...props,
+        }, markdown),
+      ),
     ),
   );
 }
@@ -161,4 +182,46 @@ test("keeps Mermaid source visible while the response is streaming", () => {
   assert.doesNotMatch(html, /mermaid-block-loading/);
   assert.match(html, />Preview</);
   assert.match(html, /A --&gt; B/);
+});
+
+test("does not nest automatic inline-code links inside existing markdown anchors", () => {
+  for (const href of ["prd.md", "https://example.com"]) {
+    const html = renderMarkdownWithIndex("[`prd.md`](" + href + ")", ["prd.md"]);
+    assert.equal((html.match(/<a /g) ?? []).length, 1);
+    assert.match(html, /<code class="markdown-inline-code">prd.md<\/code>/);
+  }
+});
+
+test("links inline code paths that exist in the file index", () => {
+  const html = renderMarkdownWithIndex("see `prd.md` now", [".trellis/tasks/x/prd.md"]);
+
+  assert.match(
+    html,
+    /<a (?=[^>]*href="\.trellis\/tasks\/x\/prd\.md")(?=[^>]*class="markdown-inline-code markdown-file-link")[^>]*>prd\.md<\/a>/,
+  );
+  assert.doesNotMatch(html, /\snode=/);
+});
+
+test("leaves inline code paths plain when the index has no match", () => {
+  const unmatched = renderMarkdownWithIndex("see `prd.md` now", ["other.md"]);
+  const noIndex = renderMarkdown("see `prd.md` now");
+
+  assert.match(unmatched, /<code class="markdown-inline-code">prd\.md<\/code>/);
+  assert.doesNotMatch(unmatched, /markdown-file-link/);
+  assert.match(noIndex, /<code class="markdown-inline-code">prd\.md<\/code>/);
+  assert.doesNotMatch(noIndex, /markdown-file-link/);
+});
+
+test("linkifies bare text paths in paragraphs only when the index confirms them", () => {
+  const linked = renderMarkdownWithIndex("open .trellis/tasks/x/prd.md now", [".trellis/tasks/x/prd.md"]);
+  const missing = renderMarkdownWithIndex("open src/missing.ts now", [".trellis/tasks/x/prd.md"]);
+
+  assert.match(linked, /<a href="\.trellis\/tasks\/x\/prd\.md" class="path-text-link">\.trellis\/tasks\/x\/prd\.md<\/a>/);
+  assert.doesNotMatch(missing, /<a /);
+});
+
+test("keeps table cell text unwrapped when the index has no match", () => {
+  const html = renderMarkdownWithIndex("| # |\n|---|\n| 1 |", ["src/a.ts"]);
+
+  assert.match(html, /<tbody><tr><td>1<\/td>/);
 });

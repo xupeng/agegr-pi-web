@@ -29,6 +29,15 @@ function renderMessage(message, props = {}) {
   );
 }
 
+test("renders background artifacts on their completion notification only", () => {
+  const message = {
+    role: "custom", customType: "pi-web:subagent-notification", content: "done", display: true,
+    details: { kind: "pi-web-subagent", sessionId: "child", writtenFiles: [{ filePath: "/repo/artifact.md" }] },
+  };
+  assert.match(renderMessage(message, { cwd: "/repo", onOpenFile() {} }), /title="\/repo\/artifact.md"/);
+  assert.doesNotMatch(renderMessage({ ...message, customType: "unrelated" }), /title="\/repo\/artifact.md"/);
+});
+
 test("updates a reused message when its written files change", () => {
   const props = { message: { role: "assistant", content: [] } };
   assert.equal(MessageView.compare(props, props), true);

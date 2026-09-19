@@ -1,10 +1,13 @@
 "use client";
 
-import { useMemo, type MouseEvent } from "react";
+import { Children, useCallback, useMemo, type MouseEvent, type ReactNode } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import { resolveLocalFileHref, shouldOpenLocalFileInApp } from "@/lib/file-links";
 import { encodeFilePathForApi } from "@/lib/file-paths";
+import { linkifyPlainText, linkifyToken, type FileIndexLookup } from "@/lib/path-linkify";
 import { markdownRehypePlugins, markdownRemarkPlugins, markdownUrlTransform, normalizeDisplayMath } from "@/lib/markdown";
+import { FileIndexProvider, useFileIndexContext } from "./FileIndexContext";
+import { PathText } from "./PathText";
 import { MermaidBlock, CodeBlock } from "./MermaidBlock";
 
 interface MarkdownBodyProps {
@@ -15,11 +18,39 @@ interface MarkdownBodyProps {
   onOpenFile?: (filePath: string) => void;
 }
 
+/**
+ * Linkify only the string children of a block element. Elements (`code`, `a`,
+ * `strong` …) are left untouched so nested markup keeps its own renderer, and
+ * text with no index hit is returned byte-identical to the default output.
+ */
+function linkifyChildren(
+  children: ReactNode,
+  lookup: FileIndexLookup,
+  onOpenFile: (filePath: string) => void,
+): ReactNode {
+  let changed = false;
+  const mapped = Children.map(children, (child) => {
+    if (typeof child !== "string") return child;
+    const segments = linkifyPlainText(child, { lookup });
+    if (!segments.some((segment) => segment.match)) return child;
+    changed = true;
+    return <PathText text={child} onOpenFile={onOpenFile} />;
+  });
+  return changed ? mapped : children;
+}
+
 export function MarkdownBody({ children, className, isStreaming, cwd, onOpenFile }: MarkdownBodyProps) {
   const normalizedMarkdown = useMemo(() => normalizeDisplayMath(children), [children]);
+  const lookup = useFileIndexContext();
+  const linkifyBlockChildren = useCallback(
+    (node: ReactNode) => (lookup && onOpenFile ? linkifyChildren(node, lookup, onOpenFile) : node),
+    [lookup, onOpenFile],
+  );
   // Stable renderer identities keep stateful blocks mounted across message hover updates.
   const components = useMemo<Components>(() => ({
-    code({ className, children, ...props }) {
+    code: function CodeRenderer({ className, children, ...props }) {
+      // An existing anchor disables automatic links for all its descendants.
+      const codeLookup = useFileIndexContext();
       const lang = className?.replace("language-", "").toLowerCase() ?? "";
       const raw = String(children);
       const isBlock = className?.includes("language-") || raw.includes("\n");
@@ -35,6 +66,26 @@ export function MarkdownBody({ children, className, isStreaming, cwd, onOpenFile
         }
         return <CodeBlock code={raw.replace(/\n$/, "")} lang={lang} isStreaming={isStreaming} />;
       }
+      // `node` is react-markdown metadata, not a DOM attribute.
+      delete props.node;
+      const match = codeLookup && onOpenFile ? linkifyToken(raw, { lookup: codeLookup }) : null;
+      if (match && onOpenFile) {
+        const filePath = match.filePath;
+        const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
+          if (!shouldOpenLocalFileInApp(event)) return;
+          event.preventDefault();
+          onOpenFile(filePath);
+        };
+        return (
+          <a
+            href={match.relativePath}
+            className="markdown-inline-code markdown-file-link"
+            onClick={handleClick}
+          >
+            {children}
+          </a>
+        );
+      }
       return (
         <code
           className="markdown-inline-code"
@@ -47,6 +98,22 @@ export function MarkdownBody({ children, className, isStreaming, cwd, onOpenFile
     pre({ children }) {
       return <>{children}</>;
     },
+    p({ children, ...props }) {
+      delete props.node;
+      return <p {...props}>{linkifyBlockChildren(children)}</p>;
+    },
+    li({ children, ...props }) {
+      delete props.node;
+      return <li {...props}>{linkifyBlockChildren(children)}</li>;
+    },
+    td({ children, ...props }) {
+      delete props.node;
+      return <td {...props}>{linkifyBlockChildren(children)}</td>;
+    },
+    th({ children, ...props }) {
+      delete props.node;
+      return <th {...props}>{linkifyBlockChildren(children)}</th>;
+    },
     a({ href, children, ...props }) {
       // `node` is react-markdown metadata, not a DOM attribute.
       delete props.node;
@@ -55,7 +122,7 @@ export function MarkdownBody({ children, className, isStreaming, cwd, onOpenFile
       if (!filePath || !openFile) {
         return (
           <a href={href} {...props} target="_blank" rel="noopener noreferrer">
-            {children}
+            <FileIndexProvider lookup={null}>{children}</FileIndexProvider>
           </a>
         );
       }
@@ -70,7 +137,7 @@ export function MarkdownBody({ children, className, isStreaming, cwd, onOpenFile
 
       return (
         <a href={href} {...props} onClick={handleClick}>
-          {children}
+          <FileIndexProvider lookup={null}>{children}</FileIndexProvider>
         </a>
       );
     },
@@ -91,7 +158,7 @@ export function MarkdownBody({ children, className, isStreaming, cwd, onOpenFile
         </div>
       );
     },
-  }), [cwd, isStreaming, onOpenFile]);
+  }), [cwd, isStreaming, onOpenFile, linkifyBlockChildren]);
 
   return (
     <div className={["markdown-body", className].filter(Boolean).join(" ")}>
