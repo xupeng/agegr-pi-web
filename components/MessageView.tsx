@@ -886,7 +886,7 @@ function AssistantMessageView({
             background: "rgba(234,179,8,0.07)",
             color: "#ca8a04",
             fontFamily: "var(--font-mono)",
-            fontSize: 12,
+            fontSize: "calc(12px + var(--chat-font-size-offset, 0px))",
             lineHeight: 1.5,
             whiteSpace: "pre-wrap",
             overflowWrap: "anywhere",
@@ -1208,6 +1208,7 @@ function ToolCallBlock({ block, result, duration, onOpenFile, onOpenSession }: {
           text={resultText ?? ""}
           isEmpty={resultIsEmpty}
           isError={isError}
+          onOpenFile={onOpenFile}
         />
       )}
       {expanded && result && !patchFiles && (

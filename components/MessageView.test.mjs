@@ -18,6 +18,9 @@ const {
 } = await jiti.import("./MessageView.tsx");
 const { I18nProvider } = await jiti.import("@/hooks/useI18n");
 const { splitFinalAssistantBlocks } = await jiti.import("@/lib/message-display");
+const { FileIndexProvider } = await jiti.import("./FileIndexContext.tsx");
+const { buildFileIndexLookup } = await jiti.import("../lib/path-linkify.ts");
+const { setToolCallExpanded } = await jiti.import("../lib/tool-call-expansion.ts");
 
 function renderMessage(message, props = {}) {
   return renderToStaticMarkup(
@@ -25,6 +28,25 @@ function renderMessage(message, props = {}) {
       I18nProvider,
       null,
       React.createElement(MessageView, { message, ...props }),
+    ),
+  );
+}
+
+/**
+ * Renders inside a file index so `PathText` can turn confirmed paths into links.
+ * `cwd` matches the lookup root, which is what authorizes a token.
+ */
+function renderMessageWithIndex(message, files, props = {}) {
+  const lookup = buildFileIndexLookup(files, "/repo");
+  return renderToStaticMarkup(
+    React.createElement(
+      I18nProvider,
+      null,
+      React.createElement(
+        FileIndexProvider,
+        { lookup },
+        React.createElement(MessageView, { message, cwd: "/repo", ...props }),
+      ),
     ),
   );
 }
@@ -380,6 +402,45 @@ test("marks apply_patch returned failures as errors even when isError is unset",
   assert.match(html, /border:1px solid rgba\(248,113,113,0\.45\)/);
   assert.match(html, />apply_patch</);
   assert.doesNotMatch(html, /border:1px solid rgba\(34,197,94,0\.25\)/);
+});
+
+test("keeps fork path links on an expanded apply_patch failure result", () => {
+  // The upstream refactor split PairedResult into an error branch and a plain
+  // branch. Every branch must still hand the fork's file-index handler through,
+  // or the path link silently degrades to plain text on partial failures.
+  const block = {
+    type: "toolCall",
+    toolCallId: "call-patch-links",
+    toolName: "apply_patch",
+    input: {
+      input: "*** Begin Patch\n*** Update File: src/a.ts\n-old\n+new\n*** End Patch",
+    },
+  };
+  const failed = {
+    role: "toolResult",
+    toolCallId: block.toolCallId,
+    content: [{ type: "text", text: "apply_patch partially failed.\nRecovery: MUST read src/a.ts before retrying." }],
+    details: {
+      result: { appliedFiles: [], failures: [{ filePath: "src/a.ts", message: "context mismatch" }] },
+    },
+  };
+
+  setToolCallExpanded(block.toolCallId, true);
+  try {
+    const html = renderMessageWithIndex({
+      role: "assistant",
+      provider: "openai",
+      model: "gpt-test",
+      content: [block],
+    }, ["src/a.ts"], {
+      toolResults: new Map([[block.toolCallId, failed]]),
+      onOpenFile() {},
+    });
+
+    assert.match(html, /<a href="src\/a\.ts" class="path-text-link">src\/a\.ts<\/a>/);
+  } finally {
+    setToolCallExpanded(block.toolCallId, false);
+  }
 });
 
 test("renders custom-message images as buttons that open a larger preview", () => {
