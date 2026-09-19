@@ -1,0 +1,30 @@
+Cascadia Code webfont notices
+=============================
+
+The four Cascadia Code webfont files in this directory are redistributed
+unmodified:
+
+  cascadia-code-latin-400-normal.woff2
+  cascadia-code-latin-500-normal.woff2
+  cascadia-code-latin-600-normal.woff2
+  cascadia-code-latin-700-normal.woff2
+
+They are the "latin" subset, "normal" style, weights 400/500/600/700, as
+published in the npm package @fontsource/cascadia-code@5.3.0
+(https://www.npmjs.com/package/@fontsource/cascadia-code), which sources them
+from the Google Fonts repository
+(https://github.com/google/fonts/tree/main/ofl/cascadiacode). The SHA-256 of
+each bundled file matches the Fontsource 5.3.0 latin subset byte-for-byte:
+
+  923fd5a61f1618f4597422b66172d0d8615577f81eb9382724390ec8cb8bfd5d  cascadia-code-latin-400-normal.woff2
+  d4994c01c11d6b9a49a2b44e0a3711934c99a35268ab9303a7b9dcc30495341e  cascadia-code-latin-500-normal.woff2
+  be5e5cbe3958e21cf2c7404e09853dcc83cf667e71327264274dd26fc8d92d9b  cascadia-code-latin-600-normal.woff2
+  db2452f9551ba42a0b2b5ef27a3e9438737922fbdaabd71a2446eaf96fe81ad9  cascadia-code-latin-700-normal.woff2
+
+Upstream font: Cascadia Code
+Copyright (c) 2019 - Present, Microsoft Corporation,
+with Reserved Font Name Cascadia Code.
+License: SIL Open Font License, Version 1.1 (see LICENSE-cascadia-code.txt).
+Upstream source: https://github.com/microsoft/cascadia-code
+Verbatim Google Fonts OFL:
+  https://github.com/google/fonts/blob/main/ofl/cascadiacode/OFL.txt
