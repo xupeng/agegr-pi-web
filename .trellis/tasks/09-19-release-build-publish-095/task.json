@@ -3,7 +3,7 @@
   "name": "release-build-publish-095",
   "title": "隔离构建并发布 @xup3ng/pi-web 0.9.5",
   "description": "在隔离 release root 内构建 0.9.5、逐项审计 tgz（含 public/fonts 许可与 NOTICE）、安装 smoke，再由用户终端执行 public/latest 发布并做有界核验。",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,
