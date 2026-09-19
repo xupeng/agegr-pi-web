@@ -10,6 +10,7 @@ import {
   isWindowsAbsolutePath,
 } from "@/lib/file-access";
 import { buildEntriesFromFiles, filterFileEntries, type FileIndexEntry } from "@/lib/file-fuzzy";
+import { subtractDeletedPaths } from "@/lib/file-index-paths";
 
 const execFileAsync = promisify(execFile);
 
@@ -61,12 +62,26 @@ function getIndexCache(): Map<string, CacheEntry> {
 
 async function listWithGit(cwd: string): Promise<FileListing | null> {
   try {
-    const { stdout } = await execFileAsync(
-      "git",
-      ["-C", cwd, "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
-      { timeout: 10_000, maxBuffer: 64 * 1024 * 1024, env: { ...process.env, LC_ALL: "C" } },
+    // `--cached` still lists tracked files deleted from the working tree; those
+    // are dead links for the viewer, so subtract them. `--deleted` is a second
+    // cheap index read (NUL-separated, unlike the subtraction set). If it fails
+    // (unusually old git) keep the listing rather than failing the whole route.
+    const [listed, deleted] = await Promise.all([
+      execFileAsync(
+        "git",
+        ["-C", cwd, "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
+        { timeout: 10_000, maxBuffer: 64 * 1024 * 1024, env: { ...process.env, LC_ALL: "C" } },
+      ),
+      execFileAsync(
+        "git",
+        ["-C", cwd, "ls-files", "--deleted", "-z"],
+        { timeout: 10_000, maxBuffer: 64 * 1024 * 1024, env: { ...process.env, LC_ALL: "C" } },
+      ).catch(() => ({ stdout: "" })),
+    ]);
+    const all = subtractDeletedPaths(
+      listed.stdout.split("\0").filter(Boolean),
+      deleted.stdout.split("\0").filter(Boolean),
     );
-    const all = stdout.split("\0").filter(Boolean);
     if (all.length > GIT_HARD_CAP) {
       return { files: all.slice(0, GIT_HARD_CAP), hardTruncated: true };
     }
