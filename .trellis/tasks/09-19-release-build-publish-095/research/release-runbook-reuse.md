@@ -571,7 +571,76 @@ pnpm store: ~/.local/share/pnpm/store/v10 (1.9G)；~/.npm 1.3G
 
 ---
 
-## 8. 证据索引（archive 里可复现的原件）
+## 8. 0.9.5 实际发布后的补充（2026-09-19 实跑修正）
+
+本节是 0.9.5 真实发布后的**实测修正**，下次照做时优先于前文的推断。
+
+### 8.1 smoke 探测 public 资源的 URL 必须去掉 `public/`
+
+Next.js 把 `public/` 的内容挂在站点根，所以：
+
+| 文件系统路径 | 正确 URL |
+|---|---|
+| `public/fonts/LICENSE-cascadia-code.txt` | `/fonts/LICENSE-cascadia-code.txt` |
+| `public/fonts/NOTICE.txt` | `/fonts/NOTICE.txt` |
+| `public/offline.html`、`public/sw.js`、`public/provider-icons.svg` | `/offline.html`、`/sw.js`、`/provider-icons.svg` |
+
+0.9.5 首跑把 probe 写成 `/public/fonts/...` 得到 **404**，误报为「字体许可缺失」；
+改成 `/fonts/...` 后为 **200**（4395 B / 1477 B）。**产物本身没有问题** ——
+`tar -tzf` 审计（§3）才是字体许可的权威判据，HTTP probe 只是运行时可访问性的补充。
+
+### 8.2 `npm view <pkg>@<不会存在的版本>` 在 E404 时也输出 JSON
+
+轮询脚本若只判断「输出非空」，会把**错误信封**当作「已可见」而提前退出：
+
+```json
+{"error":{"code":"E404","summary":"No match found for version 0.9.5", ...}}
+```
+
+判据必须是有没有 `version` 字段（或 `dist.integrity` 非空），例如：
+
+```bash
+INFO="$(npm view @xup3ng/pi-web@0.9.5 version dist.integrity --json 2>/dev/null || true)"
+echo "$INFO" | grep -q '"version"' || { sleep 30; continue; }
+```
+
+### 8.3 `pgrep -f` 会匹配到自己的 shell 包装
+
+清理断言 `installed-server processes left` 用 `pgrep -f '<root>/install/bin/pi-web'` 时，
+**当前 bash 命令行本身**（其中含该字符串）也会被计入，造成假残留。
+判据取「真实 node 进程」更稳：
+
+```bash
+ps -eo pid,cmd | grep -E 'install/bin/pi-web' | grep -v grep | grep -v 'bash -c'
+```
+
+另外，若曾在烟测之外手动起过服务，务必先关掉再跑最终 smoke，否则残留会被算进断言。
+
+### 8.4 0.9.5 实测数值（下次的参照基线）
+
+| 项 | 0.9.5 | 0.9.4（对照） |
+|---|---|---|
+| `entryCount` / `total files` / `filelist` 行数 | **706** | 703 |
+| tgz 字节 | 6,092,922 | 6,052,906 |
+| `unpackedSize` | 33,871,076 | 33,807,514 |
+| sha256 | `19f52aaf…37b75b8` | `eb6bb81c…a551f1` |
+| SRI | `sha512-EnTszgQw…x2RSQ==` | `sha512-WX+LIbwPx…EzwXmw==` |
+| `sha1`(shasum) | `c184c639…808046c` | `2229931f…fd972d` |
+| `npm ci` / `build` / 安装 smoke 耗时 | 58.5s / 199.8s / 63.4s | 56s / 190s / 60s |
+| BUILD_ID | `sDkZvINGJKQuzWOOBAf0c` | — |
+| `node` | v26.1.0（本机） | — |
+| 字体许可两文件 | **在包内（2 条）** | **缺失（0 条）** |
+
+### 8.5 发布受理 → 可见的时间
+
+0.9.5：`npm publish` 受理 `2026-09-19T21:56:30Z`，registry 于
+`2026-09-19T22:01:05.113Z` 可见（约 **4.5 分钟**）。与 0.9.4 的约 6 分钟同量级，
+继续按「可见前不判失败、不重发、上限 10 分钟」执行。
+
+## 9. 证据索引（archive 里可复现的原件）
+
+回执字段与本地审计的对照位置见本次发布报告
+`09-19-release-build-publish-095/research/release-report.md` §6A–§6B。
 
 ```
 .trellis/tasks/archive/2026-09/09-18-sync-upstream-post-v091/

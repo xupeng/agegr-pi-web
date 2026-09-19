@@ -1,7 +1,8 @@
 # 发布报告：@xup3ng/pi-web 0.9.5
 
-> 状态：**B1–B7 已完成并全绿；B8 批准门待用户决策**。真实 `npm publish`（B9）尚未执行。
-> 所有命令都在隔离 release root 内，主 checkout 未被 build/install 触碰。
+> 状态：**B1–B12 全部完成**。`@xup3ng/pi-web@0.9.5` 已于 2026-09-19 发布到 npm public/latest，
+> 有界核验全部通过，本地 bump 提交与 push 已完成。所有构建/打包/安装命令都在隔离 release root
+> 内执行，主 checkout 未被 build/install 触碰。
 
 ## 0. 结论摘要
 
@@ -18,7 +19,7 @@
 | tgz SRI | `sha512-EnTszgQwUntXZAf5+oIY7cRpAhMQJAg3zeCQRt7qFb9mkeeKdXRc0Pue32GUED2HE+P4oQ6JIlm4mvgu7x2RSQ==` |
 | unpackedSize | 33,871,076 B |
 | **字体许可** | ✅ 两文件在 tgz 内（AC4 达成，见 §4） |
-| registry 前置 | `0.9.5` **仍 E404**；`latest` = `0.9.4`；`npm whoami` = **E401（需用户重新登录）** |
+| 发布结果 | ✅ 已发布；`latest` = `0.9.5`；发布受理 `2026-09-19T21:56:30Z`，registry 可见 `2026-09-19T22:01:05.113Z` |
 
 ## 1. 隔离边界（B1）
 
@@ -107,7 +108,7 @@ Next.js 把 `public/` 内容挂在站点根，正确路径是 `/fonts/...`（实
 另：一次探测中出现 `installed-server processes left: 2`，定位为「我手动启动的残留服务 +
 被 `pgrep -f` 匹配到的自身 `bash -c` 包装」；清理后复跑为 `0`。
 
-## 6. B8 批准门（待用户决策）
+## 6. B8 批准门（已通过）
 
 真实发布（B9）由用户在**自己终端**执行，因为需要 2FA/OTP：
 
@@ -118,14 +119,98 @@ bash /home/xupeng/dev/personal/forked/.pi-web-v095-release-20260919-220023/b9-pu
 该脚本先 `sha256sum -c` 校验上述 sha256，再 `exec npm publish` **同一个** tgz
 （不重新构建、不重新打包）。脚本自检已通过（`...tgz: OK`）。
 
-发布前置（用户侧）：`npm whoami` 当前 **E401**，需先在终端 `npm login`。
+发布前置（用户侧）：`npm whoami` 当时为 **E401**，用户先在自己终端完成 `npm login`。
+
+**用户决策记录（2026-09-19）**：
+
+1. 批准执行不可逆的 `public/latest` 发布（0.9.5）；
+2. `09-19-font-license-in-next-release` 在发布成功后归档；
+3. 接受「e2e 未跑」的残余风险后发布。
+
+## 6A. B9 真实发布（用户终端执行，2026-09-19）
+
+命令（用户终端）：`bash $ROOT/b9-publish.sh`。脚本先 `sha256sum -c` 校验
+`19f52aaf…37b75b8`（自检 `...tgz: OK`），再 `exec npm publish` **同一个** tgz。
+
+脱敏回执（npm debug log `~/.npm/_logs/2026-09-19T21_56_30_327Z-debug-0.log`）：
+
+```
+21 notice version: 0.9.5
+25 notice shasum: c184c639805f8c93aee460b6f808f32ac808046c
+26 notice integrity: sha512-EnTszgQwUntXZ[...]lm4mvgu7x2RSQ==
+27 notice total files: 706
+30 notice Publishing to https://registry.npmjs.org/ with tag latest and public access
+31 http fetch PUT 401 https://registry.npmjs.org/@xup3ng%2fpi-web 2211ms
+40 http fetch PUT 202 https://registry.npmjs.org/@xup3ng%2fpi-web 3921ms
+45 verbose exit 0
+46 info ok
+```
+
+即 web 授权 + 2FA（`PUT 401` → 浏览器授权 → `PUT 202` 受理），退出码 0。
+回执的 `version` / `shasum` / `integrity` / `total files` 与本地审计值**逐字一致**。
+全程未读取、未输出、未存储任何凭据或 OTP。
+
+## 6B. B10 有界核验（全部通过，约 4.5 分钟）
+
+轮询起点 `2026-09-19T21:57:43Z`，第 8 次尝试（`22:01:21Z` 请求）首次可见；
+registry 记录发布时间 `2026-09-19T22:01:05.113Z`。**远低于 10 分钟上限，未发生重发。**
+
+| 检查 | 期望 | 远端实测 | 结论 |
+|---|---|---|---|
+| exact version | 0.9.5 | `0.9.5` | ✅ |
+| `dist-tags.latest` | 0.9.5 | `{"latest":"0.9.5"}` | ✅ |
+| `versions` 含新版本 | 含 0.9.5 | `…0.9.3, 0.9.4, 0.9.5` | ✅ |
+| `dist.integrity` | `sha512-EnTszgQw…x2RSQ==` | 逐字相同 | ✅ |
+| `dist.shasum` | `c184c639…808046c` | 逐字相同 | ✅ |
+| `dist.fileCount` | 706 | `706` | ✅ |
+| `dist.unpackedSize` | 33,871,076 | `33871076` | ✅ |
+| maintainers | xup3ng | `["xup3ng <recordus@gmail.com>"]` | ✅ |
+| 发布时间 | 记录 | `2026-09-19T22:01:05.113Z` | ✅ |
+| **远端 tgz 字节级比对** | 与本地封存件相同 | 下载后 sha256 = `19f52aaf…37b75b8`，`cmp` **逐字节相同** | ✅ |
+| **远端 tgz 内字体许可** | 命中 2 条 | `package/public/fonts/LICENSE-cascadia-code.txt`、`NOTICE.txt` | ✅ |
+| `0.9.4` 未被改写 | integrity 保持原值 | `sha512-WX+LIbwPxXCMn…EzwXmw==` 未变 | ✅ |
+
+证据：`evidence/remote-0.9.5.json`、`evidence/remote-0.9.5.tgz`、
+`evidence/remote-font-license.txt`。
+
+## 6C. B11 本地 bump 提交与 push
+
+- 主 checkout 的 `package.json` / `package-lock.json` 由**同一 3 行差异**复现
+  （`version` 0.9.4 → 0.9.5），并与隔离 `$ROOT/src` 的两个文件 `diff` **完全一致**；
+  `pnpm-lock.yaml` **零改动**。
+- 按路径显式 `git add package.json package-lock.json`（**未** `git add -A`）；
+  提交 `86088d9 chore: release 0.9.5`，`git show --name-only` 中 `.pi/agents` 命中数 **0**。
+- `git push origin personal`：`2415bdb..86088d9 personal -> personal`；
+  `git rev-parse personal` == `git rev-parse origin/personal` == `86088d9bc00aedd6a46df13d2429fe9bf2ebc361`。
+- **未打 tag**（`git tag -l 'v0.9.5'` 为空）、未发 GitHub Release、未 push upstream。
+
+## 6D. 字体许可任务的收口
+
+`09-19-font-license-in-next-release` 的全部验收点在本次发布中满足：
+
+| 该任务 AC | 本次证据 |
+|---|---|
+| AC1 下一次发布的 tgz 清单同时含两文件（`tar -tzf` 原始输出） | §4，命中 2 条；**远端** tgz 同样命中 2 条（§6B） |
+| AC2 该次发布的源码树内 `node --test public/fonts.test.mjs` 通过 | §4，2/2 通过 |
+| AC3 证据写入该次发布任务的 `research/` 报告并注明 0.9.4 缺项已修复 | 本报告 §4 |
+| AC4 未对已发布的 0.9.4 做任何改动 | §6B，其 integrity 仍为 `sha512-WX+LIbwPxXCMn…EzwXmw==` |
+
+据此归档该任务（用户已批准「发布成功后归档」）。
 
 ## 7. 待办（B9–B12）
 
-- [ ] B9 用户执行 `b9-publish.sh`，agent 只记录脱敏回执
-- [ ] B10 有界核验（≤10 分钟）：version / latest / integrity / shasum / fileCount 与本地逐字一致
-- [ ] B11 主 checkout bump 提交（仅 `package.json`/`package-lock.json`）+ `git push origin personal`
-- [ ] B12 回填本报告的发布回执、核验对照、push 结果与未覆盖项
+- [x] B9 用户执行 `b9-publish.sh`（脱敏回执见 §6A）
+- [x] B10 有界核验（§6B，全部通过）
+- [x] B11 bump 提交 + push（§6C）
+- [x] B12 回填发布报告（本文件）
+
+## 7A. 流程偏差（如实记录）
+
+- **核验脚本的一次假阴性**：`b10-verify.sh` 初版把 `npm view` 的 **E404 错误信封**也当作
+  「已可见」（因为它同样是 JSON），导致第一次运行在第 1 次尝试就误判 `integrity match: NO` 并退出。
+  修正为「必须存在 `version` 字段」后重新轮询。**未因此重发**（脚本只读）。
+- **smoke 脚本的路径错误**：见 §5.1（`/public/fonts/...` → `/fonts/...`）。
+- **手动启动服务器的残留进程**：见 §5.1 末（已清理，最终 `installed-server processes left: 0`）。
 
 ## 8. 未覆盖项与残余风险
 
