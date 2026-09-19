@@ -7,6 +7,7 @@ import { parseFrontmatter } from "./frontmatter";
 import { writePrivateFileAtomicSync } from "./atomic-file";
 import { isExistingPathWithinRoots } from "./path-security";
 import { PRESET_READ_ONLY } from "./tool-presets";
+import type { WrittenFile } from "./written-file-sources";
 import type { SessionEntry, SubagentSessionStatus } from "./types";
 
 export const SUBAGENT_META_TYPE = "pi-web:subagent";
@@ -104,6 +105,8 @@ export interface SubagentRunInfo {
   worktreePath?: string;
   worktreeBranch?: string;
   worktreeCleanupError?: string;
+  /** Files the child session wrote, snapshotted when the run finished. */
+  writtenFiles?: WrittenFile[];
 }
 
 const DEFAULT_TOOLS = ["read", "bash", "edit", "write", "grep", "find", "ls"];

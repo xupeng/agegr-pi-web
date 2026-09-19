@@ -11,6 +11,7 @@ import {
   type SubagentRunInfo,
 } from "./subagents";
 import { MAX_SUBAGENT_INPUT_FILES } from "./subagent-input";
+import type { WrittenFile } from "./written-file-sources";
 
 export const HOST_SUBAGENT_EXTENSION_NAME = "pi-web-subagents";
 const HOST_SUBAGENT_EXTENSION_PATH = `<inline:${HOST_SUBAGENT_EXTENSION_NAME}>`;
@@ -30,6 +31,8 @@ export interface SubagentToolDetails {
   worktreePath?: string;
   worktreeBranch?: string;
   worktreeCleanupError?: string;
+  /** Files the child session wrote, snapshotted at completion. Optional for backward compatibility. */
+  writtenFiles?: WrittenFile[];
 }
 
 export interface StartSubagentRequest {
@@ -100,6 +103,7 @@ export function subagentToolDetails(run: SubagentRunInfo): SubagentToolDetails {
     ...(run.worktreePath ? { worktreePath: run.worktreePath } : {}),
     ...(run.worktreeBranch ? { worktreeBranch: run.worktreeBranch } : {}),
     ...(run.worktreeCleanupError ? { worktreeCleanupError: run.worktreeCleanupError } : {}),
+    ...(run.writtenFiles && run.writtenFiles.length > 0 ? { writtenFiles: run.writtenFiles } : {}),
   };
 }
 
