@@ -1,0 +1,5 @@
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "检查阶段必须核对验证基线来源与计数对照，不能只看数字变小"}
+{"file": ".trellis/spec/frontend/trellis-subagent-records.md", "reason": "检查 R2 是否越界修改 producer 契约，或复用了会被 32 条截断的展示链路"}
+{"file": ".trellis/spec/frontend/settings-dialog-mobile.md", "reason": "检查卡片与新增对话区排版是否遵守字号变量与移动端约束"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "检查新契约是否已按规则登记"}
+{"file": ".trellis/tasks/09-19-clickable-file-paths/research/render-index-card-surfaces.md", "reason": "核对实现与研究的改造点/测试冲突点清单是否逐项落实（含既有断言不被破坏）"}

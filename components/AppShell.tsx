@@ -1036,8 +1036,11 @@ export function AppShell() {
     if (isMobile) setSidebarOpen(false);
   }, [isMobile]);
 
-  const handleOpenLinkedFile = useCallback((filePath: string) => {
-    handleOpenFile(filePath, getFileName(filePath), { sourceSessionId: selectedSession?.id ?? null });
+  const handleOpenLinkedFile = useCallback((filePath: string, options?: { modeHint?: "diff"; sourceSessionId?: string }) => {
+    handleOpenFile(filePath, getFileName(filePath), {
+      sourceSessionId: options?.sourceSessionId ?? selectedSession?.id ?? null,
+      modeHint: options?.modeHint,
+    });
   }, [handleOpenFile, selectedSession?.id]);
 
   const handleOpenTerminal = useCallback((cwd: string) => {

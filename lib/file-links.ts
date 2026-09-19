@@ -24,7 +24,7 @@ function safeDecode(value: string): string {
   }
 }
 
-function normalizeFilePathSlashes(filePath: string): string {
+export function normalizeFilePathSlashes(filePath: string): string {
   if (/^[a-zA-Z]:[\\/]/.test(filePath) || filePath.startsWith("\\\\")) {
     return filePath.replace(/\\/g, "/");
   }
@@ -35,7 +35,7 @@ function stripLineSuffix(filePath: string): string {
   return filePath.replace(/:\d+(?::\d+)?$/, "");
 }
 
-function normalizeLocalPath(filePath: string): string {
+export function normalizeLocalPath(filePath: string): string {
   const normalized = normalizeFilePathSlashes(filePath);
   const isWindowsDrive = /^[a-zA-Z]:\//.test(normalized);
   const isUnc = normalized.startsWith("//");
@@ -61,7 +61,7 @@ function normalizeLocalPath(filePath: string): string {
   return leadingSlash ? `/${joined}` : joined;
 }
 
-function isPathInside(candidate: string, root: string): boolean {
+export function isPathInside(candidate: string, root: string): boolean {
   const normalizedCandidate = normalizeLocalPath(candidate).replace(/\/+$/, "");
   const normalizedRoot = normalizeLocalPath(root).replace(/\/+$/, "");
   const useCaseInsensitive = /^[a-zA-Z]:\//.test(normalizedCandidate) || /^[a-zA-Z]:\//.test(normalizedRoot);
@@ -159,7 +159,7 @@ export function resolveLocalFilePath(filePath: string | undefined, baseDir?: str
       ?? normalizedBase?.match(/^(\/\/[^/]+\/[^/]+)(?:\/|$)/)?.[1];
     candidate = windowsRoot ? `${windowsRoot}${normalizedPath}` : normalizedPath;
   } else {
-    if (!normalizedBase) return null;
+    if (normalizedBase === undefined) return null;
     candidate = `${normalizedBase}/${normalizedPath}`;
   }
 

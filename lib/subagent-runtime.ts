@@ -9,6 +9,7 @@ import {
   type ModelRuntime,
 } from "@earendil-works/pi-coding-agent";
 import type { AgentSessionLike } from "./pi-types";
+import { extractWrittenFilesFromEntries } from "./written-file-sources";
 import {
   subagentFinalText,
   subagentToolDetails,
@@ -126,6 +127,23 @@ async function cleanupWorktree(
     return undefined;
   } catch (error) {
     return `Worktree retained at ${worktree.path}: ${error instanceof Error ? error.message : String(error)}`;
+  }
+}
+
+/**
+ * Snapshot the files a finished child session wrote. Never throws: a snapshot
+ * failure must not turn a completed subagent into a failed one.
+ */
+function snapshotWrittenFiles(
+  inner: AgentSessionLike,
+  cwd: string | undefined,
+): Pick<SubagentRunInfo, "writtenFiles"> {
+  try {
+    const entries = inner.sessionManager.getEntries() as unknown as SessionEntry[];
+    const writtenFiles = extractWrittenFilesFromEntries(entries, cwd);
+    return writtenFiles.length > 0 ? { writtenFiles } : {};
+  } catch {
+    return {};
   }
 }
 
@@ -362,6 +380,7 @@ export function createSubagentController(
 
         const cleanupError = await cleanupWorktree(parent.cwd, isolatedWorktree);
         if (cleanupError) result = { ...result, worktreeCleanupError: cleanupError };
+        result = { ...result, ...snapshotWrittenFiles(inner, childCwd) };
         const persisted: SubagentResultMetadata = {
           version: 1,
           status: result.status as SubagentResultMetadata["status"],
@@ -495,6 +514,7 @@ export function createSubagentController(
         ...(result.result ? { result: result.result } : {}),
         ...(result.error ? { error: result.error } : {}),
       });
+      result = { ...result, ...snapshotWrittenFiles(wrapper!.inner, wrapper!.cwd) };
       stored.run = result;
       request.onUpdate?.(result);
       getSubagentRuns().delete(request.sessionId);

@@ -769,6 +769,24 @@ pre, code {
   font-size: 0.92em;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--border) 70%, transparent);
 }
+.markdown-body .markdown-file-link {
+  color: var(--accent);
+  text-decoration: none;
+  cursor: pointer;
+}
+.markdown-body .markdown-file-link:hover {
+  text-decoration: underline;
+}
+.path-text-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.path-text-link:hover {
+  text-decoration-style: solid;
+}
 .markdown-body .contains-task-list {
   padding-left: 0;
   list-style: none;

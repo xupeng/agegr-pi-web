@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "核对验证基线与计数对照是否记录在案"}
+{"file": ".trellis/spec/frontend/settings-dialog-mobile.md", "reason": "核对设置 section 的移动端行为是否符合规范"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "核对新契约登记情况"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "核对是否重复实现了既有的原子写/设置外壳/来源校验能力"}

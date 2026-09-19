@@ -63,6 +63,20 @@ Questions to answer:
 - 提交前的最小集合：`node_modules/.bin/tsc --noEmit`、`npm run lint`、`npm test`
   三者退出码为 0，且计数与基线逐项对照记录在任务 `research/` 下。
 
+### 数据链路脚本不等于浏览器验证
+
+同一功能可能有两类证据，报告时必须分开写，不能互相冒充：
+
+- **数据链路脚本**：用真实 session 文件直接跑纯函数/提取层（例：`research/verify-e2e.mjs`
+  跑出 24 个产物、`research/verify-ac5.mjs` 量出 1242 → 1929 条路径）。它证明数据正确，
+  **不能**证明点击、右栏、视口布局。
+- **真实浏览器运行**（Playwright + 已安装的 Chromium）：凡依赖点击、右栏打开、viewport 的
+  断言都必须真跑（例：`e2e/clickable-file-paths.mjs`），并把断言输出与截图留在任务
+  `research/` 下。跑不起来时必须区分「环境阻塞」与「功能失败」，未覆盖的项就写「未覆盖」，
+  禁止用代码阅读推断成通过。
+- 沿用的既有前提：`e2e/` 依赖真实 dev server（先查端口、复用健康进程，禁止 `next build`）；
+  本机 Playwright 默认 revision 可能未安装，需显式使用已安装的 chromium headless shell。
+
 ---
 
 ## Code Review Checklist

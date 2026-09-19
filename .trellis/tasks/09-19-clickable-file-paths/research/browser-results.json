@@ -1,0 +1,70 @@
+[
+  {
+    "name": "AC8-loading",
+    "status": "PASS",
+    "evidence": {
+      "assertion": "No inline-code links while file-index response is held",
+      "screenshot": ".trellis/tasks/09-19-clickable-file-paths/research/browser-index-loading.png"
+    }
+  },
+  {
+    "name": "AC7",
+    "status": "PASS",
+    "evidence": {
+      "assertion": "Real inline-code click opens lib/auth-throttle.ts and recordAuthFailure content",
+      "screenshot": ".trellis/tasks/09-19-clickable-file-paths/research/browser-inline-open.png"
+    }
+  },
+  {
+    "name": "AC8-missing",
+    "status": "PASS",
+    "evidence": {
+      "assertion": "Out-of-index /tmp/baseline-lint.txt remains plain code, with no ancestor anchor",
+      "screenshot": ".trellis/tasks/09-19-clickable-file-paths/research/browser-missing-plain.png"
+    }
+  },
+  {
+    "name": "AC10",
+    "status": "PASS",
+    "evidence": {
+      "href": ".pi/agents/trellis-check.md",
+      "title": "/home/xupeng/dev/personal/forked/agegr-pi-web/.pi/agents/trellis-check.md",
+      "screenshot": ".trellis/tasks/09-19-clickable-file-paths/research/browser-tool-result-open.png"
+    }
+  },
+  {
+    "name": "AC11-cards",
+    "status": "PASS",
+    "evidence": {
+      "assertion": "Real loaded prd.md card has Document · MD, +6/-0 and all actions (historical +81/-10 lies outside loaded tail)",
+      "screenshot": ".trellis/tasks/09-19-clickable-file-paths/research/browser-cards-desktop.png"
+    }
+  },
+  {
+    "name": "AC11-diff",
+    "status": "PASS",
+    "evidence": {
+      "assertion": "Real historical session card Open diff opens app/globals.css with Diff aria-pressed=true",
+      "screenshot": ".trellis/tasks/09-19-clickable-file-paths/research/browser-card-diff.png"
+    }
+  },
+  {
+    "name": "AC11-mobile",
+    "status": "PASS",
+    "evidence": {
+      "bounds": {
+        "x": 16,
+        "y": 363.6875,
+        "width": 358,
+        "height": 91.5
+      },
+      "assertion": "390x844 card remains within viewport, no horizontal overflow",
+      "screenshot": ".trellis/tasks/09-19-clickable-file-paths/research/browser-cards-mobile.png"
+    }
+  },
+  {
+    "name": "AC6",
+    "status": "NOT COVERED",
+    "reason": "Real session predates writtenFiles snapshot producer; no new Agent run or fabricated persisted notification used."
+  }
+]
