@@ -1,0 +1,2 @@
+{"file": ".trellis/tasks/09-19-release-build-publish-095/research/release-runbook-reuse.md", "reason": "可复用的隔离脚本（env.sh/check-run.py/smoke.sh/b9-publish.sh）、B1-B12 步骤与 0.9.4 参照数值、字体许可核验方法"}
+{"file": ".trellis/tasks/09-19-merge-upstream-pre-095/research/upstream-merge-analysis.md", "reason": "确认发布基线 H 的来源与上游范围，避免混用旧基线"}

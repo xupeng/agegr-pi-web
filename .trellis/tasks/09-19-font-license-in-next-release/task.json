@@ -19,7 +19,7 @@
   "pr_url": null,
   "subtasks": [],
   "children": [],
-  "parent": null,
+  "parent": "09-19-npm-release-095",
   "relatedFiles": [],
   "notes": "",
   "meta": {}

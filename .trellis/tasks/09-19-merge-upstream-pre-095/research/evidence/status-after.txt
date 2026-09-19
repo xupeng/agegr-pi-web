@@ -1,0 +1,7 @@
+ M .pi/agents/trellis-check.md
+ M .pi/agents/trellis-implement.md
+ M .pi/agents/trellis-research.md
+ M .trellis/tasks/09-19-font-license-in-next-release/task.json
+?? .trellis/tasks/09-19-merge-upstream-pre-095/
+?? .trellis/tasks/09-19-npm-release-095/
+?? .trellis/tasks/09-19-release-build-publish-095/

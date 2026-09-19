@@ -1,0 +1,30 @@
+{
+  "id": "npm-release-095",
+  "name": "npm-release-095",
+  "title": "npm 发布 0.9.5（先合并 upstream/main）",
+  "description": "把 upstream/main 落后 20 个提交合并进 personal，再以隔离 release root 构建并发布 @xup3ng/pi-web 0.9.5；发布前核验 public/fonts 许可文件进入产物（承接 09-19-font-license-in-next-release）。",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "xupeng",
+  "assignee": "xupeng",
+  "createdAt": "2026-09-19",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "personal",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "09-19-merge-upstream-pre-095",
+    "09-19-release-build-publish-095",
+    "09-19-font-license-in-next-release"
+  ],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {}
+}

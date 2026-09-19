@@ -1,0 +1,4 @@
+{"file": ".trellis/tasks/09-19-merge-upstream-pre-095/research/upstream-merge-analysis.md", "reason": "27 提交清单、14 个冲突文件逐处性质与建议解决方向、fork 资产风险、dry-run 结果树与回滚方案"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "冲突多发生在同层与跨层的签名/数据结构接缝，按此指南确认上下游一致性"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "多处冲突是 prop/函数签名扩展（onOpenFile 增加 page、OpenWrittenFileHandler），需按类型约定合并"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "避免把上游实现与 fork 实现并存成两份逻辑（如 turn-written-files 的 apply_patch 接入）"}

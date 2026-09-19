@@ -1,0 +1,4 @@
+{"file": ".trellis/tasks/09-19-merge-upstream-pre-095/research/upstream-merge-analysis.md", "reason": "核对 14 个冲突文件是否逐项按性质处理、语义复核清单是否逐项打勾"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "回归验证门槛：lint 不新增错误、测试通过、无文件删除"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "复核 session-reader 与 API 路由等跨层行为未因合并回退"}
+{"file": ".trellis/tasks/09-19-merge-upstream-pre-095/research/merge-execution.md", "reason": "本次合并的执行记录：H 与树 hash、14 处冲突逐项决定、语义冲突判断（onOpenFile 通道统一、apply_patch sources 取舍、preview-only 严格语义）、验证退出码与未覆盖项"}

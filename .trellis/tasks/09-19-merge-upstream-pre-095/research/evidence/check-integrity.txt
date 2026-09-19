@@ -1,0 +1,57 @@
+$ git show -s --format=%H%n%T%n%P 628683a
+628683a4ffc6548799720dc5d21b3b521e7f8d60
+3637d447ad0c0be45998cdf02f759f2659231347
+2415bdb32847ff1ae5842d84efc049678b846ae9 5e9b997d9bb22be7dee099d351816b97cd08bc53
+
+$ git rev-list --count 628683a^1..628683a^2
+27
+
+$ git merge-base 628683a^1 628683a^2
+860698a6573e63a2432157676a5ac9bc9ce54044
+
+$ git diff --diff-filter=D --name-only 628683a^1 628683a
+
+$ git diff --name-only 628683a^1 628683a -- package.json package-lock.json pnpm-lock.yaml next.config.ts tsconfig* *eslint* .github .pi public
+
+$ git status --short
+ M .pi/agents/trellis-check.md
+ M .pi/agents/trellis-implement.md
+ M .pi/agents/trellis-research.md
+ M .trellis/tasks/09-19-font-license-in-next-release/task.json
+?? .trellis/tasks/09-19-merge-upstream-pre-095/
+?? .trellis/tasks/09-19-npm-release-095/
+?? .trellis/tasks/09-19-release-build-publish-095/
+
+$ git ls-files -u
+
+27 hashes match in order: True
+b42d3f4
+e70c367
+d2056b6
+3f07a5f
+b44017a
+5b96a9d
+6edbecb
+ed7a4d7
+ffb2daf
+47a0bb2
+1f79174
+50a2fd4
+eac6f14
+974c8bb
+a84093e
+58c1a21
+ed50d88
+404923e
+fce666a
+d11d344
+f2d600b
+79894b9
+c844973
+afd2575
+002400d
+8df5132
+5e9b997
+Conflict markers tracked + nonignored untracked: []
+lint identical after exit footer stripped: True
+Exit codes measured: tsc=0 lint=0 test=0 targeted14=0 targeted16=0

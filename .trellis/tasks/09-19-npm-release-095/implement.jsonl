@@ -1,0 +1,2 @@
+{"file": ".trellis/tasks/09-19-merge-upstream-pre-095/research/upstream-merge-analysis.md", "reason": "父任务协调依据：合并范围、冲突规模与可发布性判断"}
+{"file": ".trellis/tasks/09-19-release-build-publish-095/research/release-runbook-reuse.md", "reason": "父任务协调依据：隔离发布流程、批准门与核验要求"}
