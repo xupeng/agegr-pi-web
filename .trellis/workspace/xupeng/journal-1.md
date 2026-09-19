@@ -394,3 +394,24 @@ Made file paths in agent replies open the right preview pane and rebuilt the fil
 ### Status
 
 [OK] **Completed**
+
+
+## Session 7: Branch cleanup and fork main sync
+
+**Date**: 2026-09-19
+**Task**: Branch cleanup and fork main sync
+**Branch**: `personal`
+
+### Summary
+
+Housekeeping session. Deleted five stale local branches: three were fully merged into personal (merge/upstream-v091-20260912-200432, recovery/upstream-v091-20260913-current-D/-L) and two were proven redundant before a force delete (backup/origin-personal-391c141 is superseded by 3fd4a33, and backup/ask-user-before-amend-ee672d7 is fully covered, its merge parent 860698a being an ancestor of personal). Synced main to upstream/main (d11d344) with a fast-forward push of 28bab3c..d11d344, so the fork's main is again a pure upstream mirror; local main had carried two commits upstream will never have. Folded the only one of those with real content into the personal line by cherry-picking 95a4a54 (archive 00-bootstrap-guidelines) as 80497c1, and deliberately did not apply f838a4e (trellis scaffold bootstrap) because 86 of its 100 files are byte-identical on personal while the other 14 are later rewrites there, so re-applying it would have reverted 285 lines. Finally dropped the archived 00-bootstrap-guidelines copy that the cherry-pick brought in: it differs from the still-open active task only in checked boxes, which five placeholder spec docs contradict. No branch checkout was needed for any of this (git update-ref plus cherry-pick on the current branch), so the three uncommitted .pi/agents/*.md edits were never touched.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `80497c1` | (see git log) |
+
+### Status
+
+[OK] **Completed**
