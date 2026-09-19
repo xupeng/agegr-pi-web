@@ -234,3 +234,43 @@ trellis-check 独立审查（无 P0，5 项待修，均已修复）：
 - 可选：push origin/personal、打 tag、建 GitHub Release（需另行授权，本任务明确不做）
 - 可选：归档 09-12-sync-upstream-v091 / 09-13-npm-patch-release（本次未动）
 - 未覆盖：e2e/run.mjs 与浏览器交互 smoke（D5 验证深度不含）
+
+
+## Session 3: 清理发布临时产物（0.9.4 发布收尾）
+
+**Date**: 2026-09-19
+**Task**: 清理发布临时产物（0.9.4 发布收尾）
+**Branch**: `personal`
+
+### Summary
+
+发布核验完成后按用户要求清理隔离产物：把 09-18 的审计证据提取为 240K 小包（research/evidence/：退出码 JSON、构建/打包/安装/dry-run 日志、703 条目 filelist、tgz 哈希、smoke 输出、可复现脚本），删除 3.5G 的 v094 release root；并按用户决定整个删除 4.5G 的 v093（09-13）release root（0.9.3 可从 registry 重下，删除前记录其 tgz SHA256 与远端 integrity）。顺带 prune 掉 3 条目录已不存在的陈旧 worktree 元数据，共释放约 9G。
+
+### Main Changes
+
+- chore(task): archive 0.9.4 release evidence and record cleanup（962d0e2）
+- 删除 ../.pi-web-v094-release-20260918-182408（3.5G，证据已提取归档）
+- 删除 ../.pi-web-v093-release-20260913（4.5G，用户选择整体删除）
+- git worktree prune -v 移除 baseline/candidate/pi-web-0.9.2-verify 三条失效元数据
+- 清理 /tmp 中本次产生的中间文件（保留他人/其它任务的目录）
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `962d0e2` | (see git log) |
+
+### Testing
+
+- [OK] 清理后主 checkout：git status 未变（仅用户 3 个 agent 文件与 09-13 任务目录）、next 16.3.5、git worktree list 仅剩主 checkout
+- [OK] 8505 dev server GET / -> 200；registry latest = 0.9.4，0.9.3 与 0.9.4 均可下载（integrity 未变）
+- [OK] 磁盘：可用空间从 ~58G 提升到 65G
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 可选：push origin/personal、打 tag、建 GitHub Release（需另行授权）
+- 09-12-sync-upstream-v091 / 09-13-npm-patch-release 仍为 in_progress，未归档
