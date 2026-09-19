@@ -1,0 +1,18 @@
+{
+  "name": "b7-publish-dry-run",
+  "cwd": "/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408",
+  "cmd": [
+    "npm",
+    "publish",
+    "--dry-run",
+    "--registry=https://registry.npmjs.org/",
+    "--tag=latest",
+    "--access=public",
+    "/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/artifacts/xup3ng-pi-web-0.9.4.tgz"
+  ],
+  "exit": 0,
+  "duration_s": 6.84,
+  "log": "/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/logs/b7-publish-dry-run.log",
+  "registry": "https://registry.npmjs.org/",
+  "home": "/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/home"
+}

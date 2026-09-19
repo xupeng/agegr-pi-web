@@ -1,0 +1,14 @@
+{
+  "name": "b4-build",
+  "cwd": "/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/src",
+  "cmd": [
+    "npm",
+    "run",
+    "build"
+  ],
+  "exit": 0,
+  "duration_s": 189.96,
+  "log": "/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/logs/b4-build.log",
+  "registry": "https://registry.npmjs.org/",
+  "home": "/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/home"
+}

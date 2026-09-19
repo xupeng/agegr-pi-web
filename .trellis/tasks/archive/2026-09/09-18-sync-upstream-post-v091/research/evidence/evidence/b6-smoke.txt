@@ -1,0 +1,37 @@
+== B6 smoke: installed @xup3ng/pi-web 0.9.4 on port 46885 ==
+-- version: 0.9.4
+== page + static assets (asset URLs taken from the rendered HTML) ==
+GET /                                        200  (11663 bytes)
+GET /login                                   200  (11663 bytes)
+GET /manifest.webmanifest                    200  (442 bytes)
+GET /_next/static/chunks/1278-5acf84a5c06a0936.js 200  (98445 bytes)
+GET /_next/static/chunks/3794-6cecce02b123eb1f.js 200  (241388 bytes)
+GET /_next/static/chunks/4bd1b696-8a4ab4fdf0ae305a.js 200  (201060 bytes)
+GET /_next/static/chunks/5772-fa9b9cccdc812bf9.js 200  (15717 bytes)
+== cwd-independent API ==
+GET /api/home                                200  (85 bytes)
+GET /api/projects                            200  (86 bytes)
+GET /api/agent/running                       200  (95 bytes)
+GET /api/tools/settings                      200  (45 bytes)
+GET /api/subagents/settings                  200  (36 bytes)
+GET /api/default-cwd                         405  (0 bytes)
+== fixture project: validate first (registers the allowed root) ==
+POST /api/cwd/validate                       {"success":true,"cwd":"/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/fixture/demo","projectRoot":"/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/fixture/
+== fixture project API (cwd-dependent) ==
+GET /api/models?cwd=fixture                  200  (18622 bytes)
+GET /api/skills?cwd=fixture                  200  (60 bytes)
+GET /api/plugins?cwd=fixture                 200  (148 bytes)
+GET /api/files/.../README.md?type=read       200  (97 bytes)
+GET /api/files/...?type=list                 200  (163 bytes)
+GET /api/worktrees?cwd=fixture               {"projectRoot":"/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/fixture/demo","projectKey":"/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/fixture/demo","i
+GET /api/sessions?projectKey=fixture         {"sessions":[],"sessionListVersion":0,"runningSessionIds":[],"completionNotificationSuppressedSessionIds":[]}
+== terminal smoke (node-pty create + delete, id=380273fe00158b785f11a5ed8fa1ff39) ==
+POST /api/terminal                           {"id":"380273fe00158b785f11a5ed8fa1ff39"}
+GET /api/terminal/<id>                       200  (132 bytes)
+DELETE /api/terminal/<id>                    200
+== cleanup ==
+listener pids: 1399498 
+port released after 1s
+listeners left: 0
+installed-server processes left: 0
+0

@@ -1,0 +1,8 @@
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+
+> @xup3ng/pi-web@0.9.4 postinstall
+> node bin/prepare-terminal.js
+
+
+added 937 packages in 56s

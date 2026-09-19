@@ -1,0 +1,15 @@
+{
+  "name": "b2b-npm-version",
+  "cwd": "/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/src",
+  "cmd": [
+    "npm",
+    "version",
+    "0.9.4",
+    "--no-git-tag-version"
+  ],
+  "exit": 0,
+  "duration_s": 0.34,
+  "log": "/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/logs/b2b-npm-version.log",
+  "registry": "https://registry.npmjs.org/",
+  "home": "/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/home"
+}

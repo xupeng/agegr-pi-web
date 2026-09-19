@@ -1,0 +1,17 @@
+{
+  "name": "b6-install",
+  "cwd": "/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408",
+  "cmd": [
+    "npm",
+    "install",
+    "-g",
+    "--prefix",
+    "/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/install",
+    "/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/artifacts/xup3ng-pi-web-0.9.4.tgz"
+  ],
+  "exit": 0,
+  "duration_s": 62.07,
+  "log": "/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/logs/b6-install.log",
+  "registry": "https://registry.npmjs.org/",
+  "home": "/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/home"
+}

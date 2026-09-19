@@ -217,3 +217,36 @@ $ git show --stat --oneline 57924e3
   （隔离 HOME 无任何 provider 凭据，属设计使然）。
 - 主 checkout 的 dev server（8505）在 A 阶段尾声已用 next 16.3.5 重启并冒烟通过；
   它与本次发布产物无关。
+
+## 13. 清理记录（2026-09-18，发布核验完成后）
+
+用户确认发布成功后执行清理。**删除**：
+
+- 隔离 release root `/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408`
+  （3.5 GB：`src/`、`node_modules/`、`install/`、`artifacts/`、`evidence/`、`logs/`、`check/`）。
+- `/tmp` 中本次产生的中间文件（`pl-before.json`、`pnpm-before.yaml`、`npm-install.log`、
+  `baseline-*.txt/log`、`merged-*.txt`、`candidate-*.txt/log`、`focused.txt`、
+  `pi-release-root.txt`、`pi-web-merge-msg.txt`、`ecn1631/`、`pnpmprobe/`）。
+
+**保留（提取为小体积证据）**：`research/evidence/`（240 KB）
+
+- `evidence/`：`H.txt`、`H-tree.txt`、`SHA256SUMS`、`SHA512.b64`、`filelist.txt`（703 条目清单）、
+  `b6-smoke.txt`（生产安装 smoke 原始输出）、`remote-0.9.4.json`（远端元数据）、`smoke-port.txt`；
+  以及可复现脚本 `env.sh`、`check-run.py`、`smoke.sh`、`b9-publish.sh`。
+- `check/`：`b2b`…`b7` 六步的退出码/耗时 JSON 记录。
+- `logs/`：`b3-npm-ci`、`b4-build`、`b5-pack`、`b6-install`、`b6-smoke-server`、`b7-publish-dry-run`。
+- 已扫描确认不包含 token / `_auth` / password / OTP 等敏感字段（唯一命中是 `b9-publish.sh`
+  注释里的 "2FA one-time password" 字样）。
+
+**产物来源不变**：`@xup3ng/pi-web@0.9.4` 以 registry 为准，可随时重新下载；
+清理后复核 `npm view @xup3ng/pi-web@0.9.4 dist.tarball dist.integrity` 仍返回
+`https://registry.npmjs.org/@xup3ng/pi-web/-/pi-web-0.9.4.tgz` 与
+`sha512-WX+LIbwPxXCMn…EzwXmw==`（与 §5/§9 记录一致）。
+
+**其它清理**：`git worktree prune -v` 移除了 3 条目录已不存在的陈旧 worktree 元数据
+（`baseline`、`candidate`、`pi-web-0.9.2-verify`，均来自更早的任务），
+现在 `git worktree list` 只剩主 checkout。
+
+**未触碰**：3 个 `.pi/agents/trellis-*.md`（用户未提交改动）、`.trellis/tasks/09-13-npm-patch-release/`、
+`../.pi-web-v093-release-20260913/`（09-13 任务的 release root）与 8505 dev server 的日志。
+因此本文中出现的 `<ROOT>/…` 路径引用仅为历史记录，磁盘上已不存在。

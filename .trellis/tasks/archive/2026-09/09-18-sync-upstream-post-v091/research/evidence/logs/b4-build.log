@@ -1,0 +1,106 @@
+
+> @xup3ng/pi-web@0.9.4 build
+> next build --webpack
+
+▲ Next.js 16.3.5 (webpack)
+✓ Running next.config.ts took 58ms
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+
+  Creating an optimized production build ...
+(node:1398356) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+⚠ Compiled with warnings in 33.1s
+
+./app/api/sessions/[id]/export/route.ts
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./app/api/sessions/[id]/export/route.ts
+
+(node:1398431) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✓ Compiled successfully in 58s
+  Running TypeScript ...
+  Finished TypeScript in 30.2s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/16) ...
+  Generating static pages using 3 workers (4/16) 
+  Generating static pages using 3 workers (8/16) 
+  Generating static pages using 3 workers (12/16) 
+✓ Generating static pages using 3 workers (16/16) in 3.0s
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/agent/[id]
+├ ƒ /api/agent/[id]/bash-output
+├ ƒ /api/agent/[id]/events
+├ ƒ /api/agent/[id]/lease
+├ ƒ /api/agent/new
+├ ƒ /api/agent/running
+├ ƒ /api/app-update
+├ ƒ /api/attachments
+├ ƒ /api/auth/api-key/[provider]
+├ ƒ /api/auth/login/[provider]
+├ ƒ /api/auth/logout/[provider]
+├ ƒ /api/auth/providers
+├ ƒ /api/cwd/browse
+├ ƒ /api/cwd/validate
+├ ƒ /api/default-cwd
+├ ƒ /api/extension-ui/settings
+├ ƒ /api/file-index
+├ ƒ /api/files/[...path]
+├ ƒ /api/git/diff
+├ ƒ /api/git/status
+├ ƒ /api/home
+├ ƒ /api/models
+├ ƒ /api/models-config
+├ ƒ /api/models-config/catalog
+├ ƒ /api/models-config/discover
+├ ƒ /api/models-config/test
+├ ƒ /api/plugins
+├ ƒ /api/plugins/check
+├ ƒ /api/project-trust
+├ ƒ /api/projects
+├ ƒ /api/provider-usage/query
+├ ƒ /api/push/config
+├ ƒ /api/push/subscribe
+├ ƒ /api/sessions
+├ ƒ /api/sessions/[id]
+├ ƒ /api/sessions/[id]/auto-name
+├ ƒ /api/sessions/[id]/context
+├ ƒ /api/sessions/[id]/entries/[entryId]/thinking
+├ ƒ /api/sessions/[id]/entries/[entryId]/tool-result-image
+├ ƒ /api/sessions/[id]/export
+├ ƒ /api/sessions/[id]/state
+├ ƒ /api/sessions/search
+├ ƒ /api/settings/ask-user
+├ ƒ /api/skills
+├ ƒ /api/skills/check
+├ ƒ /api/skills/install
+├ ƒ /api/skills/search
+├ ƒ /api/skills/update
+├ ƒ /api/subagents/[id]
+├ ƒ /api/subagents/profiles
+├ ƒ /api/subagents/settings
+├ ƒ /api/terminal
+├ ƒ /api/terminal/[id]
+├ ƒ /api/terminal/[id]/events
+├ ƒ /api/tools/settings
+├ ƒ /api/web-auth
+├ ƒ /api/worktrees
+├ ○ /login
+└ ○ /manifest.webmanifest
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

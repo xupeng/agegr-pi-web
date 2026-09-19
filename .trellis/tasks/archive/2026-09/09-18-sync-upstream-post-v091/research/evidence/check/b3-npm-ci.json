@@ -1,0 +1,15 @@
+{
+  "name": "b3-npm-ci",
+  "cwd": "/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/src",
+  "cmd": [
+    "npm",
+    "ci",
+    "--cache",
+    "/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/npm-cache"
+  ],
+  "exit": 0,
+  "duration_s": 56.0,
+  "log": "/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/logs/b3-npm-ci.log",
+  "registry": "https://registry.npmjs.org/",
+  "home": "/home/xupeng/dev/personal/forked/.pi-web-v094-release-20260918-182408/home"
+}
