@@ -279,13 +279,26 @@ git diff --name-only fc2323e..e47ac56 -- bin public next.config.ts package.json 
 
 ## 7B. 最终 Git 状态（收尾后核对）
 
-见 §7A.2 的执行结果；核验命令与值：
+核验命令与实际值：
 
 ```bash
-git rev-parse personal          # 与下值相等
-git rev-parse origin/personal
-git tag -l 'v0.9.5'             # 空
+$ git rev-parse personal          → 9c4c304bcae8c877888fe1f79c63168a43001f51
+$ git rev-parse origin/personal   → 9c4c304bcae8c877888fe1f79c63168a43001f51   # 相等 ✅
+$ git tag -l 'v0.9.5'             → （空）✅
+$ git status --short              → 仅用户 3 个 .pi/agents/trellis-*.md（未暂存）
 ```
+
+提交序列（`86088d9` 是发布 bump，其后为记账/文档）：
+
+```text
+9c4c304 docs(task): close out the 0.9.5 release report against the independent check
+9c4c304 之前的记账提交：发布报告/runbook、docs/release-npm.md、字体任务归档
+86088d9 chore: release 0.9.5          ← B11 bump（仅 package.json + package-lock.json）
+e327ff9 … 2f3caed … fc2323e … 628683a ← 任务记录 / spec / 合并修复 / 上游 merge
+```
+
+`86088d9` 之后的提交不触碰 `bin`/`public`/`next.config.ts`/`package.json`/锁文件，
+因此**不影响已发布的 0.9.5 产物**（产物身份由 §6B 的 registry 比对固定）。
 
 ## 8. 未覆盖项与残余风险
 
