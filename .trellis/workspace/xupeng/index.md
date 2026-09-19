@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 7
+- **Total Sessions**: 8
 - **Last Active**: 2026-09-19
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~417 | Active |
+| `journal-1.md` | ~438 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 8 | 2026-09-19 | Frontend spec bootstrap: filling six guideline docs | `e619302` | `personal` |
 | 7 | 2026-09-19 | Branch cleanup and fork main sync | `80497c1` | `personal` |
 | 6 | 2026-09-19 | Clickable file paths and the written-file pipeline | `cfaef78`, `1695b29`, `82691fe`, `0c5b06b`, `981544e` | `personal` |
 | 5 | 2026-09-19 | 恢复字体许可文件、归档 09-13、新建发布核验任务 | `5129887`, `5a67988`, `9a524db`, `65c6de3`, `7c90ef0` | `personal` |

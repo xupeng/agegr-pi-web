@@ -415,3 +415,24 @@ Housekeeping session. Deleted five stale local branches: three were fully merged
 ### Status
 
 [OK] **Completed**
+
+
+## Session 8: Frontend spec bootstrap: filling six guideline docs
+
+**Date**: 2026-09-19
+**Task**: Frontend spec bootstrap: filling six guideline docs
+**Branch**: `personal`
+
+### Summary
+
+Turned the six frontend spec files from trellis templates into real, code-backed conventions (1174 lines), which is what 00-bootstrap-guidelines existed for. Method: four parallel trellis-research sub-agents produced 2761 lines of evidence with file:line anchors (component conventions, directory layout, hooks and state, types and quality); three implement sub-agents then wrote the docs in Chinese, deleting or renaming template sections that did not apply and adding ones the templates lacked (i18n, component testing, client/server boundary, persistence, SSR). An independent trellis-check pass sampled 30 file:line citations (7 were wrong on the first pass and were fixed), recounted every numeric claim from the TypeScript AST (correcting e.g. as-casts 272 to 549, non-null assertions 0 to 66, interface/type 248 to 167), reconciled contradictions between documents, and confirmed the two pre-existing quality-guidelines sections stayed byte-identical. index.md now registers all six and states the real language convention (Chinese prose, English identifiers) instead of the unused English-only rule. Gates: tsc --noEmit clean, eslint 474 files / 0 problems, npm test 1311/1311. Committed as e619302 and pushed to origin/personal, then 00-bootstrap-guidelines was archived.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `e619302` | (see git log) |
+
+### Status
+
+[OK] **Completed**
