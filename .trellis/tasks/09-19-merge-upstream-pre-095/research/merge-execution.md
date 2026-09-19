@@ -173,6 +173,13 @@ lint 基线为**实测**：合并前在 `2415bdb` 上跑 `npm run lint` = exit 0
 
 ## 6. 发布基线交接
 
-- **`H` = `fc2323ef95261af77cdeeb3d945bc0114f8b64db`**，树 hash `6b5a684b25089c96a18aec6684605d14bb8c39d1`（merge commit 为 `628683a`，修复提交 `fc2323e`）。
-- `09-19-release-build-publish-095` 的 B2 必须用该 hash 导出源码；`H` 变化则已封存 tgz 作废。
+- **代码基线 = `fc2323ef95261af77cdeeb3d945bc0114f8b64db`**，树 hash
+  `6b5a684b25089c96a18aec6684605d14bb8c39d1`
+  （merge commit `628683a` → 检查修复提交 `fc2323e`）。
+- 其后两个**记账提交**（`947f857` 写 spec、`0a611d6` 写任务记录）只动 `.trellis/**`：
+  已实测 `git diff --name-only fc2323e..HEAD -- bin public next.config.ts package.json
+  package-lock.json pnpm-lock.yaml` **为空**，即打包白名单路径零变化。
+- 因此 `09-19-release-build-publish-095` 的 B2 可以两种等价方式冻结：
+  ①直接导出 `fc2323e`；②导出当时的 `personal` HEAD，但必须先用上面那条 `git diff` 证明
+  白名单路径与 `fc2323e` 一致。**不要用分支名代替 hash。** `H` 一变，已封存 tgz 作废。
 - 本次**未 push**（按用户 Git 边界决定，push 在发布核验成功后与 bump 提交一起进行）。
