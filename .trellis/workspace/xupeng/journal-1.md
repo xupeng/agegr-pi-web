@@ -369,3 +369,28 @@ trellis-check 独立审查（无 P0，5 项待修，均已修复）：
 
 - 下次发布（0.9.5 或后续）时按 09-19 的 AC1/AC2 核验 tgz 含两个许可文件；发布需另行授权
 - 00-bootstrap-guidelines 仍未完成（spec 中多个文件仍是 To fill）
+
+
+## Session 6: Clickable file paths and the written-file pipeline
+
+**Date**: 2026-09-19
+**Task**: Clickable file paths and the written-file pipeline
+**Branch**: `personal`
+
+### Summary
+
+Made file paths in agent replies open the right preview pane and rebuilt the files-written pipeline behind it. Extraction now covers apply_patch (summaries first, per-file +/- from the patch preview, delete targets excluded) and subagent output (full Trellis trace list instead of the 32-trace display window, plus a writtenFiles snapshot at built-in Agent completion that also reaches background notifications). Rendered text is linkified only when /api/file-index contains the path, and /api/file-index no longer offers tracked files deleted from the worktree. The files-changed chips became a card with a type line, this turn's +/- and inline preview/diff/copy actions. Verified with 1311 unit tests, a real-browser Playwright run and two real-session data scripts; delivered as xupeng/agegr-pi-web#1 (base personal), which is merged. Known gap: the background-subagent notification card still has unit coverage only.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `cfaef78` | (see git log) |
+| `1695b29` | (see git log) |
+| `82691fe` | (see git log) |
+| `0c5b06b` | (see git log) |
+| `981544e` | (see git log) |
+
+### Status
+
+[OK] **Completed**
