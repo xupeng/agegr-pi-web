@@ -23,6 +23,7 @@ These guides help you **ask the right questions before coding**.
 |-------|---------|-------------|
 | [Code Reuse Thinking Guide](./code-reuse-thinking-guide.md) | Identify patterns and reduce duplication | When you notice repeated patterns |
 | [Cross-Layer Thinking Guide](./cross-layer-thinking-guide.md) | Think through data flow across layers | Features spanning multiple layers |
+| [Upstream Sync](./upstream-sync.md) | 把 `upstream/main` 合并进 `personal` 的实操契约：预判、冲突解决五条规则、语义复核、冻结与提交 | 准备发新版本前的上游同步，或需要跟进上游修复时 |
 
 ---
 

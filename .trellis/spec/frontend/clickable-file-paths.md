@@ -138,10 +138,22 @@ Traps, all reproduced against real sessions:
 
 ### 3.4 Opening and authorization
 
-- `AppShell.handleOpenFile(filePath, fileName, { sourceSessionId, modeHint })` opens the right pane and
-  reuses the file-tab machinery; `modeHint: "diff"` starts in diff mode.
+- `components/TurnWrittenFiles.tsx:19` defines the single chat-surface channel:
+  `OpenWrittenFileHandler = (filePath, options?: { modeHint?, sourceSessionId?, page? })`.
+  Chat components take this type rather than declaring their own inline signature, so a new option
+  reaches every surface at once. Do not add a second shape (for example a positional `page`).
+- `AppShell.handleOpenFile(filePath, fileName, { sourceSessionId, modeHint, page })`
+  (`components/AppShell.tsx:1032`) opens the right pane and reuses the file-tab machinery;
+  `modeHint: "diff"` starts in diff mode and `page` seeds the viewer's `initialPage`.
 - `handleOpenLinkedFile` passes `options.sourceSessionId ?? selectedSession.id`. Markdown/`PathText`
   callers pass nothing and therefore keep the selected-session semantics.
+  It accepts the same option object (`components/AppShell.tsx:1055`)
+  and forwards `page` (`:1059`).
+- `components/MarkdownBody.tsx:174` turns a PDF `#page=N` fragment into that option object
+  (`openFile(filePath, { page: parsePdfPageFragment(href) ?? undefined })`).
+  `components/FileViewer.tsx:42` is the deliberate exception: its own markdown link handler still
+  uses the numeric form and is bridged by the inline adapter at
+  `components/AppShell.tsx:2504`; do not unify it without checking that adapter.
 - `GET /api/files/[...path]` authorizes when the path is inside an allowed root **or** when the given
   `sessionId`'s entries reference that path (`lib/session-file-references.ts`). This fallback is what
   lets a card open a subagent-written path outside the roots (for example `/tmp/...`), which is exactly
