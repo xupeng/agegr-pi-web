@@ -250,3 +250,25 @@ $ git show --stat --oneline 57924e3
 **未触碰**：3 个 `.pi/agents/trellis-*.md`（用户未提交改动）、`.trellis/tasks/09-13-npm-patch-release/`、
 `../.pi-web-v093-release-20260913/`（09-13 任务的 release root）与 8505 dev server 的日志。
 因此本文中出现的 `<ROOT>/…` 路径引用仅为历史记录，磁盘上已不存在。
+
+## 14. 勘误（2026-09-19 追加）：B5 的"许可文件"子项未核实，实际不通过
+
+`implement.md` 的 B5 要求：内容审计"含 `package.json`/`bin`/`next.config.ts`/**字体与许可文件**"。
+本文 §5 只核对了 `package.json`、`bin`、`next.config.ts` 与一个 `public` 图标，
+**没有核对许可文件**，因此当时"B5 审计通过"的结论对该子项不成立。事后核实：
+
+- 已发布的 **0.9.3** tarball 含 `package/public/fonts/LICENSE-cascadia-code.txt`（4395 B，
+  SIL OFL 1.1 全文）与 `package/public/fonts/NOTICE.txt`（1477 B，四个 woff2 的来源与 SHA-256）。
+- 本任务 **0.9.4** 的 tgz（§5 的 703 条清单）与主仓库 `public/fonts/` 只有 4 个 woff2，
+  **没有**这两个文件；`git log --all -- public/fonts/LICENSE-cascadia-code.txt
+  public/fonts/NOTICE.txt` 为空 → 它们**从未进入仓库历史**。
+- 成因：这两个文件是 09-13 任务在**隔离 src** 内补充的（其 check-report 的本地提交 allowlist
+  第 3、4 项），从未同步回主仓库；0.9.4 从主 HEAD 构建，于是丢失。
+- `NOTICE.txt` 声明的 4 个 woff2 SHA-256 与当前仓库文件 **4/4 一致**，说明该 NOTICE 对当前字体仍准确；
+  两个文件可从 registry 的 0.9.3 tarball 无损恢复（09-13 release root 删除前已记录其 hash）。
+
+影响：`@xup3ng/pi-web@0.9.4` 在分发 OFL 授权的 Cascadia Code 字体时**缺少许可证文本**，
+相对 0.9.3 属于合规回退。功能无影响。处置由后续决定驱动（恢复文件并提交 / 是否发 0.9.5）。
+
+教训（与 §11 同类）：审计清单里的每一项都要有**逐项证据**；
+"关键文件在位"这类概括性结论容易把未检查的子项一起算作通过。
