@@ -274,3 +274,55 @@ trellis-check 独立审查（无 P0，5 项待修，均已修复）：
 
 - 可选：push origin/personal、打 tag、建 GitHub Release（需另行授权）
 - 09-12-sync-upstream-v091 / 09-13-npm-patch-release 仍为 in_progress，未归档
+
+
+## Session 4: 归档 10 个已完成任务，并发现字体许可文件缺口
+
+**Date**: 2026-09-19
+**Task**: 归档 10 个已完成任务，并发现字体许可文件缺口
+**Branch**: `personal`
+
+### Summary
+
+按用户指示逐个取证后归档 10 个实际已完成的任务（功能已在代码中落地且无残留未完成标记），保留 2 个未完成任务。归档过程中发现一个真实的许可缺口：已发布的 0.9.3 含 public/fonts/LICENSE-cascadia-code.txt 与 NOTICE.txt，但这两个文件从未提交进仓库，因此主仓库与 0.9.4 缺少字体许可声明。
+
+### Main Changes
+
+- 归档 08-27-hide-tui-powerline-widgets（lib/extension-ui-settings.ts 默认 hiddenWidgetKeys=['powerline-*']）
+- 归档 08-27-markdown-table-horizontal-scroll（.markdown-table-wrap overflow-x:auto + table width:max-content）
+- 归档 08-29-ask-user-card-in-stream / state-reset / submit-lockup-supplement（askUserCardInColumn + ChatWindow 按 ask 重建 key + locked 状态 + supplement 输入）
+- 归档 08-29-mobile-enter-sends / mobile-keyboard-cover（触屏需 ctrl/meta 才发送 + IME 保护；hooks/useViewportHeight.ts 处理 visualViewport）
+- 归档 08-30-chat-font-size-control（SettingsPanel 字号控件 + hooks/useChatAppearance.ts）
+- 归档 09-11-subagents-entry-visibility（lib/trellis-subagent-records.ts + TrellisSubagentRecords + spec 文档；仅剩用户验收）
+- 归档 09-12-sync-upstream-v091（其 merge 分支已是 personal 祖先，上游 v0.9.1 整合已完成）
+- 保留 00-bootstrap-guidelines（spec 中多个文件仍是 To fill）与 09-13-npm-patch-release（字体许可 + release-result.md 未收尾）
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `15e47fd` | (see git log) |
+| `cd645ea` | (see git log) |
+| `850d5e6` | (see git log) |
+| `ac320c3` | (see git log) |
+| `f4f7f54` | (see git log) |
+| `32786bd` | (see git log) |
+| `c3cc74a` | (see git log) |
+| `ad05356` | (see git log) |
+| `e982653` | (see git log) |
+| `7c90ef0` | (see git log) |
+
+### Testing
+
+- [OK] 每个归档任务都做了代码落地核对：powerline 默认隐藏、表格 wrap、ask_user key/locked/supplement、触屏发送判定 + isComposing、visualViewport hook、字号控件、trellis-subagent-records 均存在于当前代码
+- [OK] 字体许可取证：0.9.3 公开 tarball 内含 LICENSE-cascadia-code.txt(4395B) 与 NOTICE.txt(1477B)；NOTICE 声明的 4 个 woff2 SHA256 与仓库现有文件 4/4 一致
+- [OK] 归档后活动任务仅剩 2 个；git status 仍只含用户未提交的 3 个 agent 文件与 09-13 任务目录（后者已变为 current）
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 决定字体许可缺口如何处置：恢复两文件并提交 / 恢复并发 0.9.5 / 仅记录
+- 09-13 的 release-result.md 与本地 bump 提交仍未做（0.9.4 已跨越 0.9.3）

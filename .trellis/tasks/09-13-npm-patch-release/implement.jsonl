@@ -1,0 +1,5 @@
+{"file": ".trellis/tasks/09-13-npm-patch-release/research/release-plan.md", "reason": "实际发布脚本、隔离/认证/许可证阻塞、同tgz验证及可选commit协议"}
+{"file": ".trellis/tasks/09-12-sync-upstream-v091/research/revalidation-report.md", "reason": "可复用源码验证及14 lint与历史E2E限制，不替代产物测试"}
+{"file": ".trellis/tasks/09-12-sync-upstream-v091/research/merge-plan.md", "reason": "09-09历史发布来源与数据隔离风险"}
+{"file": "docs/release-npm.md", "reason": "fork npm发布契约；本任务采用更严格分阶段同tgz流程"}
+{"file": "AGENTS.md", "reason": "主dev build禁令与用户数据保护"}
