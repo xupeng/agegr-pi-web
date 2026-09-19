@@ -10,7 +10,7 @@
 |---|---|
 | 版本 | `0.9.5`（patch） |
 | 源码基线 `H` | `e47ac5692d524e533c3a64d434b41b409fdf4bee`（`personal` HEAD） |
-| `H` 树 hash | `10e6fef6609bb6593b0eccd212ad4eccf2151c3d`（见 `evidence/H-tree.txt`，已与 `git rev-parse HEAD^{tree}` 复核一致） |
+| `H` 树 hash | `10e6fef6609bb6593b0eccd212ad4eccf2151c3d`（见 `evidence/H-tree.txt`，已与 `git rev-parse "$H^{tree}"` 复核一致） |
 | 代码基线等价证明 | `git diff --name-only fc2323e..H -- bin public next.config.ts package.json package-lock.json pnpm-lock.yaml` = **空** |
 | 隔离 root | `/home/xupeng/dev/personal/forked/.pi-web-v095-release-20260919-220023` |
 | BUILD_ID | `sDkZvINGJKQuzWOOBAf0c` |
@@ -56,9 +56,21 @@
   主 checkout 绝对路径 `/home/xupeng/dev/personal/forked/agegr-pi-web` **0 命中**；
   `agegr-pi-web` 的 7 处命中全部是 `package.json` 的 homepage/repository 与 README 里的
   GitHub raw URL（合法元数据）。
-- **已知披露项**：`.next` 产物内嵌隔离构建路径 `$ROOT/src`（122 处，形态为
-  `a.exports=d(".../src/node_modules/next/dist/...")` 的模块解析路径）。
-  与 0.9.2/0.9.3/0.9.4 同类行为，运行不依赖该路径存在，属可接受项。
+- **已知披露项（计数已按独立检查 F3 修正）**：`.next` 产物内嵌隔离构建路径 `$ROOT/src`。
+  精确统计（对每个 tar 成员做字节级 `count`）：**3,842 次出现 / 187 个文件 / 232 行**。分布：
+
+  | 类别 | 次数 | 说明 |
+  |---|---:|---|
+  | `.next/trace` | 3,532 | 构建期 trace 元数据，运行不使用 |
+  | `*.js`（含 `*client-reference-manifest.js`） | 246 | `a.exports=d(".../src/node_modules/next/dist/...")` 形式的模块解析路径 |
+  | 其它（manifest 等） | 64 | — |
+
+  本报告早前写的「122 处」是 `grep -c` 在 tar 流上的**行计数**且受二进制内容干扰，不是出现次数；
+  已按上述实测口径更正。
+  **关于运行依赖（独立检查 F2）**：这些路径在 smoke 时确实存在，
+  **「移除隔离构建树后仍可运行」尚未验证**。与 0.9.2/0.9.3/0.9.4 属同类现象，
+  但本次**不宣称**「运行不依赖该路径」—— 该结论需要在未挂载 release `src/` 的环境里
+  重装同一个 tgz 实测才能成立，本次未做。
 
 ## 4. 字体许可核验（AC4，承接 09-19-font-license-in-next-release）
 
@@ -121,7 +133,7 @@ bash /home/xupeng/dev/personal/forked/.pi-web-v095-release-20260919-220023/b9-pu
 
 发布前置（用户侧）：`npm whoami` 当时为 **E401**，用户先在自己终端完成 `npm login`。
 
-**用户决策记录（2026-09-19）**：
+**用户决策记录（2026-09-19；属操作记录，未独立复核）**：
 
 1. 批准执行不可逆的 `public/latest` 发布（0.9.5）；
 2. `09-19-font-license-in-next-release` 在发布成功后归档；
@@ -150,7 +162,20 @@ bash /home/xupeng/dev/personal/forked/.pi-web-v095-release-20260919-220023/b9-pu
 回执的 `version` / `shasum` / `integrity` / `total files` 与本地审计值**逐字一致**。
 全程未读取、未输出、未存储任何凭据或 OTP。
 
+**时间口径说明（独立检查 F7）**：`21:56:30.327Z` 是上述 debug 日志的**文件起始时间**；
+摘录的 `PUT 202` 行本身不带绝对时间戳，因此不能把该秒当作精确受理时刻。
+可靠锚点是 registry 记录的**发布时间** `2026-09-19T22:01:05.113Z`：
+从日志起始到可见约 **4.6 分钟**，与 0.9.4 的约 6 分钟同量级。
+
 ## 6B. B10 有界核验（全部通过，约 4.5 分钟）
+
+> **流程声明修正（独立检查 F1，重要）**：`b10-verify.sh` 当时是 `set -u` + 20 次循环、
+> 每次 `sleep 30`，**没有墙钟 deadline、未给 npm 请求设置超时与禁重试**，且字段不一致时
+> 只打印 `NO` 仍 `exit 0`（`latest` 仅打印不断言）。所以当时的证据应表述为
+> **「人工核对字段全部一致」**，而非「脚本用退出码落实了有界核验」。
+> 本次实测字段确实全部匹配（见下表），结论不受影响；脚本已按建议重写
+> （单调墙钟 deadline + 剩余预算超时 + 全部字段一致才 `exit 0`，否则非零），供下次使用。
+> 另：§7A 所述「第一次 mismatch 退出」实为该 E404 信封误判后的**提前返回**，不是失败退出。
 
 轮询起点 `2026-09-19T21:57:43Z`，第 8 次尝试（`22:01:21Z` 请求）首次可见；
 registry 记录发布时间 `2026-09-19T22:01:05.113Z`。**远低于 10 分钟上限，未发生重发。**
@@ -166,7 +191,7 @@ registry 记录发布时间 `2026-09-19T22:01:05.113Z`。**远低于 10 分钟�
 | `dist.unpackedSize` | 33,871,076 | `33871076` | ✅ |
 | maintainers | xup3ng | `["xup3ng <recordus@gmail.com>"]` | ✅ |
 | 发布时间 | 记录 | `2026-09-19T22:01:05.113Z` | ✅ |
-| **远端 tgz 字节级比对** | 与本地封存件相同 | 下载后 sha256 = `19f52aaf…37b75b8`，`cmp` **逐字节相同** | ✅ |
+| **远端 tgz 字节级比对** | 与本地封存件相同 | 下载后 sha256 = `19f52aaf…37b75b8`，`cmp` **逐字节相同**（独立检查重下并复核，同时用 registry 原始 API 交叉验证） | ✅ |
 | **远端 tgz 内字体许可** | 命中 2 条 | `package/public/fonts/LICENSE-cascadia-code.txt`、`NOTICE.txt` | ✅ |
 | `0.9.4` 未被改写 | integrity 保持原值 | `sha512-WX+LIbwPxXCMn…EzwXmw==` 未变 | ✅ |
 
@@ -211,6 +236,56 @@ registry 记录发布时间 `2026-09-19T22:01:05.113Z`。**远低于 10 分钟�
   修正为「必须存在 `version` 字段」后重新轮询。**未因此重发**（脚本只读）。
 - **smoke 脚本的路径错误**：见 §5.1（`/public/fonts/...` → `/fonts/...`）。
 - **手动启动服务器的残留进程**：见 §5.1 末（已清理，最终 `installed-server processes left: 0`）。
+
+### 7A.1 独立检查（Phase 2.2）提出的限制与本报告的收口
+
+`check-report.md` 结论为「发布产物身份、registry 元数据、字体许可与版本 bump 均通过独立核验」，
+同时提出 8 项限制。逐项处置：
+
+| 编号 | 处置 |
+|---|---|
+| F1 核验脚本不落实失败/超时门禁（高） | 已在 §6B 显式降级该声明；脚本已重写为「墙钟 deadline + 剩余预算超时 + 全字段一致才 exit 0」 |
+| F2 内嵌路径的运行独立性缺证（高） | 已在 §3 撤回「运行不依赖该路径」的断言，标注为**未验证**并给出验证条件 |
+| F3 「122 处」计数口径错误（中） | 已在 §3 更正为 3,842 次 / 187 文件 / 232 行并分类 |
+| F4 本地领先 origin 两个记账提交（中） | 已 push，`personal` 与 `origin/personal` 重新相等（见 §7A.2） |
+| F5 `smoke.sh` 是打印器而非断言器（中） | 本报告 §5 的表述已限定为「HTTP 探测观察到 200」；它**不能**证明 PTY 实际输出 shell 数据，也不能替代「安装 exit 0」之外的断言。脚本仅按原样保留为证据 |
+| F6 `env.sh` 只清了部分变量（中） | §1 的声明限定为「已实测无 token 泄漏」；**不**宣称脚本对任意凭据形态做了完备隔离（未处理 `ALL_PROXY`/`NPM_CONFIG__AUTH`/`NPM_CONFIG_GLOBALCONFIG` 等） |
+| F7 部分证据未落盘 / JSON 拼接（中） | `evidence/remote-0.9.5.json` 已拆为 `remote-version.json` + `remote-dist-tags.json` 两个合法 JSON；受理时间口径已在 §6A 修正；用户批准与登录身份均标注「操作记录，未独立复核」 |
+| F8 冻结基线存在记账例外（低） | 见 §7A.3 |
+
+### 7A.2 F4 的收口：记账提交已 push
+
+B11 当时 `personal` == `origin/personal` == `86088d9`。此后为记录发布与归档又产生两个
+**只含 `.trellis/**` 与 `docs/release-npm.md`** 的提交（`e327ff9`、字体任务归档提交），
+已按用户既定的 `push origin/personal` 边界一并推送。推送后复核相等（见 §7B）。
+这些提交不触碰 `bin`/`public`/`next.config.ts`/`package.json`/锁文件，**不影响已发布产物**。
+
+### 7A.3 F8 的收口：冻结基线的记账例外（已批准）
+
+合并子任务的 `evidence/H.txt` 是 `fc2323e`（代码基线）；本发布任务的 `H` 是当时的
+`personal` HEAD `e47ac56`。二者的**完整** diff 为
+
+```bash
+git diff --name-only fc2323e..e47ac56     # 全部为 .trellis/**，产品源码 0 变化
+git diff --name-only fc2323e..e47ac56 -- bin public next.config.ts package.json package-lock.json pnpm-lock.yaml
+# → 空
+```
+
+即：`e47ac56` 相对 `fc2323e` 只多了记账提交（spec 文档、任务记录、归档），
+产品与打包白名单路径零变化。该例外已由合并子任务的
+`research/merge-execution.md` §6 显式许可，并由独立检查复核确认无实际漂移。
+因此 PRD AC1 的「`H` 与子任务产出一致」应按「代码基线一致、HEAD 因记账前移」理解，
+不逐字判全绿。
+
+## 7B. 最终 Git 状态（收尾后核对）
+
+见 §7A.2 的执行结果；核验命令与值：
+
+```bash
+git rev-parse personal          # 与下值相等
+git rev-parse origin/personal
+git tag -l 'v0.9.5'             # 空
+```
 
 ## 8. 未覆盖项与残余风险
 
