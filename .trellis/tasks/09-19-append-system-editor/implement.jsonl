@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/frontend/settings-dialog-mobile.md", "reason": "新增设置 section 的移动端硬约束：全屏阈值、滚动容器、安全区、浮层居中方式"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "提交前验证基线要求与本任务记录的对照口径"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "spec 登记规则：若新增设置 section 形成稳定契约需登记"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "本任务的价值在于复用既有模式（原子私有写、settings section、request-security、project-trust），此指南给出复用判断口径"}
