@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 4
+- **Total Sessions**: 5
 - **Last Active**: 2026-09-19
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~328 | Active |
+| `journal-1.md` | ~371 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 5 | 2026-09-19 | 恢复字体许可文件、归档 09-13、新建发布核验任务 | `5129887`, `5a67988`, `9a524db`, `65c6de3`, `7c90ef0` | `personal` |
 | 4 | 2026-09-19 | 归档 10 个已完成任务，并发现字体许可文件缺口 | `15e47fd`, `cd645ea`, `850d5e6`, `ac320c3`, `f4f7f54`, `32786bd`, `c3cc74a`, `ad05356`, `e982653`, `7c90ef0` | `personal` |
 | 3 | 2026-09-19 | 清理发布临时产物（0.9.4 发布收尾） | `962d0e2` | `personal` |
 | 2 | 2026-09-18 | 同步上游 v0.9.1 之后的 9 个提交并发布 0.9.4 | `e5806e6`, `2fb2d11`, `d044656`, `3fad0a6`, `57924e3`, `c634468` | `personal` |

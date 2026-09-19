@@ -326,3 +326,46 @@ trellis-check 独立审查（无 P0，5 项待修，均已修复）：
 
 - 决定字体许可缺口如何处置：恢复两文件并提交 / 恢复并发 0.9.5 / 仅记录
 - 09-13 的 release-result.md 与本地 bump 提交仍未做（0.9.4 已跨越 0.9.3）
+
+
+## Session 5: 恢复字体许可文件、归档 09-13、新建发布核验任务
+
+**Date**: 2026-09-19
+**Task**: 恢复字体许可文件、归档 09-13、新建发布核验任务
+**Branch**: `personal`
+
+### Summary
+
+按用户决定处理 0.9.4 的字体许可缺口：从 registry 上已发布的 0.9.3 tarball 字节级恢复 public/fonts/LICENSE-cascadia-code.txt 与 NOTICE.txt 并加回归测试；归档 09-13 任务；新建 parked 任务 09-19 跟踪“下次发布必须带上这两个文件”。
+
+### Main Changes
+
+- fix(fonts): 恢复 SIL OFL 许可全文与来源 NOTICE（cmp 与 tarball 内字节一致；sha256 82c05d6c… / 9834f87f…），新增 public/fonts.test.mjs（断言两文件存在、NOTICE 列出每个 woff2、声明的 SHA-256 与实际文件 4/4 一致）
+- docs(task): 在已归档 09-18 发布报告写入 §14 勘误——B5 的“字体与许可文件”子项当时只核了字体、漏了许可文件却判定通过（5a67988）
+- chore(task): 归档 09-13-npm-patch-release（0.9.3 已发布并被 0.9.4 取代；其未完成的本地 bump/许可回流已由 5129887 覆盖）
+- chore(task): 新建 09-19-font-license-in-next-release（仅 PRD，planning 状态，不复发布 0.9.4）
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `5129887` | (see git log) |
+| `5a67988` | (see git log) |
+| `9a524db` | (see git log) |
+| `65c6de3` | (see git log) |
+| `7c90ef0` | (see git log) |
+
+### Testing
+
+- [OK] public/fonts.test.mjs 单独通过 2/2；反向验证（临时移走 NOTICE）失败 2/2，证明能拦住该回归
+- [OK] 全量单测 1241 pass / 0 fail（新增 2 条测试后）
+- [OK] 恢复文件与 0.9.3 tarball 内对应字节 cmp 一致；主仓库 4 个 woff2 的 SHA-256 与 NOTICE 声明 4/4 相符
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 下次发布（0.9.5 或后续）时按 09-19 的 AC1/AC2 核验 tgz 含两个许可文件；发布需另行授权
+- 00-bootstrap-guidelines 仍未完成（spec 中多个文件仍是 To fill）
