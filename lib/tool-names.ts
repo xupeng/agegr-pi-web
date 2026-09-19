@@ -33,6 +33,7 @@ export function isEditToolName(toolName: string): boolean {
 export function isApplyPatchToolName(toolName: string): boolean {
   const name = toolName.toLowerCase();
   return name === "apply_patch" ||
-    name.endsWith("_apply_patch") ||
-    name.endsWith(".apply_patch");
+    name.startsWith("apply_patch_") ||
+    name.endsWith(".apply_patch") ||
+    name.endsWith("_apply_patch");
 }

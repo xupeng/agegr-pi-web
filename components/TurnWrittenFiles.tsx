@@ -13,11 +13,12 @@ import { getFileIcon } from "./FileIcons";
  * minimal extension of the existing `onOpenFile` channel: `modeHint: "diff"`
  * reuses the tab machinery the file explorer already drives, and
  * `sourceSessionId` lets `/api/files` authorize a subagent-written path through
- * the child session that references it.
+ * the child session that references it. `page` carries a PDF `#page=` fragment
+ * from a markdown link so the viewer opens on that page.
  */
 export type OpenWrittenFileHandler = (
   filePath: string,
-  options?: { modeHint?: "diff"; sourceSessionId?: string },
+  options?: { modeHint?: "diff"; sourceSessionId?: string; page?: number },
 ) => void;
 
 const ADDED_COLOR = "#4ade80";

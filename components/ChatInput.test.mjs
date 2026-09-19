@@ -448,6 +448,7 @@ test("keeps only read-only built-ins available while a run is active", () => {
   assert.equal(canRunBuiltinSlashCommandWhileStreaming("/copy"), true);
   assert.equal(canRunBuiltinSlashCommandWhileStreaming("/session"), true);
   assert.equal(canRunBuiltinSlashCommandWhileStreaming("/compact"), false);
+  assert.equal(canRunBuiltinSlashCommandWhileStreaming("/auto-compact"), false);
   assert.equal(canRunBuiltinSlashCommandWhileStreaming("/reload"), false);
 });
 
