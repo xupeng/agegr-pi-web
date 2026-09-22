@@ -585,3 +585,40 @@ Gave pi-web a per-session stall watchdog so a turn that stops producing agent ev
 
 - 是否删除 0.9.5 root 与本次 root（各约 3.5G）待用户决定
 - GitHub Release / personal-* tag 渠道仍硬编码 0.8.x，若要恢复该渠道需单独适配
+
+
+## Session 12: 废弃并清理 personal-* GitHub Release 渠道（含孤儿 pnpm-lock）
+
+**Date**: 2026-09-22
+**Task**: 废弃并清理 personal-* GitHub Release 渠道（含孤儿 pnpm-lock）
+**Branch**: `personal`
+
+### Summary
+
+删除已废弃的 personal-* GitHub Release 渠道（workflow + 脚本）与它唯一的消费者 pnpm-lock.yaml，把 docs/spec 改成单一 npm 锁与'渠道已废弃'的单一事实；历史 10 个 tag 与 Release 保留。
+
+### Main Changes
+
+- 删 .github/workflows/release-personal.yml 与 scripts/release-personal.sh（最后运行 2026-08-29，版本校验硬编码 0.8.x；0.9.0-0.10.0 全走 npm）
+- 删 pnpm-lock.yaml：唯一消费者是该 workflow，上游无此文件；顺带消除 eslint-plugin-react-hooks 7.0.1/7.1.1 诊断分歧的来源
+- docs/release-npm.md 删掉括注与 personal 行，改为'只有 npm 一条渠道' + 历史 Release 仍可下载但不再更新；docs/release.md 删掉 fork 注记（反而更贴近上游）
+- quality-guidelines.md 的两锁机制段改写为历史注记（保留 14 条诊断实测与已修记录），恢复动作只留 npm ci 且明确 pnpm 树不可复算；upstream-sync 漂移清单与目录结构清单同步
+- 历史产物按用户要求保留：10 个 personal-0.8.11.* tag 与 10 个 GitHub Release 未动
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `6a865a2` | (see git log) |
+| `b3b0094` | (see git log) |
+
+### Testing
+
+- [OK] 删除后在无 pnpm-lock 的树上 npm ci exit 0，树锁一致（react/eslint/next/@types-react 全 ok）
+- [OK] 三件套：tsc 退出 0、lint 495 文件 0 error 0 warning、npm test 1411 pass / 0 fail（与 0.10.0 发布基线一致）
+- [OK] AC5 全仓 grep：除 archive/、workspace/ 与任务目录外无 release-personal 活引用；spec 中无 pnpm-lock 现役描述
+- [OK] AC7：git tag -l 'personal-*' 仍为 10 个，GitHub Release 仍为 10 条
+
+### Status
+
+[OK] **Completed**
