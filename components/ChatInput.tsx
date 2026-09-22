@@ -715,9 +715,10 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
     cwd: string;
     values: Record<string, boolean>;
   } | null>(null);
-  const skillDormancy = cwd && skillDormancyState?.cwd === cwd
-    ? skillDormancyState.values
-    : {};
+  const skillDormancy = useMemo(
+    () => (cwd && skillDormancyState?.cwd === cwd ? skillDormancyState.values : {}),
+    [cwd, skillDormancyState],
+  );
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const toolDropdownRef = useRef<HTMLDivElement>(null);
@@ -769,6 +770,124 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
       ta.style.height = `${Math.min(ta.scrollHeight, 200)}px`;
     });
   }, []);
+
+  // Kept above `useImperativeHandle` on purpose: that call references these
+  // callbacks before their declaration, and React Compiler cannot preserve the
+  // manual memoization of a callback that is forward-referenced there and also
+  // used later (it reported `preserve-manual-memoization` for both). Declaring
+  // them first removes the forward reference without changing their deps.
+  const processImageFiles = useCallback(async (files: File[]) => {
+    if (compact) return;
+    const remaining = Math.max(
+      0,
+      MAX_ATTACHED_IMAGES - attachedImagesRef.current.length - pendingImageCountRef.current,
+    );
+    const imageFiles = files
+      .filter((f) => f.type.startsWith("image/") && f.size <= MAX_ATTACHED_IMAGE_BYTES)
+      .slice(0, remaining);
+    if (!imageFiles.length) return;
+
+    setAttachmentError(null);
+    const pending = imageFiles.map((file) => ({
+      id: `inline-process-${++pendingImageIdRef.current}`,
+      name: file.name || "image",
+    }));
+    const pendingIds = new Set(pending.map((image) => image.id));
+    pendingImageCountRef.current += pending.length;
+    pendingInlineImagesRef.current = [...pendingInlineImagesRef.current, ...pending];
+    setPendingInlineImages(pendingInlineImagesRef.current);
+
+    try {
+      const newImages = await Promise.all(
+        imageFiles.map(async (file) => ({
+          ...await compressImageFile(file),
+          previewUrl: URL.createObjectURL(file),
+        }))
+      );
+      setAttachedImages((prev) => {
+        const accepted = newImages.slice(0, Math.max(0, MAX_ATTACHED_IMAGES - prev.length));
+        newImages.slice(accepted.length).forEach(revokeImagePreview);
+        const next = [...prev, ...accepted];
+        attachedImagesRef.current = next;
+        return next;
+      });
+    } catch {
+      setAttachmentError("Failed to process image");
+    } finally {
+      pendingImageCountRef.current = Math.max(0, pendingImageCountRef.current - pending.length);
+      setPendingInlineImages((current) => {
+        const next = current.filter((image) => !pendingIds.has(image.id));
+        pendingInlineImagesRef.current = next;
+        return next;
+      });
+    }
+  }, [compact]);
+
+  /**
+   * Save pasted/dropped images to disk (via /api/attachments) and insert their
+   * absolute paths into the message as @-mentions, so the agent can read them
+   * even when the active model has no vision support.
+   */
+  const saveImagesToDisk = useCallback(async (files: File[]) => {
+    const remaining = Math.max(
+      0,
+      MAX_ATTACHED_IMAGES
+        - attachedImagesRef.current.length
+        - extractImageMentions(valueRef.current).length
+        - pendingImageCountRef.current,
+    );
+    const imageFiles = files.filter(
+      (f) => f.type.startsWith("image/") && f.size > 0 && f.size <= MAX_ATTACHED_IMAGE_BYTES,
+    ).slice(0, remaining);
+    if (!imageFiles.length) return;
+
+    setAttachmentError(null);
+    const pending = imageFiles.map((file) => ({
+      id: `disk-upload-${++pendingImageIdRef.current}`,
+      name: file.name || "image",
+    }));
+    const pendingIds = new Set(pending.map((image) => image.id));
+    pendingImageCountRef.current += pending.length;
+    pendingDiskImagesRef.current = [...pendingDiskImagesRef.current, ...pending];
+    setPendingDiskImages(pendingDiskImagesRef.current);
+
+    const body = new FormData();
+    for (const file of imageFiles) body.append("files", file);
+    try {
+      const response = await fetch(
+        `/api/attachments?cwd=${encodeURIComponent(cwd ?? "")}`,
+        { method: "POST", body },
+      );
+      if (!response.ok) {
+        let message = `Failed to save image (HTTP ${response.status})`;
+        try {
+          const data = await response.json() as { error?: string };
+          if (data.error) message = data.error;
+        } catch {
+          // keep default message
+        }
+        setAttachmentError(message);
+        return;
+      }
+      const data = await response.json() as { paths?: string[] };
+      const paths = data.paths ?? [];
+      if (!paths.length) {
+        setAttachmentError("No image paths returned");
+        return;
+      }
+      const mention = paths.map((p) => buildImageMentionText(p)).join("");
+      insertTextAtCursor(mention);
+    } catch {
+      setAttachmentError("Failed to save image (network error)");
+    } finally {
+      pendingImageCountRef.current = Math.max(0, pendingImageCountRef.current - pending.length);
+      setPendingDiskImages((current) => {
+        const next = current.filter((image) => !pendingIds.has(image.id));
+        pendingDiskImagesRef.current = next;
+        return next;
+      });
+    }
+  }, [insertTextAtCursor, cwd]);
 
   useImperativeHandle(ref, () => ({
     insertIfEmpty(text: string) {
@@ -937,119 +1056,6 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
     },
   }));
 
-  const processImageFiles = useCallback(async (files: File[]) => {
-    if (compact) return;
-    const remaining = Math.max(
-      0,
-      MAX_ATTACHED_IMAGES - attachedImagesRef.current.length - pendingImageCountRef.current,
-    );
-    const imageFiles = files
-      .filter((f) => f.type.startsWith("image/") && f.size <= MAX_ATTACHED_IMAGE_BYTES)
-      .slice(0, remaining);
-    if (!imageFiles.length) return;
-
-    setAttachmentError(null);
-    const pending = imageFiles.map((file) => ({
-      id: `inline-process-${++pendingImageIdRef.current}`,
-      name: file.name || "image",
-    }));
-    const pendingIds = new Set(pending.map((image) => image.id));
-    pendingImageCountRef.current += pending.length;
-    pendingInlineImagesRef.current = [...pendingInlineImagesRef.current, ...pending];
-    setPendingInlineImages(pendingInlineImagesRef.current);
-
-    try {
-      const newImages = await Promise.all(
-        imageFiles.map(async (file) => ({
-          ...await compressImageFile(file),
-          previewUrl: URL.createObjectURL(file),
-        }))
-      );
-      setAttachedImages((prev) => {
-        const accepted = newImages.slice(0, Math.max(0, MAX_ATTACHED_IMAGES - prev.length));
-        newImages.slice(accepted.length).forEach(revokeImagePreview);
-        const next = [...prev, ...accepted];
-        attachedImagesRef.current = next;
-        return next;
-      });
-    } catch {
-      setAttachmentError("Failed to process image");
-    } finally {
-      pendingImageCountRef.current = Math.max(0, pendingImageCountRef.current - pending.length);
-      setPendingInlineImages((current) => {
-        const next = current.filter((image) => !pendingIds.has(image.id));
-        pendingInlineImagesRef.current = next;
-        return next;
-      });
-    }
-  }, [compact]);
-
-  /**
-   * Save pasted/dropped images to disk (via /api/attachments) and insert their
-   * absolute paths into the message as @-mentions, so the agent can read them
-   * even when the active model has no vision support.
-   */
-  const saveImagesToDisk = useCallback(async (files: File[]) => {
-    const remaining = Math.max(
-      0,
-      MAX_ATTACHED_IMAGES
-        - attachedImagesRef.current.length
-        - extractImageMentions(valueRef.current).length
-        - pendingImageCountRef.current,
-    );
-    const imageFiles = files.filter(
-      (f) => f.type.startsWith("image/") && f.size > 0 && f.size <= MAX_ATTACHED_IMAGE_BYTES,
-    ).slice(0, remaining);
-    if (!imageFiles.length) return;
-
-    setAttachmentError(null);
-    const pending = imageFiles.map((file) => ({
-      id: `disk-upload-${++pendingImageIdRef.current}`,
-      name: file.name || "image",
-    }));
-    const pendingIds = new Set(pending.map((image) => image.id));
-    pendingImageCountRef.current += pending.length;
-    pendingDiskImagesRef.current = [...pendingDiskImagesRef.current, ...pending];
-    setPendingDiskImages(pendingDiskImagesRef.current);
-
-    const body = new FormData();
-    for (const file of imageFiles) body.append("files", file);
-    try {
-      const response = await fetch(
-        `/api/attachments?cwd=${encodeURIComponent(cwd ?? "")}`,
-        { method: "POST", body },
-      );
-      if (!response.ok) {
-        let message = `Failed to save image (HTTP ${response.status})`;
-        try {
-          const data = await response.json() as { error?: string };
-          if (data.error) message = data.error;
-        } catch {
-          // keep default message
-        }
-        setAttachmentError(message);
-        return;
-      }
-      const data = await response.json() as { paths?: string[] };
-      const paths = data.paths ?? [];
-      if (!paths.length) {
-        setAttachmentError("No image paths returned");
-        return;
-      }
-      const mention = paths.map((p) => buildImageMentionText(p)).join("");
-      insertTextAtCursor(mention);
-    } catch {
-      setAttachmentError("Failed to save image (network error)");
-    } finally {
-      pendingImageCountRef.current = Math.max(0, pendingImageCountRef.current - pending.length);
-      setPendingDiskImages((current) => {
-        const next = current.filter((image) => !pendingIds.has(image.id));
-        pendingDiskImagesRef.current = next;
-        return next;
-      });
-    }
-  }, [insertTextAtCursor, cwd]);
-
   const attachImageFiles = useCallback((files: File[]) => {
     if (supportsInlineImages) processImageFiles(files);
     else void saveImagesToDisk(files);
@@ -1192,7 +1198,11 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
     ? value.slice(1).toLowerCase()
     : null;
 
-  const filteredSlashCommands = (() => {
+  // Deliberately memoized (not a micro-optimization): this derived palette is
+  // rebuilt on every render, which silently defeated the `getNextSlashIndex`
+  // and `handleKeyDown` useCallbacks that depend on it. Freezing it here is the
+  // smallest change that makes the existing manual memoization real again.
+  const filteredSlashCommands = useMemo(() => {
     if (slashQuery === null) return [];
     const builtinCommands = isStreaming
       ? BUILTIN_SLASH_COMMANDS.filter((command) => command.availableWhileStreaming)
@@ -1210,12 +1220,17 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
         return SLASH_SOURCE_ORDER[a.source] - SLASH_SOURCE_ORDER[b.source]
           || TEXT_COLLATOR.compare(a.name, b.name);
       });
-  })();
+  }, [slashQuery, isStreaming, slashCommands, t]);
 
+  // Same rationale as above: `buildSlashCommandLayout` returns fresh arrays and
+  // is a dependency of `handleKeyDown`, so it must be frozen by its real inputs.
   const {
     commands: displayedSlashCommands,
     groups: groupedSlashCommands,
-  } = buildSlashCommandLayout(filteredSlashCommands, skillDormancy);
+  } = useMemo(
+    () => buildSlashCommandLayout(filteredSlashCommands, skillDormancy),
+    [filteredSlashCommands, skillDormancy],
+  );
 
   const slashCommandCountLabel = filteredSlashCommands.length === 1
     ? t(slashQuery ? "chat.match" : "chat.command")

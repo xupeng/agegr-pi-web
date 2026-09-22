@@ -1086,14 +1086,17 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
   // Prefer an exact UI selection while a refetch is in flight. Once the
   // response catches up, the server-resolved path handles Windows case and
   // separator differences without teaching the browser OS path semantics.
-  const currentWorktree = worktreeState
+  const currentWorktree = useMemo(() => (worktreeState
     ? worktreeState.worktrees.find((worktree) => worktree.path === selectedCwd)
       ?? (worktreeState.forCwd === selectedCwd && worktreeState.currentWorktreePath
         ? worktreeState.worktrees.find((worktree) => worktree.path === worktreeState.currentWorktreePath)
         : undefined)
       ?? worktreeState.worktrees.find((worktree) => worktree.isMain)
-    : undefined;
-  const currentWorktreePath = currentWorktree?.path ?? null;
+    : undefined), [worktreeState, selectedCwd]);
+  // Memoized so it is a stable dependency for `handleRemoveWorktree` below;
+  // as a plain render-derived value React Compiler could not keep its
+  // `preserve-manual-memoization` guarantee.
+  const currentWorktreePath = useMemo(() => currentWorktree?.path ?? null, [currentWorktree]);
 
   const commitCustomPath = useCallback(async (candidate?: string) => {
     const path = (candidate ?? customPathValue).trim();

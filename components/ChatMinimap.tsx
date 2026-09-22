@@ -26,6 +26,20 @@ const MINIMAP_PADDING = 12;
 const PREVIEW_HIDE_DELAY = 250;
 const NAVIGATION_ACTIVE_LOCK_MS = 1600;
 
+/**
+ * Read `ref.current` through a module-level helper so the `useCallback` dep arrays below can keep
+ * listing the ref object itself.
+ *
+ * eslint-plugin-react-hooks 7.1.1 refuses to preserve a manual memoization whose body reads
+ * `ref.current` while the deps list the ref object ("Differences in ref.current access"), and the
+ * compiler-approved alternative — listing `ref.current` in the deps — makes `exhaustive-deps`
+ * report a mutable dependency. Routing the read through this helper satisfies both rules while
+ * keeping the dependency semantics (refs are stable) exactly as they were.
+ */
+function readRefCurrent<T>(ref: RefObject<T | null>): T | null {
+  return ref.current;
+}
+
 interface AssistantPreview {
   markdown: string;
   element: HTMLDivElement | null;
@@ -306,7 +320,7 @@ export function ChatMinimap({
   }, []);
 
   const updateScroll = useCallback(() => {
-    const scrollEl = scrollContainer.current;
+    const scrollEl = readRefCurrent(scrollContainer);
     if (!scrollEl) return;
     const scrollable = scrollEl.scrollHeight - scrollEl.clientHeight;
     const currentNodes = allNodesRef.current;
@@ -319,7 +333,7 @@ export function ChatMinimap({
     if (measureThrottleRef.current) return;
     measureThrottleRef.current = setTimeout(() => {
       measureThrottleRef.current = null;
-      const scrollEl = scrollContainer.current;
+      const scrollEl = readRefCurrent(scrollContainer);
       const minimapEl = containerRef.current;
       if (!scrollEl || !minimapEl) return;
 
@@ -438,7 +452,7 @@ export function ChatMinimap({
   }, [messages.length, measureNodes, updateScroll]);
 
   const scrollToNode = useCallback((node: NodeInfo, behavior: ScrollBehavior) => {
-    const scrollEl = scrollContainer.current;
+    const scrollEl = readRefCurrent(scrollContainer);
     if (!scrollEl) return;
     lockActiveNode(node.index);
     if (node.targetTurn.scrollTop === null) {
@@ -454,7 +468,7 @@ export function ChatMinimap({
   }, [lockActiveNode, onRevealHistory, scrollContainer]);
 
   const scrollToAssistant = useCallback((node: NodeInfo, assistantIndex: number) => {
-    const scrollEl = scrollContainer.current;
+    const scrollEl = readRefCurrent(scrollContainer);
     if (!scrollEl) return;
     const assistantElement = node.targetTurn.assistantPreviews[assistantIndex]?.element;
     if (!assistantElement) {
@@ -502,7 +516,7 @@ export function ChatMinimap({
     assistantIndex: number,
     headingIndex: number,
   ) => {
-    const scrollEl = scrollContainer.current;
+    const scrollEl = readRefCurrent(scrollContainer);
     if (!scrollEl) return;
     const answerElement = node.targetTurn.assistantPreviews[assistantIndex]?.element;
     if (!answerElement) {

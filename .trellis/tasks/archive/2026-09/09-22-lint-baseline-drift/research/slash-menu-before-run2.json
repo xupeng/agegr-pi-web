@@ -1,0 +1,51 @@
+{
+  "root": "/home/xupeng/dev/personal/forked/pi-web-lintclean-personal",
+  "opened": {
+    "count": 7,
+    "names": [
+      "/auto-compact",
+      "/clone",
+      "/compact",
+      "/copy",
+      "/name",
+      "/reload",
+      "/session"
+    ],
+    "activeIndex": 0
+  },
+  "afterKeys": [
+    {
+      "key": "ArrowDown",
+      "active": "/copy"
+    },
+    {
+      "key": "ArrowDown",
+      "active": "/session"
+    },
+    {
+      "key": "ArrowRight",
+      "active": "/session"
+    },
+    {
+      "key": "ArrowUp",
+      "active": "/copy"
+    },
+    {
+      "key": "ArrowLeft",
+      "active": "/compact"
+    },
+    {
+      "key": "ArrowDown",
+      "active": "/reload"
+    }
+  ],
+  "committed": "/reload ",
+  "filteredForRe": [
+    "/reload",
+    "/clone",
+    "/compact"
+  ],
+  "escaped": {
+    "menuItemsAfterEscape": 0
+  }
+}

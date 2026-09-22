@@ -495,3 +495,51 @@ Gave pi-web a per-session stall watchdog so a turn that stops producing agent ev
 
 - 可选：给 stall_aborted 的 toast 与刷新后卡片的本地化渲染补一次真实浏览器（Playwright）证据
 - 可选：给停滞卡片加一个本地化标题（当前标题是 raw customType）
+
+
+## Session 10: lint-baseline-drift: 归因并收口 14 条 preserve-manual-memoization
+
+**Date**: 2026-09-22
+**Task**: lint-baseline-drift: 归因并收口 14 条 preserve-manual-memoization
+**Branch**: `task/09-22-lint-baseline-drift`
+
+### Summary
+
+把「全仓 lint 14 条既有错误」归因到锁文件选择（npm 7.0.1 vs pnpm 7.1.1），并把 14 处在两棵树上都修到 0 error，不改行为。
+
+### Main Changes
+
+- 用两棵干净安装树做单变量归因：同 495 文件、同规则级别，唯一差异是 eslint-plugin-react-hooks 7.0.1（package-lock.json）vs 7.1.1（pnpm-lock.yaml，fork 自有）
+- 修正 spec 的旧归因（不是「旧树污染」，干净 pnpm 树同样复现），补机制/识别特征/恢复动作，删除写死的 462/474 文件数
+- ChatMinimap：新增模块级 readRefCurrent，deps 保持 ref 对象（写 scrollContainer.current 会被 exhaustive-deps 判为可变依赖）
+- ChatInput：filteredSlashCommands 与 buildSlashCommandLayout 结果改 useMemo（此前每次渲染重建，使既有 useCallback 失效）；两个图片 useCallback 上移到 useImperativeHandle 之前以消除前向引用
+- SessionSidebar：currentWorktree/currentWorktreePath 用 useMemo 固定；P4（参数化）会打破 SessionSidebar.worktree.test.mjs 的源码断言，故放弃
+- 主 checkout 执行 npm ci 恢复锁一致树，消除 react 19.2.8→19.2.4 等漂移
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `5181b1f` | (see git log) |
+| `26bafdb` | (see git log) |
+| `9e0c52c` | (see git log) |
+| `ec40c8e` | (see git log) |
+| `bfec332` | (see git log) |
+| `6347624` | (see git log) |
+
+### Testing
+
+- [OK] 7.1.1 pnpm 夹具：eslint 全仓 495 文件 0 error / 0 warning（修复前 14）
+- [OK] 7.0.1 npm 夹具：0 error / 0 warning；两棵树 tsc 退出 0、npm test 1411 pass / 0 fail
+- [OK] 主 checkout npm ci 后：lint 0/0、tsc 0、npm test 1411 pass / 0 fail
+- [OK] 新增 research/slash-menu-keyboard.mjs：斜杠菜单键盘导航修复前后快照逐字节一致（方向键/Enter/Escape/过滤）
+- [OK] e2e 记录为既有失败：/api/sessions/<id>/state 500，基线与修复后、dev 与 start 模式、Node 22.19 均一致复现，非本任务引入
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 「state 路由 500」单独立项：它让 npm run test:e2e 在本机不能作为干净门禁
+- 上游 package-lock.json 解析到 react-hooks ≥7.1 时，本任务的修复已让 CI 免疫

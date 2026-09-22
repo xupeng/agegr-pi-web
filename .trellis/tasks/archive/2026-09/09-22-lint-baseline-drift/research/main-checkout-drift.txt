@@ -1,0 +1,17 @@
+=== current checkout drift evidence ===
+date: 2026-09-22T16:03:40+08:00
+branch: personal  head: 5402a5f
+
+--- npm ls --depth=0 (drift markers) ---
+
+--- lock vs installed for key packages ---
+DRIFT	react	lock=19.2.4	installed=19.2.8
+DRIFT	react-dom	lock=19.2.4	installed=19.2.8
+DRIFT	eslint	lock=9.39.4	installed=9.39.5
+ok  	next	lock=16.3.5	installed=16.3.5
+ok  	eslint-config-next	lock=16.3.5	installed=16.3.5
+ok  	typescript	lock=5.9.3	installed=5.9.3
+DRIFT	@types/react	lock=19.2.14	installed=19.2.18
+
+--- eslint-plugin-react-hooks (nested) ---
+lock=7.0.1 installed=ABSENT

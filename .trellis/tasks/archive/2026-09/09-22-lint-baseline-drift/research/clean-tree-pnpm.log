@@ -1,0 +1,355 @@
+Preparing worktree (detached HEAD 5402a5f)
+HEAD is now at 5402a5f Merge pull request #2 from xupeng/task/09-22-stall-watchdog
+=== pnpm tree verification (pnpm-lock.yaml, react-hooks 7.1.1) ===
+2026-09-22T16:19:01+08:00
+✓ Lockfile passes supply-chain policies (verified 2h ago)
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages are hard linked from the content-addressable store to the virtual store.
+  Content-addressable store is at: /home/xupeng/.local/share/pnpm/store/v11
+  Virtual store is at:             node_modules/.pnpm
+Packages: +757
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 757, reused 757, downloaded 0, added 757, done
+. postinstall$ node bin/prepare-terminal.js
+. postinstall: Done
+
+dependencies:
++ @earendil-works/pi-agent-core 0.85.1
++ @earendil-works/pi-ai 0.85.1
++ @earendil-works/pi-coding-agent 0.85.1
++ @earendil-works/pi-tui 0.85.1
++ @xterm/addon-fit 0.11.0
++ @xterm/xterm 6.0.0
++ ansi_up 6.0.6
++ js-yaml 5.4.0
++ next 16.3.5
++ node-pty 1.2.0-beta.15
++ proper-lockfile 4.1.2
++ react 19.2.8
++ react-dom 19.2.8
++ remark-frontmatter 5.0.0
++ semver 7.8.0
++ undici 8.10.0
++ web-push 3.6.7
+
+devDependencies:
++ @tailwindcss/postcss 4.3.3
++ @types/js-yaml 4.0.9
++ @types/node 25.9.5
++ @types/proper-lockfile 4.1.4
++ @types/react 19.2.18
++ @types/react-dom 19.2.5
++ @types/react-syntax-highlighter 15.5.13
++ @types/semver 7.8.0
++ @types/web-push 3.6.4
++ eslint 9.39.5
++ eslint-config-next 16.3.5
++ jiti 2.7.0
++ katex 0.16.47
++ mammoth 1.12.1
++ mermaid 11.17.2
++ playwright 1.63.0
++ postcss 8.5.26
++ react-markdown 10.1.0
++ react-syntax-highlighter 16.1.1
++ rehype-katex 7.0.1
++ rehype-raw 7.0.0
++ rehype-sanitize 6.0.0
++ remark-gfm 4.0.1
++ remark-math 6.0.0
++ tailwindcss 4.3.3
++ typescript 5.9.3
+
+Error: ERR_PNPM_IGNORED_BUILDS
+
+  × installing dependencies
+  ╰─▶ Ignored build scripts: @google/genai@1.52.0, esbuild@0.28.1, node-
+      pty@1.2.0-beta.15, protobufjs@7.6.5, unrs-resolver@1.12.2
+  help: Run "pnpm approve-builds" to pick which dependencies should be allowed
+        to run scripts.
+
+pnpm_install_exit=1
+
+=== lint ===
+
+> @xup3ng/pi-web@0.9.5 lint
+> eslint .
+
+
+/home/xupeng/dev/personal/forked/pi-web-lintclean-pnpm/components/ChatInput.tsx
+   940:41  error  Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. This value was memoized in source but not in compilation output.
+
+/home/xupeng/dev/personal/forked/pi-web-lintclean-pnpm/components/ChatInput.tsx:940:41
+  938 |   }));
+  939 |
+> 940 |   const processImageFiles = useCallback(async (files: File[]) => {
+      |                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 941 |     if (compact) return;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^
+> 942 |     const remaining = Math.max(
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^
+> 984 |     }
+      | ^^^^^^^^^^^^^^^^^^^^^^^^
+> 985 |   }, [compact]);
+      | ^^^^ Could not preserve existing memoization
+  986 |
+  987 |   /**
+  988 |    * Save pasted/dropped images to disk (via /api/attachments) and insert their                                                                                                                                                                                                                                                                                                                                                                                                                                               react-hooks/preserve-manual-memoization
+   992:40  error  Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. This value was memoized in source but not in compilation output.
+
+/home/xupeng/dev/personal/forked/pi-web-lintclean-pnpm/components/ChatInput.tsx:992:40
+   990 |    * even when the active model has no vision support.
+   991 |    */
+>  992 |   const saveImagesToDisk = useCallback(async (files: File[]) => {
+       |                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  993 |     const remaining = Math.max(
+       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  994 |       0,
+       …
+       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 1050 |     }
+       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 1051 |   }, [insertTextAtCursor, cwd]);
+       | ^^^^ Could not preserve existing memoization
+  1052 |
+  1053 |   const attachImageFiles = useCallback((files: File[]) => {
+  1054 |     if (supportsInlineImages) processImageFiles(files);                                                                                                                                                                                                                                                                                                                        react-hooks/preserve-manual-memoization
+  1445:41  error  Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. This value was memoized in source but not in compilation output.
+
+/home/xupeng/dev/personal/forked/pi-web-lintclean-pnpm/components/ChatInput.tsx:1445:41
+  1443 |   }, [value, attachedImages, hasPendingImages, onBuiltinCommand, onPromptWithStreamingBehavior, onSteer, onFollowUp, clearInput, onAudioUnlock, runBuiltinCommand]);
+  1444 |
+> 1445 |   const getNextSlashIndex = useCallback((direction: "up" | "down" | "left" | "right") => {
+       |                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 1446 |     const lastIndex = displayedSlashCommands.length - 1;
+       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 1447 |     if (lastIndex < 0) return 0;
+       …
+       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 1485 |       : Math.max(0, slashActiveIndex - 1);
+       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 1486 |   }, [displayedSlashCommands.length, slashActiveIndex]);
+       | ^^^^ Could not preserve existing memoization
+  1487 |
+  1488 |   const handleKeyDown = useCallback(
+  1489 |     (e: KeyboardEvent<HTMLTextAreaElement>) => {  react-hooks/preserve-manual-memoization
+  1486:7   error  Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. This dependency may be mutated later, which could cause the value to change unexpectedly.
+
+/home/xupeng/dev/personal/forked/pi-web-lintclean-pnpm/components/ChatInput.tsx:1486:7
+  1484 |       ? Math.min(lastIndex, slashActiveIndex + 1)
+  1485 |       : Math.max(0, slashActiveIndex - 1);
+> 1486 |   }, [displayedSlashCommands.length, slashActiveIndex]);
+       |       ^^^^^^^^^^^^^^^^^^^^^^ This dependency may be modified later
+  1487 |
+  1488 |   const handleKeyDown = useCallback(
+  1489 |     (e: KeyboardEvent<HTMLTextAreaElement>) => {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-hooks/preserve-manual-memoization
+  1489:5   error  Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. This value was memoized in source but not in compilation output.
+
+/home/xupeng/dev/personal/forked/pi-web-lintclean-pnpm/components/ChatInput.tsx:1489:5
+  1487 |
+  1488 |   const handleKeyDown = useCallback(
+> 1489 |     (e: KeyboardEvent<HTMLTextAreaElement>) => {
+       |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 1490 |       const nativeEvent = e.nativeEvent;
+       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 1491 |       const sendShortcut = e.key === "Enter" && !e.shiftKey && (!isMobileOrTouch || e.ctrlKey || e.metaKey);
+       …
+       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 1620 |       }
+       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 1621 |     },
+       | ^^^^^^ Could not preserve existing memoization
+  1622 |     [isMobileOrTouch, isStreaming, onSteer, onFollowUp, onAbort, slashMenuOpen, slashQuery, displayedSlashCommands, slashActiveIndex, applySlashCommand, sendQueued, handleSend, getNextSlashIndex, atMenuOpen, atQuery, atMatches, atActiveIndex, applyAtCompletion, historyMenuOpen, inputHistory, historyActiveIndex, applyHistoryInput, value]
+  1623 |   );
+  1624 |                            react-hooks/preserve-manual-memoization
+  1622:81  error  Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. This dependency may be mutated later, which could cause the value to change unexpectedly.
+
+/home/xupeng/dev/personal/forked/pi-web-lintclean-pnpm/components/ChatInput.tsx:1622:81
+  1620 |       }
+  1621 |     },
+> 1622 |     [isMobileOrTouch, isStreaming, onSteer, onFollowUp, onAbort, slashMenuOpen, slashQuery, displayedSlashCommands, slashActiveIndex, applySlashCommand, sendQueued, handleSend, getNextSlashIndex, atMenuOpen, atQuery, atMatches, atActiveIndex, applyAtCompletion, historyMenuOpen, inputHistory, historyActiveIndex, applyHistoryInput, value]
+       |                                                                                 ^^^^^^^^^^ This dependency may be modified later
+  1623 |   );
+  1624 |
+  1625 |   const handleInput = useCallback(() => {                                                                                                                                                                                                                                                                                                                                                                               react-hooks/preserve-manual-memoization
+  1622:93  error  Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. This dependency may be mutated later, which could cause the value to change unexpectedly.
+
+/home/xupeng/dev/personal/forked/pi-web-lintclean-pnpm/components/ChatInput.tsx:1622:93
+  1620 |       }
+  1621 |     },
+> 1622 |     [isMobileOrTouch, isStreaming, onSteer, onFollowUp, onAbort, slashMenuOpen, slashQuery, displayedSlashCommands, slashActiveIndex, applySlashCommand, sendQueued, handleSend, getNextSlashIndex, atMenuOpen, atQuery, atMatches, atActiveIndex, applyAtCompletion, historyMenuOpen, inputHistory, historyActiveIndex, applyHistoryInput, value]
+       |                                                                                             ^^^^^^^^^^^^^^^^^^^^^^ This dependency may be modified later
+  1623 |   );
+  1624 |
+  1625 |   const handleInput = useCallback(() => {                                                                                                                                                                                                                                                                                                                                                       react-hooks/preserve-manual-memoization
+
+/home/xupeng/dev/personal/forked/pi-web-lintclean-pnpm/components/ChatMinimap.tsx
+  308:36  error  Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `scrollContainer.current`, but the source dependencies were [scrollContainer, syncActiveNode]. Differences in ref.current access.
+
+/home/xupeng/dev/personal/forked/pi-web-lintclean-pnpm/components/ChatMinimap.tsx:308:36
+  306 |   }, []);
+  307 |
+> 308 |   const updateScroll = useCallback(() => {
+      |                                    ^^^^^^^
+> 309 |     const scrollEl = scrollContainer.current;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 310 |     if (!scrollEl) return;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 311 |     const scrollable = scrollEl.scrollHeight - scrollEl.clientHeight;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 312 |     const currentNodes = allNodesRef.current;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 313 |     setVisible(scrollable > 20);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 314 |     syncActiveNode(scrollEl, currentNodes);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 315 |   }, [scrollContainer, syncActiveNode]);
+      | ^^^^ Could not preserve existing manual memoization
+  316 |
+  317 |   const measureThrottleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  318 |   const measureNodes = useCallback(() => {  react-hooks/preserve-manual-memoization
+  318:36  error  Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `scrollContainer.current`, but the source dependencies were [lockActiveNode, messageRefs, scrollContainer, syncActiveNode]. Differences in ref.current access.
+
+/home/xupeng/dev/personal/forked/pi-web-lintclean-pnpm/components/ChatMinimap.tsx:318:36
+  316 |
+  317 |   const measureThrottleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+> 318 |   const measureNodes = useCallback(() => {
+      |                                    ^^^^^^^
+> 319 |     if (measureThrottleRef.current) return;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 320 |     measureThrottleRef.current = setTimeout(() => {
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 402 |     }, 150);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 403 |   }, [lockActiveNode, messageRefs, scrollContainer, syncActiveNode]);
+      | ^^^^ Could not preserve existing manual memoization
+  404 |
+  405 |   useEffect(() => {
+  406 |     const el = scrollContainer.current;                                                                                                                                                                                                                                                                                      react-hooks/preserve-manual-memoization
+  440:36  error  Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `scrollContainer.current`, but the source dependencies were [lockActiveNode, onRevealHistory, scrollContainer]. Differences in ref.current access.
+
+/home/xupeng/dev/personal/forked/pi-web-lintclean-pnpm/components/ChatMinimap.tsx:440:36
+  438 |   }, [messages.length, measureNodes, updateScroll]);
+  439 |
+> 440 |   const scrollToNode = useCallback((node: NodeInfo, behavior: ScrollBehavior) => {
+      |                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 441 |     const scrollEl = scrollContainer.current;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 442 |     if (!scrollEl) return;
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 453 |     scrollEl.scrollTo({ top: targetTop, behavior });
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 454 |   }, [lockActiveNode, onRevealHistory, scrollContainer]);
+      | ^^^^ Could not preserve existing manual memoization
+  455 |
+  456 |   const scrollToAssistant = useCallback((node: NodeInfo, assistantIndex: number) => {
+  457 |     const scrollEl = scrollContainer.current;                                                                                                                                                           react-hooks/preserve-manual-memoization
+  456:41  error  Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `scrollContainer.current`, but the source dependencies were [lockActiveNode, onRevealHistory, scrollContainer]. Differences in ref.current access.
+
+/home/xupeng/dev/personal/forked/pi-web-lintclean-pnpm/components/ChatMinimap.tsx:456:41
+  454 |   }, [lockActiveNode, onRevealHistory, scrollContainer]);
+  455 |
+> 456 |   const scrollToAssistant = useCallback((node: NodeInfo, assistantIndex: number) => {
+      |                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 457 |     const scrollEl = scrollContainer.current;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 458 |     if (!scrollEl) return;
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 478 |     scrollEl.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 479 |   }, [lockActiveNode, onRevealHistory, scrollContainer]);
+      | ^^^^ Could not preserve existing manual memoization
+  480 |
+  481 |   const findNearestNode = useCallback((ratio: number): NodeInfo | null => {
+  482 |     const { nodes, gap, fillsHeight } = nodeLayoutRef.current;                                                                                                                  react-hooks/preserve-manual-memoization
+  500:39  error  Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. The inferred dependencies did not match the manually specified dependencies, which could cause the value to change more or less frequently than expected. The inferred dependency was `scrollContainer.current`, but the source dependencies were [lockActiveNode, onRevealHistory, scrollContainer]. Differences in ref.current access.
+
+/home/xupeng/dev/personal/forked/pi-web-lintclean-pnpm/components/ChatMinimap.tsx:500:39
+  498 |   }, []);
+  499 |
+> 500 |   const scrollToHeading = useCallback((
+      |                                       ^
+> 501 |     node: NodeInfo,
+      | ^^^^^^^^^^^^^^^^^^^
+> 502 |     assistantIndex: number,
+      …
+      | ^^^^^^^^^^^^^^^^^^^
+> 529 |     scrollEl.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+      | ^^^^^^^^^^^^^^^^^^^
+> 530 |   }, [lockActiveNode, onRevealHistory, scrollContainer]);
+      | ^^^^ Could not preserve existing manual memoization
+  531 |
+  532 |   const cancelPreviewHide = useCallback(() => {
+  533 |     if (!previewHideTimerRef.current) return;                                                                                                                                                                                                                                                                                                                                                                                                                  react-hooks/preserve-manual-memoization
+
+/home/xupeng/dev/personal/forked/pi-web-lintclean-pnpm/components/SessionSidebar.tsx
+  1195:44  error  Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. This value was memoized in source but not in compilation output.
+
+/home/xupeng/dev/personal/forked/pi-web-lintclean-pnpm/components/SessionSidebar.tsx:1195:44
+  1193 |   }, [wtNewBranch, wtBusy, worktreeState]);
+  1194 |
+> 1195 |   const handleRemoveWorktree = useCallback(async (path: string, force: boolean) => {
+       |                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 1196 |     if (!worktreeState || wtBusy) return;
+       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 1197 |     setWtBusy(true);
+       …
+       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 1222 |     }
+       | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 1223 |   }, [worktreeState, wtBusy, currentWorktreePath]);
+       | ^^^^ Could not preserve existing memoization
+  1224 |
+  1225 |   // Close dropdowns on outside click
+  1226 |   useEffect(() => {  react-hooks/preserve-manual-memoization
+  1223:30  error  Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. This dependency may be mutated later, which could cause the value to change unexpectedly.
+
+/home/xupeng/dev/personal/forked/pi-web-lintclean-pnpm/components/SessionSidebar.tsx:1223:30
+  1221 |       setWtBusy(false);
+  1222 |     }
+> 1223 |   }, [worktreeState, wtBusy, currentWorktreePath]);
+       |                              ^^^^^^^^^^^^^^^^^^^ This dependency may be modified later
+  1224 |
+  1225 |   // Close dropdowns on outside click
+  1226 |   useEffect(() => {                                                                                                                                                                                                                                                                                                                                                                                                           react-hooks/preserve-manual-memoization
+
+✖ 14 problems (14 errors, 0 warnings)
+
+lint_exit=1
+
+=== plugin version ===
+not nested
+node_modules/.pnpm/eslint-plugin-react-hooks@7.1.1_eslint@9.39.5_jiti@2.7.0_/node_modules/eslint-plugin-react-hooks
