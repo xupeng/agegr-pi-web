@@ -9,7 +9,7 @@ import { ThinkingIcon } from "./ThinkingIcon";
 import { copyText } from "@/lib/clipboard";
 import { useI18n } from "@/hooks/useI18n";
 import { parseCompactionSummary } from "@/lib/compaction-summary";
-import { getAssistantErrorMessage, getThinkingPreview, isAssistantTruncated, isEmptyThinkingBlock } from "@/lib/message-display";
+import { formatStallAbortNotice, getAssistantErrorMessage, getThinkingPreview, isAssistantTruncated, isEmptyThinkingBlock, STALL_ABORT_CUSTOM_TYPE } from "@/lib/message-display";
 import { parseUnifiedPatch, type SplitDiffCell, type SplitDiffFile } from "@/lib/patch";
 import { applyPatchPreviewToFiles, applyPatchResultHasFailures, extractApplyPatchPaths, getApplyPatchInputText, parseApplyPatchInput } from "@/lib/apply-patch";
 import { isApplyPatchToolName, isEditToolName } from "@/lib/tool-names";
@@ -1669,7 +1669,12 @@ function CustomMessageView({ message, cwd, onOpenFile }: { message: CustomMessag
   const [copied, setCopied] = useState(false);
   const text = getMessageText(message.content);
   const images = getMessageImages(message.content);
-  const hasDetails = message.details !== undefined;
+  // The stall notice is stored with an English `content` for the model; the
+  // transcript renders the localized reason from `details` instead, and hides
+  // the raw JSON details that every other custom type can expand.
+  const isStallAbort = message.customType === STALL_ABORT_CUSTOM_TYPE;
+  const displayText = isStallAbort ? formatStallAbortNotice(message.details, t) : text;
+  const hasDetails = message.details !== undefined && !isStallAbort;
   const detailsText = hasDetails ? safeJson(message.details) : "";
   const writtenFiles = useMemo(() => message.customType === "pi-web:subagent-notification"
     ? resolveAndMergeWrittenFiles(extractSubagentSnapshotWrittenFiles(message.details), cwd)
@@ -1678,7 +1683,7 @@ function CustomMessageView({ message, cwd, onOpenFile }: { message: CustomMessag
   const time = formatTime(message.timestamp);
 
   const copyContent = () => {
-    copyText(text || detailsText).then(() => {
+    copyText(displayText || detailsText).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     });
@@ -1717,7 +1722,7 @@ function CustomMessageView({ message, cwd, onOpenFile }: { message: CustomMessag
         {contentExpanded ? (
           <div style={{ padding: "6px 9px" }}>
             {images.length > 0 && (
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: text ? 8 : 0 }}>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: displayText ? 8 : 0 }}>
                 {images.map((img, i) => {
                   const src = imageSource(img);
                   if (!src) return null;
@@ -1734,7 +1739,7 @@ function CustomMessageView({ message, cwd, onOpenFile }: { message: CustomMessag
                 })}
               </div>
             )}
-             {text ? <MarkdownBody className="markdown-custom-message" cwd={cwd} onOpenFile={onOpenFile}>{text}</MarkdownBody> : <span style={{ color: "var(--text-dim)", fontSize: 12 }}>{t("i18n.noMessage")}</span>}
+             {displayText ? <MarkdownBody className="markdown-custom-message" cwd={cwd} onOpenFile={onOpenFile}>{displayText}</MarkdownBody> : <span style={{ color: "var(--text-dim)", fontSize: 12 }}>{t("i18n.noMessage")}</span>}
           </div>
         ) : (
           <button
@@ -1751,7 +1756,7 @@ function CustomMessageView({ message, cwd, onOpenFile }: { message: CustomMessag
               textAlign: "left",
             }}
           >
-             {text ? previewText(text) : t("i18n.showExtensionMessage")}
+             {displayText ? previewText(displayText) : t("i18n.showExtensionMessage")}
           </button>
         )}
 
@@ -1765,7 +1770,7 @@ function CustomMessageView({ message, cwd, onOpenFile }: { message: CustomMessag
             background: "var(--bg-subtle)",
           }}
         >
-          {text || detailsText ? (
+          {displayText || detailsText ? (
             <button
               onClick={copyContent}
               style={{

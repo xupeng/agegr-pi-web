@@ -455,6 +455,34 @@ test("renders custom-message images as buttons that open a larger preview", () =
   assert.match(html, /<img[^>]+src="data:image\/png;base64,YWJj"/);
 });
 
+test("renders the stall watchdog notice as a localized reason instead of raw details", () => {
+  const details = {
+    toolName: "bash",
+    timeoutMs: 15 * 60_000,
+    timeoutSource: "default",
+    toolOverride: false,
+    silentMs: 16 * 60_000,
+    elapsedMs: 10 * 60_000,
+    toolElapsedMs: 95 * 60_000,
+  };
+  const html = renderMessage({
+    role: "custom",
+    customType: "pi-web.stall.abort",
+    content: "SERVER-ENGLISH-CONTENT",
+    display: true,
+    details,
+    timestamp: Date.now(),
+  });
+
+  assert.match(html, /no output from bash for 16 min/);
+  assert.match(html, /1h 35m/);
+  // The body is the localized notice, not the stored English `content` or the
+  // raw details JSON that every other custom type can expand.
+  assert.doesNotMatch(html, /SERVER-ENGLISH-CONTENT/);
+  assert.doesNotMatch(html, /silentMs/);
+  assert.doesNotMatch(html, /timeoutSource/);
+});
+
 test("shows tool-result images while the tool details stay collapsed", () => {
   const block = {
     type: "toolCall",

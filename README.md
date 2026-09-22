@@ -54,7 +54,7 @@ For port and hostname, command-line options override the corresponding environme
 | `PI_WEB_IDLE_TIMEOUT_MS` | Session idle timeout in milliseconds, up to `2147483647`; `0` disables idle shutdown; invalid or out-of-range values use the default | `600000` (10 min) |
 | `PI_WEB_STALL_TIMEOUT_MS` | Abort a turn that produces no agent event for this many milliseconds, up to `2147483647`; `0` disables the watchdog; invalid or out-of-range values use the default | `900000` (15 min) |
 
-`PI_WEB_STALL_TIMEOUT_MS` overrides `stallTimeoutMs` in `~/.pi/agent/pi-web-settings.json`. `stallToolTimeouts` in that file sets per-tool budgets (default `{ "bash": 1800000 }`), which is why a long but silent shell command is not aborted at the main threshold. When the watchdog fires it takes the same abort path as Stop and reports the reason in the chat.
+`PI_WEB_STALL_TIMEOUT_MS` overrides `stallTimeoutMs` in `~/.pi/agent/pi-web-settings.json`. `stallToolTimeouts` in that file sets per-tool budgets (default `{ "bash": 1800000 }`), which is why a long but silent shell command is not aborted at the main threshold. When the watchdog fires it takes the same abort path as Stop and reports the reason in the chat; that reason is also persisted as a `pi-web.stall.abort` custom message in the session, so it stays readable after a reload.
 
 For example:
 

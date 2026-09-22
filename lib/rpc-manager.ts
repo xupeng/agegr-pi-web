@@ -15,6 +15,7 @@ import {
 import { cacheSessionPath, getLatestModelChange, invalidateSessionListCache, readLatestSessionEntryId, resolveSessionPath } from "./session-reader";
 import { getProjectTrustStatus, projectTrustReloadOptions } from "./project-trust";
 import { persistExplicitStartupPreferences } from "./startup-preferences";
+import { renderStallAbortText, STALL_ABORT_CUSTOM_TYPE, type StallAbortNoticeDetails } from "./message-display";
 import { resolveStallWatchdogSettings, StallWatchdog, type StallWatchdogStall } from "./stall-watchdog";
 import { notifySessionComplete } from "./web-push";
 import { hasActiveSessionLivenessProvider } from "./session-liveness";
@@ -417,6 +418,34 @@ export class AgentSessionWrapper {
       silentMs: stall.silentMs,
       elapsedMs: stall.elapsedMs,
       toolElapsedMs: stall.toolElapsedMs,
+    });
+    // Persist the reason before aborting. The agent is still streaming, so with
+    // `triggerTurn: false` the SDK parks this custom message until the turn
+    // ends; the abort below flushes it to the session `.jsonl`, where a reload
+    // renders it as a localized notice instead of a bare "operation aborted".
+    // Fire-and-forget: a failed write must not block the abort.
+    const details: StallAbortNoticeDetails = {
+      toolName: stall.toolName,
+      timeoutMs: stall.timeoutMs,
+      timeoutSource: stall.timeoutSource,
+      toolOverride: stall.toolOverride,
+      silentMs: stall.silentMs,
+      elapsedMs: stall.elapsedMs,
+      toolElapsedMs: stall.toolElapsedMs,
+    };
+    void this.inner.sendCustomMessage(
+      {
+        customType: STALL_ABORT_CUSTOM_TYPE,
+        content: renderStallAbortText(details),
+        display: true,
+        details,
+      },
+      { triggerTurn: false },
+    ).catch((error) => {
+      console.error(
+        "[pi-web] failed to record stalled session abort:",
+        error instanceof Error ? error.message : error,
+      );
     });
     void this.abortTurn().catch((error) => {
       console.error(

@@ -1,4 +1,24 @@
+import { translateMessage } from "./i18n/format";
+import { enLocale } from "./i18n/messages/en";
 import type { AgentMessage, AssistantContentBlock, AssistantMessage, ThinkingContent, ToolCallContent } from "./types";
+
+/**
+ * `customType` of the persisted stall-watchdog notice. The watchdog stores one
+ * of these in the session `.jsonl` so the reason survives a reload, instead of
+ * living only in the transient toast.
+ */
+export const STALL_ABORT_CUSTOM_TYPE = "pi-web.stall.abort";
+
+/** Structured reason carried as the `details` of a {@link STALL_ABORT_CUSTOM_TYPE} message. */
+export interface StallAbortNoticeDetails {
+  toolName: string | null;
+  timeoutMs: number;
+  timeoutSource: "env" | "config" | "default";
+  toolOverride: boolean;
+  silentMs: number;
+  elapsedMs: number;
+  toolElapsedMs: number | null;
+}
 
 interface DisplayOptions {
   isStreaming?: boolean;
@@ -98,6 +118,17 @@ export function formatStallAbortNotice(
   return toolName
     ? translate("chat.stalledTurnAborted", { tool: toolName, minutes: silentMinutes, elapsed })
     : translate("chat.stalledTurnAbortedNoTool", { minutes: silentMinutes, elapsed });
+}
+
+/**
+ * English one-liner persisted as the `content` of a stall-abort custom message.
+ * The server does not know the browser locale, so the client re-renders the
+ * localized form from `details`; the wording comes from the same i18n copy as
+ * the toast (via {@link formatStallAbortNotice}) so both stay in step.
+ */
+export function renderStallAbortText(details: unknown): string {
+  return formatStallAbortNotice(details, (key, params) =>
+    translateMessage("en", key, { en: enLocale.messages }, params));
 }
 
 function isFinalAnswerBlock(block: AssistantContentBlock): boolean {
