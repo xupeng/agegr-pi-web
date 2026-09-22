@@ -436,3 +436,62 @@ Turned the six frontend spec files from trellis templates into real, code-backed
 ### Status
 
 [OK] **Completed**
+
+
+## Session 9: Stall watchdog: aborting a turn that stops producing events
+
+**Date**: 2026-09-22
+**Task**: Stall watchdog: aborting a turn that stops producing events
+**Branch**: `task/09-22-stall-watchdog`
+
+### Summary
+
+Gave pi-web a per-session stall watchdog so a turn that stops producing agent events is aborted instead of hanging forever. Every agent event re-arms a silence timer (15 min default, bash 30 min, env/config/0/invalid precedence); on expiry the turn takes the same abort path as Stop, so the extension's AbortSignal -> SIGTERM -> SIGKILL chain still reaps stuck children, and a stall_aborted event plus a server log report the last in-flight tool and the silence duration. Verified with 21 unit tests whose assertions were hardened by a mutation-testing check pass (which also caught a leaked listener on repeated start()), a real 90s-threshold dispatch that stalled a live trellis_subagent at 90009ms with zero leftover child processes, and a real 657.6s dispatch at the default threshold that finished untouched. The final check pass then flagged that the reason only lived in a 5s notice and the server log, which defeats the purpose for a user who walked away; the owner chose to fix it inside this task, so the task was re-opened and the reason is now persisted as a pi-web.stall.abort custom message that a reload renders as the localized notice (verified by a second real 90s dispatch whose transcript carried the entry with all seven fields equal to the event payload, no extra turn, and zero leftover children).
+
+### Main Changes
+
+- 新增 lib/stall-watchdog.ts：per-session 静默观察、阈值解析（env > 配置 > 默认，0 关闭，非法回落 + warn）、工具级宽限
+- 接入 lib/rpc-manager.ts 的唯一事件回调，并抽出 abortTurn() 与用户 Stop 共用；destroy/agent_settled/用户 abort 停表，触发幂等
+- stall_aborted 事件 + [pi-web] 日志 + 三语文案，复用既有 notice 通道，未新增 SSE 通道或 subagent producer
+- 新增 lib/pi-web-settings.ts 共享设置读写，ask-user-settings.ts 改为复用
+- 新增 spec .trellis/spec/frontend/stall-watchdog.md 并在 index 登记
+- 返工追加：handleStall() 在 abort 前用 SDK 的 sendCustomMessage(triggerTurn:false) 写一条 pi-web.stall.abort custom message，落盘进会话 jsonl，刷新后仍可见
+- 返工追加：CustomMessageView 对该 customType 用 formatStallAbortNotice 渲染本地化正文并隐藏裸 JSON details；英文 content 复用同一份 i18n 文案
+- 返工追加：AC7 断言覆盖「条目字段与事件逐字段相等 / 冷读与 HTTP 都取回 / 提示之后没有新 turn」，并补了写入失败不阻止中止的用例
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `a4bbc65` | (see git log) |
+| `aa5e0c4` | (see git log) |
+| `9c73c5e` | (see git log) |
+| `8b17b4a` | (see git log) |
+| `c36b81b` | (see git log) |
+| `9cb34b9` | (see git log) |
+| `a088d96` | (see git log) |
+| `ec777f3` | (see git log) |
+| `951a8c1` | (see git log) |
+
+### Testing
+
+- [OK] npm test 1407 pass / 0 fail；tsc --noEmit 0 错；改动文件 eslint 0 诊断（全仓 14 条为未改动文件的既有基线）
+- [OK] AC5 真实派发：90s 阈值下 90009ms 静默命中 stall_aborted，settle 后零残留子进程
+- [OK] AC6 默认阈值真实派发 657.6s（23 次进度事件）未被中止，工具成功结束
+- [OK] AC7 返工后重跑 AC5：14/14 checks 通过（条目落盘、七字段对账、冷读 + HTTP 回读、无多余 turn、零残留），npm test 1411 pass / 0 fail
+
+### 已知边界（如实记录，未修）
+
+- 停滞卡片的标题仍是 raw customType（`pi-web.stall.abort`），正文已本地化；若要更像 toast 需另加 i18n 标题
+- 该 custom message 会进入下一轮模型上下文（与 pi-web.ask.answers 同机制，`triggerTurn: false` 保证不起新 turn），这是有意接受的
+- 静默分钟数取整（90s 显示为「2 分钟」）；浏览器侧 toast 与刷新后卡片的三语渲染都只有组件测试与数据链路证据，未跑 Playwright
+- 全仓 `npm run lint` 仍有 14 个既有基线错误（未改动的 ChatInput/ChatMinimap/SessionSidebar），未做干净树 npm ci 复核
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 可选：给 stall_aborted 的 toast 与刷新后卡片的本地化渲染补一次真实浏览器（Playwright）证据
+- 可选：给停滞卡片加一个本地化标题（当前标题是 raw customType）

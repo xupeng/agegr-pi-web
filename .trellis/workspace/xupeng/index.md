@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 8
-- **Last Active**: 2026-09-19
+- **Total Sessions**: 9
+- **Last Active**: 2026-09-22
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~438 | Active |
+| `journal-1.md` | ~481 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 9 | 2026-09-22 | Stall watchdog: aborting a turn that stops producing events | `a4bbc65`, `aa5e0c4`, `9c73c5e`, `8b17b4a` | `task/09-22-stall-watchdog` |
 | 8 | 2026-09-19 | Frontend spec bootstrap: filling six guideline docs | `e619302` | `personal` |
 | 7 | 2026-09-19 | Branch cleanup and fork main sync | `80497c1` | `personal` |
 | 6 | 2026-09-19 | Clickable file paths and the written-file pipeline | `cfaef78`, `1695b29`, `82691fe`, `0c5b06b`, `981544e` | `personal` |
