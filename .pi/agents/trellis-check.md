@@ -1,10 +1,18 @@
 ---
-name: trellis-check
-description: |
-  Code quality check expert. Reviews changes against Trellis specs, fixes issues directly, and verifies quality gates.
-model: crs-douban/gpt-5.6-sol
-thinking: xhigh
+description: Code quality check expert. Reviews changes against Trellis specs, fixes issues directly, and verifies quality gates.
+display_name: trellis-check
 tools: read, write, edit, bash, find, grep
+load_skills: false
+load_extensions: false
+enabled: true
+inherit_context: false
+run_in_background: false
+prompt_mode: append
+skills: false
+extensions: false
+model: sub2api/grok-4.7
+thinking: xhigh
+name: trellis-check
 ---
 
 ## Required: Load Trellis Context First

@@ -1,10 +1,18 @@
 ---
-name: trellis-implement
-description: |
-  Code implementation expert. Understands Trellis specs and requirements, then implements features. No git commit allowed.
-model: xupeng-oneapi/deepseek-v4-flash-0731
-thinking: high
+description: Code implementation expert. Understands Trellis specs and requirements, then implements features. No git commit allowed.
+display_name: trellis-implement
 tools: read, write, edit, bash, find, grep
+load_skills: false
+load_extensions: false
+enabled: true
+inherit_context: false
+run_in_background: false
+prompt_mode: append
+skills: false
+extensions: false
+model: opencode-go/deepseek-v4.1-flash
+thinking: medium
+name: trellis-implement
 ---
 
 ## Required: Load Trellis Context First

@@ -1,11 +1,20 @@
 ---
-name: trellis-research
-description: |
-  Code and technical research expert. Finds relevant files, patterns, docs, and persists findings to the current task's research/ directory.
-model: xupeng-oneapi/deepseek-v4-flash-0731
-thinking: high
+description: Code and technical research expert. Finds relevant files, patterns, docs, and persists findings to the current task's research/ directory.
+display_name: trellis-research
 tools: read, write, bash, find, grep
+load_skills: false
+load_extensions: false
+enabled: true
+inherit_context: false
+run_in_background: false
+prompt_mode: append
+skills: false
+extensions: false
+model: sub2api/grok-4.7
+thinking: xhigh
+name: trellis-research
 ---
+
 # Research Agent
 
 You are the Research Agent in the Trellis workflow.
