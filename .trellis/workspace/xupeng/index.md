@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 10
+- **Total Sessions**: 11
 - **Last Active**: 2026-09-22
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~545 | Active |
+| `journal-1.md` | ~587 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 11 | 2026-09-22 | 发布 @xup3ng/pi-web 0.10.0（隔离构建 + 用户 2FA 发布 + 有界核验） | `8f537d0` | `personal` |
 | 10 | 2026-09-22 | lint-baseline-drift: 归因并收口 14 条 preserve-manual-memoization | `5181b1f`, `26bafdb`, `9e0c52c`, `ec40c8e`, `bfec332`, `6347624` | `task/09-22-lint-baseline-drift` |
 | 9 | 2026-09-22 | Stall watchdog: aborting a turn that stops producing events | `a4bbc65`, `aa5e0c4`, `9c73c5e`, `8b17b4a` | `task/09-22-stall-watchdog` |
 | 8 | 2026-09-19 | Frontend spec bootstrap: filling six guideline docs | `e619302` | `personal` |

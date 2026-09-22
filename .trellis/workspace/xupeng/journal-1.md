@@ -543,3 +543,45 @@ Gave pi-web a per-session stall watchdog so a turn that stops producing agent ev
 
 - 「state 路由 500」单独立项：它让 npm run test:e2e 在本机不能作为干净门禁
 - 上游 package-lock.json 解析到 react-hooks ≥7.1 时，本任务的修复已让 CI 免疫
+
+
+## Session 11: 发布 @xup3ng/pi-web 0.10.0（隔离构建 + 用户 2FA 发布 + 有界核验）
+
+**Date**: 2026-09-22
+**Task**: 发布 @xup3ng/pi-web 0.10.0（隔离构建 + 用户 2FA 发布 + 有界核验）
+**Branch**: `personal`
+
+### Summary
+
+以 personal 冻结提交 e91dda7 为唯一基线，在仓库外隔离 root 内构建、审计、冒烟并封存 0.10.0 的 tgz（sha256 14c274de），由用户在自己终端完成不可逆 npm publish，随后核验通过并落地版本提交。
+
+### Main Changes
+
+- 隔离 root：/home/xupeng/dev/personal/forked/.pi-web-v0100-release-20260922-184342，复用 0.9.5 root 的脚本并适配版本串
+- B2b 只在隔离 src 内 bump 到 0.10.0（仅 package.json 1 行 + lock 2 行）；主 checkout 保持 0.9.5 直到 B11
+- B4 构建只在隔离 src 内进行，主 checkout 的 .next/node_modules mtime 逐项未变
+- B5 审计：706 条目三处一致、包内 0.10.0、字体许可 2/2 + 4 woff2、无 .git/.pi/.trellis/.env/cache/dev/js.map、0 symlink、0 凭据
+- B9 发布由用户终端执行 b9-publish.sh（脚本先 sha256sum -c 校验封存件），PUT 202、exit 0
+- B11 版本落地提交 chore: release 0.10.0（8f537d0），沿用 0.9.4/0.9.5 的提交形式
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `8f537d0` | (see git log) |
+
+### Testing
+
+- [OK] 隔离构建 exit 0 / 191s；BUILD_ID=NF_GCs4TJcsE0ZDwzzC0s
+- [OK] 生产安装冒烟 20 项探针 200（唯一 405 为 /api/default-cwd 预期）、node-pty 建/查/删 200、listeners left 0
+- [OK] publish dry-run exit 0，total files 706 与 filelist/pack entryCount 一致
+- [OK] B10 核验：registry 0.10.0 且 latest 指向它，integrity/shasum/fileCount 全中，远端 tgz 与封存件 cmp 逐字节相同
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 是否删除 0.9.5 root 与本次 root（各约 3.5G）待用户决定
+- GitHub Release / personal-* tag 渠道仍硬编码 0.8.x，若要恢复该渠道需单独适配
