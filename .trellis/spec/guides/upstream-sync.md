@@ -26,7 +26,7 @@ git diff --name-status "$(git merge-base HEAD upstream/main)"..upstream/main --d
 - **落后提交数会过时**：任务书/记忆里的数字常常已经不是当前值（本仓库出现过「20 个」实际是
   「27 个」）。一律以 `git rev-list --count` 的实测为准。
 - **`--diff-filter=D` 是否为空**：上游是否删除了本 fork 仍在用的文件。
-- **依赖与配置是否漂移**：`package.json`、`package-lock.json`、`pnpm-lock.yaml`、
+- **依赖与配置是否漂移**：`package.json`、`package-lock.json`、
   `next.config.ts`、`tsconfig*`、eslint 配置、`.github/`。若上游改过其中任何一项，本次同步
   就必须同时处理锁文件/依赖升级，规划时要显式写出来（零漂移的同步可以跳过 `npm install`）。
 
@@ -120,7 +120,7 @@ npm test 2>&1 | tee /tmp/test-after.txt ; echo "test=${PIPESTATUS[0]}"
 ```bash
 git show --stat HEAD            # 核对变更规模与上游 shortstat 是否量级一致
 git diff --diff-filter=D --name-only HEAD^1..HEAD     # 必须为空：没丢 fork 文件
-git diff --name-only HEAD^1..HEAD -- package.json package-lock.json pnpm-lock.yaml \
+git diff --name-only HEAD^1..HEAD -- package.json package-lock.json \
   next.config.ts 'tsconfig*' '*eslint*' .github        # 零漂移证明
 git rev-list --count HEAD^1..HEAD^2                    # 上游提交数
 sha256sum .pi/agents/*.md                              # 用户资产前后一致

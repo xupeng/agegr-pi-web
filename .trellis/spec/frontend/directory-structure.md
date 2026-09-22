@@ -47,7 +47,7 @@
 │   └── i18n/                8   format.ts + registry.ts + types.ts + messages/{en,zh-CN,zh-TW}.ts
 ├── e2e/            8 files   7 个 .mjs（Playwright 回归）+ README.md
 ├── bin/            5 files   npm CLI 入口 pi-web（CommonJS）
-├── scripts/        2 files   release-npm.sh / release-personal.sh
+├── scripts/        1 file    release-npm.sh
 ├── docs/          13 files   9 .md（用户/贡献者指南 + adr/0001-0003）+ 4 张图片
 ├── public/        80 files   fonts/、icons/、sw.js、offline.html（随 npm 包发布）
 ├── .trellis/                 Trellis workflow（spec / tasks / scripts）

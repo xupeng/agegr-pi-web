@@ -76,27 +76,29 @@
 
 ### 验证基线必须来自与锁文件一致的依赖树
 
-#### 机制：两套受跟踪 lockfile 钉了不同的 `eslint-plugin-react-hooks`
+#### 机制：诊断数由依赖树决定（历史上曾有两套 lockfile）
 
-本仓库同时跟踪 `package-lock.json`（上游 CI 用 `npm ci` + `npm run lint`）与 `pnpm-lock.yaml`
-（fork 自有，`release-personal.yml` 用 `pnpm install --frozen-lockfile`，只 build 不 lint）。
-两者钉的 `eslint-plugin-react-hooks` 版本**不同**，而 `eslint-config-next` 对该插件的依赖范围是
-`^7.0.0`：**同一份源码在两棵树上会得到不同的诊断集合**。
+`eslint-config-next` 对 `eslint-plugin-react-hooks` 的依赖范围是 `^7.0.0`，
+**实际解析到的插件版本决定诊断集合**：同一份源码在不同插件版本下会得到不同的诊断。
 
-实测（2026-09-22，`personal@5402a5f`，两条命令各自干净安装、同一份源码）：
+2026-09-22 的历史案例：本仓库当时同时跟踪 `package-lock.json`（上游 CI 用 `npm ci` +
+`npm run lint`）与 `pnpm-lock.yaml`（fork 自有，当时由一条只 build 不 lint 的 pnpm 发布
+workflow 使用），两者钉的插件版本不同：
 
 | 安装来源 | `eslint-plugin-react-hooks` | 覆盖文件 | error |
 |---|---|---|---|
 | `npm ci`（package-lock.json） | 7.0.1 | 495 | 0 |
 | `pnpm install --frozen-lockfile`（pnpm-lock.yaml） | 7.1.1 | 495 | 14 条 `react-hooks/preserve-manual-memoization` |
 
-覆盖文件数完全相同、规则严重级别都是 `error`，唯一变量就是插件版本 ⇒ 诊断差异**由 lockfile 决定**，
-与源码状态无关。2026-09-18 那次记录的同一现象曾被归因为"旧树污染"，那个结论不完整：
-污染不是必要条件，用 `pnpm-lock.yaml` 做干净安装同样复现。
+覆盖文件数完全相同、规则严重级别都是 `error`，唯一变量就是插件版本 ⇒ 诊断差异**由 lockfile
+决定**，与源码状态无关。2026-09-18 那次记录的同一现象曾被归因为"旧树污染"，那个结论不完整：
+污染不是必要条件，用当时的 `pnpm-lock.yaml` 做干净安装同样复现。
 
-> 上表的 14 条是 **`personal@5402a5f` 的修复前实测值**，不是当前的期望值：同一日的
-> `09-22-lint-baseline-drift` 任务已把这批诊断修到两棵树都是 0。保留这组数字是为了说明机制与
-> 判定方式；维护时请以"同一次运行内实测 + 两棵树都要跑"为准，不要照抄这里的计数。
+> 上表的 14 条是 **`personal@5402a5f` 的修复前实测值**，不是当前的期望值：
+> `09-22-lint-baseline-drift` 已把这批诊断修到两棵树都是 0；随后
+> `09-22-drop-personal-release` 废弃了 `personal-*` 发布渠道，并连同只服务它的
+> `pnpm-lock.yaml` 一起删除 ⇒ **现在只有 npm 一套锁**。保留这组数字是为了说明"诊断数由依赖树
+> 决定"这一机制；维护时以"同一次运行内实测 + 给出基线来源"为准，不要照抄这里的计数。
 
 #### 识别特征：这棵 `node_modules` 是混合树
 
@@ -105,32 +107,28 @@
 1. `node_modules/.pnpm/` 与 `node_modules/.ignored/` 同时存在（pnpm 装过、npm 又装过）；
 2. 存在 `node_modules/.modules.yaml`（pnpm 元数据）或 `node_modules/.package-lock.json`（npm 元数据）；
 3. `package-lock.json` 期望的嵌套插件路径
-   （`node_modules/eslint-config-next/node_modules/eslint-plugin-react-hooks`）缺失，
-   而 `.pnpm/eslint-plugin-react-hooks@<ver>_*/` 存在；
-4. 最直接的信号：**同一份源码在两棵树上诊断数不同**，或 `npm run lint` 的历史基线与本次差异
-   无法用"新增/删除文件"解释。
+   （`node_modules/eslint-config-next/node_modules/eslint-plugin-react-hooks`）缺失；
+4. 最直接的信号：`npm run lint` 的历史基线与本次差异**无法用"新增/删除文件"或"依赖版本升级"
+   解释**（2026-09-22 之前，同一份源码在两套 lockfile 的树上诊断数不同就是这种信号）。
 
 #### 恢复动作
 
 ```bash
-# npm 树（与上游 CI 同构）
+# 唯一受支持的树（与上游 CI 同构）
 npm ci
-
-# pnpm 树（与 release-personal.yml 同构；本机 pnpm 12 会 ERR_PNPM_IGNORED_BUILDS，
-# 必须用 workflow 钉的 pnpm 10 且显式设置 CI，否则非 TTY 下会中止）
-CI=true npx --yes pnpm@10 install --frozen-lockfile
 ```
 
-**不要**用 `npm install` / `pnpm install` 原地修补已经混合的树：只有在干净安装的树上得到的
-诊断数才是基线。
+仓库**不再跟踪 `pnpm-lock.yaml`**（2026-09-22 随已废弃的 `personal-*` 渠道删除），所以
+`pnpm install` 出来的树**不可复算**，不能作为基线。**不要**用 `npm install` / `pnpm install`
+原地修补已经混合的树：只有在干净安装的树上得到的诊断数才是基线。
 
 #### 判定口径
 
 - 报告"lint 无新增诊断"时，必须同时给出**基线是怎么得到的**（哪棵树、哪条安装命令、哪个 ref），
   并在诊断数量变化时做归因（规则级别 / 文件覆盖数 / 插件与 config 版本 / 依赖树一致性），
   **不允许用"数字变小了"或"与上次一样"直接当通过**。
-- 涉及 lint 结论的验证，**两棵树都要跑**：`npm ci` 树给上游口径，pnpm 树给 fork 发布口径；
-  只报其中一棵会漏掉由插件版本差异引起的真实诊断。
+- 只有一条受支持的树（`npm ci`，即上游 CI 口径）。诊断数与基线不同时，先按上面的"识别特征"
+  确认依赖树是否被 pnpm 污染过，再解释差异；不允许拿另一棵树的数字当锚点。
 - 交叉验证首选：`git write-tree` + `git commit-tree`（不写任何 ref）拿到候选树，
   在独立 worktree 里 `npm ci` 后复跑 tsc / lint / `npm test`，
   这样既隔离了并发会话的未提交改动，也保证依赖来自锁文件。
