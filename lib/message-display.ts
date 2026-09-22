@@ -1,4 +1,24 @@
+import { translateMessage } from "./i18n/format";
+import { enLocale } from "./i18n/messages/en";
 import type { AgentMessage, AssistantContentBlock, AssistantMessage, ThinkingContent, ToolCallContent } from "./types";
+
+/**
+ * `customType` of the persisted stall-watchdog notice. The watchdog stores one
+ * of these in the session `.jsonl` so the reason survives a reload, instead of
+ * living only in the transient toast.
+ */
+export const STALL_ABORT_CUSTOM_TYPE = "pi-web.stall.abort";
+
+/** Structured reason carried as the `details` of a {@link STALL_ABORT_CUSTOM_TYPE} message. */
+export interface StallAbortNoticeDetails {
+  toolName: string | null;
+  timeoutMs: number;
+  timeoutSource: "env" | "config" | "default";
+  toolOverride: boolean;
+  silentMs: number;
+  elapsedMs: number;
+  toolElapsedMs: number | null;
+}
 
 interface DisplayOptions {
   isStreaming?: boolean;
@@ -42,6 +62,73 @@ export function isAssistantTruncated(
   options: DisplayOptions = {},
 ): boolean {
   return !options.isStreaming && message.stopReason === "length";
+}
+
+/** Render a millisecond duration as a compact `1h 2m` / `3m 4s` / `5s` label. */
+export function formatDurationMs(ms: number): string {
+  if (!Number.isFinite(ms) || ms <= 0) return "0s";
+  const totalSec = Math.floor(ms / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
+}
+
+export interface StallAbortNoticeFields {
+  toolName?: unknown;
+  silentMs?: unknown;
+  elapsedMs?: unknown;
+  toolElapsedMs?: unknown;
+}
+
+function asFiniteDuration(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
+}
+
+function readStallAbortFields(value: unknown): StallAbortNoticeFields {
+  if (value === null || typeof value !== "object") return {};
+  const record = value as Record<string, unknown>;
+  return {
+    toolName: record.toolName,
+    silentMs: record.silentMs,
+    elapsedMs: record.elapsedMs,
+    toolElapsedMs: record.toolElapsedMs,
+  };
+}
+
+/**
+ * Human-readable reason for the stall watchdog's `stall_aborted` event. The
+ * watchdog aborts a turn that produced no agent event for too long; this turns
+ * its structured payload into the notice text (copy lives in i18n).
+ */
+export function formatStallAbortNotice(
+  value: unknown,
+  translate: (key: string, params?: Record<string, string | number>) => string,
+): string {
+  const fields = readStallAbortFields(value);
+  const silentMs = asFiniteDuration(fields.silentMs) ?? 0;
+  const silentMinutes = Math.max(1, Math.round(silentMs / 60_000));
+  const elapsedMs = asFiniteDuration(fields.toolElapsedMs) ?? asFiniteDuration(fields.elapsedMs) ?? 0;
+  const elapsed = formatDurationMs(elapsedMs);
+  const toolName = typeof fields.toolName === "string" && fields.toolName.trim() !== ""
+    ? fields.toolName.trim()
+    : null;
+  return toolName
+    ? translate("chat.stalledTurnAborted", { tool: toolName, minutes: silentMinutes, elapsed })
+    : translate("chat.stalledTurnAbortedNoTool", { minutes: silentMinutes, elapsed });
+}
+
+/**
+ * English one-liner persisted as the `content` of a stall-abort custom message.
+ * The server does not know the browser locale, so the client re-renders the
+ * localized form from `details`; the wording comes from the same i18n copy as
+ * the toast (via {@link formatStallAbortNotice}) so both stay in step.
+ */
+export function renderStallAbortText(details: unknown): string {
+  return formatStallAbortNotice(details, (key, params) =>
+    translateMessage("en", key, { en: enLocale.messages }, params));
 }
 
 function isFinalAnswerBlock(block: AssistantContentBlock): boolean {

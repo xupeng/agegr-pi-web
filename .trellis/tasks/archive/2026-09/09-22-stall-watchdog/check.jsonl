@@ -1,0 +1,3 @@
+{"file": ".trellis/tasks/09-22-stall-watchdog/research/pi-web-anchors.md", "reason": "按锚点逐条核查是否复用既有 abort/idle 范式、是否覆盖 destroy() 清理点"}
+{"file": ".trellis/spec/frontend/trellis-subagent-records.md", "reason": "核查显示层是否符合该契约（单一 producer、无浏览器端扩展导入）"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "按本仓库质量规范与实际检查命令核验证据"}

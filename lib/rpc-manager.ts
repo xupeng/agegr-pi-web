@@ -15,6 +15,8 @@ import {
 import { cacheSessionPath, getLatestModelChange, invalidateSessionListCache, readLatestSessionEntryId, resolveSessionPath } from "./session-reader";
 import { getProjectTrustStatus, projectTrustReloadOptions } from "./project-trust";
 import { persistExplicitStartupPreferences } from "./startup-preferences";
+import { renderStallAbortText, STALL_ABORT_CUSTOM_TYPE, type StallAbortNoticeDetails } from "./message-display";
+import { resolveStallWatchdogSettings, StallWatchdog, type StallWatchdogStall } from "./stall-watchdog";
 import { notifySessionComplete } from "./web-push";
 import { hasActiveSessionLivenessProvider } from "./session-liveness";
 import type { SlashCommandInfo } from "@earendil-works/pi-coding-agent";
@@ -166,6 +168,9 @@ export function resolveSessionIdleTimeoutMs(
 
 const SESSION_IDLE_TIMEOUT_MS = resolveSessionIdleTimeoutMs();
 
+/** Stall watchdog thresholds, resolved from env + the pi-web settings file. */
+const STALL_WATCHDOG_SETTINGS = resolveStallWatchdogSettings();
+
 const SESSION_REPLACEMENT_COMMAND_TYPES = new Set(["fork", "clone"]);
 const COMMANDS_ALLOWED_DURING_SESSION_REPLACEMENT = new Set([
   "get_state",
@@ -268,6 +273,8 @@ export class AgentSessionWrapper {
   private readonly suppressCompletionNotifications: boolean;
   private unsubscribe: (() => void) | null = null;
   private idleTimer: ReturnType<typeof setTimeout> | null = null;
+  private stallWatchdog: StallWatchdog | null = null;
+  private lastActiveToolCallId: string | null = null;
   private onDestroyCallback: (() => void) | null = null;
   private shutdownPromise: Promise<void> | null = null;
   private sessionShutdownEmitted = false;
@@ -338,6 +345,9 @@ export class AgentSessionWrapper {
   }
 
   start(): void {
+    this.unsubscribe?.();
+    this.stallWatchdog?.dispose();
+    this.stallWatchdog = this.createStallWatchdog();
     this.unsubscribe = this.inner.subscribe((event: AgentEvent) => {
       if (event.type === "agent_start") this.agentRunNeedsCompletion = true;
       if (event.type === "agent_end") {
@@ -347,15 +357,118 @@ export class AgentSessionWrapper {
       if (typeof toolCallId === "string") {
         if (event.type === "tool_execution_start" || event.type === "tool_execution_update") {
           this.activeToolEvents.set(toolCallId, event);
+          // Track the most recently touched tool without reordering the map
+          // that onEvent() replays to reconnecting clients.
+          this.lastActiveToolCallId = toolCallId;
         } else if (event.type === "tool_execution_end") {
           this.activeToolEvents.delete(toolCallId);
+          if (this.lastActiveToolCallId === toolCallId) {
+            this.lastActiveToolCallId = this.activeToolEvents.keys().next().value ?? null;
+          }
         }
       }
+      this.stallWatchdog?.observe(event);
+      if (event.type === "agent_start") this.stallWatchdog?.arm();
+      if (event.type === "agent_settled") this.stallWatchdog?.disarm();
       if (IDLE_RESET_EVENT_TYPES.has(event.type)) this.resetIdleTimer();
       this.emit(event);
       if (event.type === "agent_settled") this.notifyAgentRunCompleteIfIdle();
     });
     this.resetIdleTimer();
+  }
+
+  private createStallWatchdog(): StallWatchdog {
+    return new StallWatchdog({
+      settings: STALL_WATCHDOG_SETTINGS,
+      getActiveTool: () => {
+        const callId = this.lastActiveToolCallId;
+        if (!callId) return null;
+        const event = this.activeToolEvents.get(callId);
+        const toolName = typeof event?.toolName === "string" ? event.toolName : null;
+        return toolName ? { toolCallId: callId, toolName } : null;
+      },
+      onStall: (stall) => this.handleStall(stall),
+    });
+  }
+
+  /**
+   * A turn stopped producing events past its silence budget. Emit a readable
+   * reason for the browser, log the decision, then reuse the normal abort
+   * sequence so every in-flight tool and child process unwinds.
+   */
+  private handleStall(stall: StallWatchdogStall): void {
+    if (!this._alive) return;
+    const silentSeconds = Math.round(stall.silentMs / 1000);
+    const toolElapsed = stall.toolElapsedMs === null
+      ? "n/a"
+      : `${Math.round(stall.toolElapsedMs / 1000)}s`;
+    console.warn(
+      `[pi-web] aborting stalled session ${this.sessionId}: ${silentSeconds}s without events`
+      + ` (tool=${stall.toolName ?? "none"}, toolElapsed=${toolElapsed}`
+      + `, turnElapsed=${Math.round(stall.elapsedMs / 1000)}s`
+      + `, timeout=${Math.round(stall.timeoutMs / 1000)}s, source=${stall.timeoutSource}`
+      + `${stall.toolOverride ? ", toolOverride=true" : ""})`,
+    );
+    this.emit({
+      type: "stall_aborted",
+      toolName: stall.toolName,
+      timeoutMs: stall.timeoutMs,
+      timeoutSource: stall.timeoutSource,
+      toolOverride: stall.toolOverride,
+      silentMs: stall.silentMs,
+      elapsedMs: stall.elapsedMs,
+      toolElapsedMs: stall.toolElapsedMs,
+    });
+    // Persist the reason before aborting. The agent is still streaming, so with
+    // `triggerTurn: false` the SDK parks this custom message until the turn
+    // ends; the abort below flushes it to the session `.jsonl`, where a reload
+    // renders it as a localized notice instead of a bare "operation aborted".
+    // Fire-and-forget: a failed write must not block the abort.
+    const details: StallAbortNoticeDetails = {
+      toolName: stall.toolName,
+      timeoutMs: stall.timeoutMs,
+      timeoutSource: stall.timeoutSource,
+      toolOverride: stall.toolOverride,
+      silentMs: stall.silentMs,
+      elapsedMs: stall.elapsedMs,
+      toolElapsedMs: stall.toolElapsedMs,
+    };
+    void this.inner.sendCustomMessage(
+      {
+        customType: STALL_ABORT_CUSTOM_TYPE,
+        content: renderStallAbortText(details),
+        display: true,
+        details,
+      },
+      { triggerTurn: false },
+    ).catch((error) => {
+      console.error(
+        "[pi-web] failed to record stalled session abort:",
+        error instanceof Error ? error.message : error,
+      );
+    });
+    void this.abortTurn().catch((error) => {
+      console.error(
+        "[pi-web] stalled session abort failed:",
+        error instanceof Error ? error.message : error,
+      );
+    });
+  }
+
+  /**
+   * Abort the current turn. Shared by the user's Stop command and the stall
+   * watchdog so both take exactly the same unwind path.
+   */
+  private async abortTurn(): Promise<void> {
+    this.stallWatchdog?.disarm();
+    this.forceShutdownOnIdle = true;
+    // Stop must unwind extension commands that have not started the agent yet.
+    this.extensionUiAbortController.abort(new DOMException("Extension UI cancelled by Stop", "AbortError"));
+    try {
+      await this.withFinalIdleReset(() => this.inner.abort());
+    } finally {
+      if (!this.isRunning()) this.forceShutdownOnIdle = false;
+    }
   }
 
   private notifyAgentRunCompleteIfIdle(): void {
@@ -774,6 +887,7 @@ export class AgentSessionWrapper {
             promptSettled = true;
             this.pendingPromptCount = Math.max(0, this.pendingPromptCount - 1);
             this.resetIdleTimer();
+            if (!this.isRunning()) this.stallWatchdog?.disarm();
             this.notifyAgentRunCompleteIfIdle();
           };
 
@@ -832,15 +946,8 @@ export class AgentSessionWrapper {
       }
 
       case "abort":
-        this.forceShutdownOnIdle = true;
-        // Stop must unwind extension commands that have not started the agent yet.
-        this.extensionUiAbortController.abort(new DOMException("Extension UI cancelled by Stop", "AbortError"));
-        try {
-          await this.withFinalIdleReset(() => this.inner.abort());
-          return null;
-        } finally {
-          if (!this.isRunning()) this.forceShutdownOnIdle = false;
-        }
+        await this.abortTurn();
+        return null;
 
       case "get_state": {
         const model = this.inner.model;
@@ -1212,6 +1319,9 @@ export class AgentSessionWrapper {
     this.emit({ type: "session_shutdown" });
     getAskUserStore().forgetSession(this.sessionId);
     if (this.idleTimer) clearTimeout(this.idleTimer);
+    this.stallWatchdog?.dispose();
+    this.stallWatchdog = null;
+    this.lastActiveToolCallId = null;
     if (this.inner.isBashRunning) this.inner.abortBash();
     this.unsubscribe?.();
     for (const pending of this.pendingUiResponses.values()) pending.cancel();

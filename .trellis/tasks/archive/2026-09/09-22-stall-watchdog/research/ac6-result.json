@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "sessionId": "01a0c7c6-928c-753c-8169-d17681d95752",
+  "elapsedMs": 672453,
+  "toolDurationMs": 657612,
+  "progressEvents": 23,
+  "progressSpreadMs": 657521,
+  "checks": {
+    "sessionCreated": true,
+    "toolStarted": true,
+    "noStallEvent": true,
+    "toolCompleted": true,
+    "toolSucceeded": true,
+    "progressEventsFlowed": true,
+    "dispatchRanForMinutes": true,
+    "progressSpreadOverTime": true,
+    "notStreamingAtEnd": true,
+    "noLeftoverChildProcesses": true
+  },
+  "toolEndText": "{\"content\":[{\"type\":\"text\",\"text\":\"第 20 次已完成。20 条 `sleep 30` 已全部按顺序执行完毕，纯 sleep 累计 **600 秒（10 分钟）**。期间没有另跑计时命令，所以没法给出包含工具往返开销的精确墙钟时间；实际总耗时会略高于 600 秒。\"}],\"details\":{\"kind\":\"trellis-subagent-progress\",\"agent\":\"trellis-research\",\"mode\":\"single\",\"startedAt\":1790058087440,\"updatedAt\":1790058745216,\"final",
+  "eventsFile": "/home/xupeng/dev/personal/forked/agegr-pi-web/.trellis/tasks/09-22-stall-watchdog/research/ac6-events.jsonl"
+}

@@ -1,51 +1,31 @@
-import { existsSync, mkdirSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { getAgentDir } from "@earendil-works/pi-coding-agent";
-import { writePrivateFileAtomicSync } from "./atomic-file";
+import {
+  getPiWebSettingsPath,
+  readPiWebSettings,
+  writePiWebSettings,
+} from "./pi-web-settings";
 
 export interface AskUserSettings {
   askUser: boolean;
 }
 
-type StoredAskUserSettings = Record<string, unknown> & {
-  version?: unknown;
-  askUser?: unknown;
-};
-
-export function getAskUserSettingsPath(agentDir = getAgentDir()): string {
-  return join(agentDir, "pi-web-settings.json");
-}
-
-function readStoredSettings(settingsPath: string): StoredAskUserSettings {
-  if (!existsSync(settingsPath)) return {};
-  const parsed: unknown = JSON.parse(readFileSync(settingsPath, "utf8"));
-  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
-    throw new Error("Invalid pi-web settings: expected an object");
-  }
-  return parsed as StoredAskUserSettings;
-}
+/** Path of the shared pi-web settings file that stores the ask_user preference. */
+export const getAskUserSettingsPath = getPiWebSettingsPath;
 
 /**
  * The persisted ask_user preference, or `undefined` when the user has never
  * touched it (the default applies).
  */
-export function readAskUserSetting(settingsPath = getAskUserSettingsPath()): boolean | undefined {
-  const stored = readStoredSettings(settingsPath);
+export function readAskUserSetting(settingsPath = getPiWebSettingsPath()): boolean | undefined {
+  const stored = readPiWebSettings(settingsPath);
   const value = stored.askUser;
   return value === true || value === false ? value : undefined;
 }
 
 export function writeAskUserSetting(
   enabled: boolean,
-  settingsPath = getAskUserSettingsPath(),
+  settingsPath = getPiWebSettingsPath(),
 ): AskUserSettings {
-  const stored = readStoredSettings(settingsPath);
-  mkdirSync(dirname(settingsPath), { recursive: true });
-  writePrivateFileAtomicSync(settingsPath, JSON.stringify({
-    ...stored,
-    version: 1,
-    askUser: enabled,
-  }, null, 2));
+  writePiWebSettings({ askUser: enabled }, settingsPath);
   return { askUser: enabled };
 }
 

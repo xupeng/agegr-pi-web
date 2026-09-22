@@ -1,0 +1,22 @@
+{"at":1790062025674,"kind":"children.before","detail":[]}
+{"at":1790062027087,"kind":"session.created","detail":{"sessionId":"01a0c802-dcb0-72c6-82b6-fc416da62fb4","model":{"provider":"opencode-go","modelId":"deepseek-v4.1-flash"},"thinking":"low"}}
+{"at":1790062029939,"kind":"tools.active","detail":{"count":23,"hasTrellisSubagent":true}}
+{"at":1790062037461,"kind":"tool.start","detail":{"toolName":"trellis_subagent","toolCallId":"call_00_y0BtIoBAmJv9LosUHKtO9243"}}
+{"at":1790062037461,"kind":"tool.update","detail":{"toolCallId":"call_00_y0BtIoBAmJv9LosUHKtO9243"}}
+{"at":1790062039720,"kind":"tool.update","detail":{"toolCallId":"call_00_y0BtIoBAmJv9LosUHKtO9243"}}
+{"at":1790062045130,"kind":"tool.update","detail":{"toolCallId":"call_00_y0BtIoBAmJv9LosUHKtO9243"}}
+{"at":1790062135145,"kind":"sse.stall_aborted"}
+{"at":1790062135145,"kind":"stall_aborted","detail":{"toolName":"trellis_subagent","silentMs":90010,"timeoutMs":90000,"timeoutSource":"env","toolElapsedMs":97831}}
+{"at":1790062135216,"kind":"sse.tool_execution_end"}
+{"at":1790062135216,"kind":"sse.agent_end"}
+{"at":1790062135216,"kind":"sse.agent_settled"}
+{"at":1790062135216,"kind":"agent.settled","detail":{"afterStallMs":71}}
+{"at":1790062135220,"kind":"sse.prompt_done"}
+{"at":1790062135220,"kind":"prompt.done","detail":{}}
+{"at":1790062135220,"kind":"progress.events","detail":{"counted":4}}
+{"at":1790062135302,"kind":"session.state","detail":{"isStreaming":false}}
+{"at":1790062140339,"kind":"children.after","detail":{"total":0,"leaked":[]}}
+{"at":1790062140372,"kind":"reason.text","detail":{"en":"Turn aborted automatically: no output from trellis_subagent for 2 min (1m 37s running).","zhCN":"已自动中止本轮：trellis_subagent 已连续 2 分钟无输出（已运行 1m 37s）。","zhTW":"已自動中止本輪：trellis_subagent 已連續 2 分鐘無輸出（已執行 1m 37s）。"}}
+{"at":1790062140384,"kind":"agent.starts","detail":{"total":0,"afterStall":false}}
+{"at":1790062140384,"kind":"persisted.entry","detail":{"file":"/home/xupeng/.pi/agent/sessions/--home-xupeng-dev-personal-personal-assistant--/2026-09-22T07-27-05-907Z_01a0c802-dcb0-72c6-82b6-fc416da62fb4.jsonl","customType":"pi-web.stall.abort","display":true,"content":"Turn aborted automatically: no output from trellis_subagent for 2 min (1m 37s running).","details":{"toolName":"trellis_subagent","timeoutMs":90000,"timeoutSource":"env","toolOverride":false,"silentMs":90010,"elapsedMs":102695,"toolElapsedMs":97831}}}
+{"at":1790062144924,"kind":"reload.customMessage","detail":{"found":true,"role":"custom","content":"Turn aborted automatically: no output from trellis_subagent for 2 min (1m 37s running).","fileMapped":true,"fileSilentMs":90010}}

@@ -360,6 +360,8 @@ export const enLocale: LocalePlugin = {
     "chat.runningTool": "Running tool...",
     "chat.generatingToolInput": "Generating parameters...",
     "chat.truncatedByOutputLimit": "This response was cut off after reaching the model’s output limit. Send a follow-up to continue.",
+    "chat.stalledTurnAborted": "Turn aborted automatically: no output from {tool} for {minutes} min ({elapsed} running).",
+    "chat.stalledTurnAbortedNoTool": "Turn aborted automatically: no output for {minutes} min ({elapsed} running).",
     "chat.runningNamedTool": "Running {name}...",
     "chat.runningTools": "Running {names}...",
     "chat.runningToolsMore": "Running {names} (+{count})...",

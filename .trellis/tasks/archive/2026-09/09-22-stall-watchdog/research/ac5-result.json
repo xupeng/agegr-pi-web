@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "sessionId": "01a0c802-dcb0-72c6-82b6-fc416da62fb4",
+  "elapsedMs": 105281,
+  "stallThresholdMs": 90000,
+  "checks": {
+    "sessionCreated": true,
+    "trellisSubagentAvailable": true,
+    "toolStarted": true,
+    "stallEventReceived": true,
+    "stallToolName": true,
+    "stallSilentMs": true,
+    "stallToolRanLongEnough": true,
+    "settledAfterStall": true,
+    "notStreamingAfterAbort": true,
+    "noLeftoverChildProcesses": true,
+    "persistedStallEntry": true,
+    "persistedEntryFields": true,
+    "noTurnStartedByTheNotice": true,
+    "reasonSurvivesReload": true
+  },
+  "reasons": {
+    "en": "Turn aborted automatically: no output from trellis_subagent for 2 min (1m 37s running).",
+    "zhCN": "已自动中止本轮：trellis_subagent 已连续 2 分钟无输出（已运行 1m 37s）。",
+    "zhTW": "已自動中止本輪：trellis_subagent 已連續 2 分鐘無輸出（已執行 1m 37s）。"
+  },
+  "eventsFile": "/home/xupeng/dev/personal/forked/agegr-pi-web/.trellis/tasks/09-22-stall-watchdog/research/ac5-events.jsonl"
+}
