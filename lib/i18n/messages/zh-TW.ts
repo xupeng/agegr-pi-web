@@ -360,6 +360,8 @@ export const zhTWLocale: LocalePlugin = {
     "chat.runningTool": "正在執行工具...",
     "chat.generatingToolInput": "正在產生參數...",
     "chat.truncatedByOutputLimit": "回覆因達到模型輸出長度上限而被截斷。傳送一則後續訊息以繼續。",
+    "chat.stalledTurnAborted": "已自動中止本輪：{tool} 已連續 {minutes} 分鐘無輸出（已執行 {elapsed}）。",
+    "chat.stalledTurnAbortedNoTool": "已自動中止本輪：已連續 {minutes} 分鐘無輸出（已執行 {elapsed}）。",
     "chat.runningNamedTool": "正在執行 {name}...",
     "chat.runningTools": "正在執行 {names}...",
     "chat.runningToolsMore": "正在執行 {names}（另有 {count} 個）...",

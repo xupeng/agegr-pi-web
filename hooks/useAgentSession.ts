@@ -27,6 +27,8 @@ import { mergeSessionStats, type SessionFileStats } from "@/lib/session-stats";
 import { userMessageKey } from "@/lib/prompt-recovery";
 import { AgentEventConnection } from "@/lib/agent-event-connection";
 import { getToolExecutionProgress } from "@/lib/tool-execution-progress";
+import { formatStallAbortNotice } from "@/lib/message-display";
+import { useI18n } from "@/hooks/useI18n";
 import { updateExtensionWidgets } from "@/lib/extension-widgets";
 import {
   collectTrellisToolCallIdsFromMessage,
@@ -364,6 +366,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
   const [slashCommands, setSlashCommands] = useState<SlashCommandInfo[]>([]);
   const [slashCommandsLoading, setSlashCommandsLoading] = useState(false);
   const [noticeState, dispatchNotice] = useReducer(noticeReducer, { visible: [], pending: [] });
+  const { t: translate } = useI18n();
   const [sessionStatsOverride, setSessionStatsOverride] = useState<SessionStatsInfo | null>(null);
   const [extensionDialog, setExtensionDialog] = useState<ExtensionUiDialogRequest | null>(null);
   const [extensionCustomUi, setExtensionCustomUi] = useState<ExtensionUiCustomRequest | null>(null);
@@ -1681,6 +1684,9 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
       case "prompt_error":
         addNotice({ type: "error", message: (event.errorMessage as string | undefined) ?? "Command failed" });
         break;
+      case "stall_aborted":
+        addNotice({ type: "error", message: formatStallAbortNotice(event, translate) });
+        break;
       case "extension_error":
         addNotice({
           type: "error",
@@ -1897,7 +1903,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         setExtensionDialog((current) => current?.id === event.id ? null : current);
         break;
     }
-  }, [addNotice, allowTrellisCallsFromMessage, cancelEventStreamGrace, flushTrellisReplay, handleExtensionUiRequest, ingestTrellisToolDetails, liveEventsBelongToView, notifyPromptStage, onAgentEnd, refreshViewedSession, scheduleEventStreamClose, scrollToBottom, settleUiStage, syncLiveModel]);
+  }, [addNotice, allowTrellisCallsFromMessage, cancelEventStreamGrace, flushTrellisReplay, handleExtensionUiRequest, ingestTrellisToolDetails, liveEventsBelongToView, notifyPromptStage, onAgentEnd, refreshViewedSession, scheduleEventStreamClose, scrollToBottom, settleUiStage, syncLiveModel, translate]);
   handleAgentEventRef.current = handleAgentEvent;
 
   const handleSend = useCallback(async (message: string, images?: AttachedImage[]) => {

@@ -187,6 +187,7 @@ hooks/
 - One `AgentSessionWrapper` per session id, keyed in `globalThis.__piSessions`
 - `globalThis` survives Next.js hot-reload; plain module-level Map does not
 - Idle timeout: 10 minutes by default (`PI_WEB_IDLE_TIMEOUT_MS`, `0` disables). Concurrent `startRpcSession()` calls share a single start Promise (`globalThis.__piStartLocks`)
+- Stall watchdog: a turn that produces no agent event for 15 minutes (`PI_WEB_STALL_TIMEOUT_MS`, or `stallTimeoutMs` in `~/.pi/agent/pi-web-settings.json`; `0` disables) is aborted through the same path as Stop and reports the last in-flight tool. `stallToolTimeouts` overrides the budget per tool (default `bash` = 30 min) so a legitimately silent long command is not killed. This is independent of the idle timer: it aborts the turn, never shuts the session down. See `lib/stall-watchdog.ts`.
 
 ### Fork must destroy the wrapper immediately
 `AgentSession.fork()` **mutates the wrapper's inner state in-place** — after fork, `inner.sessionId` is the *new* session's id. If the wrapper stays alive in the registry under the old id, the next request gets the already-forked state and subsequent forks produce a corrupt `parentSession` chain.
