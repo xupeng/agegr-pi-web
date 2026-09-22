@@ -1,0 +1,5 @@
+{"file": ".trellis/tasks/archive/2026-09/09-19-release-build-publish-095/research/release-runbook-reuse.md", "reason": "B1→B12 的可复用 runbook：隔离 root 布局、四个脚本要点、每步退出码判据与 0.9.4/0.9.5 参照数值"}
+{"file": ".trellis/tasks/09-22-npm-release-0100/design.md", "reason": "本次的隔离边界、数据流、关键决策表与失败/回滚处置"}
+{"file": ".trellis/tasks/09-22-npm-release-0100/prd.md", "reason": "R1-R10 与 AC1-AC10，含规划期实测的 registry/登录/磁盘/字体事实"}
+{"file": ".trellis/spec/guides/upstream-sync.md", "reason": "发布基线与锁文件漂移的关系：零漂移的同步可以跳过依赖重装，但发布必须对齐锁文件"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "验证基线口径与「不要在主 checkout build」的既有约束"}

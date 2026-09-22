@@ -1,0 +1,4 @@
+{"file": ".trellis/tasks/09-22-npm-release-0100/prd.md", "reason": "AC1-AC10 的逐条判定依据与 dev/start 证据要求"}
+{"file": ".trellis/tasks/archive/2026-09/09-19-release-build-publish-095/research/release-runbook-reuse.md", "reason": "复核时对照 0.9.5 的参照值（文件数、构建耗时、BUILD_ID、包清单）判断偏差是否合理"}
+{"file": ".trellis/tasks/09-22-npm-release-0100/design.md", "reason": "失败与回滚矩阵：H 漂移、version churn、dry-run 不符、发布后核验失败各自的处置"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "证据必须可复算、不得用「数字变了」当通过；发布核验同样要求给出基线来源"}
