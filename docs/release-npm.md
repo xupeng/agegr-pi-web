@@ -1,8 +1,7 @@
 # npm 发布（fork 独立版本线）
 
 本 fork 的独立 npm 包 **`@xup3ng/pi-web`** 发布说明（区别于 upstream 的
-`@agegr/pi-web` 与 personal 内部版本的 git-tag + CI 流程，见
-[`scripts/release-personal.sh`](../scripts/release-personal.sh)）。
+`@agegr/pi-web`）。
 
 ## 快速开始
 
@@ -58,12 +57,16 @@ npm view @xup3ng/pi-web dist-tags   # latest 应指向新版本
 - **build 污染 `.next/`**：发布构建会重写 `.next/`，发布后若 `npm run dev`
   异常，按 `AGENTS.md` 的 dev 故障流程（备份 `.next` → 重启）处理。
 
-## 与 personal 内部版本的区分
+## 渠道现状：只有 npm 一条
 
 | 渠道 | 版本 | 命令 | 发布目标 |
 | --- | --- | --- | --- |
 | npm（本脚本） | `0.9.x` 稳定 semver | `./scripts/release-npm.sh` | registry.npmjs.org 公开包 |
-| personal 内部 | `0.8.11-personal.N` | `./scripts/release-personal.sh` | GitHub Release（tag + Actions） |
+
+历史上还曾有一条 `personal-0.8.11.*` 的 GitHub Release 渠道（`personal-*` tag 触发 CI 构建并
+`gh release create`）。该渠道在 0.9.x 线上从未使用，已废弃，其 workflow 与脚本于 2026-09-22 删除
+（连同只服务它的 `pnpm-lock.yaml`）。**历史 GitHub Release（`personal-0.8.11.*`）仍可下载，
+但不再更新**；新版本一律走 npm。
 
 ## 实际采用的流程：隔离 release root（0.9.3 起的现行做法）
 
