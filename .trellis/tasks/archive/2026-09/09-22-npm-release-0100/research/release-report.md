@@ -1,6 +1,6 @@
 # 发布报告：@xup3ng/pi-web 0.10.0（npm）
 
-状态：**B1–B11 完成，0.10.0 已发布并核验通过**；B12 仅剩"是否删除 release root"待用户决定。
+状态：**B1–B12 全部完成，0.10.0 已发布、核验通过、证据已保留、隔离 root 已按用户决定清理。**
 
 ## 0. 关键标识
 
@@ -155,11 +155,17 @@ git push origin personal
   （取自 `scripts/release-npm.sh` 的口径），实际采用 `chore: release 0.10.0`，
   因为仓库里 0.9.4（`57924e3`）与 0.9.5（`86088d9`）的真实发布提交都是这个形式。
 
-## 6. 待完成（B12）
+## 6. B12 收尾（已完成）
 
-| 步 | 内容 | 判据 |
-|---|---|---|
-| B12 | 本报告已补全；询问是否删除 0.9.5 root（3.5G）与本次 root（约 3.5G） | 用户批准后再删 |
+用户决定：**保留最小证据集后删除两个 root**。执行结果：
+
+- 证据保留到 `~/pi-web-release-artifacts/0.10.0/`（**6.3M / 37 文件**）：封存的
+  `xup3ng-pi-web-0.10.0.tgz`（删除后复算 sha256 仍为 `14c274de…83f11`）、`artifacts/` 的
+  `SHA256SUMS`/`SHA512.b64`/`filelist.txt`/`pack-*.json`、`evidence/`、`logs/`、`check/`、本次用到的
+  `scripts/`（`env.sh`/`npmrc`/`check-run.py`/`smoke.sh`/`b9-publish.sh`/`b10-verify.sh`）与一份
+  `README.md`（说明来源与复核命令）。
+- 删除 `.pi-web-v095-release-20260919-220023`（3.5G）与
+  `.pi-web-v0100-release-20260922-184342`（3.7G）；`/` 可用空间 49G → **56G**。
 
 ## 7. 验收清单（AC1–AC10）
 
