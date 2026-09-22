@@ -1,0 +1,34 @@
+=== active dependency tree is a pnpm+npm hybrid ===
+
+--- .pnpm store present? ---
+node_modules/.pnpm
+759
+--- pnpm metadata files ---
+-rw-r--r-- 1 xupeng xupeng  57195 Sep 22 13:22 node_modules/.modules.yaml
+-rw-r--r-- 1 xupeng xupeng 263020 Sep 22 13:22 node_modules/.pnpm/lock.yaml
+
+--- npm drift artifacts ---
+node_modules/.ignored
+@earendil-works
+eslint
+eslint-config-next
+jiti
+js-yaml
+27
+node_modules/.package-lock.json
+
+--- active react-hooks plugin ---
+7.1.1
+lockfile expects: 7.0.1
+
+--- repo lockfiles ---
+.trellis/tasks/archive/2026-09/08-29-ask-user-submit-lockup-supplement/check.jsonl
+.trellis/tasks/archive/2026-09/08-29-ask-user-submit-lockup-supplement/design.md
+.trellis/tasks/archive/2026-09/08-29-ask-user-submit-lockup-supplement/implement.jsonl
+.trellis/tasks/archive/2026-09/08-29-ask-user-submit-lockup-supplement/implement.md
+.trellis/tasks/archive/2026-09/08-29-ask-user-submit-lockup-supplement/prd.md
+.trellis/tasks/archive/2026-09/08-29-ask-user-submit-lockup-supplement/task.json
+components/MermaidBlock.test.mjs
+components/MermaidBlock.tsx
+lib/skill-lock.test.mjs
+lib/skill-lock.ts

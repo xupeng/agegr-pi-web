@@ -1,0 +1,6 @@
+{"file": ".trellis/tasks/09-22-lint-baseline-drift/design.md", "reason": "三类诊断成因、P1/P2/P3/P4 候选修法、两棵夹具树的迭代循环与回滚点"}
+{"file": ".trellis/tasks/09-22-lint-baseline-drift/research/baseline-summary.md", "reason": "修复前基线：npm 树 495 文件 0 error / pnpm 树 495 文件 14 error，以及夹具的安装命令与 pnpm 版本注意事项"}
+{"file": ".trellis/tasks/09-22-lint-baseline-drift/research/diagnostics-7.1.1-summary.md", "reason": "14 条诊断的逐条摘要、三类成因与插件实现行号锚点，是逐站点修复的 oracle 输入（完整原始输出在同目录 json）"}
+{"file": ".trellis/spec/frontend/hook-guidelines.md", "reason": "useCallback/useMemo/依赖数组的既有约定：useMemo 属低频工具、exhaustive-deps 保持开启、三条 React Compiler 规则被刻意关闭"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "三个组件的组织与 props 约定，改造不得破坏对外契约"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "同类问题应在既有机制上收敛，不要为每个站点发明一套新写法"}
