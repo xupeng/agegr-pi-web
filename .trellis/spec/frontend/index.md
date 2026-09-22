@@ -26,6 +26,7 @@
 | [会话列表刷新机制](./session-list-refresh.md) | 两级按需加载、缓存层级、刷新触发点、强制刷新竞态防护 | Written |
 | [设置弹窗在移动端的布局协议](./settings-dialog-mobile.md) | 小屏全屏化、margin auto 居中、safe-area 陷阱、滚动链、对话区字号与内容宽度模式 | Written |
 | [Clickable file paths](./clickable-file-paths.md) | Turn written-file extraction (apply_patch / trellis / Agent 快照)、索引校验链化、`PathText`、产物卡片与打开授权 | Written |
+| [会话停滞看门狗](./stall-watchdog.md) | 阈值来源与优先级、工具级宽限、`stall_aborted` 事件契约、arm/disarm/dispose 不变量、与 idle 回收的边界、已知边界 | Written |
 
 ---
 
