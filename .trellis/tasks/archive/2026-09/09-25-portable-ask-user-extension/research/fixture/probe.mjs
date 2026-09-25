@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import { cpSync, mkdtempSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve, sep } from 'node:path';
+import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DefaultResourceLoader, SettingsManager } from '@earendil-works/pi-coding-agent';
 
@@ -10,7 +10,12 @@ import { DefaultResourceLoader, SettingsManager } from '@earendil-works/pi-codin
 // symlink back to its node_modules. No model, network, service, or leftover
 // agent dir.
 const here = fileURLToPath(new URL('.', import.meta.url));
-const repoRoot = resolve(here, '../../../../..');
+let repoRoot = here;
+while (!existsSync(join(repoRoot, 'package.json'))) {
+  const parent = dirname(repoRoot);
+  if (parent === repoRoot) throw new Error('repository package.json not found');
+  repoRoot = parent;
+}
 const source = resolve(repoRoot, 'lib/ask-user/portable');
 const scratch = mkdtempSync(join(tmpdir(), 'ask-user-sdk-probe-'));
 const root = join(scratch, 'package');

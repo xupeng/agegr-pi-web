@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import { cpSync, mkdirSync, mkdtempSync, realpathSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve, sep } from 'node:path';
+import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // PA admission probe for an independently copied portable package. PA's
@@ -10,7 +10,12 @@ import { fileURLToPath } from 'node:url';
 // imported read-only; cwd and agentDir stay in the temp dir so nothing is
 // written under the PA checkout or this task tree. No operator switch is toggled.
 const here = fileURLToPath(new URL('.', import.meta.url));
-const repoRoot = resolve(here, '../../../../..');
+let repoRoot = here;
+while (!existsSync(join(repoRoot, 'package.json'))) {
+  const parent = dirname(repoRoot);
+  if (parent === repoRoot) throw new Error('repository package.json not found');
+  repoRoot = parent;
+}
 const sourceDir = resolve(repoRoot, 'lib/ask-user/portable');
 const pa = resolve(repoRoot, '../../personal-assistant');
 

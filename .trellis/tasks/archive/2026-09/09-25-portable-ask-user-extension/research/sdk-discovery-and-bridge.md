@@ -11,8 +11,8 @@ This is only an interface/loader probe: the fixture uses minimal question fields
 From `/home/xupeng/dev/personal/forked/agegr-pi-web`:
 
 ```bash
-node .trellis/tasks/09-25-portable-ask-user-extension/research/fixture/probe.mjs
-node --import "$(realpath ../../personal-assistant/node_modules/tsx/dist/loader.mjs)" .trellis/tasks/09-25-portable-ask-user-extension/research/fixture/pa-probe.mjs
+node .trellis/tasks/archive/2026-09/09-25-portable-ask-user-extension/research/fixture/probe.mjs
+node --import "$(realpath ../../personal-assistant/node_modules/tsx/dist/loader.mjs)" .trellis/tasks/archive/2026-09/09-25-portable-ask-user-extension/research/fixture/pa-probe.mjs
 ```
 
 Expected stdout:
