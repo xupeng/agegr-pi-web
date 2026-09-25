@@ -5,6 +5,7 @@ import { join } from "node:path";
 import test from "node:test";
 import { createJiti } from "jiti";
 import {
+  ASK_USER_CURRENT_METADATA_PATH,
   assertIsolatedSessionDir,
   assertSessionFileIsolated,
   buildReport,
@@ -102,11 +103,12 @@ test("extraction reads ask_user metadata, matches the live tool, and rejects amb
   );
 
   const { previous, current } = gitMetadataLoader(REPO_ROOT)(DEFAULT_OLD_REV);
+  assert.equal(ASK_USER_CURRENT_METADATA_PATH, "lib/ask-user/portable/tool.ts");
   assert.notEqual(previous.promptSnippet, current.promptSnippet);
   const jiti = createJiti(import.meta.url, { interopDefault: true, moduleCache: false });
   const { createAskUserToolDefinition } = await jiti.import(join(REPO_ROOT, "lib/ask-user/tool.ts"));
   const live = createAskUserToolDefinition({ open: async () => ({ ask: null }) });
-  const extracted = extractAskUserMetadata(readFileSync(join(REPO_ROOT, "lib/ask-user/tool.ts"), "utf8"));
+  const extracted = extractAskUserMetadata(readFileSync(join(REPO_ROOT, ASK_USER_CURRENT_METADATA_PATH), "utf8"));
   assert.equal(extracted.promptSnippet, live.promptSnippet);
   assert.deepEqual(extracted.promptGuidelines, [...live.promptGuidelines]);
 });

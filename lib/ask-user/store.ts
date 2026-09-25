@@ -1,19 +1,31 @@
 import { randomUUID } from "node:crypto";
 import {
-  ASK_USER_ID_MAX_LENGTH,
-  ASK_USER_OPTION_LIMIT,
-  ASK_USER_OTHER_TEXT_MAX_LENGTH,
-  ASK_USER_QUESTION_LIMIT,
-  ASK_USER_TEXT_MAX_LENGTH,
   type AskUserAnswer,
   type AskUserCloseReason,
   type AskUserOutcome,
   type AskUserQuestion,
-  type AskUserQuestionOption,
   type AskUserQuestionRecord,
   type AskUserSubmission,
+  type PendingAskOpenResult,
   type PendingAskUser,
-} from "./types";
+} from "./portable/types";
+import {
+  cloneAsk,
+  cloneQuestion,
+  normalizeSupplement,
+  PendingAskValidationError,
+  requireId,
+  requireSessionId,
+  validateQuestions,
+  validateSubmission,
+  type RecordedAnswers,
+} from "./portable/validation";
+import { renderAskUserAnswersText, renderSupersededAskText } from "./portable/format";
+
+// Re-exported so existing Pi Web imports from `./store` and `./index` keep
+// working while the definitions live in the portable package.
+export { PendingAskValidationError, renderAskUserAnswersText, renderSupersededAskText };
+export type { PendingAskOpenResult };
 
 export interface PendingAskStoreOptions {
   now?: (() => Date) | undefined;
@@ -27,17 +39,6 @@ export interface PendingAskOpenInput {
 }
 
 /**
- * A freshly opened ask, plus the outcome of the ask it replaced. A session
- * holds at most one open ask, so opening while one is still unanswered
- * supersedes it — and the caller must report that outcome to the model, naming
- * the questions the user never got to answer.
- */
-export interface PendingAskOpenResult {
-  ask: PendingAskUser;
-  superseded?: AskUserOutcome;
-}
-
-/**
  * Result of submitting or cancelling an ask. `"stale"` means the ask named by
  * the caller is no longer the session's open ask (already submitted,
  * superseded, or gone with its daemon-side session), which is an ordinary race
@@ -47,25 +48,15 @@ export type PendingAskCloseResult =
   | { status: "closed"; outcome: AskUserOutcome }
   | { status: "stale" };
 
-/** Rejected input: a question set is malformed, or an answer does not fit its question. */
-export class PendingAskValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "PendingAskValidationError";
-  }
-}
-
-type RecordedAnswers = ReadonlyMap<string, AskUserAnswer>;
-
 /**
  * Server-owned open-ask state: one unanswered question set per session.
  *
  * The store is pure domain logic — no Next.js, no Pi session, no I/O, no
- * timers. It validates asks and answers, owns the open/supersede/submit/cancel
- * transitions, and computes the answered-versus-unanswered outcome that both
- * the model-facing message and the browser record are rendered from. Callers
- * publish the returned asks and outcomes; the store never emits anything
- * itself.
+ * timers. It validates asks and answers (through the shared portable
+ * validator), owns the open/supersede/submit/cancel transitions, and computes
+ * the answered-versus-unanswered outcome that both the model-facing message and
+ * the browser record are rendered from. Callers publish the returned asks and
+ * outcomes; the store never emits anything itself.
  *
  * State is deliberately process-lifetime and in-memory. An open ask is
  * meaningful only while the session runtime that posted it exists, and
@@ -207,39 +198,6 @@ export class PendingAskStore {
   }
 }
 
-/**
- * Model-facing text of a closed ask. The model reads this, so it must name the
- * unanswered questions as plainly as the answered ones.
- */
-export function renderAskUserAnswersText(outcome: AskUserOutcome): string {
-  const lead = outcome.reason === "submitted"
-    ? "The user submitted answers to your questions."
-    : `The question set was closed (${outcome.reason}) before it was fully answered.`;
-  const supplementLine = outcome.supplement === undefined
-    ? []
-    : ["", `Supplement (user-provided, beyond the questions): ${JSON.stringify(outcome.supplement)}`];
-  return [lead, "", ...outcome.questions.map(questionLines).flat(), "", outcome.summary, ...supplementLine].join("\n");
-}
-
-/**
- * Notice for the model when a new ask replaced one the user never answered, so
- * a supersede is never a silent loss of the earlier questions.
- */
-export function renderSupersededAskText(outcome: AskUserOutcome): string {
-  return [
-    `This replaced an earlier question set (${outcome.askId}) that the user never submitted.`,
-    `Left unanswered: ${outcome.unansweredIds.join(", ")}.`,
-  ].join("\n");
-}
-
-function questionLines(record: AskUserQuestionRecord): string[] {
-  const header = `- ${record.question.id}: ${record.question.question}`;
-  if (!record.answered) return [header, "  Unanswered."];
-  const parts = [...record.values.map((value) => `selected ${value}`)];
-  if (record.otherText !== undefined) parts.push(`custom: ${JSON.stringify(record.otherText)}`);
-  return [header, `  Answered: ${parts.join("; ")}`];
-}
-
 function askUserOutcome(
   ask: PendingAskUser,
   answers: RecordedAnswers,
@@ -279,123 +237,4 @@ function summaryLine(total: number, answeredCount: number, unansweredIds: string
   return unansweredIds.length === 0
     ? `${answered}; none left unanswered`
     : `${answered}; unanswered: ${unansweredIds.join(", ")}`;
-}
-
-function validateQuestions(questions: AskUserQuestion[]): AskUserQuestion[] {
-  if (questions.length === 0) throw new PendingAskValidationError("An ask must contain at least one question");
-  if (questions.length > ASK_USER_QUESTION_LIMIT) {
-    throw new PendingAskValidationError(`An ask must not contain more than ${ASK_USER_QUESTION_LIMIT.toString()} questions`);
-  }
-  const seenIds = new Set<string>();
-  return questions.map((question) => {
-    const id = requireId(question.id, "question id");
-    if (seenIds.has(id)) throw new PendingAskValidationError(`Duplicate question id ${id}`);
-    seenIds.add(id);
-    return validateQuestion(question, id);
-  });
-}
-
-function validateQuestion(question: AskUserQuestion, id: string): AskUserQuestion {
-  if (question.options.length > ASK_USER_OPTION_LIMIT) {
-    throw new PendingAskValidationError(`Question ${id} must not offer more than ${ASK_USER_OPTION_LIMIT.toString()} options`);
-  }
-  const seenValues = new Set<string>();
-  const options = question.options.map((option) => {
-    const value = requireId(option.value, `option value of question ${id}`);
-    if (seenValues.has(value)) throw new PendingAskValidationError(`Duplicate option value ${value} in question ${id}`);
-    seenValues.add(value);
-    return validateOption(option, value, id);
-  });
-  const detail = question.detail;
-  return {
-    id,
-    question: requireText(question.question, `text of question ${id}`),
-    ...(detail === undefined ? {} : { detail: requireText(detail, `detail of question ${id}`) }),
-    options,
-    ...(question.multiple === true ? { multiple: true } : {}),
-  };
-}
-
-function validateOption(option: AskUserQuestionOption, value: string, questionId: string): AskUserQuestionOption {
-  const detail = option.detail;
-  return {
-    value,
-    label: requireText(option.label, `label of option ${value} in question ${questionId}`),
-    ...(detail === undefined ? {} : { detail: requireText(detail, `detail of option ${value} in question ${questionId}`) }),
-  };
-}
-
-function validateSubmission(ask: PendingAskUser, submission: AskUserSubmission): Map<string, AskUserAnswer> {
-  const questionsById = new Map(ask.questions.map((question) => [question.id, question]));
-  const answers = new Map<string, AskUserAnswer>();
-  for (const answer of submission.answers) {
-    const question = questionsById.get(answer.id);
-    if (question === undefined) throw new PendingAskValidationError(`Unknown question id ${answer.id}`);
-    if (answers.has(answer.id)) throw new PendingAskValidationError(`Duplicate answer for question ${answer.id}`);
-    const validated = validateAnswer(question, answer);
-    // Untouched questions and explicitly empty answers are the same thing, so
-    // an empty answer is dropped rather than recorded as answered.
-    if (validated !== undefined) answers.set(answer.id, validated);
-  }
-  return answers;
-}
-
-function validateAnswer(question: AskUserQuestion, answer: AskUserAnswer): AskUserAnswer | undefined {
-  const optionValues = new Set(question.options.map((option) => option.value));
-  const values: string[] = [];
-  for (const value of answer.values) {
-    if (!optionValues.has(value)) throw new PendingAskValidationError(`Question ${question.id} has no option ${value}`);
-    if (values.includes(value)) throw new PendingAskValidationError(`Duplicate value ${value} for question ${question.id}`);
-    values.push(value);
-  }
-  const otherText = normalizeOtherText(question, answer.otherText);
-  const selectionCount = values.length + (otherText === undefined ? 0 : 1);
-  if (question.multiple !== true && selectionCount > 1) {
-    throw new PendingAskValidationError(`Question ${question.id} accepts a single answer`);
-  }
-  if (selectionCount === 0) return undefined;
-  return { id: question.id, values, ...(otherText === undefined ? {} : { otherText }) };
-}
-
-function normalizeOtherText(question: AskUserQuestion, otherText: string | undefined): string | undefined {
-  if (otherText === undefined) return undefined;
-  if (otherText.length > ASK_USER_OTHER_TEXT_MAX_LENGTH) {
-    throw new PendingAskValidationError(`Other text of question ${question.id} exceeds its length limit`);
-  }
-  const trimmed = otherText.trim();
-  return trimmed === "" ? undefined : trimmed;
-}
-
-function normalizeSupplement(supplement: string | undefined): string | undefined {
-  if (supplement === undefined) return undefined;
-  if (supplement.length > ASK_USER_OTHER_TEXT_MAX_LENGTH) {
-    throw new PendingAskValidationError("Supplement exceeds its length limit");
-  }
-  const trimmed = supplement.trim();
-  return trimmed === "" ? undefined : trimmed;
-}
-
-function cloneAsk(ask: PendingAskUser): PendingAskUser {
-  return { askId: ask.askId, askedAt: ask.askedAt, questions: ask.questions.map(cloneQuestion) };
-}
-
-function cloneQuestion(question: AskUserQuestion): AskUserQuestion {
-  return { ...question, options: question.options.map((option) => ({ ...option })) };
-}
-
-function requireSessionId(sessionId: string): string {
-  if (sessionId === "") throw new Error("sessionId must not be empty");
-  return sessionId;
-}
-
-function requireId(value: string, field: string): string {
-  if (value.trim() === "") throw new PendingAskValidationError(`${field} must not be empty`);
-  if (value.length > ASK_USER_ID_MAX_LENGTH) throw new PendingAskValidationError(`${field} exceeds its length limit`);
-  return value;
-}
-
-function requireText(value: string, field: string): string {
-  if (value.trim() === "") throw new PendingAskValidationError(`${field} must not be empty`);
-  if (value.length > ASK_USER_TEXT_MAX_LENGTH) throw new PendingAskValidationError(`${field} exceeds its length limit`);
-  return value;
 }
