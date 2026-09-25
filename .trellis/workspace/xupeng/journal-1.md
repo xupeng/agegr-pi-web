@@ -711,3 +711,24 @@ Validated SDK and PA Stage A local discovery, extracted a shared bounded ask_use
 ### Status
 
 [OK] **Completed**
+
+
+## Session 16: Verify archived ask_user probes
+
+**Date**: 2026-09-25
+**Task**: Verify archived ask_user probes
+**Branch**: `feat/portable-ask-user-extension`
+
+### Summary
+
+After archiving the portable extension task, fixed the two research probes to locate the repository root at any task depth and reran the SDK and PA Stage A probes from their archived paths.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `d463266` | (see git log) |
+
+### Status
+
+[OK] **Completed**
