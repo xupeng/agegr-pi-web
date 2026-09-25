@@ -1,0 +1,29 @@
+{
+  "id": "ask-user-adoption-portability",
+  "name": "ask-user-adoption-portability",
+  "title": "Improve ask_user adoption and evaluate portable extension",
+  "description": "",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P2",
+  "creator": "xupeng",
+  "assignee": "xupeng",
+  "createdAt": "2026-09-25",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "09-25-ask-user-invocation-guidance",
+    "09-25-ask-user-standalone-extension"
+  ],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {}
+}

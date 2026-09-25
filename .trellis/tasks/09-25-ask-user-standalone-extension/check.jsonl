@@ -1,0 +1,2 @@
+{"file":".trellis/spec/frontend/ask-user-protocol.md","reason":"Check that the assessment distinguishes extension registration from host UI, persistence and answer delivery."}
+{"file":".trellis/tasks/09-25-ask-user-standalone-extension/research/extension-boundaries.md","reason":"Verify each feasibility claim against its source anchor and guardrails."}
