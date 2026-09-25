@@ -622,3 +622,47 @@ Gave pi-web a per-session stall watchdog so a turn that stops producing agent ev
 ### Status
 
 [OK] **Completed**
+
+
+## Session 13: ask_user 调用引导改进与独立扩展可行性评估
+
+**Date**: 2026-09-25
+**Task**: ask_user 调用引导改进与独立扩展可行性评估
+**Branch**: `feat/ask-user-adoption-portability`
+
+### Summary
+
+改写 ask_user 的 promptSnippet/promptGuidelines，让模型在被缺失事实、范围选择或必要决策阻塞时优先用卡片提问而非散文提问；同时产出独立 Pi 扩展的可行性报告（仅文档，未实现、未改 personal-assistant）。
+
+### Main Changes
+
+- lib/ask-user/tool.ts 的 promptSnippet 改为「blocking clarification or a required decision」；promptGuidelines 明确适用条件（工具可用 + 被缺失事实/范围/决策阻塞）、合并提问、排除普通对话/修辞性提问/可选后续建议、工具不可用时回到散文，并保留「答案只作澄清不代替敏感操作授权」「单独且最后调用、不重发不轮询」
+- lib/ask-user/tool.test.mjs 把 promptSnippet 的精确串断言改为 assert.match 契约断言，覆盖新引导的各个要点（仍只验证提示元数据）
+- .trellis/spec/frontend/ask-user-protocol.md 增加调用引导条目，注明断言只验证元数据、实际效果需同模型同配置的独立会话记录，单次冒烟不能推断调用率
+- 新增父子任务：父 09-25-ask-user-adoption-portability，子 09-25-ask-user-invocation-guidance（引导）与 09-25-ask-user-standalone-extension（可行性报告）；报告含可抽取边界、host 适配、scheduled 场景隔离、打包/失败模式与后续测试矩阵
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `a6bae54` | (see git log) |
+| `82e4c3b` | (see git log) |
+| `c34ca07` | (see git log) |
+
+### Testing
+
+- [OK] [OK] node --test lib/ask-user/tool.test.mjs 4/4 pass
+- [OK] [OK] XDG_STATE_HOME= npm test 1411/1411 pass（不设该变量时未改动的 lib/skill-lock.test.mjs 默认参数断言 1410/1411，属环境相关基线）
+- [OK] [OK] node_modules/.bin/tsc --noEmit、npm run lint、git diff --check 均通过
+- [OK] [OK] 隔离临时 cwd 冒烟：sub2api-codex/gpt-6-sol 对 DB 迁移提示发起两问 ask_user 卡片（单次观察，非调用率/前后对比结论）
+- [OK] [OK] dev server 127.0.0.1:30141 上 GET / 与 GET /api/models 返回 200；本轮结束后已按用户要求停掉该 server
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 用户自行运行/测试并决定是否开 PR；本分支未 push
+- 三处 .pi/agents/trellis-*.md 与 pnpm-lock.yaml/pnpm-workspace.yaml 非本任务产物，未纳入提交
+- 独立扩展若要落地，需 personal-assistant 侧提供 host bridge（pending 状态、持久化、答案投递、UI）并做 scheduled origin gating

@@ -108,9 +108,9 @@ export function createAskUserToolDefinition(deps: AskUserToolDeps) {
     name: "ask_user",
     label: "Ask user",
     description: "Post a set of questions to the user as a browser form and end this run. Answers arrive later as a follow-up message; the user may leave any question unanswered.",
-    promptSnippet: "ask_user: post a question set to the user; ends the run, answers return as a follow-up",
+    promptSnippet: "ask_user: ask for blocking clarification or a required decision; ends the run, answers return as a follow-up",
     promptGuidelines: [
-      "When you need decisions from the user, post them together with ask_user instead of asking in prose one at a time. It ends the run and the answers, including the questions the user left unanswered, come back as a follow-up message that wakes you. Call it alone and last, and do not repost the same questions or poll for answers.",
+      "When you cannot continue the requested work without a missing fact, scope choice, or decision from the user, and ask_user is available, use it instead of ending with a prose question. Group related questions in one call. Do not use it for ordinary conversation, rhetorical questions, or optional follow-up suggestions; if the tool is unavailable, ask in prose. An answer to ask_user is clarification, not authorization for a sensitive action. The tool ends the run; answers, including unanswered questions, arrive as a follow-up message that wakes you. Call it alone and last, and do not repost the same questions or poll for answers.",
     ],
     parameters: AskUserParams,
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
