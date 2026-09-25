@@ -1,0 +1,3 @@
+# Evaluation design
+
+Use a temporary, isolated session harness on the same SDK 0.85.1 and model configuration for both tool-metadata versions. Load the previous snippet/guidelines from the parent commit rather than changing the checked-out production tool; all other registered tools, system instructions, thinking level and prompts stay identical. Each trial starts a new conversation. The unavailable case omits ask_user on both sides and must never attempt a tool call that is absent. Record run identifier, prompt version, config, invocation/prose classification, error state and cleanup status; redact user/provider secrets. The comparator isolates prompt metadata only, not a live before/after rollout, and cannot support significance claims.
