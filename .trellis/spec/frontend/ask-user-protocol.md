@@ -15,7 +15,45 @@
 - 参数：`questions[]`（每项 `id/question/detail?/options[]/multiple?`）。限制：≤20 问题、每题 ≤12 选项、id ≤128、文本 ≤1000、自定义文本 ≤4000。
 - 执行：登记为会话 open ask 后返回 `{ terminate: true }`；畸形问题集抛 `PendingAskValidationError`（变 error tool result，模型可自纠重发）。
 - 工具文本明确告知模型"答案将以 follow-up 唤醒，不要重复提问"；supersede 时附加旧 ask 未答列表。
-- 调用引导在 `lib/ask-user/tool.ts:110-115` 的 `promptSnippet` / `promptGuidelines`：仅在工具可用、继续当前请求必须等待缺失事实、范围选择或必要决策时调用；把相关问题合并后单独、最后调用。普通对话、修辞性提问与非阻塞的后续建议仍用文字，工具不可用时也用文字。回答只用于澄清，不代替敏感操作授权。对应契约断言在 `lib/ask-user/tool.test.mjs:16-38`；断言只验证提示元数据，不证明模型遵循。实际效果要用同模型、同配置的独立会话记录调用结果；单次冒烟不能推断调用率变化。
+- 调用引导在 `lib/ask-user/portable/tool.ts:139-142` 的 `promptSnippet` / `promptGuidelines`：仅在工具可用、继续当前请求必须等待缺失事实、范围选择或必要决策时调用；把相关问题合并后单独、最后调用。普通对话、修辞性提问与非阻塞的后续建议仍用文字，工具不可用时也用文字。回答只用于澄清，不代替敏感操作授权。对应契约断言在 `lib/ask-user/tool.test.mjs`；断言只验证提示元数据，不证明模型遵循。实际效果要用同模型、同配置的独立会话记录调用结果；单次冒烟不能推断调用率变化。
+
+## 跨宿主桥接（SDK 0.85.1 本地原型）
+
+### 1. 适用范围
+
+`lib/ask-user/portable/` 是 `private: true` 的本地 Pi 包，入口由 `package.json` 的 `pi.extensions: ["./index.ts"]` 发现。Pi Web 仍由 `lib/ask-user/extension.ts` 直接给共享工具工厂注入 `open`，不走下面的事件桥；其他宿主必须显式绑定。安装包本身不会创建卡片、提供答案 API、授权写操作或唤醒模型，也不自动启用 PA 定时任务里的 `ask_user`。
+
+### 2. 签名
+
+`openAskThroughBridge(bus, { conversationId, questions }): Promise<PendingAskOpenResult>` 定义在 `lib/ask-user/portable/bridge.ts`。包入口 `index.ts` 在工具执行时发出 `pi.ask-user.bridge:resolve-open:v1`，同一个 SDK resource loader 上的宿主监听器必须同步调用事件请求的 `register(open)`，`open(request): Promise<PendingAskOpenResult>` 可以异步登记。监听器不能先 `await` 再注册。
+
+### 3. 契约
+
+- `open` 收到 `{ version: 1, conversationId: string, questions: AskUserQuestion[] }`；问题先经过 `portable/validation.ts` 的有界校验并被复制。`conversationId` 是不透明会话身份，不是 Pi Web 的 SSE/持久化字段。
+- 宿主 `open` 负责在 resolve 前登记可恢复的 ask，并返回 `{ ask: { askId, askedAt, questions }, superseded? }`；`ask.questions` 必须与调用的 id、文本、选项、多选标志及顺序一致。发生替换时 `superseded.reason` 必须为 `"superseded"`，并包含可报告的 `unansweredIds`。
+- `pi.events` 属于 loader；另一个 loader 的监听器不生效。SDK event bus 的 `emit()` 返回值不表示已绑定，监听异常也可能被 SDK 捕获，必须计数同步注册。只有宿主 resolve 且 ack 有效后，工具才返回 `terminate: true`。ack 的持久化真实性仍由受信任宿主保证，包只能校验结构和问题身份。
+
+### 4. 校验与错误矩阵
+
+| 条件 | 结果 |
+| --- | --- |
+| 空/重复/超限问题或畸形运行时字段 | `PendingAskValidationError`，不触发宿主 `open` |
+| 缺失、延后或重复 `register` | `AskUserBridgeError`，不调用 `open` |
+| 宿主 `open` 拒绝 | 原错误传播，不返回 `terminate: true` |
+| 缺失 ack、问题不匹配、不可报告的 supersede | `AskUserBridgeError`，不返回 `terminate: true` |
+| 恰好一次同步注册、成功登记且有效 ack | 返回共享工具结果并 `terminate: true` |
+
+### 5. 正常/边界/错误案例
+
+正常：`lib/ask-user/portable/discovery.test.mjs` 从**独立拷贝**的目录加载包，同 loader 的 inline 宿主登记并返回匹配的 ask。边界：`lib/ask-user/extension.test.mjs` 证明 Pi Web 开关关闭时不注册工具，打开时仍直接查找实时 session。错误：无监听器或伪造不同问题的 ack 都由 `bridge.ts` 拒绝；不会用成功结果掩盖未登记的 ask。
+
+### 6. 必测断言
+
+`discovery.test.mjs` 验证本地包发现、peer 为 0.85.1、拷贝目录无需指回 Pi Web 的 node_modules、缺失/重复 bridge 与畸形 ack 的失败关闭；`bridge.test.mjs` 验证边界输入和 supersede；`store.test.mjs` 验证失败的提交不会关闭已打开的 ask；`extension.test.mjs` 验证 Pi Web 开关和 session lookup。PA 的 Stage A 固定目录准入仅有隔离探针；Stage B、定时任务排除、重启后答案交付属于另一个仓库的任务，不能写成已验证。
+
+### 7. 错误与正确方式
+
+错误：工具发现没有桥接宿主时返回 `{ terminate: true }`，再寄希望于某个浏览器稍后显示卡片。正确：在执行时通过同 loader 的事件请求拿到**唯一、同步注册**的 `open`，等待宿主登记和有效 ack；否则抛错，让模型得到 error tool result。禁止用全局变量或直接导入 Next/PA 内部模块绕过宿主准入。
 
 ## 状态机（`lib/ask-user/store.ts` 的 `PendingAskStore`）
 
@@ -67,10 +105,11 @@
 
 ## 文件布局
 
-- `lib/ask-user/types.ts` — 类型 + 限制常量（纯、可复用）
-- `lib/ask-user/store.ts` — `PendingAskStore` + 校验 + 答案文本渲染（纯、无框架依赖）
+- `lib/ask-user/portable/` — 可本地安装的 Pi 包（`pi.extensions: ["./index.ts"]`、`peerDependencies` 钉死 SDK 0.85.1、`private: true`、MIT `LICENSE` + `README.md` 记录 bridge 契约与本地安装）。其中 `types.ts` 为有界 DTO/限制，`validation.ts` 为唯一的提问/答案校验器，`format.ts` 为答案文本渲染，`tool.ts` 为 `createAskUserToolDefinition`（`defineTool` + TypeBox schema），`bridge.ts` 为显式 host bridge 解析（`pi.ask-user.bridge:resolve-open:v1`，要求恰好一个同步 `register`）。缺失/多个 bridge、畸形问题、ack 缺少有界 `askId`/`askedAt`、ack 的 questions 与校验后的提问身份不一致（id/文本/选项/`multiple`/顺序），或 `superseded` 不是带 `unansweredIds` 的 `reason: "superseded"` 结果，全部 fail closed，不返回 `terminate: true`。安装验证必须用目录拷贝；指回本仓库 `node_modules` 的符号链接不算独立安装。`index.ts` 为包入口，把 bridge 注入共享工具。
+- `lib/ask-user/types.ts` — 再导出 `./portable/types`，并保留 Pi Web 专有的 `ASK_USER_ANSWERS_CUSTOM_TYPE` 与 `AskUserCloseResponse`
+- `lib/ask-user/store.ts` — `PendingAskStore` 状态机与 outcome 计算；校验/渲染委托给 `./portable`（对外导出面不变）
 - `lib/ask-user/persist.ts` — open ask 磁盘镜像（读/写/替换/删除，损坏降级，无框架依赖）
-- `lib/ask-user/tool.ts` — `createAskUserToolDefinition`（`defineTool` + TypeBox schema）
+- `lib/ask-user/tool.ts` — 再导出 `./portable/tool`（Pi Web 内联适配器直接注入 `open`，不走 bridge）
 - `lib/rpc-manager.ts` — 注入、命令、事件、作废钩子、`get_state` 投影
 - `lib/ask-user-settings.ts` + `app/api/settings/ask-user/route.ts` — 开关持久化（`~/.pi/agent/pi-web-settings.json` 的 `askUser` 字段）+ GET/PUT；`PI_WEB_ASK_USER` env 优先于文件
 - `hooks/useAgentSession.ts` — `pendingAsk` 状态、`submitAsk`/`cancelAsk`、事件处理、重水合

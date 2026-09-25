@@ -688,3 +688,47 @@ Ran 24 isolated old/new ask_user guidance trials across four scenarios, recorded
 ### Status
 
 [OK] **Completed**
+
+
+## Session 15: Prototype portable ask_user extension
+
+**Date**: 2026-09-25
+**Task**: Prototype portable ask_user extension
+**Branch**: `feat/portable-ask-user-extension`
+
+### Summary
+
+Validated SDK and PA Stage A local discovery, extracted a shared bounded ask_user package with an explicit fail-closed host bridge, preserved Pi Web behavior, updated the merged evaluation runner, and archived the portable-extension task.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `aadfb6f` | (see git log) |
+| `41ffaa8` | (see git log) |
+| `75eaaab` | (see git log) |
+
+### Status
+
+[OK] **Completed**
+
+
+## Session 16: Verify archived ask_user probes
+
+**Date**: 2026-09-25
+**Task**: Verify archived ask_user probes
+**Branch**: `feat/portable-ask-user-extension`
+
+### Summary
+
+After archiving the portable extension task, fixed the two research probes to locate the repository root at any task depth and reran the SDK and PA Stage A probes from their archived paths.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `d463266` | (see git log) |
+
+### Status
+
+[OK] **Completed**

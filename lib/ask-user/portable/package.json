@@ -1,0 +1,19 @@
+{
+  "name": "pi-ask-user-portable",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Portable ask_user tool core with an explicit host bridge. Local prototype; not published.",
+  "license": "MIT",
+  "pi": {
+    "extensions": [
+      "./index.ts"
+    ]
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-ai": "0.85.1",
+    "@earendil-works/pi-coding-agent": "0.85.1"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  }
+}

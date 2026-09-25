@@ -6,7 +6,6 @@ export {
   renderSupersededAskText,
   type PendingAskCloseResult,
   type PendingAskOpenInput,
-  type PendingAskOpenResult,
   type PendingAskStoreOptions,
 } from "./store";
 export {

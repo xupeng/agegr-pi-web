@@ -61,6 +61,11 @@ export function findRepoRoot(start) {
 
 export const REPO_ROOT = findRepoRoot(dirname(SCRIPT_PATH));
 export const ASK_USER_TOOL_REPO_PATH = "lib/ask-user/tool.ts";
+// The earlier revision defines the tool in tool.ts; the local package moves
+// the live definition into portable/tool.ts and leaves tool.ts as a re-export.
+export const ASK_USER_CURRENT_METADATA_PATH = existsSync(join(REPO_ROOT, "lib/ask-user/portable/tool.ts"))
+  ? "lib/ask-user/portable/tool.ts"
+  : ASK_USER_TOOL_REPO_PATH;
 export const DEFAULT_OLD_REV = "922f7e1";
 export const MAX_MODEL_CALLS = 24;
 export const DEFAULT_ABORT_SETTLE_MS = 15_000;
@@ -226,7 +231,7 @@ export function gitMetadataLoader(repoRoot) {
         maxBuffer: 10 * 1024 * 1024,
       }),
     ),
-    current: extractAskUserMetadata(readFileSync(join(repoRoot, ASK_USER_TOOL_REPO_PATH), "utf8")),
+    current: extractAskUserMetadata(readFileSync(join(repoRoot, ASK_USER_CURRENT_METADATA_PATH), "utf8")),
   });
 }
 
