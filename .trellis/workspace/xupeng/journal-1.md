@@ -666,3 +666,25 @@ Gave pi-web a per-session stall watchdog so a turn that stops producing agent ev
 - 用户自行运行/测试并决定是否开 PR；本分支未 push
 - 三处 .pi/agents/trellis-*.md 与 pnpm-lock.yaml/pnpm-workspace.yaml 非本任务产物，未纳入提交
 - 独立扩展若要落地，需 personal-assistant 侧提供 host bridge（pending 状态、持久化、答案投递、UI）并做 scheduled origin gating
+
+
+## Session 14: Evaluate ask_user invocation behavior
+
+**Date**: 2026-09-25
+**Task**: Evaluate ask_user invocation behavior
+**Branch**: `feat/ask-user-behavior-evaluation`
+
+### Summary
+
+Ran 24 isolated old/new ask_user guidance trials across four scenarios, recorded per-trial observations and caveats, verified the research runner, and archived the behavior-evaluation task.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `2c784ac` | (see git log) |
+| `c623f12` | (see git log) |
+
+### Status
+
+[OK] **Completed**

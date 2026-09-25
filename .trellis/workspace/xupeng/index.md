@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 13
+- **Total Sessions**: 14
 - **Last Active**: 2026-09-25
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~668 | Active |
+| `journal-1.md` | ~690 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 14 | 2026-09-25 | Evaluate ask_user invocation behavior | `2c784ac`, `c623f12` | `feat/ask-user-behavior-evaluation` |
 | 13 | 2026-09-25 | ask_user 调用引导改进与独立扩展可行性评估 | `a6bae54`, `82e4c3b`, `c34ca07` | `feat/ask-user-adoption-portability` |
 | 12 | 2026-09-22 | 废弃并清理 personal-* GitHub Release 渠道（含孤儿 pnpm-lock） | `6a865a2`, `b3b0094` | `personal` |
 | 11 | 2026-09-22 | 发布 @xup3ng/pi-web 0.10.0（隔离构建 + 用户 2FA 发布 + 有界核验） | `8f537d0` | `personal` |
