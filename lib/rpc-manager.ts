@@ -20,7 +20,7 @@ import { resolveStallWatchdogSettings, StallWatchdog, type StallWatchdogStall } 
 import { notifySessionComplete } from "./web-push";
 import { hasActiveSessionLivenessProvider } from "./session-liveness";
 import type { SlashCommandInfo } from "@earendil-works/pi-coding-agent";
-import type { AgentSessionLike, ExtensionUiContextLike, ToolInfo } from "./pi-types";
+import type { AgentSessionLike, ContextUsage, ExtensionUiContextLike, ToolInfo } from "./pi-types";
 import type {
   ExtensionUiRequest,
   ExtensionUiResponse,
@@ -951,7 +951,19 @@ export class AgentSessionWrapper {
 
       case "get_state": {
         const model = this.inner.model;
-        const contextUsage = this.inner.getContextUsage();
+        // `getContextUsage()` is a derived metric, and pi can throw while
+        // computing it: it walks the branch and reads `usage.totalTokens` off
+        // the newest assistant entry, which a hand-written or legacy v3 session
+        // file can omit. This command backs `GET /api/agent/[id]` on session
+        // open and the `GET /api/sessions/[id]/state` poll, so letting that
+        // throw escape would answer 500 and make the session look unopenable.
+        // Report an unknown context usage instead.
+        let contextUsage: ContextUsage | undefined;
+        try {
+          contextUsage = this.inner.getContextUsage();
+        } catch {
+          contextUsage = undefined;
+        }
         return {
           sessionId: this.inner.sessionId,
           sessionFile: this.inner.sessionFile ?? "",

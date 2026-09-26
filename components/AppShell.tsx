@@ -288,6 +288,7 @@ export function AppShell() {
   const [pendingQuotePrompt, setPendingQuotePrompt] = useState<{ sessionId: string; text: string } | null>(null);
   const topBarRef = useRef<HTMLDivElement>(null);
   const mobileToolbarRef = useRef<HTMLDivElement>(null);
+  const mobileToolbarSessionIdRef = useRef<string | undefined>(undefined);
   // Branch navigator state — populated by ChatWindow via onBranchDataChange
   const [branchTree, setBranchTree] = useState<SessionTreeNode[]>([]);
   const [branchActiveLeafId, setBranchActiveLeafId] = useState<string | null>(null);
@@ -465,9 +466,26 @@ export function AppShell() {
     };
   }, [mobileToolbarMoreOpen]);
 
+  // A layout change always drops the narrow-mobile overflow panel.
   useEffect(() => {
     setMobileToolbarMoreOpen(false);
-  }, [isMobile, isNarrowMobile, selectedSession?.id, newSessionDraftId]);
+  }, [isMobile, isNarrowMobile]);
+
+  // Switching session does too, but the restored session arriving after a fresh
+  // load is not a switch: the toolbar renders while the session list is still in
+  // flight, so closing whenever the id changed snapped the panel shut right
+  // after the user opened it — measured at 390px with a delayed /api/sessions,
+  // where the Agents button then never appeared.
+  useEffect(() => {
+    const previous = mobileToolbarSessionIdRef.current;
+    mobileToolbarSessionIdRef.current = selectedSession?.id;
+    if (previous === undefined || previous === selectedSession?.id) return;
+    setMobileToolbarMoreOpen(false);
+  }, [selectedSession?.id]);
+
+  useEffect(() => {
+    setMobileToolbarMoreOpen(false);
+  }, [newSessionDraftId]);
 
   useEffect(() => {
     if (!activeTopPanel || !topBarRef.current) return;

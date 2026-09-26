@@ -4,6 +4,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AskUserAnswer, PendingAskUser } from "@/lib/types";
 import { getLocalePlugin } from "@/lib/i18n/registry";
 import { isBuiltinAskUserViewHtml } from "@/lib/ask-user/mcp-view-html";
+import { readThemeTokens, type AskUserThemeTokens } from "@/lib/ask-user/theme-tokens";
+import {
+  collectViewText,
+  filterViewFontFacesByStack,
+  selectViewFontFaces,
+  type AskUserViewFontFace,
+} from "@/lib/ask-user/view-fonts";
 import {
   ASK_USER_ID_MAX_LENGTH,
   ASK_USER_OPTION_LIMIT,
@@ -11,16 +18,40 @@ import {
   ASK_USER_QUESTION_LIMIT,
 } from "@/lib/ask-user/types";
 import { useI18n } from "@/hooks/useI18n";
-import { AskUserCard } from "./AskUserCard";
+import { AskUserAppFailure } from "./AskUserAppFailure";
 
 /** Peer protocol version of the MCP Apps 2026-01-26 handshake. */
 const APPS_PROTOCOL_VERSION = "2026-01-26";
-/** How long the fetch + handshake may take before the native card takes over. */
+/** How long the fetch + handshake may take before the degraded state takes over. */
 const APPS_HANDSHAKE_TIMEOUT_MS = 6000;
+/** Budget for mirroring the webfonts before the view renders without them. */
+const ASK_VIEW_FONTS_TIMEOUT_MS = 2500;
+/**
+ * Most faces one ask may carry. The whole vendored set is 99 faces / 5.1 MiB, so
+ * these bounds only stop a pathological manifest: a long ask (13 questions, ~60
+ * distinct CJK characters) already needs 20 subsets, and truncating a selection
+ * mid-way is visible, because the dropped glyphs fall back to a system font and
+ * the question then renders in two different faces.
+ */
+const ASK_VIEW_FONT_FACE_LIMIT = 128;
+const ASK_VIEW_FONT_BYTE_LIMIT = 8 * 1024 * 1024;
 const MAX_VIEW_HEIGHT = 4000;
 const ASK_USER_VIEW_URI = "ui://pi-web/ask-user.html";
+const ASK_VIEW_FONT_FACES_URL = "/api/ask-user/font-faces";
+const ASK_USER_VIEW_FONT_MANIFEST_VERSION = 1;
+/** woff2 files always start with these four bytes. */
+const WOFF2_SIGNATURE = [0x77, 0x4f, 0x46, 0x32];
 
-const APPS_DISABLED = process.env.NEXT_PUBLIC_PI_WEB_ASK_USER_APPS === "0";
+/** One font the frame installs as a `FontFace`, bytes already in memory. */
+interface AskUserViewFont {
+  family: string;
+  style: string;
+  weight: string;
+  unicodeRange: string;
+  data: ArrayBuffer;
+}
+
+type AskUserAppViewState = "loading" | "apps" | "failed";
 
 interface AppViewPayload {
   uri: string;
@@ -31,6 +62,8 @@ interface AppViewPayload {
   structuredContent: Record<string, unknown>;
   content: Array<{ type: "text"; text: string }>;
   html: string;
+  /** Pi Web webfonts for the frame; empty means system fallbacks. */
+  fonts: AskUserViewFont[];
 }
 
 export interface AskUserAppHostProps {
@@ -66,7 +99,7 @@ function parseAnswers(value: unknown): AskUserAnswer[] | null {
   return answers;
 }
 
-function parsePayload(value: unknown, expected: { sessionId: string; askId: string }): AppViewPayload | null {
+function parsePayload(value: unknown, expected: { sessionId: string; askId: string }): Omit<AppViewPayload, "fonts"> | null {
   const record = asRecord(value);
   if (!record) return null;
   const toolInput = asRecord(record.toolInput);
@@ -102,6 +135,17 @@ function currentTheme(): "light" | "dark" {
   return document.documentElement.classList.contains("dark") ? "dark" : "light";
 }
 
+/**
+ * Pi Web's design tokens, read from the live document. The view cannot inherit
+ * them (opaque origin, `var()` does not cross the sandbox), and Pi Web ships
+ * five palettes, so the values are forwarded instead of a light/dark hint.
+ */
+function readDocumentThemeTokens(): AskUserThemeTokens {
+  if (typeof document === "undefined") return {};
+  const styles = getComputedStyle(document.documentElement);
+  return readThemeTokens((name) => styles.getPropertyValue(name));
+}
+
 /** Pixel offset the chat font slider applies on top of the 14px base. */
 function readFontSizeOffsetPx(): number {
   if (typeof document === "undefined") return 0;
@@ -117,12 +161,17 @@ function readFontSizeOffsetPx(): number {
 /**
  * Host font stack forwarded to the sandboxed view.
  *
- * The view runs in its own document with `default-src 'none'`, so the host's
- * webfonts cannot load there and an unset font would render the card in the
- * browser default (Times New Roman). Sending the sanitized stack lets the view
- * degrade to the same system fallbacks the host would use. The value must not
- * be able to break out of the inline style, so only font-stack characters
- * survive; the view sanitizes again before applying it.
+ * The view runs in its own document, so it cannot inherit this stack and an
+ * unset font would render the card in the browser default (Times New Roman).
+ * This is deliberately the `body` stack - the UI stack the native card
+ * inherited from the message column - and not `--font-content`, the chat prose
+ * stack: `--font-content` lists LXGW WenKai Screen, whose kai glyphs are
+ * visibly larger and heavier than the sans the card used, which read as "wrong
+ * font / font too large" on a phone. Asking for the UI stack keeps Latin in
+ * Oxanium and CJK in the device's own sans (PingFang SC on iOS, Noto Sans CJK
+ * elsewhere), exactly like the card did. The value must not be able to break
+ * out of the inline style, so only font-stack characters survive; the view
+ * sanitizes again before applying it.
  */
 function readFontFamilyStack(): string {
   if (typeof document === "undefined") return "";
@@ -132,30 +181,128 @@ function readFontFamilyStack(): string {
   return cleaned.length === 0 || cleaned.length > 300 ? "" : cleaned;
 }
 
+let askViewFontManifestPromise: Promise<AskUserViewFontFace[]> | null = null;
+const askViewFontBytes = new Map<string, Promise<ArrayBuffer>>();
+
+/**
+ * Fetch the face manifest once per page session.
+ *
+ * The frame cannot fetch anything itself (opaque origin, `default-src 'none'`,
+ * and Chromium blocks its requests to `/fonts/**` as local-network access), so
+ * the host reads the manifest, picks the subsets the ask text needs and posts
+ * the bytes with the projection. Failures are cached as "no webfonts" so every
+ * ask does not re-pay for them.
+ */
+function loadAskViewFontManifest(): Promise<AskUserViewFontFace[]> {
+  if (!askViewFontManifestPromise) {
+    askViewFontManifestPromise = fetch(ASK_VIEW_FONT_FACES_URL, { headers: { accept: "application/json" } })
+      .then((response) => (response.ok ? response.json() as Promise<unknown> : null))
+      .then((value): AskUserViewFontFace[] => {
+        const record = asRecord(value);
+        if (!record || record.version !== ASK_USER_VIEW_FONT_MANIFEST_VERSION || !Array.isArray(record.faces)) return [];
+        return record.faces.flatMap((entry) => {
+          const face = asRecord(entry);
+          if (!face || typeof face.url !== "string" || typeof face.unicodeRange !== "string") return [];
+          if (typeof face.family !== "string" || typeof face.style !== "string" || typeof face.weight !== "string") return [];
+          if (typeof face.display !== "string") return [];
+          return [{
+            family: face.family,
+            style: face.style,
+            weight: face.weight,
+            display: face.display,
+            unicodeRange: face.unicodeRange,
+            url: face.url,
+          }];
+        });
+      })
+      .catch(() => [] as AskUserViewFontFace[]);
+  }
+  return askViewFontManifestPromise;
+}
+
+/** Fetches one woff2 on the host's own origin; the bytes never travel over the wire in the frame. */
+function loadAskViewFontBytes(url: string): Promise<ArrayBuffer | null> {
+  const cached = askViewFontBytes.get(url);
+  if (cached) return cached.then((buffer) => buffer);
+  const request = fetch(url, { headers: { accept: "font/woff2" } })
+    .then((response) => (response.ok ? response.arrayBuffer() : null))
+    .catch(() => null);
+  askViewFontBytes.set(url, request as Promise<ArrayBuffer>);
+  return request;
+}
+
+/**
+ * The faces this ask should carry: only the unicode-range subsets the projected
+ * text touches, capped by count and by total bytes. A failure or a slow
+ * manifest degrades to "no webfonts" rather than delaying the handshake.
+ */
+function loadAskViewFonts(
+  structuredContent: unknown,
+  labels: Record<string, string>,
+  stack: string,
+): Promise<AskUserViewFont[]> {
+  const work = (async () => {
+    const manifest = await loadAskViewFontManifest();
+    if (manifest.length === 0) return [];
+    // Only families the forwarded stack asks for: a face for a family nothing
+    // references is inert bytes (the UI stack names Oxanium and system
+    // families, so the vendored CJK subsets are not shipped at all).
+    const usable = filterViewFontFacesByStack(manifest, stack);
+    if (usable.length === 0) return [];
+    const text = collectViewText(structuredContent, labels);
+    const selected = selectViewFontFaces(usable, text, ASK_VIEW_FONT_FACE_LIMIT);
+    const buffers = await Promise.all(selected.map((face) => loadAskViewFontBytes(face.url)));
+    const fonts: AskUserViewFont[] = [];
+    let bytes = 0;
+    for (const [index, face] of selected.entries()) {
+      const buffer = buffers[index];
+      if (!buffer || buffer.byteLength === 0) continue;
+      if (bytes + buffer.byteLength > ASK_VIEW_FONT_BYTE_LIMIT) break;
+      const signature = new Uint8Array(buffer, 0, Math.min(4, buffer.byteLength));
+      if (signature.length < 4 || WOFF2_SIGNATURE.some((byte, position) => signature[position] !== byte)) continue;
+      bytes += buffer.byteLength;
+      fonts.push({ family: face.family, style: face.style, weight: face.weight, unicodeRange: face.unicodeRange, data: buffer });
+    }
+    return fonts;
+  })();
+  return Promise.race([
+    work.catch(() => [] as AskUserViewFont[]),
+    new Promise<AskUserViewFont[]>((resolve) => window.setTimeout(() => resolve([]), ASK_VIEW_FONTS_TIMEOUT_MS)),
+  ]).then((fonts) => fonts);
+}
+
 /**
  * Client host wrapper for the ask_user MCP Apps view.
  *
- * It fetches the authenticated projection, mounts the fixed built-in document as
- * an opaque-origin `srcdoc` iframe (`sandbox="allow-scripts"`, no
- * `allow-same-origin`) and performs the probed Apps handshake. Because the frame
- * has an opaque origin, host messages arrive with `event.origin === "null"` and
- * are accepted only when `event.source` is the exact mounted iframe; outbound
- * messages target `"*"`. This works from any page origin (loopback, LAN IP,
- * Tailscale, hostname, HTTPS).
+ * It is the only renderer for `ask_user`: it fetches the authenticated
+ * projection, mounts the fixed built-in document as an opaque-origin `srcdoc`
+ * iframe (`sandbox="allow-scripts"`, no `allow-same-origin`) and performs the
+ * probed Apps handshake. Because the frame has an opaque origin, host messages
+ * arrive with `event.origin === "null"` and are accepted only when
+ * `event.source` is the exact mounted iframe; outbound messages target `"*"`.
+ * This works from any page origin (loopback, LAN IP, Tailscale, hostname,
+ * HTTPS).
  *
- * Only `ask_submit` / `ask_cancel` for this session and askId are forwarded into
- * the existing `submitAsk` / `cancelAsk` callbacks. On a disabled flag, or any
- * fetch/handshake/timeout failure, it keeps the existing `AskUserCard`. The card
- * stays mounted until the sandboxed view reports a size after tool-result, so a
- * failed handshake never replaces an open ask with a blank iframe.
+ * The DOM marker `data-ask-user-view` is exactly one of three states:
+ * `loading` while the projection or handshake is pending, `apps` once the view
+ * reports a size after tool-result, and `failed` for the read-only degraded
+ * state. The iframe is mounted off-screen while pending and only revealed on
+ * that size notification, so it never flashes at zero height.
+ *
+ * Only `ask_submit` / `ask_cancel` for this session and askId are forwarded
+ * into the existing `submitAsk` / `cancelAsk` callbacks. Any fetch, projection
+ * or handshake failure keeps the ask open and shows the degraded state, whose
+ * single control (retry) re-runs the projection fetch without a page reload.
  */
 export function AskUserAppHost({ ask, sessionId, onSubmit, onCancel }: AskUserAppHostProps) {
   const { t, locale } = useI18n();
   const [apps, setApps] = useState<AppViewPayload | null>(null);
   const [failed, setFailed] = useState(false);
   const [handshakeReady, setHandshakeReady] = useState(false);
+  // Bumped by the degraded state's retry control; the projection effect depends
+  // on it, so retrying re-runs the fetch and handshake without a full reload.
+  const [reloadKey, setReloadKey] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
-  const cardSlotRef = useRef<HTMLDivElement | null>(null);
   const labelsRef = useRef<Record<string, string>>({});
   const onSubmitRef = useRef(onSubmit);
   const onCancelRef = useRef(onCancel);
@@ -197,10 +344,10 @@ export function AskUserAppHost({ ask, sessionId, onSubmit, onCancel }: AskUserAp
     askIdRef.current = ask.askId;
   });
 
-  // Fetch the MCP Apps projection. Any failure here falls back to the native
-  // card with the ask still open. Origin-independent: no loopback decision.
+  // Fetch the MCP Apps projection. Any failure here shows the degraded state
+  // with the ask still open. Origin-independent: no loopback decision.
   useEffect(() => {
-    if (!sessionId || APPS_DISABLED) {
+    if (!sessionId) {
       setFailed(true);
       return;
     }
@@ -223,10 +370,16 @@ export function AskUserAppHost({ ask, sessionId, onSubmit, onCancel }: AskUserAp
         if (!response.ok) throw new Error(`ask view request failed: ${response.status}`);
         return response.json() as Promise<unknown>;
       })
-      .then((value) => {
+      .then(async (value) => {
+        const parsed = parsePayload(value, { sessionId, askId: ask.askId });
+        if (!parsed) throw new Error("ask view projection was invalid");
+        // The webfonts depend on the projected text and on the stack the frame
+        // will use, so they follow the projection; their own budget keeps the 6s
+        // handshake intact, and the frame's very first tool-result already
+        // carries the faces it renders in.
+        const fonts = await loadAskViewFonts(parsed.structuredContent, labelsRef.current, readFontFamilyStack());
         if (cancelled) return;
-        const payload = parsePayload(value, { sessionId, askId: ask.askId });
-        if (!payload) throw new Error("ask view projection was invalid");
+        const payload: AppViewPayload = { ...parsed, fonts };
         payloadRef.current = payload;
         setApps(payload);
       })
@@ -239,7 +392,7 @@ export function AskUserAppHost({ ask, sessionId, onSubmit, onCancel }: AskUserAp
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [ask.askId, sessionId]);
+  }, [ask.askId, reloadKey, sessionId]);
 
   // Speak the Apps handshake. The listener is attached on mount, before the
   // srcdoc document is rendered, so the view's first `ui/initialize` cannot be
@@ -254,13 +407,6 @@ export function AskUserAppHost({ ask, sessionId, onSubmit, onCancel }: AskUserAp
       if (completedRef.current) return;
       completedRef.current = true;
       window.clearTimeout(readyTimerRef.current);
-      const active = document.activeElement;
-      if (active instanceof Node && cardSlotRef.current?.contains(active)) {
-        // The user already started answering the native card. Keep that draft
-        // instead of swapping in a fresh Apps view.
-        setFailed(true);
-        return;
-      }
       setHandshakeReady(true);
     };
     const sendError = (id: unknown, message: string) => {
@@ -278,8 +424,11 @@ export function AskUserAppHost({ ask, sessionId, onSubmit, onCancel }: AskUserAp
             ...payload.structuredContent,
             labels: labelsRef.current,
             theme: currentTheme(),
+            colorScheme: currentTheme(),
+            tokens: readDocumentThemeTokens(),
             fontSizeOffsetPx: readFontSizeOffsetPx(),
             fontFamily: readFontFamilyStack(),
+            fonts: payload.fonts,
           },
         },
       });
@@ -386,21 +535,37 @@ export function AskUserAppHost({ ask, sessionId, onSubmit, onCancel }: AskUserAp
     setFailed(true);
   }, []);
 
+  const retry = useCallback(() => {
+    setReloadKey((key) => key + 1);
+  }, []);
+
   const showApps = Boolean(apps) && !failed && handshakeReady;
+  const viewState: AskUserAppViewState = failed ? "failed" : showApps ? "apps" : "loading";
+
   return (
-    <>
-      {showApps ? null : (
-        <div ref={cardSlotRef} data-ask-user-view="native">
-          <AskUserCard
-            ask={ask}
-            onSubmit={onSubmit}
-            onCancel={onCancel}
-          />
+    <div data-ask-user-view={viewState} style={{ width: "100%", maxWidth: 820, margin: "0 auto" }}>
+      {viewState === "failed" ? <AskUserAppFailure ask={ask} onRetry={retry} /> : null}
+      {viewState === "loading" ? (
+        <div
+          role="status"
+          aria-busy="true"
+          aria-label={t("chat.askUserTitle")}
+          style={{
+            width: "100%",
+            border: "1px solid var(--border)",
+            borderRadius: 10,
+            background: "var(--bg-panel)",
+            padding: "14px",
+            display: "grid",
+            gap: 10,
+          }}
+        >
+          <div style={{ height: 12, width: "45%", borderRadius: 6, background: "var(--bg)", opacity: 0.7 }} />
+          <div style={{ height: 34, width: "100%", borderRadius: 7, background: "var(--bg)", opacity: 0.5 }} />
         </div>
-      )}
+      ) : null}
       {apps && !failed ? (
         <div
-          data-ask-user-view={showApps ? "apps" : "apps-pending"}
           aria-hidden={showApps ? undefined : true}
           style={showApps ? undefined : {
             position: "fixed",
@@ -414,6 +579,7 @@ export function AskUserAppHost({ ask, sessionId, onSubmit, onCancel }: AskUserAp
           }}
         >
           <iframe
+            key={reloadKey}
             ref={iframeRef}
             title={t("chat.askUserTitle")}
             srcDoc={apps.html}
@@ -433,6 +599,6 @@ export function AskUserAppHost({ ask, sessionId, onSubmit, onCancel }: AskUserAp
           />
         </div>
       ) : null}
-    </>
+    </div>
   );
 }

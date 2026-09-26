@@ -350,24 +350,50 @@ try {
       json: { success: true, renewed: 0 },
     }));
 
-    const openAgents = async (expectTrellis = true) => {
-      const button = page.getByRole("button", { name: "Agents", exact: true });
-      if (viewport.width <= 600 && await button.count() === 0) {
-        await page.locator("[data-mobile-toolbar-more='true']").click();
+    // Narrow mobile keeps these actions inside the "more" panel, which starts
+    // closed, so open it by its own aria-expanded state instead of guessing
+    // from whether the target button happens to exist yet.
+    const openToolbarButton = async (name) => {
+      const button = page.getByRole("button", { name, exact: true });
+      if (viewport.width <= 600) {
+        const more = page.locator("[data-mobile-toolbar-more='true']");
+        await more.waitFor();
+        if (await more.getAttribute("aria-expanded") !== "true") await more.click();
+        await page.locator("#mobile-toolbar-actions").waitFor();
       }
       await button.waitFor();
+      return button;
+    };
+    const openAgents = async (expectTrellis = true) => {
+      const button = await openToolbarButton("Agents");
       if (await button.getAttribute("aria-pressed") !== "true") await button.click();
       if (expectTrellis) await page.locator("[data-trellis-subagent-records='true']").waitFor();
       return button;
     };
     const openBranches = async () => {
-      const button = page.getByRole("button", { name: "Branches", exact: true });
-      if (viewport.width <= 600 && await button.count() === 0) {
-        await page.locator("[data-mobile-toolbar-more='true']").click();
-      }
-      await button.waitFor();
+      const button = await openToolbarButton("Branches");
       if (await button.getAttribute("aria-pressed") !== "true") await button.click();
     };
+
+    if (viewport.width === 390) {
+      // Regression: the narrow-mobile overflow panel must survive the restored
+      // session arriving. AppShell used to close it whenever the selected id
+      // changed — including the undefined -> id transition of a fresh load — so
+      // a slow session list closed the panel the user had just opened and the
+      // Agents button never appeared.
+      const slowSessions = async (route) => {
+        await delay(2_500);
+        return route.continue();
+      };
+      await page.route("**/api/sessions**", slowSessions);
+      await page.goto(`${base}/?session=${MIXED}`, { waitUntil: "domcontentloaded" });
+      const moreButton = page.locator("[data-mobile-toolbar-more='true']");
+      await moreButton.waitFor();
+      await moreButton.click();
+      await page.getByRole("button", { name: "Agents", exact: true }).waitFor({ timeout: 15_000 });
+      assert.equal(await moreButton.getAttribute("aria-expanded"), "true");
+      await page.unroute("**/api/sessions**", slowSessions);
+    }
 
     await page.goto(`${base}/?session=${RECORDS_A}`, { waitUntil: "domcontentloaded" });
     await page.getByText("A filler 59", { exact: true }).waitFor();

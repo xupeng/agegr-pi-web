@@ -689,6 +689,10 @@ button.extension-widget-trigger:focus-visible {
 
 :root {
   --font-mono: "Cascadia Code", 'JetBrains Mono', 'Fira Code', 'Consolas', ui-monospace, 'PingFang SC', 'Microsoft YaHei', monospace;
+  /* Chat text stack. The sandboxed ask_user view reads it through
+     getComputedStyle so its own text renders in the same faces (Oxanium for
+     Latin, LXGW WenKai Screen for CJK); see components/AskUserAppHost.tsx. */
+  --font-content: "Oxanium", "LXGW WenKai GB Screen", "LXGW WenKai Screen", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
 }
 
 pre, code {
@@ -708,7 +712,7 @@ pre, code {
      的差写进 --chat-font-size-offset，消息正文 = 14px + offset（与代码块、表格、
      时间戳等 calc(X + offset) 表面同步缩放，字号滑块也作用于同一链）。 */
   font-size: calc(14px + var(--chat-font-size-offset, 0px));
-  font-family: "Oxanium", "LXGW WenKai GB Screen", "LXGW WenKai Screen", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
+  font-family: var(--font-content);
   font-weight: 500;
   line-height: 1.75;
   color: var(--text);

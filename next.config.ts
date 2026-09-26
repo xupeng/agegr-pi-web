@@ -80,10 +80,6 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_APP_VERSION: version,
     NEXT_PUBLIC_PI_VERSION: piVersion,
-    // Ask_user MCP Apps rendering is contained behind one flag: "0" forces the
-    // native AskUserCard everywhere. The sandbox is origin-independent, so
-    // enabling it needs no loopback or second-port precondition.
-    NEXT_PUBLIC_PI_WEB_ASK_USER_APPS: process.env.NEXT_PUBLIC_PI_WEB_ASK_USER_APPS ?? "1",
   },
 };
 

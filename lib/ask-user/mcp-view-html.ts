@@ -6,7 +6,11 @@
  * opaque origin. An opaque origin never matches CSP `'self'`, so the view script
  * is inlined here and allowed by its SHA-256 hash; `style-src 'unsafe-inline'` is
  * required because the view sets `style` attributes. The document has no network,
- * frames, images or form action, and `srcdoc` inherits the parent CSP.
+ * frames, images or form action, and `srcdoc` inherits the parent CSP — which is
+ * why Pi Web's webfonts arrive as woff2 bytes with the projection and are
+ * installed as `FontFace` objects (`lib/ask-user/view-fonts.ts` and its
+ * server-only half `lib/ask-user/view-font-manifest.ts`) instead of being
+ * fetched from `/fonts/**`.
  *
  * Because the origin is opaque, host messages arrive with `event.origin === "null"`
  * and are accepted only when `event.source` is the exact mounted iframe. This makes
@@ -70,6 +74,76 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
     actionFailed: "The ask action failed. You can try again.",
   };
 
+  // Pi Web design tokens mirrored by the host. The frame is an opaque origin,
+  // so it cannot inherit the host's CSS variables and cannot resolve var()
+  // against the host document: the host sends the values it computed, which is
+  // what makes every palette (light, dark, mist, rose, pine) follow. The
+  // fallbacks are Pi Web's light palette, so a missing token still renders.
+  // This table mirrors lib/ask-user/theme-tokens.ts; an inlined script cannot
+  // import it, so the two are kept in step by hand.
+  var TOKENS = [
+    ["bg", "--pi-bg", "color", "#ffffff"],
+    ["bgPanel", "--pi-bg-panel", "color", "#f5f5f5"],
+    ["bgHover", "--pi-bg-hover", "color", "#eeeeee"],
+    ["bgSelected", "--pi-bg-selected", "color", "#e8e8e8"],
+    ["border", "--pi-border", "color", "#e0e0e0"],
+    ["text", "--pi-text", "color", "#1a1a1a"],
+    ["textMuted", "--pi-text-muted", "color", "#515c6b"],
+    ["textDim", "--pi-text-dim", "color", "#5e6673"],
+    ["accent", "--pi-accent", "color", "#245bce"],
+    ["accentContrast", "--pi-accent-contrast", "color", "#ffffff"],
+    ["maxWidth", "--pi-max-width", "length", "820px"]
+  ];
+  // Pi Web defines no success/danger tokens; these are the values its own
+  // components use (SkillsConfig, FileExplorer), so the view matches the host.
+  var SUCCESS_COLOR = "#16a34a";
+  var DANGER_COLOR = "#ef4444";
+  var baseStylesInstalled = false;
+
+  function sanitizeToken(kind, value) {
+    if (typeof value !== "string") return "";
+    var trimmed = value.trim();
+    if (trimmed.length === 0 || trimmed.length > 64) return "";
+    if (/[;{}"'<>\\]/.test(trimmed)) return "";
+    if (/url\s*\(|expression\s*\(|var\s*\(|!important|@/i.test(trimmed)) return "";
+    if (kind === "length") {
+      return /^[0-9]+(\.[0-9]+)?(px|rem|em)$/.test(trimmed) ? trimmed : "";
+    }
+    return /^(#[0-9a-fA-F]{3,8}|(rgb|rgba|hsl|hsla|oklch|oklab|lab|lch|color|light-dark)\([0-9a-zA-Z.,%\/\s+-]*\)|transparent|currentcolor)$/.test(trimmed)
+      ? trimmed
+      : "";
+  }
+
+  function applyTokens(tokens) {
+    var provided = tokens && typeof tokens === "object" ? tokens : {};
+    TOKENS.forEach(function (token) {
+      var value = sanitizeToken(token[2], provided[token[0]]);
+      document.documentElement.style.setProperty(token[1], value === "" ? token[3] : value);
+    });
+  }
+
+  // Rules an inline style cannot express: the focus ring, placeholder colour,
+  // form controls inheriting the frame's font, and mobile text autosizing.
+  // style-src 'unsafe-inline' covers the element.
+  function installBaseStyles() {
+    if (baseStylesInstalled) return;
+    baseStylesInstalled = true;
+    var style = document.createElement("style");
+    style.textContent = "button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--pi-accent,#245bce);outline-offset:2px;}"
+      // UA stylesheets give button/input/textarea their own font, so without
+      // this the option rows render in the platform UI font (Arial on Linux,
+      // San Francisco on iOS) while the question right above them renders in
+      // the host stack - the exact "wrong font" seen on a phone.
+      + "button,input,textarea{font-family:inherit;}"
+      + "input::placeholder,textarea::placeholder{color:var(--pi-text-dim,#5e6673);}"
+      // Mobile browsers apply text autosizing inside a document that is not
+      // marked mobile-optimized, which inflated the question text ~1.7x on a
+      // phone while the form controls around it stayed put. The parent page
+      // has a viewport meta; this frame needs its own, plus the opt-out.
+      + "html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}";
+    document.head.appendChild(style);
+  }
+
   function post(message) {
     // With sandbox="allow-scripts" (no allow-same-origin) this srcdoc document
     // has an opaque origin: location.origin is the string "null" and the parent
@@ -105,15 +179,89 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
     return text(template).split("{count}").join(String(count)).split("{total}").join(String(total));
   }
 
-  // The sandbox denies external fonts (CSP default-src 'none'), so the view
-  // could only ever use the browser default. The host sends its own stack; keep
-  // only font-stack characters so the value cannot break out of the inline
-  // style it is applied to.
+  // The host sends its own stack; keep only font-stack characters so the value
+  // cannot break out of the inline style it is applied to.
   function sanitizeFontStack(value) {
     if (typeof value !== "string") return "";
     var cleaned = value.replace(/[^A-Za-z0-9 ,'"_-]/g, " ").trim();
     if (cleaned.length === 0 || cleaned.length > 300) return "";
     return cleaned;
+  }
+
+  // The host cannot hand the frame a URL: an opaque origin never matches CSP
+  // 'self', and a request to the app's own /fonts/ files is refused as local
+  // network access. So Pi Web's faces arrive as woff2 bytes with the projection
+  // and are installed as FontFace objects, which need no URL and no font-src.
+  // Validate everything: this script is inlined and cannot import the module
+  // that built the payload, and the frame must never parse arbitrary font data.
+  var FONT_FAMILIES = ["Oxanium", "LXGW WenKai Screen"];
+  // Mirrors the host cap; the vendored set is 99 faces, so a longer ask than
+  // the frame expects is still accepted instead of losing all fonts.
+  var FONT_FACE_LIMIT = 128;
+  var FONT_BYTE_LIMIT = 2 * 1024 * 1024;
+  var fontsInstalled = "";
+
+  function sanitizeFontEntry(entry) {
+    if (!entry || typeof entry !== "object") return null;
+    if (FONT_FAMILIES.indexOf(entry.family) === -1) return null;
+    if (typeof entry.style !== "string" || !/^(normal|italic|oblique( -?[0-9]{1,3}deg)?)$/.test(entry.style)) return null;
+    if (typeof entry.weight !== "string" || !/^(normal|bold|[0-9]{3}( [0-9]{3})?)$/.test(entry.weight)) return null;
+    if (typeof entry.unicodeRange !== "string") return null;
+    if (!/^U\+[0-9A-Fa-f?]+(-[0-9A-Fa-f]+)?(,U\+[0-9A-Fa-f?]+(-[0-9A-Fa-f]+)?)*$/.test(entry.unicodeRange)) return null;
+    var data = entry.data;
+    if (Object.prototype.toString.call(data) !== "[object ArrayBuffer]") return null;
+    if (data.byteLength < 4 || data.byteLength > FONT_BYTE_LIMIT) return null;
+    var signature = new Uint8Array(data, 0, 4);
+    // "wOF2": a woff2 file, and nothing else, may become a face here.
+    if (signature[0] !== 0x77 || signature[1] !== 0x4f || signature[2] !== 0x46 || signature[3] !== 0x32) return null;
+    return {
+      family: entry.family,
+      style: entry.style,
+      weight: entry.weight,
+      unicodeRange: entry.unicodeRange,
+      data: data,
+    };
+  }
+
+  // Installed once per payload: re-adding faces on every re-render would restart
+  // their loads. document.fonts.ready then re-reports the height, because
+  // swapping a fallback for a webfont can change the measured content height
+  // after the host already sized the frame.
+  function installFonts(value) {
+    if (!Array.isArray(value) || value.length === 0 || value.length > FONT_FACE_LIMIT) return;
+    var accepted = [];
+    for (var index = 0; index < value.length; index += 1) {
+      var face = sanitizeFontEntry(value[index]);
+      if (face) accepted.push(face);
+    }
+    if (accepted.length === 0) return;
+    var key = accepted.length + ":";
+    for (var item = 0; item < accepted.length; item += 1) {
+      key += accepted[item].family + accepted[item].unicodeRange + accepted[item].data.byteLength + ";";
+    }
+    if (key === fontsInstalled) return;
+    if (!window.FontFace || !document.fonts || !document.fonts.add) return;
+    for (var next = 0; next < accepted.length; next += 1) {
+      var entry = accepted[next];
+      try {
+        var fontFace = new window.FontFace(entry.family, entry.data, {
+          style: entry.style,
+          weight: entry.weight,
+          unicodeRange: entry.unicodeRange,
+          display: "swap",
+        });
+        document.fonts.add(fontFace);
+      } catch (error) {
+        // A face that cannot be parsed simply leaves the fallback in place.
+      }
+    }
+    fontsInstalled = key;
+    if (document.fonts.ready && document.fonts.ready.then) {
+      document.fonts.ready.then(function () {
+        lastReportedHeight = -1;
+        reportSize();
+      });
+    }
   }
 
   function el(tag, props, children) {
@@ -126,6 +274,7 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
         else if (key === "text") node.textContent = value;
         else if (key === "onclick") node.addEventListener("click", value);
         else if (key === "oninput") node.addEventListener("input", value);
+        else if (key === "onkeydown") node.addEventListener("keydown", value);
         else node.setAttribute(key, value);
       });
     }
@@ -136,27 +285,39 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
   }
 
   function baseTextColor() {
-    return "light-dark(#1f2328, #e6e6e6)";
+    return "var(--pi-text, #1a1a1a)";
   }
 
   function mutedTextColor() {
-    return "light-dark(#57606a, #9aa4b2)";
+    return "var(--pi-text-muted, #515c6b)";
+  }
+
+  function dimTextColor() {
+    return "var(--pi-text-dim, #5e6673)";
   }
 
   function borderColor() {
-    return "light-dark(#d0d7de, #3a3f46)";
+    return "var(--pi-border, #e0e0e0)";
   }
 
   function panelColor() {
-    return "light-dark(#ffffff, #1f2328)";
+    return "var(--pi-bg-panel, #f5f5f5)";
   }
 
   function bgColor() {
-    return "light-dark(#f6f8fa, #16191d)";
+    return "var(--pi-bg, #ffffff)";
   }
 
   function accentColor() {
-    return "light-dark(#0969da, #4493f8)";
+    return "var(--pi-accent, #245bce)";
+  }
+
+  function accentContrastColor() {
+    return "var(--pi-accent-contrast, #ffffff)";
+  }
+
+  function cardMaxWidth() {
+    return "var(--pi-max-width, 820px)";
   }
 
   function draftFor(id) {
@@ -176,12 +337,19 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
   function refresh() {
     if (answeredEl) answeredEl.textContent = formatAnswered(labels.answered, answered(), questions.length);
     refs.forEach(function (ref) {
-      ref.buttons.forEach(function (entry) {
-        var selected = draftFor(ref.question.id).values.indexOf(entry.option.value) !== -1;
-        entry.button.setAttribute("aria-pressed", selected ? "true" : "false");
-        entry.button.style.background = selected ? accentColor() : panelColor();
-        entry.button.style.color = selected ? "#ffffff" : baseTextColor();
+      var values = draftFor(ref.question.id).values;
+      var anySelected = ref.buttons.some(function (entry) { return values.indexOf(entry.option.value) !== -1; });
+      ref.buttons.forEach(function (entry, index) {
+        var selected = values.indexOf(entry.option.value) !== -1;
+        entry.button.setAttribute("aria-checked", selected ? "true" : "false");
+        entry.button.style.background = selected ? accentColor() : bgColor();
+        entry.button.style.color = selected ? accentContrastColor() : baseTextColor();
         entry.button.style.borderColor = selected ? accentColor() : borderColor();
+        if (ref.question.multiple !== true) {
+          // Roving tabindex: the group is one tab stop and the arrows move
+          // inside it, the way a native radiogroup behaves.
+          entry.button.setAttribute("tabindex", selected || (!anySelected && index === 0) ? "0" : "-1");
+        }
         if (entry.check) entry.check.textContent = selected ? (ref.question.multiple ? "☑" : "◉") : (ref.question.multiple ? "☐" : "○");
       });
       if (ref.summary) {
@@ -198,7 +366,7 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
     refs.forEach(function (ref) {
       ref.buttons.forEach(function (entry) {
         entry.button.disabled = locked;
-        entry.button.style.opacity = locked ? "0.7" : "1";
+        entry.button.style.opacity = locked ? "0.75" : "1";
         entry.button.style.cursor = locked ? "default" : "pointer";
       });
       ref.otherInput.disabled = locked;
@@ -210,16 +378,26 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
     }
     footerEl.textContent = "";
     if (locked) {
-      footerEl.appendChild(el("div", {
+      // role=status announces the lock; focusing it keeps a keyboard user from
+      // being dropped onto the document body when the controls get disabled.
+      var lockedStatus = el("div", {
+        role: "status",
+        "aria-live": "polite",
+        tabindex: "-1",
         style: "display:flex;align-items:center;gap:8px;color:" + mutedTextColor() + ";font-size:12.5px;",
       }, [
-        el("span", { text: "✓", style: "color:#1a7f37;font-weight:700;" }),
+        el("span", { text: "✓", "aria-hidden": "true", style: "color:" + SUCCESS_COLOR + ";font-weight:700;" }),
         el("span", { text: status === "submitting" ? labels.submitted : labels.cancelling }),
-      ]));
+      ]);
+      footerEl.appendChild(lockedStatus);
+      if (lockedStatus.focus) {
+        try { lockedStatus.focus(); } catch (error) { /* focus is best effort */ }
+      }
       reportSize();
       return;
     }
-    footerEl.appendChild(el("div", { text: labels.hint, style: "color:" + mutedTextColor() + ";font-size:11.5px;line-height:1.45;min-width:0;" }));
+    // --text-dim, like the card's hint; --text-muted is the answered counter's colour.
+    footerEl.appendChild(el("div", { text: labels.hint, style: "color:" + dimTextColor() + ";font-size:11.5px;line-height:1.45;min-width:0;" }));
     var actions = el("div", { style: "display:flex;gap:8px;flex-shrink:0;" }, [
       el("button", {
         type: "button",
@@ -237,41 +415,80 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
     footerEl.appendChild(actions);
     if (footerError !== "") {
       footerEl.appendChild(el("div", {
+        role: "alert",
         text: footerError,
-        style: "flex-basis:100%;color:#cf222e;font-size:12px;line-height:1.4;",
+        style: "flex-basis:100%;color:" + DANGER_COLOR + ";font-size:12px;line-height:1.4;",
       }));
     }
     reportSize();
   }
 
   function buttonStyle(primary) {
-    return "padding:7px 14px;border-radius:7px;font-size:13px;cursor:pointer;"
+    // The native card gave submit two more horizontal pixels than cancel.
+    return "padding:7px " + (primary ? "16px" : "14px") + ";border-radius:7px;font-size:13px;cursor:pointer;"
       + (primary
         ? "border:1px solid " + accentColor() + ";background:" + accentColor() + ";color:#fff;font-weight:600;"
         : "border:1px solid " + borderColor() + ";background:" + panelColor() + ";color:" + mutedTextColor() + ";");
   }
 
   function optionButton(ref, option) {
-    var check = el("span", { text: ref.question.multiple ? "☐" : "○", style: "flex-shrink:0;font-size:12px;opacity:0.9;" });
+    var multiple = ref.question.multiple === true;
+    // The glyph is decoration: the state lives in aria-checked.
+    var check = el("span", { text: multiple ? "☐" : "○", "aria-hidden": "true", style: "flex-shrink:0;font-size:12px;opacity:0.85;" });
     var label = el("span", { style: "min-width:0;" }, [document.createTextNode(text(option.label))]);
     if (option.detail !== undefined && option.detail !== null && text(option.detail) !== "") {
       label.appendChild(el("span", { text: text(option.detail), style: "display:block;font-size:11.5px;opacity:0.8;" }));
     }
     var button = el("button", {
       type: "button",
-      "aria-pressed": "false",
+      role: multiple ? "checkbox" : "radio",
+      "aria-checked": "false",
       onclick: function () { toggleOption(ref, option); },
+      onkeydown: function (event) { onOptionKeyDown(ref, event); },
       style: "display:flex;align-items:flex-start;gap:8px;text-align:left;width:100%;box-sizing:border-box;padding:7px 10px;border-radius:7px;border:1px solid "
-        + borderColor() + ";background:" + panelColor() + ";color:" + baseTextColor() + ";font-size:13px;line-height:1.4;cursor:pointer;",
+        + borderColor() + ";background:" + bgColor() + ";color:" + baseTextColor() + ";font-size:13px;line-height:1.4;cursor:pointer;",
     }, [check, label]);
     return { button: button, check: check, option: option };
+  }
+
+  /**
+   * Radio semantics: arrows move and select inside the group, Home/End jump to
+   * the ends. Checkbox groups need no handler — Tab reaches every option and
+   * Space toggles the focused one.
+   */
+  function onOptionKeyDown(ref, event) {
+    if (!event || ref.question.multiple === true) return;
+    var key = event.key;
+    if (key !== "ArrowDown" && key !== "ArrowRight" && key !== "ArrowUp" && key !== "ArrowLeft" && key !== "Home" && key !== "End") return;
+    var entries = ref.buttons;
+    if (entries.length === 0) return;
+    if (typeof event.preventDefault === "function") event.preventDefault();
+    var current = draftFor(ref.question.id).values[0];
+    var selectedIndex = -1;
+    entries.forEach(function (entry, index) {
+      if (entry.option.value === current) selectedIndex = index;
+    });
+    var next;
+    if (selectedIndex === -1) {
+      next = key === "ArrowUp" || key === "ArrowLeft" || key === "End" ? entries.length - 1 : 0;
+    } else if (key === "Home") {
+      next = 0;
+    } else if (key === "End") {
+      next = entries.length - 1;
+    } else if (key === "ArrowDown" || key === "ArrowRight") {
+      next = (selectedIndex + 1) % entries.length;
+    } else {
+      next = (selectedIndex - 1 + entries.length) % entries.length;
+    }
+    toggleOption(ref, entries[next].option);
+    if (typeof entries[next].button.focus === "function") entries[next].button.focus();
   }
 
   function detailBlock(detail) {
     var box = el("div", {
       style: "margin-top:8px;margin-bottom:6px;padding:10px 12px;border-left:3px solid " + borderColor()
         + ";border-radius:4px;background:" + bgColor() + ";color:" + mutedTextColor()
-        + ";font-size:12.5px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;",
+        + ";font-size:12.5px;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere;",
     });
     text(detail).split(/\r?\n(?:[\t ]*\r?\n)+/).forEach(function (paragraph, index) {
       box.appendChild(el("p", { text: paragraph, style: "margin:" + (index === 0 ? "0" : "6px 0 0 0") + ";" }));
@@ -282,7 +499,12 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
   function buildQuestion(question, index) {
     var ref = { question: question, buttons: [], otherInput: null, summary: null };
     var options = Array.isArray(question.options) ? question.options : [];
-    var optionsBox = el("div", { style: "margin-top:8px;display:grid;gap:6px;padding-left:20px;" });
+    var questionId = "pi-web-ask-q-" + String(index);
+    var optionsBox = el("div", {
+      role: question.multiple === true ? "group" : "radiogroup",
+      "aria-labelledby": questionId,
+      style: "margin-top:8px;display:grid;gap:6px;padding-left:20px;",
+    });
     options.forEach(function (option) {
       var entry = optionButton(ref, option);
       ref.buttons.push(entry);
@@ -292,8 +514,10 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
       type: "text",
       value: draftFor(question.id).otherText,
       placeholder: question.multiple ? labels.multipleOtherPlaceholder : labels.otherPlaceholder,
+      "aria-label": question.multiple ? labels.multipleOtherPlaceholder : labels.otherPlaceholder,
       oninput: function () { setOtherText(ref, otherInput.value); },
-      style: "flex:1;min-width:0;border:none;background:transparent;outline:none;color:" + baseTextColor() + ";font-size:13px;",
+      // No inline outline:none — it would beat the injected :focus-visible rule.
+      style: "flex:1;min-width:0;border:none;background:transparent;color:" + baseTextColor() + ";font-size:13px;",
     });
     ref.otherInput = otherInput;
     var otherBox = el("div", {
@@ -303,7 +527,7 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
         style: "display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;border:1px dashed "
           + borderColor() + ";background:" + bgColor() + ";",
       }, [
-        el("span", { text: "✎", "aria-hidden": "true", style: "flex-shrink:0;width:13px;text-align:center;color:" + mutedTextColor() + ";font-size:12px;" }),
+        el("span", { text: "✎", "aria-hidden": "true", style: "flex-shrink:0;width:13px;text-align:center;color:" + dimTextColor() + ";font-size:12px;" }),
         otherInput,
       ]),
     ]);
@@ -314,7 +538,7 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
     var header = el("div", { style: "display:grid;grid-template-columns:20px minmax(0,1fr);align-items:baseline;" }, [
       el("span", { text: String(index + 1) + ".", style: "color:" + accentColor() + ";font-size:12px;font-weight:700;flex-shrink:0;" }),
       el("div", { style: "min-width:0;" }, [
-        el("div", { text: text(question.question), style: "color:" + baseTextColor() + ";font-size:13.5px;line-height:1.5;white-space:pre-wrap;" }),
+        el("div", { id: questionId, text: text(question.question), style: "color:" + baseTextColor() + ";font-size:13.5px;line-height:1.5;white-space:pre-wrap;" }),
         question.detail !== undefined && question.detail !== null && text(question.detail) !== "" ? detailBlock(question.detail) : null,
       ]),
     ]);
@@ -383,6 +607,7 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
     footerError = "";
     locked = true;
     status = "submitting";
+    refresh();
     refreshControls();
     var args = { sessionId: sessionId, askId: askId, answers: buildAnswers() };
     var trimmed = supplement.trim();
@@ -390,6 +615,7 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
     callTool("ask_submit", args).catch(function (error) {
       locked = false;
       status = "idle";
+      refresh();
       refreshControls();
       fail(error);
     });
@@ -400,10 +626,12 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
     footerError = "";
     locked = true;
     status = "cancelling";
+    refresh();
     refreshControls();
     callTool("ask_cancel", { sessionId: sessionId, askId: askId }).catch(function (error) {
       locked = false;
       status = "idle";
+      refresh();
       refreshControls();
       fail(error);
     });
@@ -411,6 +639,9 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
 
   function render(projection) {
     if (!root) return;
+    installBaseStyles();
+    installFonts(projection.fonts);
+    applyTokens(projection.tokens);
     questions = Array.isArray(projection.questions) ? projection.questions : [];
     drafts = Object.create(null);
     refs = [];
@@ -418,11 +649,21 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
     status = "idle";
     supplement = "";
     footerError = "";
-    document.documentElement.style.colorScheme = projection.theme === "dark" ? "dark" : "light";
+    // color-scheme drives the UA controls and scrollbars; the host sends it
+    // because it knows the resolved palette, while theme names (pine, rose,
+    // mist) only look like light/dark variants.
+    document.documentElement.style.colorScheme =
+      projection.colorScheme === "dark" || (projection.colorScheme !== "light" && projection.theme === "dark")
+        ? "dark"
+        : "light";
     var offset = Number(projection.fontSizeOffsetPx);
     if (!isFinite(offset) || offset < -32 || offset > 48) offset = 0;
     document.documentElement.style.setProperty("--chat-font-size-offset", offset + "px");
-    document.documentElement.style.fontFamily = sanitizeFontStack(projection.fontFamily);
+    // The host stack only resolves once installFonts() above has added the faces;
+    // keep a sans default so a frame that never receives them still avoids the
+    // UA serif.
+    document.documentElement.style.fontFamily =
+      sanitizeFontStack(projection.fontFamily) || "-apple-system, system-ui, 'Segoe UI', Roboto, sans-serif";
     root.textContent = "";
 
     var header = el("div", {
@@ -430,10 +671,17 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
         + borderColor() + ";background:" + bgColor() + ";",
     }, [
       el("div", { text: labels.title, style: "color:" + baseTextColor() + ";font-size:13px;font-weight:650;" }),
-      answeredEl = el("div", { text: formatAnswered(labels.answered, 0, questions.length), style: "color:" + mutedTextColor() + ";font-size:12px;" }),
+      answeredEl = el("div", {
+        text: formatAnswered(labels.answered, 0, questions.length),
+        "aria-live": "polite",
+        style: "color:" + mutedTextColor() + ";font-size:12px;",
+      }),
     ]);
 
-    var body = el("div", { style: "padding:12px 14px;" });
+    // Same grid + 14px row gap as the native card: without the gap consecutive
+    // questions sit flush against each other and a long ask reads as one wall of
+    // text (measured 0px between blocks before this).
+    var body = el("div", { style: "display:grid;gap:14px;padding:12px 14px;" });
     questions.forEach(function (question, index) {
       body.appendChild(buildQuestion(question, index));
     });
@@ -442,9 +690,10 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
       rows: "2",
       maxlength: "4000",
       placeholder: labels.supplementPlaceholder,
+      "aria-label": labels.supplementTitle,
       oninput: function () { supplement = textareaEl.value; },
       style: "width:100%;min-width:0;box-sizing:border-box;resize:none;padding:8px 10px;border-radius:7px;border:1px dashed "
-        + borderColor() + ";background:" + bgColor() + ";outline:none;color:" + baseTextColor() + ";font-size:13px;line-height:1.5;font-family:inherit;",
+        + borderColor() + ";background:" + bgColor() + ";color:" + baseTextColor() + ";font-size:13px;line-height:1.5;font-family:inherit;",
     });
     var supplementBox = el("div", { style: "padding:0 14px 12px;border-top:1px solid " + borderColor() + ";" }, [
       el("div", { text: labels.supplementTitle, style: "margin:10px 0 6px;color:" + baseTextColor() + ";font-size:12px;font-weight:600;" }),
@@ -458,11 +707,10 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
 
     root.appendChild(el("div", {
       role: "dialog",
-      "aria-modal": "true",
       "aria-label": labels.title,
-      style: "width:100%;max-width:820px;margin:0 auto;border:1px solid " + borderColor()
+      style: "width:100%;max-width:" + cardMaxWidth() + ";margin:0 auto;border:1px solid " + borderColor()
         + ";border-radius:10px;background:" + panelColor() + ";box-shadow:0 12px 40px rgba(0,0,0,0.18);overflow:hidden;"
-        + "display:flex;flex-direction:column;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;",
+        + "display:flex;flex-direction:column;",
     }, [header, body, supplementBox, footerEl]));
 
     refresh();
@@ -536,11 +784,18 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
 
 /**
  * base64 SHA-256 of {@link ASK_USER_VIEW_SCRIPT}, as used by the meta CSP.
- * Recompute after any edit to the script:
- *   node -e "const c=require('crypto'),fs=require('fs');"
- * and update both this constant and the HTML below (the test pins them together).
+ * Recompute after any edit to the script with:
+ *   node --input-type=module -e "import {createHash} from 'node:crypto'; import
+ *   {createJiti} from 'jiti'; const jiti = createJiti(process.cwd()+'/x.mjs');
+ *   const {ASK_USER_VIEW_SCRIPT} = await jiti.import('./lib/ask-user/mcp-view-html.ts');
+ *   console.log('sha256-' + createHash('sha256').update(ASK_USER_VIEW_SCRIPT,
+ *   'utf8').digest('base64'))"
+ * and paste the result into both this constant and the CSP meta tag below — the
+ * test in components/AskUserAppHost.test.mjs fails if the two ever disagree. The
+ * script must keep containing no backtick, no "${" and no "</script" so it can
+ * stay inside this module's template literals.
  */
-export const ASK_USER_VIEW_SCRIPT_HASH = "sha256-80CsvagnTBsAh+wwgCwpg/Z+oFnznM2qIjYyVu0ETVs=";
+export const ASK_USER_VIEW_SCRIPT_HASH = "sha256-q0tU0IKatN7idjOAF/+VWxZO9AYyZWa8Rm5hZtSMIrI=";
 
 /**
  * The fixed view document. `isBuiltinAskUserViewHtml` trusts exactly this string.
@@ -549,7 +804,8 @@ export const ASK_USER_VIEW_HTML = `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-80CsvagnTBsAh+wwgCwpg/Z+oFnznM2qIjYyVu0ETVs='; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-q0tU0IKatN7idjOAF/+VWxZO9AYyZWa8Rm5hZtSMIrI='; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Pi Web ask_user</title>
 </head>
 <body>

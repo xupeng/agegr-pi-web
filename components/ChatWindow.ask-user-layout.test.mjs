@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const chatWindowSource = await readFile(new URL("./ChatWindow.tsx", import.meta.url), "utf8");
-const askUserCardSource = await readFile(new URL("./AskUserCard.tsx", import.meta.url), "utf8");
+const askUserAppHostSource = await readFile(new URL("./AskUserAppHost.tsx", import.meta.url), "utf8");
 
 test("ask_user card scrolls inside the message column on non-empty sessions", () => {
   // The card is rendered right after the rendered messages, inside the scroll
@@ -36,8 +36,13 @@ test("empty new-session page keeps the column-aligned ask_user card", () => {
   );
 });
 
-test("ask_user card has no fixed height cap and no inner scroll", () => {
-  // The card grows naturally; the whole message column scrolls instead.
-  assert.doesNotMatch(askUserCardSource, /maxHeight/);
-  assert.doesNotMatch(askUserCardSource, /overflowY:\s*"auto"/);
+test("ask_user host has no fixed height cap and no inner scroll", () => {
+  // The layout contract moved from the deleted AskUserCard to the host: the
+  // app view column is width-bounded (maxWidth 820) and has a floor (minHeight
+  // 220), but it is never height-capped and never scrolls internally — the
+  // whole message column scrolls instead.
+  assert.match(askUserAppHostSource, /maxWidth: 820/);
+  assert.match(askUserAppHostSource, /minHeight: 220/);
+  assert.doesNotMatch(askUserAppHostSource, /maxHeight/);
+  assert.doesNotMatch(askUserAppHostSource, /overflowY:\s*"auto"/);
 });
