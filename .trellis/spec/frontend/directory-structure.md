@@ -148,6 +148,26 @@
 `lib/paths.ts` 的能力必须在服务端预先解析（`/api/worktrees` 返回已解析的 `currentWorktreePath`），
 客户端不得自行比较路径。
 
+### 同一模块里既有纯浏览器 helper 又有 node 读取：必须拆开
+
+2026-09-26（PR #9）实测：`lib/ask-user/view-fonts.ts` 曾是「纯函数 + `readViewFontManifest()`」
+的混合体（后者用 `await import("node:fs/promises")` 与 `await import("node:path")`），
+被 `"use client"` 的 `components/AskUserAppHost.tsx` **值导入**（链路 `ChatWindow.tsx` → `AppShell.tsx`）：
+
+| 校验 | 结果 |
+|------|------|
+| `tsc --noEmit` | 通过 |
+| `node --experimental-strip-types --test` | 通过（node 自己解析 `node:` 没问题） |
+| `npm run dev`（Turbopack） | 通过 —— 所以本地 dev 验证**跑不出**这个问题 |
+| `npm run build`（`next build --webpack`，CI 的 e2e job 第一步） | 失败：`Module build failed: UnhandledSchemeError: Reading from "node:fs/promises" is not handled by plugins` |
+
+结论：客户端可达的模块只能是纯浏览器代码，node 读取单独放服务端模块
+（现状：`lib/ask-user/view-fonts.ts` 纯函数 + `lib/ask-user/view-font-manifest.ts` 只读文件，
+由 `app/api/ask-user/font-faces/route.ts` 值导入后者）。**动态 `await import("node:…")` 不是豁免**：
+webpack 在构建期按字面量解析它，`next dev` 才容忍。自检方式：
+`grep -n "node:" <被客户端值导入的模块>` 必须为空 —— `lib/ask-user/view-fonts.test.mjs`
+有一条断言把这条规则钉住，文件读取的那半边另测在 `view-font-manifest.test.mjs`。
+
 ---
 
 ## 路径别名与构建边界

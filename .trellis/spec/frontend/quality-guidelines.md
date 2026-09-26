@@ -65,6 +65,16 @@
   （`lib/powershell-settings.ts`、`lib/provider-credential-store.ts`）。
 - **`enabledModels` 模式不得当字符串比较**：走 `lib/model-scope.ts` → SDK 的
   `resolveModelScopeWithDiagnostics()`（见 `AGENTS.md` 的 model-scope 段）。
+- **派生指标算不出来 ≠ 整个响应失败**：`lib/rpc-manager.ts` 的 `get_state` 用 try/catch 包住
+  `inner.getContextUsage()`，失败时返回 `contextUsage: null`（`lib/pi-types.ts:58` 本就声明为可选、
+  返回处已是 `contextUsage ? {…} : null`）。实测：`GET /api/agent/[id]`（打开会话）与
+  `GET /api/sessions/[id]/state`（ask / 运行态轮询）都走这条命令，而 pi 的 `getContextUsage()`
+  会读分支里最新 assistant 条目的 `usage.totalTokens`；手写或 legacy v3 会话文件可以没有 `usage`，
+  于是它抛 `Cannot read properties of undefined (reading 'totalTokens')`
+  （栈：`calculateContextTokens` → `getContextUsage` → `lib/rpc-manager.ts` 的 `send`），
+  两个接口一起 500、会话看起来打不开。`E2E_SERVER_MODE=start` 跑 `e2e/run.mjs` 的 compacted
+  fixture（assistant 条目无 `usage`）即复现，回归测试是 `lib/rpc-manager.test.mjs` 的
+  「get_state reports an unknown context usage instead of failing the whole response」。
 - **toolCall 字段差异只在一处归一**：`lib/normalize.ts:57 normalizeToolCalls()`，
   `lib/session-reader.ts` 与 `hooks/useAgentSession.ts` 两侧都必须调用。
 - **lint 期望**：`@typescript-eslint/no-explicit-any` 与 `ban-ts-comment` 是 `error` 级，

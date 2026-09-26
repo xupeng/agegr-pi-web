@@ -198,7 +198,7 @@ MessageView (:302, memo)          按 message.role 分派
   触发器上 `aria-haspopup="dialog"` + `aria-expanded`；`onCancel` 里 `preventDefault()` 自管关闭。
 - **自研弹层**：`role="dialog"` + `aria-modal="true"` + `aria-label`
   （`components/SettingsUi.tsx:39-41`，`embedded` 时三个属性一起退化为 `undefined`；
-  同型 `AskUserCard.tsx:82-84`、`ProjectTrustDialog.tsx:38-40`）。
+  同型 `ProjectTrustDialog.tsx:38-40`）。
 - **折叠/展开必须 `aria-expanded` 与 `title`/`aria-label` 成对**：
   `TurnWrittenFiles.tsx:166-167`、`MessageView.tsx:466-468`。
 - **异步状态用 `role="status"` / `role="alert"`**，不引入 toast 库：
