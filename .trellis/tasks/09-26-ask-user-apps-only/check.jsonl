@@ -1,0 +1,4 @@
+{"file":".trellis/tasks/09-26-ask-user-apps-only/prd.md","reason":"Verify every acceptance criterion, especially the degraded state and each removal."}
+{"file":".trellis/tasks/09-26-ask-user-apps-only/design.md","reason":"Check the implementation matches the designed states and leaves the invariants untouched."}
+{"file":".trellis/spec/frontend/ask-user-protocol.md","reason":"Confirm spec and code agree after the migration, including the updated state markers."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Quality gates for the review."}

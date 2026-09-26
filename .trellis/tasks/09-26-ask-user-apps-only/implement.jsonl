@@ -1,0 +1,5 @@
+{"file":".trellis/tasks/09-26-ask-user-apps-only/prd.md","reason":"Scope, acceptance criteria and the settled decisions for making the app view the only renderer."}
+{"file":".trellis/tasks/09-26-ask-user-apps-only/design.md","reason":"The three view states, the degraded state contract and the exact list of deletions to implement."}
+{"file":".trellis/spec/frontend/ask-user-protocol.md","reason":"Existing host, tool, view and sandbox contracts that must survive the removal of the native card."}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"Component conventions the replacement host states must follow."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Quality gates the change must satisfy."}
