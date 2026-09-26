@@ -1,0 +1,460 @@
+{
+  "status": "PASS",
+  "mcpNegotiatedVersion": "2025-11-25",
+  "modelVisibleTools": [],
+  "resource": {
+    "uri": "ui://pi-web/ask-user.html",
+    "mimeType": "text/html;profile=mcp-app"
+  },
+  "errors": [],
+  "trace": [
+    {
+      "kind": "bridge-connected",
+      "data": true
+    },
+    {
+      "kind": "sandbox-ready",
+      "data": "http://localhost:33239"
+    },
+    {
+      "kind": "wire",
+      "data": {
+        "direction": "host-to-sandbox",
+        "message": {
+          "jsonrpc": "2.0",
+          "method": "ui/notifications/sandbox-resource-ready",
+          "params": {
+            "html": "<!doctype html><html><head><meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'none'; frame-src 'none'\"><title>Ask</title></head><body><h1>Pending ask</h1><script type=\"module\" src=\"/view.js\"></script></body></html>"
+          }
+        }
+      }
+    },
+    {
+      "kind": "resource-ready",
+      "data": true
+    },
+    {
+      "kind": "wire",
+      "data": {
+        "direction": "sandbox-to-host",
+        "message": {
+          "method": "ui/initialize",
+          "params": {
+            "appCapabilities": {},
+            "appInfo": {
+              "name": "ask-view-probe",
+              "version": "1.0.0"
+            },
+            "protocolVersion": "2026-01-26"
+          },
+          "jsonrpc": "2.0",
+          "id": 0
+        }
+      }
+    },
+    {
+      "kind": "wire",
+      "data": {
+        "direction": "host-to-sandbox",
+        "message": {
+          "result": {
+            "protocolVersion": "2026-01-26",
+            "hostCapabilities": {
+              "serverTools": {}
+            },
+            "hostInfo": {
+              "name": "ask-host-probe",
+              "version": "1.0.0"
+            },
+            "hostContext": {
+              "platform": "web"
+            }
+          },
+          "jsonrpc": "2.0",
+          "id": 0
+        }
+      }
+    },
+    {
+      "kind": "wire",
+      "data": {
+        "direction": "sandbox-to-host",
+        "message": {
+          "jsonrpc": "2.0",
+          "method": "ui/notifications/initialized"
+        }
+      }
+    },
+    {
+      "kind": "initialized",
+      "data": {
+        "appsVersion": "2026-01-26",
+        "app": {
+          "name": "ask-view-probe",
+          "version": "1.0.0"
+        }
+      }
+    },
+    {
+      "kind": "wire",
+      "data": {
+        "direction": "host-to-sandbox",
+        "message": {
+          "jsonrpc": "2.0",
+          "method": "ui/notifications/tool-input",
+          "params": {
+            "arguments": {
+              "sessionId": "session-1",
+              "askId": "ask-1"
+            }
+          }
+        }
+      }
+    },
+    {
+      "kind": "sent-tool-input",
+      "data": true
+    },
+    {
+      "kind": "wire",
+      "data": {
+        "direction": "host-to-sandbox",
+        "message": {
+          "jsonrpc": "2.0",
+          "method": "ui/notifications/tool-result",
+          "params": {
+            "content": [
+              {
+                "type": "text",
+                "text": "Question ask-1 pending"
+              }
+            ],
+            "structuredContent": {
+              "askId": "ask-1",
+              "question": "Proceed?"
+            }
+          }
+        }
+      }
+    },
+    {
+      "kind": "sent-tool-result",
+      "data": true
+    },
+    {
+      "kind": "connected",
+      "data": {
+        "version": "2026-01-26",
+        "origin": "http://localhost:33239",
+        "cookie": "",
+        "topBlocked": true
+      }
+    },
+    {
+      "kind": "tool-input",
+      "data": {
+        "arguments": {
+          "sessionId": "session-1",
+          "askId": "ask-1"
+        }
+      }
+    },
+    {
+      "kind": "wire",
+      "data": {
+        "direction": "sandbox-to-host",
+        "message": {
+          "method": "tools/call",
+          "params": {
+            "name": "unlisted_tool",
+            "arguments": {
+              "askId": "ask-1"
+            },
+            "_meta": {
+              "progressToken": 1
+            }
+          },
+          "jsonrpc": "2.0",
+          "id": 1
+        }
+      }
+    },
+    {
+      "kind": "gateway-call",
+      "data": {
+        "_meta": {
+          "progressToken": 1
+        },
+        "name": "unlisted_tool",
+        "arguments": {
+          "askId": "ask-1"
+        }
+      }
+    },
+    {
+      "kind": "tool-result",
+      "data": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Question ask-1 pending"
+          }
+        ],
+        "structuredContent": {
+          "askId": "ask-1",
+          "question": "Proceed?"
+        }
+      }
+    },
+    {
+      "kind": "wire",
+      "data": {
+        "direction": "host-to-sandbox",
+        "message": {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "error": {
+            "code": -32603,
+            "message": "tool not allowlisted"
+          }
+        }
+      }
+    },
+    {
+      "kind": "unknown-tool",
+      "data": {
+        "rejected": true,
+        "message": "tool not allowlisted"
+      }
+    },
+    {
+      "kind": "wire",
+      "data": {
+        "direction": "sandbox-to-host",
+        "message": {
+          "method": "tools/call",
+          "params": {
+            "name": "submit_ask",
+            "arguments": {
+              "sessionId": "session-1",
+              "askId": "ask-1",
+              "answer": "yes"
+            },
+            "_meta": {
+              "progressToken": 2
+            }
+          },
+          "jsonrpc": "2.0",
+          "id": 2
+        }
+      }
+    },
+    {
+      "kind": "gateway-call",
+      "data": {
+        "_meta": {
+          "progressToken": 2
+        },
+        "name": "submit_ask",
+        "arguments": {
+          "sessionId": "session-1",
+          "askId": "ask-1",
+          "answer": "yes"
+        }
+      }
+    },
+    {
+      "kind": "wire",
+      "data": {
+        "direction": "host-to-sandbox",
+        "message": {
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "accepted"
+              }
+            ],
+            "structuredContent": {
+              "askId": "ask-1",
+              "answer": "yes"
+            }
+          },
+          "jsonrpc": "2.0",
+          "id": 2
+        }
+      }
+    },
+    {
+      "kind": "submit",
+      "data": {
+        "rejected": false,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "accepted"
+            }
+          ],
+          "structuredContent": {
+            "askId": "ask-1",
+            "answer": "yes"
+          }
+        }
+      }
+    },
+    {
+      "kind": "wire",
+      "data": {
+        "direction": "sandbox-to-host",
+        "message": {
+          "method": "tools/call",
+          "params": {
+            "name": "submit_ask",
+            "arguments": {
+              "sessionId": "session-1",
+              "askId": "ask-1",
+              "answer": "yes"
+            },
+            "_meta": {
+              "progressToken": 3
+            }
+          },
+          "jsonrpc": "2.0",
+          "id": 3
+        }
+      }
+    },
+    {
+      "kind": "gateway-call",
+      "data": {
+        "_meta": {
+          "progressToken": 3
+        },
+        "name": "submit_ask",
+        "arguments": {
+          "sessionId": "session-1",
+          "askId": "ask-1",
+          "answer": "yes"
+        }
+      }
+    },
+    {
+      "kind": "wire",
+      "data": {
+        "direction": "host-to-sandbox",
+        "message": {
+          "jsonrpc": "2.0",
+          "id": 3,
+          "error": {
+            "code": -32603,
+            "message": "stale or unauthorized ask"
+          }
+        }
+      }
+    },
+    {
+      "kind": "duplicate",
+      "data": {
+        "rejected": true,
+        "message": "stale or unauthorized ask"
+      }
+    },
+    {
+      "kind": "wire",
+      "data": {
+        "direction": "sandbox-to-host",
+        "message": {
+          "method": "tools/call",
+          "params": {
+            "name": "submit_ask",
+            "arguments": {
+              "sessionId": "wrong",
+              "askId": "ask-1",
+              "answer": "yes"
+            },
+            "_meta": {
+              "progressToken": 4
+            }
+          },
+          "jsonrpc": "2.0",
+          "id": 4
+        }
+      }
+    },
+    {
+      "kind": "gateway-call",
+      "data": {
+        "_meta": {
+          "progressToken": 4
+        },
+        "name": "submit_ask",
+        "arguments": {
+          "sessionId": "wrong",
+          "askId": "ask-1",
+          "answer": "yes"
+        }
+      }
+    },
+    {
+      "kind": "wire",
+      "data": {
+        "direction": "host-to-sandbox",
+        "message": {
+          "jsonrpc": "2.0",
+          "id": 4,
+          "error": {
+            "code": -32603,
+            "message": "stale or unauthorized ask"
+          }
+        }
+      }
+    },
+    {
+      "kind": "wrong-session",
+      "data": {
+        "rejected": true,
+        "message": "stale or unauthorized ask"
+      }
+    },
+    {
+      "kind": "done",
+      "data": {}
+    },
+    {
+      "kind": "wire",
+      "data": {
+        "direction": "host-to-sandbox",
+        "message": {
+          "method": "ui/resource-teardown",
+          "params": {},
+          "jsonrpc": "2.0",
+          "id": 0
+        }
+      }
+    },
+    {
+      "kind": "teardown-handler",
+      "data": {}
+    },
+    {
+      "kind": "wire",
+      "data": {
+        "direction": "sandbox-to-host",
+        "message": {
+          "result": {},
+          "jsonrpc": "2.0",
+          "id": 0
+        }
+      }
+    },
+    {
+      "kind": "teardown-result",
+      "data": {}
+    },
+    {
+      "kind": "closed",
+      "data": true
+    }
+  ]
+}

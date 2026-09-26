@@ -1192,7 +1192,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
 
   const submitAsk = useCallback(async (askId: string, answers: AskUserAnswer[], supplement?: string) => {
     const sid = sessionIdRef.current;
-    if (!sid) return;
+    if (!sid) throw new Error("No active session");
     try {
       const response = await sendAgentCommand<AskUserCloseResponse>(sid, {
         type: "ask_submit",
@@ -1203,12 +1203,15 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
       syncPendingAsk(response, askId);
     } catch (e) {
       console.error("Failed to submit ask:", e);
+      // Rethrow so the Apps host can unlock the view. The native card catches
+      // this and stays locked; swallowing it made every view action look accepted.
+      throw e;
     }
   }, [syncPendingAsk]);
 
   const cancelAsk = useCallback(async (askId: string) => {
     const sid = sessionIdRef.current;
-    if (!sid) return;
+    if (!sid) throw new Error("No active session");
     try {
       const response = await sendAgentCommand<AskUserCloseResponse>(sid, {
         type: "ask_cancel",
@@ -1217,6 +1220,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
       syncPendingAsk(response, askId);
     } catch (e) {
       console.error("Failed to cancel ask:", e);
+      throw e;
     }
   }, [syncPendingAsk]);
 

@@ -1,0 +1,4 @@
+{"file":".trellis/spec/frontend/ask-user-protocol.md","reason":"Existing Pi Web ask lifecycle, persistence, answer and UI contracts must survive Apps rendering."}
+{"file":".trellis/tasks/09-26-ask-user-mcp-migration/research/protocol-boundaries.md","reason":"Stable MCP versions, Apps scope, pinned Pi SDK and protocol probe gates."}
+{"file": ".trellis/tasks/09-26-ask-user-mcp-migration/research/browser-probe.md", "reason": "Passing Apps browser probe, negotiated versions, and loopback isolation constraint"}
+{"file": ".trellis/tasks/09-26-ask-user-mcp-migration/research/sdk-feasibility.md", "reason": "Pinned SDK APIs and authorization constraints for the local adapter"}

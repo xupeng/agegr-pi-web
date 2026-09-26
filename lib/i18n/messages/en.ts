@@ -401,6 +401,7 @@ export const enLocale: LocalePlugin = {
     "chat.askUserSubmitted": "Submitted — delivering your answers…",
     "chat.askUserCancelling": "Cancelling…",
     "chat.askUserHint": "Answers are delivered to the agent as a follow-up message; questions you leave blank are reported as unanswered.",
+    "chat.askUserActionFailed": "The ask action failed. You can try again.",
     "settings.askUserTitle": "Ask user questions",
     "settings.askUserDescription": "Let the agent post question cards to you through the ask_user tool. Applies to sessions after they are reloaded.",
     "chat.extensionExpiresIn": "expires in {seconds}s",

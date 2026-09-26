@@ -103,6 +103,21 @@
 - **答案送达是 fire-and-forget**（`closeAsk` 里 `void sendCustomMessage(...).catch(日志)`）：agent 空闲时 `triggerTurn` 走完整 agent prompt，promise 要到整个 turn 结束才 resolve——`await` 它会挂住 `ask_submit` 响应，浏览器卡片停在"已提交"直到 agent 处理完。提交/取消响应必须立即返回，答案在后台唤醒模型。
 - **跨设备同步**：`ask.closed` SSE 只到达提交设备的实时流（空闲会话的 SSE 在 grace 窗口后已关闭），其他设备收不到。卡片显示期间客户端每 3s 轮询 `/api/sessions/[id]/state`（含持久化回退）兜底同步：远端提交/取消后，本端在数秒内关闭卡片或切到新 ask。本地提交仍走 `ask_submit` 响应即时关闭。
 
+## MCP Apps 渲染（Pi Web，2026-09-26 起）
+
+`ask_user` 卡片可以由 MCP Apps 视图渲染；原生 `AskUserCard` 始终是可用后备。设计决策与实测证据在 `.trellis/tasks/09-26-ask-user-mcp-migration/research/{browser-probe,opaque-sandbox-probe}.md`。
+
+- **MCP 适配器** `lib/ask-user/mcp-app-adapter.ts`：进程内 `McpServer` + `Client`（`InMemoryTransport`）注册 app-only 工具 `project_ask_user`（`_meta.ui.resourceUri = ui://pi-web/ask-user.html`，`visibility: ["app"]`）与同名 `ui://` 资源（`text/html;profile=mcp-app`）。它只投影**已经打开的** ask，绝不打开新 ask，也不注册模型可见的第二个 `ask_user`。包版本钉 `@modelcontextprotocol/{client,core,server,ext-apps}@2.0.0` + `zod@4.2.0`，协商出的 core 版本是 `2025-11-25`、Apps 协议是 `2026-01-26`；不要实现或宣称 core `2026-07-28`。
+- **投影接口** `GET /api/agent/[id]/ask-view`：由 `proxy.ts` 鉴权；内存 store 或持久化 ask 存在时返回固定资源 + 有界 projection（含 `uri`/`mimeType`/`appsProtocolVersion`/`toolName`/`toolInput`/`structuredContent`/`content`/`html`），否则 404。没有通用 MCP 端点，也没有通过它开/关 ask 的路径。`coreProtocolVersion` 只用于测试证据，不下发浏览器。
+- **宿主** `components/AskUserAppHost.tsx`：一个 `<iframe sandbox="allow-scripts" srcDoc={内置文档}>`（**不带** `allow-same-origin`，也不带 `allow-forms/popups/downloads/modals`，无 `src`）。视图因此是 opaque origin：宿主发送一律 `postMessage(msg, "*")`，接收只接受 `event.source === iframeRef.contentWindow` **且** `event.origin === "null"`（顺序固定：先比 window 身份，再比 origin）。只转发当前 `sessionId`/`askId` 的 `ask_submit`/`ask_cancel`，回调返回 `undefined` 视为未确认并回 error。
+- **视图文档** `lib/ask-user/mcp-view-html.ts`：固定内置文档，脚本**内联**（opaque origin 永远不匹配 CSP `'self'`，且 `srcdoc` 会继承父页面 CSP，而 Pi Web 自身页面没有 CSP），由 meta CSP 的 `script-src 'sha256-…'` 放行；`style-src 'unsafe-inline'` 是必需项（视图用 `style="…"` 属性）。内联脚本不得包含 `</script`、反引号或 `${`。`ASK_USER_VIEW_SCRIPT_HASH` 必须与脚本正文一致，`components/AskUserAppHost.test.mjs` 会重算哈希；宿主挂载前仍用 `isBuiltinAskUserViewHtml` 做整段相等校验。
+- **隔离实测**（Chromium）：帧内 `document.cookie`、`localStorage`、`window.parent.document` 全部抛 `SecurityError`，`location.origin === "null"`；同一份文档若带 `allow-same-origin` 则三者都可读，浏览器还会警告可以逃逸沙箱。
+- **可移植性**：该方案不依赖 loopback 主机名对，在 `127.0.0.1`、`localhost`、局域网 IP、Tailscale 地址、自定义域名和 HTTPS 下同样成立。不要再引入"对侧 loopback 主机名"或第二个端口的沙箱，也不要把视图改成 `allow-same-origin`。
+- **开关与回退**：`NEXT_PUBLIC_PI_WEB_ASK_USER_APPS=0`、投影无效、资源/握手失败或 6s 超时都保留原生卡片；卡片要等 `ui/notifications/size-changed` 到达（且已在 tool-result 之后）才切走，若焦点已经在原生卡片里则保持不切。
+- **当前渲染路径可观测**：宿主在 DOM 上标注 `data-ask-user-view` —— 原生卡片容器是 `native`，iframe 容器在切走前是 `apps-pending`、切走后是 `apps`。两版卡片外观故意一致，这是人肉排查和浏览器测试区分它们的唯一可靠手段（`document.querySelector('[data-ask-user-view="apps"]')` 非空 = 正在用 Apps 视图）。
+- **偏差记录**：Apps `2026-01-26` 规范要求 sandbox proxy 与宿主不同源。此处没有 proxy 层，改为让不可信视图跑在 opaque origin（实测强于"同主机不同端口"）。协议消息（`ui/initialize` / `ui/notifications/initialized` / `tool-input` / `tool-result` / `size-changed` / `tools/call` / `ui/resource-teardown`）与工具、资源元数据不变。
+- **未验证**：Firefox/Safari；第三方扩展或远端 MCP server 的 Apps 渲染（本功能只认这一份内置文档）。
+
 ## 文件布局
 
 - `lib/ask-user/portable/` — 可本地安装的 Pi 包（`pi.extensions: ["./index.ts"]`、`peerDependencies` 钉死 SDK 0.85.1、`private: true`、MIT `LICENSE` + `README.md` 记录 bridge 契约与本地安装）。其中 `types.ts` 为有界 DTO/限制，`validation.ts` 为唯一的提问/答案校验器，`format.ts` 为答案文本渲染，`tool.ts` 为 `createAskUserToolDefinition`（`defineTool` + TypeBox schema），`bridge.ts` 为显式 host bridge 解析（`pi.ask-user.bridge:resolve-open:v1`，要求恰好一个同步 `register`）。缺失/多个 bridge、畸形问题、ack 缺少有界 `askId`/`askedAt`、ack 的 questions 与校验后的提问身份不一致（id/文本/选项/`multiple`/顺序），或 `superseded` 不是带 `unansweredIds` 的 `reason: "superseded"` 结果，全部 fail closed，不返回 `terminate: true`。安装验证必须用目录拷贝；指回本仓库 `node_modules` 的符号链接不算独立安装。`index.ts` 为包入口，把 bridge 注入共享工具。
@@ -114,6 +129,9 @@
 - `lib/ask-user-settings.ts` + `app/api/settings/ask-user/route.ts` — 开关持久化（`~/.pi/agent/pi-web-settings.json` 的 `askUser` 字段）+ GET/PUT；`PI_WEB_ASK_USER` env 优先于文件
 - `hooks/useAgentSession.ts` — `pendingAsk` 状态、`submitAsk`/`cancelAsk`、事件处理、重水合
 - `components/AskUserCard.tsx` — 问题卡片（选项/多选/自定义/部分作答）
+- `lib/ask-user/mcp-app-adapter.ts` + `lib/ask-user/mcp-view-html.ts` — app-only MCP 投影与固定的内置 Apps 视图文档（含内联脚本与 `script-src` 哈希）
+- `app/api/agent/[id]/ask-view/route.ts` — 鉴权后的 MCP Apps projection（只读，不开关 ask）
+- `components/AskUserAppHost.tsx` — opaque-origin `srcdoc` 沙箱宿主；失败/关闭开关时渲染 `AskUserCard`
 - `components/SettingsPanel.tsx`（GeneralSettings）— ask_user 开关 + reload 提示/按钮
 
 ## 陷阱

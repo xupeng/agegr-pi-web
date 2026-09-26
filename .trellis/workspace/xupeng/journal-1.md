@@ -732,3 +732,42 @@ After archiving the portable extension task, fixed the two research probes to lo
 ### Status
 
 [OK] **Completed**
+
+
+## Session 17: Render ask_user through a LAN-capable MCP Apps view
+
+**Date**: 2026-09-26
+**Task**: Render ask_user through a LAN-capable MCP Apps view
+**Branch**: `feat/ask-user-mcp-apps`
+
+### Summary
+
+Replaced the loopback-only MCP Apps sandbox with a single opaque-origin srcdoc view so the ask card works from any origin (loopback, LAN, Tailscale, hostname, HTTPS), added the app-only MCP projection, and closed two view-script defects found by the final review. Self-hosted the Oxanium and LXGW WenKai Screen webfonts in a separate PR (#7).
+
+### Main Changes
+
+- Opaque-origin srcdoc view (sandbox=allow-scripts, no allow-same-origin); host inlines the view script and pins it with script-src sha256, since an opaque frame never matches 'self' and srcdoc inherits the parent CSP
+- In-process MCP adapter (project_ask_user + ui://pi-web/ask-user.html, app-only) and the authenticated read-only projection route /api/agent/[id]/ask-view; core 2025-11-25 / Apps 2026-01-26, core 2026-07-28 not claimed
+- Deleted the opposite-loopback relay (public/ask-user-{view,relay}.js, app/ask-user-sandbox, lib/ask-user/sandbox-origin.ts); no second port or hostname, native AskUserCard remains the fallback
+- data-ask-user-view marker so the deliberately identical views can be told apart; final check kept the footer usable after a rejected action and made drafts/pending null-prototype maps
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `54bca43` | feat(ask-user): render the ask card through an opaque-origin MCP Apps view |
+| `1dbd2fc` | docs(spec): record the ask_user MCP Apps rendering contract |
+| `32ce12f` | chore(task): add 09-26-ask-user-mcp-migration planning, probe and check artifacts |
+
+### Testing
+
+- [OK] tsc --noEmit, npm run lint, npm test 1470 pass / 0 fail; focused ask-user suites green
+- [OK] Chromium over http://192.168.11.233:8505: iframe sandbox=allow-scripts, cookie/localStorage/parent DOM all SecurityError, real ask_submit, mobile 390x844, and an intercepted 500 keeps Submit/Cancel usable; operator confirmed data-ask-user-view=apps on their own device
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Firefox/Safari and a browser-level Apps-loading-failure test are still unverified; PA migration and MCP elicitation stay in separate tasks
