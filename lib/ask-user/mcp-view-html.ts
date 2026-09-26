@@ -383,6 +383,7 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
     footerError = "";
     locked = true;
     status = "submitting";
+    refresh();
     refreshControls();
     var args = { sessionId: sessionId, askId: askId, answers: buildAnswers() };
     var trimmed = supplement.trim();
@@ -390,6 +391,7 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
     callTool("ask_submit", args).catch(function (error) {
       locked = false;
       status = "idle";
+      refresh();
       refreshControls();
       fail(error);
     });
@@ -400,10 +402,12 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
     footerError = "";
     locked = true;
     status = "cancelling";
+    refresh();
     refreshControls();
     callTool("ask_cancel", { sessionId: sessionId, askId: askId }).catch(function (error) {
       locked = false;
       status = "idle";
+      refresh();
       refreshControls();
       fail(error);
     });
@@ -537,10 +541,15 @@ export const ASK_USER_VIEW_SCRIPT = String.raw`/**
 /**
  * base64 SHA-256 of {@link ASK_USER_VIEW_SCRIPT}, as used by the meta CSP.
  * Recompute after any edit to the script:
- *   node -e "const c=require('crypto'),fs=require('fs');"
- * and update both this constant and the HTML below (the test pins them together).
+ *   node --input-type=module -e "import('jiti').then(async ({createJiti}) => {
+ *     const {createHash} = await import('node:crypto');
+ *     const m = await createJiti('file://' + process.cwd() + '/x.mjs')(…)}"
+ * Practically: load the module with jiti, then
+ *   "sha256-" + createHash("sha256").update(ASK_USER_VIEW_SCRIPT, "utf8").digest("base64")
+ * and paste the result into both this constant and the CSP meta tag below — the
+ * test in components/AskUserAppHost.test.mjs fails if the three ever disagree.
  */
-export const ASK_USER_VIEW_SCRIPT_HASH = "sha256-80CsvagnTBsAh+wwgCwpg/Z+oFnznM2qIjYyVu0ETVs=";
+export const ASK_USER_VIEW_SCRIPT_HASH = "sha256-EloPp3UqP8tNk0CrG66KQct2N5q/++zefT8I+tJbPvU=";
 
 /**
  * The fixed view document. `isBuiltinAskUserViewHtml` trusts exactly this string.
@@ -549,7 +558,7 @@ export const ASK_USER_VIEW_HTML = `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-80CsvagnTBsAh+wwgCwpg/Z+oFnznM2qIjYyVu0ETVs='; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-EloPp3UqP8tNk0CrG66KQct2N5q/++zefT8I+tJbPvU='; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Pi Web ask_user</title>
 </head>
 <body>

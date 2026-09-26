@@ -11,16 +11,16 @@ import {
   ASK_USER_QUESTION_LIMIT,
 } from "@/lib/ask-user/types";
 import { useI18n } from "@/hooks/useI18n";
-import { AskUserCard } from "./AskUserCard";
+import { AskUserAppFailure } from "./AskUserAppFailure";
 
 /** Peer protocol version of the MCP Apps 2026-01-26 handshake. */
 const APPS_PROTOCOL_VERSION = "2026-01-26";
-/** How long the fetch + handshake may take before the native card takes over. */
+/** How long the fetch + handshake may take before the degraded state takes over. */
 const APPS_HANDSHAKE_TIMEOUT_MS = 6000;
 const MAX_VIEW_HEIGHT = 4000;
 const ASK_USER_VIEW_URI = "ui://pi-web/ask-user.html";
 
-const APPS_DISABLED = process.env.NEXT_PUBLIC_PI_WEB_ASK_USER_APPS === "0";
+type AskUserAppViewState = "loading" | "apps" | "failed";
 
 interface AppViewPayload {
   uri: string;
@@ -135,27 +135,35 @@ function readFontFamilyStack(): string {
 /**
  * Client host wrapper for the ask_user MCP Apps view.
  *
- * It fetches the authenticated projection, mounts the fixed built-in document as
- * an opaque-origin `srcdoc` iframe (`sandbox="allow-scripts"`, no
- * `allow-same-origin`) and performs the probed Apps handshake. Because the frame
- * has an opaque origin, host messages arrive with `event.origin === "null"` and
- * are accepted only when `event.source` is the exact mounted iframe; outbound
- * messages target `"*"`. This works from any page origin (loopback, LAN IP,
- * Tailscale, hostname, HTTPS).
+ * It is the only renderer for `ask_user`: it fetches the authenticated
+ * projection, mounts the fixed built-in document as an opaque-origin `srcdoc`
+ * iframe (`sandbox="allow-scripts"`, no `allow-same-origin`) and performs the
+ * probed Apps handshake. Because the frame has an opaque origin, host messages
+ * arrive with `event.origin === "null"` and are accepted only when
+ * `event.source` is the exact mounted iframe; outbound messages target `"*"`.
+ * This works from any page origin (loopback, LAN IP, Tailscale, hostname,
+ * HTTPS).
  *
- * Only `ask_submit` / `ask_cancel` for this session and askId are forwarded into
- * the existing `submitAsk` / `cancelAsk` callbacks. On a disabled flag, or any
- * fetch/handshake/timeout failure, it keeps the existing `AskUserCard`. The card
- * stays mounted until the sandboxed view reports a size after tool-result, so a
- * failed handshake never replaces an open ask with a blank iframe.
+ * The DOM marker `data-ask-user-view` is exactly one of three states:
+ * `loading` while the projection or handshake is pending, `apps` once the view
+ * reports a size after tool-result, and `failed` for the read-only degraded
+ * state. The iframe is mounted off-screen while pending and only revealed on
+ * that size notification, so it never flashes at zero height.
+ *
+ * Only `ask_submit` / `ask_cancel` for this session and askId are forwarded
+ * into the existing `submitAsk` / `cancelAsk` callbacks. Any fetch, projection
+ * or handshake failure keeps the ask open and shows the degraded state, whose
+ * single control (retry) re-runs the projection fetch without a page reload.
  */
 export function AskUserAppHost({ ask, sessionId, onSubmit, onCancel }: AskUserAppHostProps) {
   const { t, locale } = useI18n();
   const [apps, setApps] = useState<AppViewPayload | null>(null);
   const [failed, setFailed] = useState(false);
   const [handshakeReady, setHandshakeReady] = useState(false);
+  // Bumped by the degraded state's retry control; the projection effect depends
+  // on it, so retrying re-runs the fetch and handshake without a full reload.
+  const [reloadKey, setReloadKey] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
-  const cardSlotRef = useRef<HTMLDivElement | null>(null);
   const labelsRef = useRef<Record<string, string>>({});
   const onSubmitRef = useRef(onSubmit);
   const onCancelRef = useRef(onCancel);
@@ -197,10 +205,10 @@ export function AskUserAppHost({ ask, sessionId, onSubmit, onCancel }: AskUserAp
     askIdRef.current = ask.askId;
   });
 
-  // Fetch the MCP Apps projection. Any failure here falls back to the native
-  // card with the ask still open. Origin-independent: no loopback decision.
+  // Fetch the MCP Apps projection. Any failure here shows the degraded state
+  // with the ask still open. Origin-independent: no loopback decision.
   useEffect(() => {
-    if (!sessionId || APPS_DISABLED) {
+    if (!sessionId) {
       setFailed(true);
       return;
     }
@@ -239,7 +247,7 @@ export function AskUserAppHost({ ask, sessionId, onSubmit, onCancel }: AskUserAp
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [ask.askId, sessionId]);
+  }, [ask.askId, reloadKey, sessionId]);
 
   // Speak the Apps handshake. The listener is attached on mount, before the
   // srcdoc document is rendered, so the view's first `ui/initialize` cannot be
@@ -254,13 +262,6 @@ export function AskUserAppHost({ ask, sessionId, onSubmit, onCancel }: AskUserAp
       if (completedRef.current) return;
       completedRef.current = true;
       window.clearTimeout(readyTimerRef.current);
-      const active = document.activeElement;
-      if (active instanceof Node && cardSlotRef.current?.contains(active)) {
-        // The user already started answering the native card. Keep that draft
-        // instead of swapping in a fresh Apps view.
-        setFailed(true);
-        return;
-      }
       setHandshakeReady(true);
     };
     const sendError = (id: unknown, message: string) => {
@@ -386,21 +387,37 @@ export function AskUserAppHost({ ask, sessionId, onSubmit, onCancel }: AskUserAp
     setFailed(true);
   }, []);
 
+  const retry = useCallback(() => {
+    setReloadKey((key) => key + 1);
+  }, []);
+
   const showApps = Boolean(apps) && !failed && handshakeReady;
+  const viewState: AskUserAppViewState = failed ? "failed" : showApps ? "apps" : "loading";
+
   return (
-    <>
-      {showApps ? null : (
-        <div ref={cardSlotRef} data-ask-user-view="native">
-          <AskUserCard
-            ask={ask}
-            onSubmit={onSubmit}
-            onCancel={onCancel}
-          />
+    <div data-ask-user-view={viewState} style={{ width: "100%", maxWidth: 820, margin: "0 auto" }}>
+      {viewState === "failed" ? <AskUserAppFailure ask={ask} onRetry={retry} /> : null}
+      {viewState === "loading" ? (
+        <div
+          role="status"
+          aria-busy="true"
+          aria-label={t("chat.askUserTitle")}
+          style={{
+            width: "100%",
+            border: "1px solid var(--border)",
+            borderRadius: 10,
+            background: "var(--bg-panel)",
+            padding: "14px",
+            display: "grid",
+            gap: 10,
+          }}
+        >
+          <div style={{ height: 12, width: "45%", borderRadius: 6, background: "var(--bg)", opacity: 0.7 }} />
+          <div style={{ height: 34, width: "100%", borderRadius: 7, background: "var(--bg)", opacity: 0.5 }} />
         </div>
-      )}
+      ) : null}
       {apps && !failed ? (
         <div
-          data-ask-user-view={showApps ? "apps" : "apps-pending"}
           aria-hidden={showApps ? undefined : true}
           style={showApps ? undefined : {
             position: "fixed",
@@ -414,6 +431,7 @@ export function AskUserAppHost({ ask, sessionId, onSubmit, onCancel }: AskUserAp
           }}
         >
           <iframe
+            key={reloadKey}
             ref={iframeRef}
             title={t("chat.askUserTitle")}
             srcDoc={apps.html}
@@ -433,6 +451,6 @@ export function AskUserAppHost({ ask, sessionId, onSubmit, onCancel }: AskUserAp
           />
         </div>
       ) : null}
-    </>
+    </div>
   );
 }
