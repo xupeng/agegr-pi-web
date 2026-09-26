@@ -10,11 +10,11 @@
 
 ### 已查实的 pi 原生机制（不需要自造注入链路）
 
-- pi 有一等公民的「追加系统提示」文件机制：`ResourceLoader.getAppendSystemPrompt(): string[]` / `getAppendSystemPromptSources(): {path}[]`（`node_modules/@earendil-works/pi-coding-agent/dist/core/resource-loader.d.ts:39-47`）。
-- 生效文件由 `discoverAppendSystemPromptFile()` 决定（`.../dist/core/resource-loader.js:820-832`）：项目级 `<cwd>/.pi/APPEND_SYSTEM.md`（需项目受信）**优先并覆盖**全局 `<agentDir>/APPEND_SYSTEM.md`；**只返回一个路径，不是叠加**。`APPEND_SYSTEM.md` 属需受信的项目资源（`.../dist/core/trust-manager.js:5-15`）。`CONFIG_DIR_NAME` 即 `.pi`。
+- pi 有一等公民的「追加系统提示」文件机制：`ResourceLoader.getAppendSystemPrompt(): string[]` / `getAppendSystemPromptSources(): {path}[]`（`node_modules/@earendil-works/pi-coding-agent/dist/core/resource-loader.d.ts:53-54`，另一处同位接口在 `:189-190`）。
+- 生效文件由 `discoverAppendSystemPromptFile()` 决定（`.../dist/core/resource-loader.js:820-832`）：项目级 `<cwd>/.pi/APPEND_SYSTEM.md`（需项目受信）**优先并覆盖**全局 `<agentDir>/APPEND_SYSTEM.md`；**只返回一个路径，不是叠加**。`APPEND_SYSTEM.md` 属需受信的项目资源（`.../dist/core/trust-manager.js:8-16` 的 `TRUST_REQUIRING_PROJECT_CONFIG_RESOURCES`）。`CONFIG_DIR_NAME` 即 `.pi`。
 - 全局文件在本机**已存在且在用**：`~/.pi/agent/APPEND_SYSTEM.md`（322B，当前内容为「始终使用中文回答…」）。
 - 生效范围（已查实，且**本次不做扩展**）：
-  - 普通会话生效：`lib/rpc-manager.ts:2222-2240` 的正常分支不传 `appendSystemPrompt` ⇒ 由 loader 自行发现全局文件。
+  - 普通会话生效：`lib/rpc-manager.ts:2366-2379` 的 `resourceLoaderOptions` 三元里，正常分支（`:2379` 起的 `else`）不传 `appendSystemPrompt` ⇒ 由 loader 自行发现全局文件。唯一传它的是 subagent 分支（`:2375`）。
   - chat-only 模式不生效：`lib/chat-only.ts:15-17` 的 `appendSystemPromptOverride: () => []` 清空；`lib/chat-only.test.mjs:17` 断言该行为。
   - 内建子代理不生效：`lib/subagent-prompt.ts:19-25` 显式构造 `appendSystemPrompt = [profileSystemPrompt, inheritedParentContext]`。
 
@@ -80,3 +80,4 @@ UI 必须写明：**普通会话生效；Chat only 模式与内建子代理不�
 ## Notes
 
 - 本任务的价值是「让模型主动给链接」，不是「让链接能点」；后者由 `09-19-clickable-file-paths` 的渲染层保证。因此本任务可以被延后而不影响核心体验。
+- 锚点复核（2026-09-27）：开工前逐条复核了本目录引用的全部代码锚点，语义全部成立，仅 3 处行号漂移并已就地修正；记录见 `research/anchor-recheck.md`。
