@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { PwaRegistration } from "@/components/PwaRegistration";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "katex/dist/katex.min.css";
+import "./fonts.css";
+import "./fonts-lxgw-wenkai-screen.css";
 import "./globals.css";
 import "./settings.css";
 
@@ -56,18 +58,6 @@ export default function RootLayout({
     <html lang="en" translate="no" className="notranslate" suppressHydrationWarning>
       <head>
         <meta name="google" content="notranslate" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* App Router has no _document.js; this rule targets Pages Router only. */}
-        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Oxanium:wght@300..700&display=swap"
-          rel="stylesheet"
-        />
-        <link
-          href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.7.0/style.css"
-          rel="stylesheet"
-        />
         <script
           dangerouslySetInnerHTML={{
             __html: THEME_INIT_SCRIPT,
