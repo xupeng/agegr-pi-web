@@ -1,0 +1,30 @@
+{
+  "id": "ask-user-shared-view",
+  "name": "ask-user-shared-view",
+  "title": "把 ask_user 视图改成共享 React 组件，退出 MCP Apps iframe 渲染",
+  "description": "反转 PR #9 的 iframe 方向：抽出框架无关 view controller 与共享 React 视图，Pi Web 切过去并删除 MCP Apps 渲染路径；PA 作为契约前置纳入",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P2",
+  "creator": "xupeng",
+  "assignee": "xupeng",
+  "createdAt": "2026-09-26",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "personal",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "09-26-ask-user-view-controller",
+    "09-26-ask-user-react-view-package",
+    "09-26-ask-user-retire-mcp-apps"
+  ],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {}
+}
