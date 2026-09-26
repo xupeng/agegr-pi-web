@@ -13,7 +13,7 @@ import { MessageView } from "./MessageView";
 import { MarkdownBody } from "./MarkdownBody";
 import { FileIndexProvider } from "./FileIndexContext";
 import { ChatInput, type ChatInputHandle } from "./ChatInput";
-import { AskUserCard } from "./AskUserCard";
+import { AskUserAppHost } from "./AskUserAppHost";
 import { ChatMinimap, useMessageRefs } from "./ChatMinimap";
 import { ExtensionStatusBar } from "./ExtensionStatusBar";
 import { AnsiText } from "./AnsiText";
@@ -915,15 +915,15 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
   // it scrolls with the conversation instead of pinning above the composer,
   // so the message viewport keeps its full height while an ask is open.
   const askUserCardElement = pendingAsk ? (
-    <AskUserCard
-      // Rebuild the card for every new ask: the component owns draft/lock
-      // state, and when a close response for the previous ask lands after the
-      // next ask opened, React would otherwise reuse the instance with the old
-      // "submitting" lock and stale drafts still attached.
+    <AskUserAppHost
+      // Rebuild the host for every new ask: an ask switch must not leak a
+      // previous sandbox/draft/lock into the next card (same contract the
+      // native card had when ChatWindow rendered it directly).
       key={pendingAsk.askId}
       ask={pendingAsk}
-      onSubmit={(askId, answers, supplement) => void submitAsk(askId, answers, supplement)}
-      onCancel={(askId) => void cancelAsk(askId)}
+      sessionId={session?.id ?? sessionIdRef.current ?? undefined}
+      onSubmit={(askId, answers, supplement) => submitAsk(askId, answers, supplement)}
+      onCancel={(askId) => cancelAsk(askId)}
     />
   ) : null;
   // Column-aligned wrapper used by the empty-new-session page, where the card

@@ -74,7 +74,10 @@ export function AskUserCard({
     }
     const trimmedSupplement = supplement.trim();
     setStatus("submitting");
-    onSubmit(ask.askId, answers, trimmedSupplement === "" ? undefined : trimmedSupplement);
+    // The Apps host awaits this promise. Catch here so a rejection does not
+    // become unhandled, and keep the card locked: a close whose response was
+    // lost must not become editable again.
+    void Promise.resolve(onSubmit(ask.askId, answers, trimmedSupplement === "" ? undefined : trimmedSupplement)).catch(() => undefined);
   };
 
   return (
@@ -319,7 +322,7 @@ export function AskUserCard({
                 onClick={() => {
                   if (locked) return;
                   setStatus("cancelling");
-                  onCancel(ask.askId);
+                  void Promise.resolve(onCancel(ask.askId)).catch(() => undefined);
                 }}
                 style={{
                   padding: "7px 14px",

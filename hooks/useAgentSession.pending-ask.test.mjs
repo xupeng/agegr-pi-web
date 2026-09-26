@@ -12,7 +12,9 @@ function ask(id) {
 }
 
 test("rebuilds the ask card for each new ask so stale lock state cannot leak", () => {
-  assert.match(chatWindowSource, /<AskUserCard[\s\S]*?key=\{pendingAsk\.askId\}/);
+  // ChatWindow now renders the Apps host wrapper, which itself falls back to
+  // AskUserCard; the askId key still forces a fresh instance per ask.
+  assert.match(chatWindowSource, /<AskUserAppHost[\s\S]*?key=\{pendingAsk\.askId\}/);
 });
 
 test("clears the card when the close response matches the current ask", () => {

@@ -401,6 +401,7 @@ export const zhCNLocale: LocalePlugin = {
     "chat.askUserSubmitted": "已提交，正在发送你的答案…",
     "chat.askUserCancelling": "取消中…",
     "chat.askUserHint": "答案会作为后续消息发给 agent；留空的问题会被标记为未回答。",
+    "chat.askUserActionFailed": "提问操作失败，可以重试。",
     "settings.askUserTitle": "向用户提问（ask_user）",
     "settings.askUserDescription": "允许 agent 通过 ask_user 工具向你弹出问题卡片。修改在重新加载会话后生效。",
     "chat.extensionExpiresIn": "{seconds} 秒后过期",
