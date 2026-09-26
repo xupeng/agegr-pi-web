@@ -12,6 +12,7 @@ import { chromium } from "playwright";
 import { checkFilePanel, filePanelFixture } from "./file-panel.mjs";
 import { checkExtensionDialogs, extensionSource } from "./extension-dialog.mjs";
 import { checkChatAppearance } from "./chat-appearance.mjs";
+import { ASK_USER_SESSION, checkAskUserView, writeAskUserFixture } from "./ask-user.mjs";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const mode = process.env.E2E_SERVER_MODE || "dev";
@@ -32,6 +33,7 @@ const BRANCH = "e2e-branch-session";
 const RICH = "e2e-rich-session";
 const COMPACTED = "e2e-compacted-session";
 const APPEND = "e2e-external-append-session";
+const ASK_USER = ASK_USER_SESSION;
 const text = (i) => `E2E message ${String(i).padStart(4, "0")}`;
 const ids = (start, end) => Array.from({ length: end - start }, (_, i) => `e${start + i}`);
 
@@ -125,6 +127,15 @@ try {
     message("root", null, "user", "E2E wrapper root"),
     message("reply", "root", "assistant", "E2E wrapper reply"),
   ]);
+  // ask_user browser coverage needs no model and no wrapper: the state route
+  // falls back to the persisted open ask when the wrapper is gone, so a plain
+  // page.goto renders the shared view. The ask commands are stubbed in the
+  // check itself.
+  writeSession(ASK_USER, [
+    message("root", null, "user", "E2E ask user root"),
+    message("reply", "root", "assistant", "E2E ask user reply"),
+  ]);
+  writeAskUserFixture(agentDir, ASK_USER);
 
   const probe = createServer();
   probe.listen(0, "127.0.0.1");
@@ -166,7 +177,7 @@ try {
     const response = await fetch(`${base}/api/sessions`, { signal: AbortSignal.timeout(5000) }).catch(() => null);
     if (response?.ok) {
       const { sessions } = await response.json();
-      assert.deepEqual(sessions.map((session) => session.id).sort(), [LONG, BRANCH, RICH, COMPACTED, APPEND].sort());
+      assert.deepEqual(sessions.map((session) => session.id).sort(), [LONG, BRANCH, RICH, COMPACTED, APPEND, ASK_USER].sort());
       break;
     }
     assert.ok(Date.now() < deadline, "Server readiness timed out; see server.log");
@@ -402,6 +413,7 @@ try {
     await page.locator(".markdown-code-block pre").waitFor();
     await checkFilePanel(page, previewFile);
     await checkExtensionDialogs(page, artifacts, viewport.width);
+    await checkAskUserView(page, { base, sessionId: ASK_USER });
     if (viewport.width > 600) {
       await page.goto(`${base}/?session=${RICH}`, { waitUntil: "domcontentloaded" });
       await page.locator(".markdown-code-block pre").waitFor();

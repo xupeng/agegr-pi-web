@@ -1,0 +1,3 @@
+{"file": ".trellis/spec/frontend/ask-user-protocol.md", "reason": "Parent-level contract for what must stay unchanged (store, persistence, SSE events, commands, get_state, polling) versus what is being replaced (the MCP Apps rendering section)."}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "Where the portable package, its react/ subfolder, and Pi Web lib vs components boundaries must sit; this file also carries PR #9 additions that this iteration rolls back."}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Cross-child acceptance: canonical verification commands and regression expectations for the whole task tree."}
