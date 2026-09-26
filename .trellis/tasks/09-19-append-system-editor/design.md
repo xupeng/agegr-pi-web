@@ -66,7 +66,7 @@ components/SettingsPanel.tsx           新增 section「追加指令」
 
 ## 4. 生效时机（必须在 UI 说清）
 
-- 会话的系统提示在 `AgentSession` 创建时构建（`lib/rpc-manager.ts:2222-2240` 决定 resourceLoader 选项），**改文件不会影响已存在的 wrapper**。
+- 会话的系统提示在 `AgentSession` 创建时构建（`lib/rpc-manager.ts:2366-2379` 决定 resourceLoader 选项），**改文件不会影响已存在的 wrapper**。
 - 因此：新建会话立即生效；已打开的会话需要重载。内建子代理开关也是同一预期（`docs/adr/0003-built-in-subagent-toggle.md`）。
 - 设计选择：**不**引入热重载或自动重启会话（会让用户在不知情的情况下丢失运行态上下文）；只做提示。若仓库已有会话重载入口，可在提示里指向它（不新增自动化）。
 
