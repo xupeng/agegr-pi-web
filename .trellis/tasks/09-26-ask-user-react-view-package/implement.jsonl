@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/frontend/ask-user-protocol.md", "reason": "Source of truth for the keyboard and accessibility contract being moved into the shared component, plus the label set the host currently delivers."}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Repository component conventions: role/aria usage, loading and error surfaces, focus-visible handling, and how shared components should be structured."}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "Props typing, no-any, and the peer-dependency boundary rules for a package component."}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "Where portable/react/ lives and which imports a host-neutral package file may not use."}
