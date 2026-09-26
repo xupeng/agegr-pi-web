@@ -54,11 +54,21 @@ test("keeps covered statistics and file controls out of interaction and focus", 
   assert.match(source, /aria-hidden=\{covered \? true : undefined\}/);
 });
 
-test("closes the mobile action layer on outside click, Escape, layout changes, and session changes", () => {
+test("closes the mobile action layer on outside click, Escape, layout changes, and session switches", () => {
   assert.match(source, /event\.composedPath\(\)\.includes\(toolbar\)/);
   assert.match(source, /document\.addEventListener\("pointerdown", handlePointerDown, true\)/);
   assert.match(source, /event\.key !== "Escape"[\s\S]*?setMobileToolbarMoreOpen\(false\)/);
-  assert.match(source, /\}, \[isMobile, isNarrowMobile, selectedSession\?\.id, newSessionDraftId\]\);/);
+  assert.match(source, /useEffect\(\(\) => \{\s*setMobileToolbarMoreOpen\(false\);\s*\}, \[isMobile, isNarrowMobile\]\);/);
+  assert.match(source, /useEffect\(\(\) => \{\s*setMobileToolbarMoreOpen\(false\);\s*\}, \[newSessionDraftId\]\);/);
+  // A fresh load reports no selection first and the restored session only
+  // afterwards. That transition is not a switch: closing the panel there shut
+  // it right after the user opened it (measured at 390px with a delayed
+  // /api/sessions, where the Agents button then never appeared).
+  assert.match(
+    source,
+    /const previous = mobileToolbarSessionIdRef\.current;\s*mobileToolbarSessionIdRef\.current = selectedSession\?\.id;\s*if \(previous === undefined \|\| previous === selectedSession\?\.id\) return;\s*setMobileToolbarMoreOpen\(false\);/,
+  );
+  assert.doesNotMatch(source, /\[isMobile, isNarrowMobile, selectedSession\?\.id, newSessionDraftId\]/);
 });
 
 test("keeps the mobile action layer open after using an expanded action", () => {

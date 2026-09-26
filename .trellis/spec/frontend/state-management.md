@@ -174,3 +174,10 @@ export function getPreferredToolPreset(
 6. **localStorage 读写必须包 `try/catch`**（隐私模式 / quota）：统一模式见 `hooks/useTheme.ts:32-34,68-70`。
 7. **会话列表刷新的"先清空再拉取"是 forbidden pattern**：force 刷新必须"新数据到达后覆盖，不清空旧数据"，
    详见 [session-list-refresh.md](./session-list-refresh.md)。
+8. **关闭瞬时浮层（下拉 / 移动端 ⋯ 面板）的 effect 不得把"数据首次到达"当成"用户切换"**：
+   `AppShell.tsx` 的移动端工具栏用 `mobileToolbarSessionIdRef` 记住上一个会话 id，只在
+   "真 id → 另一个真 id" 时才 `setMobileToolbarMoreOpen(false)`。早先的写法按
+   `[isMobile, isNarrowMobile, selectedSession?.id, newSessionDraftId]` 关面板，于是首屏的
+   `undefined → id` 也算切换 —— 实测（390px 下把 `/api/sessions` 延迟 2.5s）面板会在用户刚点开之后自动合上，
+   `e2e/subagents.mjs` 因此等不到 Agents 按钮（CI 上偶发 30s 超时）。回归检查就在该 e2e 的 390px 分支里：
+   延迟会话列表 → 点开 ⋯ → 断言面板仍打开且 Agents 按钮出现。
