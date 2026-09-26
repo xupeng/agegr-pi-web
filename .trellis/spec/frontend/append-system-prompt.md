@@ -49,6 +49,9 @@ pi-web 只做「编辑全局那一个文件」的入口，不新造存储、不�
 3. **项目级覆盖只是提示**：`trusted: false` 时 pi 仍读全局文件，文案必须说清；不要把
    `projectOverride` 做成可写入口。
 4. **逐字节往返**：不追加、不裁剪换行；缺失读作 `""`；写空字符串创建空文件而**不删除**文件。
+   > 前端注意：`<textarea>` 的 API value 按 HTML 规范把 CRLF 归一化为 LF，所以一个 CRLF 文件
+   > **一旦被编辑并保存**就会变成 LF（纯查看不动文件：`dirty=false` 不落盘）。服务端 `PUT`
+   > 本身是逐字节的，这条限制只属于编辑控件。
 5. **原子私有写**：`lib/atomic-file.ts` 的 `writePrivateFileAtomicSync`（临时文件 + rename，0600）。
 6. **上限是字节不是字符**：65536 按 UTF-8 字节计（`Buffer.byteLength` 服务端、
    `new TextEncoder().encode(x).length` 前端）。用 `content.length` 会让中文草稿在 60000 字节附近
