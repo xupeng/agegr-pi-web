@@ -1,8 +1,8 @@
 // Browser regression for the shared `ask_user` React view.
 //
 // The retired MCP Apps iframe path had no browser coverage at all: its
-// behaviour was only asserted against a DOM shim inside
-// `lib/ask-user/mcp-view-html.test.mjs`. This module drives the real component
+// behaviour was only asserted against a DOM shim, not a real browser. This
+// module drives the real component
 // in Chromium: form state, keyboard interaction, locking, summaries, payload
 // assembly and the reject/retry path.
 //

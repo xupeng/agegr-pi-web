@@ -8,9 +8,8 @@
  *
  * Contract: only the `--pi-ask-*` namespace is read, each read carries a
  * `light-dark()` / system-font fallback, and a host maps its own tokens onto
- * the namespace on any ancestor element. Nothing here reads Pi Web's internal
- * names (`--bg`, `--text`, …) or reuses `lib/ask-user/theme-tokens.ts` — a CSS
- * variable in the same document is not untrusted input. Metrics are carried
+ * the namespace on any ancestor element. Nothing here reads a host's internal names
+ * (`--bg`, `--text`, …) — a CSS variable in the same document is not untrusted input. Metrics are carried
  * over verbatim from the deleted native card.
  */
 
