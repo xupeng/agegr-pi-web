@@ -917,11 +917,10 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
   const askUserCardElement = pendingAsk ? (
     <AskUserAppHost
       // Rebuild the host for every new ask: an ask switch must not leak a
-      // previous sandbox/draft/lock into the next card (same contract the
-      // native card had when ChatWindow rendered it directly).
+      // previous draft/lock into the next card (same contract the native card
+      // had when ChatWindow rendered it directly).
       key={pendingAsk.askId}
       ask={pendingAsk}
-      sessionId={session?.id ?? sessionIdRef.current ?? undefined}
       onSubmit={(askId, answers, supplement) => submitAsk(askId, answers, supplement)}
       onCancel={(askId) => cancelAsk(askId)}
     />
