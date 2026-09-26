@@ -999,3 +999,49 @@ Replaced the loopback-only MCP Apps sandbox with a single opaque-origin srcdoc v
 - 任务 B（09-26-ask-user-react-view-package）：portable/react/ 共享组件 + 三语默认文案 + 纯函数键盘契约 + CSS 变量契约文档 + fixture 证据
 - 任务 C（09-26-ask-user-retire-mcp-apps）：AskUserAppHost 瘦身为适配器后删除整条 iframe 管线（含 4 个 @modelcontextprotocol/* 与 zod），并重写 ask-user-protocol.md 与新增 ADR
 - 父任务归档与遗留 09-25 任务归档随 C 的 PR 合并（父任务无独立 PR）
+
+
+## Session 23: ask_user 共享 React 视图重构 · 任务 B：共享组件与 CSS 变量契约
+
+**Date**: 2026-09-26
+**Task**: ask_user 共享 React 视图重构 · 任务 B：共享组件与 CSS 变量契约
+**Branch**: `feat/ask-user-react-view-package`
+
+### Summary
+
+任务 B 完成：在 lib/ask-user/portable/react/ 下交付宿主中立的共享 React 视图，消费任务 A 的纯 controller。组件只吃 props 与 --pi-ask-* CSS 变量，不 import 任何 Pi Web 模块；三语文案随包；键盘数学抽成纯函数以绕开仓库没有 DOM 测试框架的限制。仍为纯增量：Pi Web 运行时未改动，MCP Apps 路径与其测试原样通过。
+
+### Main Changes
+
+- 新增 portable/react/AskUserView.tsx：props 为 { ask, onSubmit, onCancel, locale?, labels?, disabled? }；useReducer 接 view-controller；reject 时 dispatch action-failed（解锁 + 显示错误，与现行视图一致）；a11y 契约随组件走（radiogroup/group + aria-labelledby、roving tabindex、aria-checked、状态字符 aria-hidden、role=status aria-live 计数、锁定焦点移到状态行、role=alert 错误、role=dialog 不带 aria-modal）；另导出 hook-free 的 AskUserViewContent 供结构测试播种锁定态
+- 新增 portable/react/copy.ts：en / zh-CN / zh-TW 三语默认表 + locale 选择 + labels 逐键覆盖。36 条文案从 lib/i18n/messages/*:394-403（外加 chat.cancel / chat.submit）逐字转录，已逐条核对一致。README 写明「为什么这不构成双写点」：Pi Web 覆盖全部 12 键故永不读默认表，PA 直接用默认表，两侧文本真相来源各自唯一
+- 新增 portable/react/keyboard.ts：radioNavigationTarget / radioTabIndex 两个纯函数。已与现行内联视图的 onOptionKeyDown 逐分支比对：空组时 Home=首项、End=末项、前进箭头首项、后退箭头末项，已选组时首尾取模环绕 —— 全部等价
+- 新增 portable/react/view-css.ts：--pi-ask-* 变量表（每条在使用点自带 light-dark() 兜底，不在 .pi-ask 上声明命名空间，否则会遮蔽宿主在祖先容器上映射的值）+ 被删卡片的度量（gap 14px、选项 7px 10px/radius 7、详情 line-height 1.9、锁定 opacity 0.75、符号 0.85、提交 7px 16px / 取消 14px、底栏提示用 text-dim）+ 一条 :focus-visible 焦点环，输入控件不写内联 outline:none
+- 新增 README.md（CSS 变量清单 + Pi Web 映射示例、labels 清单、a11y 表、PA 接入步骤、未验证项）与 fixture/（最小宿主，不 import 任何 Pi Web 模块、不设任何宿主 CSS 变量，走兜底配色；证据在 research/fixture-evidence.md 与 fixture-output.txt）
+- portable/package.json：peerDependencies 增加 react >=19.0.0（不进 dependencies）
+- 我在评审时补的两处：① --pi-ask-success 取 #16a34a（与 AgentSessionPanel / MessageView 一致），没有照抄被删卡片的孤例 #10b981；② 自定义答案 input 补回 maxLength —— 被删卡片有、内联视图漏了，而 validateSubmission 会拒绝超长答案，缺了它用户只能靠一次笼统的 action failed 撞到上限。已补断言锁住
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `1d75182` | (see git log) |
+| `a09be3a` | (see git log) |
+| `2e48283` | (see git log) |
+
+### Testing
+
+- [OK] node --test lib/ask-user/portable/react/*.test.mjs：34/34 pass（AskUserView 结构 18 + keyboard 纯函数 9 + copy 三语 6 + 我补的 maxLength 1）
+- [OK] node lib/ask-user/portable/react/fixture/render.mjs：exit 0，无 Pi Web import 且无宿主 CSS 变量下渲染出全部交互控件与兜底配色
+- [OK] node --test lib/ask-user/mcp-view-html.test.mjs lib/ask-user/portable/view-controller.test.mjs：28/28 pass（均未改动）
+- [OK] env -u NODE_PATH XDG_STATE_HOME= npm test：1546/1546 pass，0 fail
+- [OK] node_modules/.bin/tsc --noEmit 退出 0；npm run lint 无问题
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 任务 C：AskUserAppHost 瘦身为适配器（取文案 + 映射 CSS 变量 + 转发命令），本地跑通 ask 全流程后再删除整条 iframe 管线与 4 个 @modelcontextprotocol/* + zod 依赖，重写 ask-user-protocol.md 并新增 ADR
+- 父任务与遗留 09-25 归档随 C 的 PR 合并（父任务无独立 PR）

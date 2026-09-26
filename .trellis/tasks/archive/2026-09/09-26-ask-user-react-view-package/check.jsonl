@@ -1,0 +1,3 @@
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Verify the component meets the repository accessibility and state-presentation rules, including paired role=status and role=alert usage."}
+{"file": ".trellis/spec/frontend/ask-user-protocol.md", "reason": "Verify the keyboard and a11y contract moved without semantic loss against the documented behaviour."}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Check test coverage, fixture evidence, and the canonical verification commands."}
