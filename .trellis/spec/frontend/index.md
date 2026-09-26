@@ -22,6 +22,7 @@
 | [Type Safety](./type-safety.md) | tsconfig 实际严格度、类型归属、运行时守卫、常见写法、禁用写法 | Written |
 | [Trellis subagent execution snapshots](./trellis-subagent-records.md) | Single owner for exact tool/kind gate, bounded branch API projection, evidence/watermarks, scoped hook ownership and read-only UI | Written |
 | [ask_user 提问协议](./ask-user-protocol.md) | ask_user 工具契约、状态机、事件/命令协议 | Written |
+| [追加系统指令编辑契约](./append-system-prompt.md) | APPEND_SYSTEM.md 的 GET/PUT 契约、写入路径固定与允许表闸门、生效范围、字节上限 | Written |
 | [移动端键盘与视口高度](./mobile-keyboard-viewport.md) | useViewportHeight 机制、focus 重试、WKWebView 兜底 | Written |
 | [会话列表刷新机制](./session-list-refresh.md) | 两级按需加载、缓存层级、刷新触发点、强制刷新竞态防护 | Written |
 | [设置弹窗在移动端的布局协议](./settings-dialog-mobile.md) | 小屏全屏化、margin auto 居中、safe-area 陷阱、滚动链、对话区字号与内容宽度模式 | Written |

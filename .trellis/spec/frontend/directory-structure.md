@@ -20,10 +20,12 @@
 
 ## 真实目录树
 
+计数按 `find` 实测（2026-09-27）；增删文件时同步，别只改总数。
+
 ```text
 仓库根
-├── app/           80 files   Next.js App Router：UI 入口 + 全部 HTTP API
-│   ├── api/       73 files   = 57 个 route.ts + 16 个 *.test.mjs
+├── app/           84 files   Next.js App Router：UI 入口 + 全部 HTTP API
+│   ├── api/       75 files   = 58 个 route.ts + 17 个 *.test.mjs
 │   │   ├── agent/{new,running}/route.ts
 │   │   ├── agent/[id]/{route,events/route,bash-output/route,lease/route}.ts
 │   │   ├── sessions/{route.ts,search/route.ts,[id]/{route,state,context,export,auto-name}.ts}
@@ -32,23 +34,24 @@
 │   │   ├── auth/{providers,api-key/[provider],login/[provider],logout/[provider]}/route.ts
 │   │   ├── models/route.ts + models-config/{catalog,discover,test}/route.ts
 │   │   ├── plugins/  skills/  subagents/  terminal/  git/  worktrees  file-index  cwd/
-│   │   └── web-auth  push  provider-usage  project-trust  extension-ui  tools/settings …
+│   │   └── web-auth  push  provider-usage  project-trust  extension-ui  append-system  tools/settings …
 │   ├── layout.tsx / page.tsx / manifest.ts
 │   ├── login/page.tsx                         唯一另一个 page，也是唯一带 "use client" 的 app 文件
 │   └── globals.css / settings.css             全局样式（CSS 变量、@font-face、对话区字号链）
-├── components/    89 files   React 客户端组件（平铺）
-│   ├── *.tsx               42   PascalCase 组件，全部具名导出
+├── components/    92 files   React 客户端组件（平铺）
+│   ├── *.tsx               43   PascalCase 组件，全部具名导出
 │   ├── *.ts                 3   kebab-case 组件内纯逻辑
 │   ├── *.module.css         1   ChatMinimap.module.css（全仓库唯一 CSS Module）
-│   └── *.test.mjs          43   与组件同目录同前缀
-├── hooks/         19 files   11 个 use*.ts|tsx（全部首行 "use client"）+ 8 个测试
-├── lib/          269 files   140 .ts（kebab-case，服务端 + 共享逻辑混合）+ 129 .test.mjs
+│   └── *.test.mjs          45   与组件同目录同前缀
+├── hooks/         20 files   11 个 use*.ts|tsx（全部首行 "use client"）+ 9 个测试
+├── lib/          310 files   158 .ts（kebab-case，服务端 + 共享逻辑混合）+ 145 .test.mjs
+│                             + 7 个 portable 包文件（ask-user/portable 的 LICENSE/README/package.json 等）
 │   ├── ask-user/            7   后端子系统：index.ts(barrel) + store/persist/tool/types/…
 │   └── i18n/                8   format.ts + registry.ts + types.ts + messages/{en,zh-CN,zh-TW}.ts
-├── e2e/            8 files   7 个 .mjs（Playwright 回归）+ README.md
+├── e2e/           11 files   10 个 .mjs（Playwright 回归）+ README.md
 ├── bin/            5 files   npm CLI 入口 pi-web（CommonJS）
 ├── scripts/        1 file    release-npm.sh
-├── docs/          14 files   10 .md（用户/贡献者指南 + adr/0001-0004）+ 4 张图片
+├── docs/          15 files   11 .md（用户/贡献者指南 + adr/0001-0005）+ 4 张图片
 ├── public/        80 files   fonts/、icons/、sw.js、offline.html（随 npm 包发布）
 ├── .trellis/                 Trellis workflow（spec / tasks / scripts）
 ├── .agents/                  Trellis 技能（skills/*/SKILL.md）
