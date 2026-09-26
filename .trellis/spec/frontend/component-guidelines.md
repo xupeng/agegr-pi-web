@@ -9,7 +9,7 @@
 ### `"use client"` 判据
 
 - 判据是**文件内是否调用 hook / 浏览器 API / 事件回传**，不是"是不是组件"。
-  `components/` 42 个 `.tsx` 里 37 个带指令；不带的 5 个都是无状态展示/图标：
+  `components/` 43 个 `.tsx` 里 38 个带指令；不带的 5 个都是无状态展示/图标：
   `components/FileIcons.tsx`、`ProviderIcon.tsx`、`SystemPromptPanel.tsx`、
   `ThemeIcon.tsx`、`ThinkingIcon.tsx`。
 - 现有指令均放在文件首行，新文件沿用（`components/MarkdownBody.tsx:1`）；这不是说框架禁止前置注释。

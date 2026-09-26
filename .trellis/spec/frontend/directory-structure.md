@@ -11,8 +11,8 @@
 - **本仓库没有 `src/`**。源码在仓库根的 `app/ components/ hooks/ lib/ public/` 下，
   `tsconfig.json` 的 `paths["@/*"]` 也直接映射到**仓库根**（不是 `src/`，也不是 `lib/`）。
 - 组织方式是**按技术层扁平组织**，不按 feature 建目录：`components/` 是平的
-  （42 个 `.tsx` 直接躺在目录下，没有 `components/<Feature>/` 这种子目录）；
-  `lib/` 有 127 个顶层 `.ts`。仅有的两个子目录 `lib/ask-user/`、`lib/i18n/` 是既有子系统。
+  （43 个 `.tsx` 直接躺在目录下，没有 `components/<Feature>/` 这种子目录）；
+  `lib/` 有 135 个顶层 `.ts`。仅有的两个子目录 `lib/ask-user/`、`lib/i18n/` 是既有子系统。
 - `README.md` 的 `## Repository Layout` 是同一份描述的另一入口；改结构时两边同步，
   避免两份说法漂移。
 
@@ -49,10 +49,10 @@
 │   ├── ask-user/            7   后端子系统：index.ts(barrel) + store/persist/tool/types/…
 │   └── i18n/                8   format.ts + registry.ts + types.ts + messages/{en,zh-CN,zh-TW}.ts
 ├── e2e/           11 files   10 个 .mjs（Playwright 回归）+ README.md
-├── bin/            5 files   npm CLI 入口 pi-web（CommonJS）
+├── bin/            6 files   npm CLI 入口 pi-web（CommonJS）
 ├── scripts/        1 file    release-npm.sh
 ├── docs/          15 files   11 .md（用户/贡献者指南 + adr/0001-0005）+ 4 张图片
-├── public/        80 files   fonts/、icons/、sw.js、offline.html（随 npm 包发布）
+├── public/       186 files   fonts/、icons/、sw.js、offline.html（随 npm 包发布）
 ├── .trellis/                 Trellis workflow（spec / tasks / scripts）
 ├── .agents/                  Trellis 技能（skills/*/SKILL.md）
 ├── .pi/                      本项目自己的 pi 配置（agents / prompts / extensions）
@@ -110,11 +110,11 @@
 
 | 对象 | 规则 | 实测 | 反例 |
 |------|------|------|------|
-| React 组件文件 | `PascalCase.tsx` | 42/42 | 无 |
+| React 组件文件 | `PascalCase.tsx` | 43/43 | 无 |
 | 组件内纯逻辑 | 与组件同目录的 `kebab-case.ts` | 3/3 | 无 |
-| 通用库模块 | `lib/**/kebab-case.ts` | 140/140，**0 个文件名含大写** | 无 |
+| 通用库模块 | `lib/**/kebab-case.ts` | 156/158，2 个例外：`lib/i18n/messages/{zh-CN,zh-TW}.ts`（BCP-47 文件名） | `lib/i18n/messages/zh-CN.ts`、`zh-TW.ts` |
 | Hook | `hooks/use*.ts`；需要 JSX 时 `use*.tsx` | 11/11 以 `use` 开头；仅 `useI18n.tsx` 是 `.tsx` | 无 |
-| 单元测试 | 与被测代码同目录，通常同前缀 + `.test.mjs`；也有按主题命名的 `hooks/model-loading.test.mjs` | 198 个 `.test.mjs` 位于五个测试根目录 | 没有独立 `tests/`，没有 vitest/jest |
+| 单元测试 | 与被测代码同目录，通常同前缀 + `.test.mjs`；也有按主题命名的 `hooks/model-loading.test.mjs` | 219 个 `.test.mjs` 位于五个测试根目录 | 没有独立 `tests/`，没有 vitest/jest |
 | 特性化测试 | `<Name>.<feature>.test.mjs` | `components/ChatInput.send-shortcut.test.mjs`、`hooks/useAgentSession.pending-ask.test.mjs`、`app/api/files/stream-route.test.mjs` | — |
 | CSS | 全局只有 `app/globals.css`、`app/settings.css`；组件级必须 `*.module.css` | 3 个 css 文件 | 无其他 CSS 文件 |
 | e2e 脚本 | `e2e/<feature>.mjs` | 见「e2e 与脚本」 | 没有 `.spec.ts` |
@@ -127,14 +127,14 @@
 
 边界**不是靠目录划分的**，而是靠文件级 `"use client"` + `app/api/**` 是唯一路由层。
 
-- `app/api/**` 全部是服务端（57 个 `route.ts`）。
-- **`lib/` 是混合目录，不能整目录当服务端**：约 38 个 `lib/*.ts` import 了 node 内建模块
+- `app/api/**` 全部是服务端（58 个 `route.ts`）。
+- **`lib/` 是混合目录，不能整目录当服务端**：约 41 个 `lib/*.ts` import 了 node 内建模块
   （`fs`/`path`/`os`/`child_process`/`crypto`/`net`/`stream`/`readline`/`worker_threads` 等），
   例如 `lib/file-access.ts`、`lib/rpc-manager.ts`、`lib/session-reader.ts`、`lib/worktree.ts`；
-  其余 89 个没有直接静态导入这些 node 内建模块；这不保证其传递依赖可进浏览器，
+  其余 94 个没有直接静态导入这些 node 内建模块；这不保证其传递依赖可进浏览器，
   客户端值导入前仍须检查依赖链。
   服务端边界**没有** `import "server-only"` 之类的守卫（实测 0 处），靠约定。
-- 共 49 个文件带 `"use client"`：`components/` 37、`hooks/` 11、`app/login/page.tsx` 1。
+- 共 50 个文件带 `"use client"`：`components/` 38、`hooks/` 11、`app/login/page.tsx` 1。
   `hooks/` **全部**带，新 hook 默认加。
 
 ### 客户端复用含 node 的模块：只能 `import type`
