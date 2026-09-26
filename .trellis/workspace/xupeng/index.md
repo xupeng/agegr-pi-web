@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 16
-- **Last Active**: 2026-09-25
+- **Total Sessions**: 17
+- **Last Active**: 2026-09-26
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~734 | Active |
+| `journal-1.md` | ~773 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 17 | 2026-09-26 | Render ask_user through a LAN-capable MCP Apps view | `54bca43`, `1dbd2fc`, `32ce12f` | `feat/ask-user-mcp-apps` |
 | 16 | 2026-09-25 | Verify archived ask_user probes | `d463266` | `feat/portable-ask-user-extension` |
 | 15 | 2026-09-25 | Prototype portable ask_user extension | `aadfb6f`, `41ffaa8`, `75eaaab` | `feat/portable-ask-user-extension` |
 | 14 | 2026-09-25 | Evaluate ask_user invocation behavior | `2c784ac`, `c623f12` | `feat/ask-user-behavior-evaluation` |
