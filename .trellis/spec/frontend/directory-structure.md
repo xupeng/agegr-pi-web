@@ -43,12 +43,12 @@
 │   └── *.test.mjs          43   与组件同目录同前缀
 ├── hooks/         19 files   11 个 use*.ts|tsx（全部首行 "use client"）+ 8 个测试
 ├── lib/          269 files   140 .ts（kebab-case，服务端 + 共享逻辑混合）+ 129 .test.mjs
-│   ├── ask-user/           10   后端子系统：index.ts(barrel) + store/persist/tool/types/…
+│   ├── ask-user/            7   后端子系统：index.ts(barrel) + store/persist/tool/types/…
 │   └── i18n/                8   format.ts + registry.ts + types.ts + messages/{en,zh-CN,zh-TW}.ts
 ├── e2e/            8 files   7 个 .mjs（Playwright 回归）+ README.md
 ├── bin/            5 files   npm CLI 入口 pi-web（CommonJS）
 ├── scripts/        1 file    release-npm.sh
-├── docs/          13 files   9 .md（用户/贡献者指南 + adr/0001-0003）+ 4 张图片
+├── docs/          14 files   10 .md（用户/贡献者指南 + adr/0001-0004）+ 4 张图片
 ├── public/        80 files   fonts/、icons/、sw.js、offline.html（随 npm 包发布）
 ├── .trellis/                 Trellis workflow（spec / tasks / scripts）
 ├── .agents/                  Trellis 技能（skills/*/SKILL.md）
@@ -148,26 +148,6 @@
 `lib/paths.ts` 的能力必须在服务端预先解析（`/api/worktrees` 返回已解析的 `currentWorktreePath`），
 客户端不得自行比较路径。
 
-### 同一模块里既有纯浏览器 helper 又有 node 读取：必须拆开
-
-2026-09-26（PR #9）实测：`lib/ask-user/view-fonts.ts` 曾是「纯函数 + `readViewFontManifest()`」
-的混合体（后者用 `await import("node:fs/promises")` 与 `await import("node:path")`），
-被 `"use client"` 的 `components/AskUserAppHost.tsx` **值导入**（链路 `ChatWindow.tsx` → `AppShell.tsx`）：
-
-| 校验 | 结果 |
-|------|------|
-| `tsc --noEmit` | 通过 |
-| `node --experimental-strip-types --test` | 通过（node 自己解析 `node:` 没问题） |
-| `npm run dev`（Turbopack） | 通过 —— 所以本地 dev 验证**跑不出**这个问题 |
-| `npm run build`（`next build --webpack`，CI 的 e2e job 第一步） | 失败：`Module build failed: UnhandledSchemeError: Reading from "node:fs/promises" is not handled by plugins` |
-
-结论：客户端可达的模块只能是纯浏览器代码，node 读取单独放服务端模块
-（现状：`lib/ask-user/view-fonts.ts` 纯函数 + `lib/ask-user/view-font-manifest.ts` 只读文件，
-由 `app/api/ask-user/font-faces/route.ts` 值导入后者）。**动态 `await import("node:…")` 不是豁免**：
-webpack 在构建期按字面量解析它，`next dev` 才容忍。自检方式：
-`grep -n "node:" <被客户端值导入的模块>` 必须为空 —— `lib/ask-user/view-fonts.test.mjs`
-有一条断言把这条规则钉住，文件读取的那半边另测在 `view-font-manifest.test.mjs`。
-
 ---
 
 ## 路径别名与构建边界
@@ -184,7 +164,7 @@ webpack 在构建期按字面量解析它，`next dev` 才容忍。自检方式�
 
 - `tsconfig.json` 的 `include` 是 `**/*.ts` + `**/*.tsx`，
   **`*.test.mjs` 与 `e2e/*.mjs` 不参与 `tsc` 类型检查**，正确性只靠运行时。
-- `next.config.ts:19-27 serverExternalPackages` 见「新代码该放哪」。
+- `next.config.ts:19-25 serverExternalPackages` 见「新代码该放哪」。
 - `eslint.config.mjs` 用 `eslint-config-next` 的 `core-web-vitals` + `typescript` 两套 flat config，
   **忽略 `.agents/**`、`.pi/**`、`.trellis/**`**，并关掉 `react-hooks/immutability`、
   `react-hooks/refs`、`react-hooks/set-state-in-effect`（代码里依赖这些关闭，别照搬通用规则）。

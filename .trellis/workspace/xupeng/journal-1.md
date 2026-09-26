@@ -1045,3 +1045,51 @@ Replaced the loopback-only MCP Apps sandbox with a single opaque-origin srcdoc v
 
 - 任务 C：AskUserAppHost 瘦身为适配器（取文案 + 映射 CSS 变量 + 转发命令），本地跑通 ask 全流程后再删除整条 iframe 管线与 4 个 @modelcontextprotocol/* + zod 依赖，重写 ask-user-protocol.md 并新增 ADR
 - 父任务与遗留 09-25 归档随 C 的 PR 合并（父任务无独立 PR）
+
+
+## Session 24: ask_user 共享 React 视图重构 · 任务 C：切换渲染并删除 MCP Apps 管线
+
+**Date**: 2026-09-26
+**Task**: ask_user 共享 React 视图重构 · 任务 C：切换渲染并删除 MCP Apps 管线
+**Branch**: `feat/ask-user-retire-mcp-apps`
+
+### Summary
+
+任务 C 完成，父任务与遗留 09-25 归档随本分支。两件事分开提交：先把渲染切到共享 React 组件并补上真实的浏览器覆盖，跑通闸门之后再删整条 iframe 管线。AskUserAppHost 从 605 行瘦到 117 行，只留下宿主真正特有的三件事（12 个标签取自 i18n、Pi Web token 映射到 --pi-ask-*、转发 submit/cancel）；随后删掉 14 个管线文件、zod 与四个 @modelcontextprotocol/* 依赖、两条 API 路由、四个 i18n 键与 next.config 里对应的 externals。被删行为 2886 行，规划时量出的行为:管线比是 669:1596。
+
+### Main Changes
+
+- components/AskUserAppHost.tsx 重写为适配器：删掉投影请求、iframe/srcDoc/sandbox、握手、postMessage 校验、字体清单与字节投递、loading/apps/failed 三态与重试控件，以及 sessionId prop（ChatWindow 同步不再传）。data-ask-user-view 固定为单一值 shared —— 三态描述的是 iframe 生命周期，单渲染器下它不是状态
+- 新增 e2e/ask-user.mjs 并接进 run.mjs：这是被删路径从来没有过的浏览器覆盖。fixture 不需要模型——往临时 agent dir 写一条持久化 open ask，GET /api/sessions/[id]/state 会回退返回它，useAgentSession 在 mount 时水合出卡片；ask_submit/ask_cancel 由 page.route 本地应答并挂住，好观察到锁定态，再分别用 close/reject 释放
+- e2e 断言覆盖：结构渲染、roving tabindex（未选中单选组恰有一个 tab stop）、方向键移动并选中、多选 Space 切换而方向键不动作、选项与自定义文本互斥、多选共存、supplement 进入 ask_submit 请求体、提交锁定 + 摘要 ✓ values · otherText + 状态行获得焦点、reject 显示 role=alert 并解锁可重试、重试清除陈旧错误、取消显示「取消中」；另加 assertThemeMapping 逐主题断言卡片 resolve 出的背景/文字/边框色等于宿主 --bg-panel/--text/--border，五套主题至少三种不同
+- 删除清单全部执行：mcp-view-html.ts + 测试、mcp-app-adapter.ts + 测试、app/api/agent/[id]/ask-view/route.ts、app/api/ask-user/font-faces/route.ts + 测试、theme-tokens.ts + 测试、view-fonts.ts + 测试、view-font-manifest.ts + 测试、components/AskUserAppFailure.tsx、三语 chat.askUserAppFailed* 四键
+- package.json 去掉 zod@4.2.0 与四个 @modelcontextprotocol/*，package-lock.json 同步更新（CI 跑 npm ci，两者必须一致）；next.config.ts 去掉对应的四条 serverExternalPackages，lib/next-config.test.mjs 里那条「/fonts/** 不需要 CORS」改为「四个包不得再出现在 externals」的缺位断言
+- ask-user-protocol.md（31KB）围绕共享视图重写：宿主/包切分、--pi-ask-* 契约与「为什么在使用点读而不在 .pi-ask 上声明」（声明会遮蔽宿主在祖先容器上的映射）、标签归属（Pi Web 覆盖 12 键故永不读包内表，PA 直接用包内表，故两侧各自只有一个文案真相来源）、data-ask-user-view、controller 的 reducer/选择器契约、a11y 契约、宿主适配器的三项职责；保留仍然成立的会话生命周期、注入、submit/cancel 协议与容器信任；放开 light-dark() 禁令（同文档内的 CSS 变量不是不可信输入）
+- 新增 docs/adr/0004-ask-user-shared-react-view.md：反转 PR #9（9c2cd86）的方向、三个被否掉的替代方案（封存 iframe 路径 / 双渲染器加开关 / 把视图拆成独立包）、后果，以及诚实的代价——第三方 MCP Apps 宿主无法渲染这个视图
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `0101e0a` | (see git log) |
+| `853a0eb` | (see git log) |
+| `d8f3807` | (see git log) |
+| `7058d8b` | (see git log) |
+| `826482a` | (see git log) |
+
+### Testing
+
+- [OK] env -u NODE_PATH XDG_STATE_HOME= E2E_SERVER_MODE=dev node e2e/run.mjs：12/12 PASS，1280px 与 390px 各一遍；删除前（0101e0a）与删除后（b5774aa）各跑过一轮
+- [OK] env -u NODE_PATH XDG_STATE_HOME= npm test：1497 pass / 0 fail / 10 suites。相对切换渲染后的 1536 少 39，恰是六个被删测试文件里的 test() 数
+- [OK] node_modules/.bin/tsc --noEmit 退出 0；npm run lint：No issues found（516 文件）
+- [OK] node 脚本逐键核对 package.json 与 package-lock.json 的 dependencies/devDependencies 相等；npm ls 退出 0
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 把 C 的 PR（base = B 的分支）与 A、B 的 PR 一起评审；三条 PR 是 stacked，A → personal，B → A，C → B，都不自行合并
+- 评审通过后合并顺序 A → B → C，然后把最上层的 base 重定向到 personal；父任务的集成评审项（全仓库残留搜索、三语键集合相等）已在 C 内完成
+- PA 仓库按 B 的 portable/react/README.md 接入：直接用包内三语默认表，不需要覆盖 labels

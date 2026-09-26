@@ -689,9 +689,11 @@ button.extension-widget-trigger:focus-visible {
 
 :root {
   --font-mono: "Cascadia Code", 'JetBrains Mono', 'Fira Code', 'Consolas', ui-monospace, 'PingFang SC', 'Microsoft YaHei', monospace;
-  /* Chat text stack. The sandboxed ask_user view reads it through
-     getComputedStyle so its own text renders in the same faces (Oxanium for
-     Latin, LXGW WenKai Screen for CJK); see components/AskUserAppHost.tsx. */
+  /* Chat prose stack: the markdown body and the message text. The ask_user
+     view deliberately does NOT use it - it takes the UI stack off `body`
+     instead, so its labels keep the sans faces of the surrounding chrome
+     rather than this stack's kai glyphs; see readFontFamilyStack() in
+     components/AskUserAppHost.tsx. */
   --font-content: "Oxanium", "LXGW WenKai GB Screen", "LXGW WenKai Screen", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
 }
 

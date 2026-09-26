@@ -1,0 +1,8 @@
+# Execution order (planning only)
+
+1. Start the behavioral-evaluation child on its own Pi Web feature branch after planning approval. Freeze model/settings, run the four archived scenarios three times per old/new prompt version in isolated sessions, save redacted evidence and report observation limits. Avoid the running 8505 checkout's `.next/dev/lock`.
+2. Start the portable-extension child in Pi Web after its own task context is active. Prototype local package entry and `open` bridge first; test missing-bridge failure. Move shared schema/validation/tool metadata behind that entry while keeping Pi Web's inline adapter and API unchanged. Test local package load under SDK 0.85.1 without publishing.
+3. In the separate PA repository, confirm the unrelated `feat/pi-pa-commands` branch has been integrated or use an isolated worktree before creating the ask_user feature branch for task `09-25-ask-user-host-bridge`. Prove external entry/bridge negotiation and a continuation after runtime teardown in tests before building Web UI. Implement durable ask state, origin gating, authenticated routes, snapshot/SSE projection and form. Do not modify or include `.pi/settings.json` and `.pi/extensions/pa.ts`.
+4. Verify cross-host contracts and failure cases; review Pi Web and PA diffs independently. Do not enable the live PA service, publish a package, push or open PRs without the relevant delivery approval.
+
+Rollback points: keep the PA production extension switch off and install only in temporary `$PA_HOME`; Pi Web's existing inline extension can remain the fallback until the extracted entry passes equivalent protocol tests. If SDK bridge injection cannot be proven, stop and revise the technical design instead of adding an ambient unauthorized hook.

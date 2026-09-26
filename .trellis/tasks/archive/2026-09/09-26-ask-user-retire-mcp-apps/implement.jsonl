@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/frontend/ask-user-protocol.md", "reason": "Rewrite target: the MCP Apps rendering section becomes the shared React view section, and the light-dark prohibition must be relaxed. Also the checklist of protocol behaviour that must not change."}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "Rewrite target: file map entries for every deleted module, plus the PR #9 additions to roll back."}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Rewrite target: the PR #9 additions describing pendingAsk app-view state and the DOM marker."}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Rewrite target: PR #9 additions about the degraded view and the loading placeholder."}

@@ -13,7 +13,7 @@ PA      its own host adapter               same, another repository
 ```
 
 The view never imports a host: no `@/` alias, no `lib/i18n`, no Next, no
-`node:`, no `lib/ask-user/theme-tokens.ts`. It only reads props and the
+`node:`, no host palette module. It only reads props and the
 `--pi-ask-*` CSS namespace. `react` is a peer dependency; the host also provides
 `react-dom` (the component itself never imports it).
 

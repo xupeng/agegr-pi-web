@@ -1,12 +1,14 @@
 # ask_user 提问协议
 
-> Pi Web 的 `ask_user` 工具契约、状态机与前后端协议。
+> Pi Web 的 `ask_user` 工具契约、状态机、共享 React 视图渲染与前后端协议。
 
 ## 背景与设计决策
 
-`ask_user` 让模型向用户提问，问题以应用交付的 MCP Apps 视图呈现，答案以 follow-up 消息唤醒模型。实现参考 `pi-web` fork（`src/server/sessions/askUserTool.ts` + `pendingAskStore.ts`），移植为 agegr-pi-web 架构。
+`ask_user` 让模型向用户提问，问题以**共享 React 组件**（`lib/ask-user/portable/react/AskUserView`）呈现，答案以 follow-up 消息唤醒模型。实现参考 `pi-web` fork（`src/server/sessions/askUserTool.ts` + `pendingAskStore.ts`），移植为 agegr-pi-web 架构。
 
 **核心决策：异步非阻塞，不用 `ctx.ui`。** `ctx.ui.*` 是阻塞式（agent 运行被 pin 住、SSE 长连、状态易失）。`ask_user` 调用后返回 `terminate: true` 结束本轮运行，问题存为进程级状态，答案通过 `sendCustomMessage(..., { triggerTurn: true, deliverAs: "followUp" })` 送达模型。
+
+**渲染决策：共享 React 视图，不用 MCP Apps iframe。** 2026-09-26 起 `ask_user` 的唯一呈现是一个框架无关 controller + React 组件（`lib/ask-user/portable/react/`），由每个宿主做一层薄适配器。MCP Apps 的 opaque-origin `srcdoc` 沙箱、握手、消息校验与字体字节投递已整体删除。决策与「删除而非封存」的理由在 `docs/adr/0004-ask-user-shared-react-view.md`；本文件末尾有一节摘要。
 
 ## 工具契约
 
@@ -79,17 +81,17 @@
 
 - `AskUserSubmission.supplement?`：用户补充的问题之外的自由文本（多行输入框，≤4000，trim 空丢弃），随 `ask_submit` 提交；`AskUserOutcome.supplement?` 记录。
 - `renderAskUserAnswersText` 末尾附加 `Supplement (user-provided, beyond the questions): <json>`，模型可据此获取补充信息。
-- 浏览器侧 `submitAsk(askId, answers, supplement?)` 传递；应用视图底部"补充信息（可选）"多行框。
+- 浏览器侧 `submitAsk(askId, answers, supplement?)` 传递；共享视图底部的"补充信息（可选）"多行框。
 
 ### 提交锁定
 
-- 应用视图（`ui://pi-web/ask-user.html`）提交/取消后进入 `submitted`/`cancelling` 状态（`locked`）：选项按钮 disabled、输入 readOnly、操作栏显示"已提交 ✓"、每题下渲染提交摘要（`✓ values · otherText`）。宿主不再渲染这套状态；锁定完全在视图脚本内。
-- 正常路径 `syncPendingAsk(response)`（pendingAsk undefined）使宿主消失；若因 SSE 关闭/重水合竞态视图残留，视图自身的 `locked` 保证不可再编辑——答案已交付，避免"不确定最终提交了什么"。
-- 单选问题：选选项清空自定义文本、输入自定义文本取消选项（互斥）；多选问题选项与自定义可共存，自定义输入框占位文案区分（`askUserMultipleOtherPlaceholder`）。
+- 提交/取消后 controller 进入 `submitting`/`cancelling` 状态（`locked`）：选项按钮 disabled、输入 readOnly、操作栏显示"已提交 ✓"、每题下渲染提交摘要（`✓ values · otherText`）。**锁定在 controller 内**，宿主不再维护第二份锁状态。
+- 正常路径 `syncPendingAsk(response)`（pendingAsk undefined）使宿主消失；若因 SSE 关闭/重水合竞态视图残留，controller 的 `locked` 保证不可再编辑——答案已交付，避免"不确定最终提交了什么"。
+- 单选问题：选选项清空自定义文本、输入自定义文本取消选项（互斥）；多选问题选项与自定义可共存，自定义输入框占位文案区分（`multipleOtherPlaceholder`）。
 
 ### 状态残留与关闭竞态
 
-- `ChatWindow` 中 `<AskUserAppHost key={pendingAsk.askId} ...>`：ask 切换必须重建宿主，否则旧 ask 的 `status`（submitting/locked）、drafts、supplement 会泄漏到新视图（表现为新视图选项无反应、输入禁用）。
+- `ChatWindow` 中 `<AskUserAppHost key={pendingAsk.askId} ...>`：ask 切换必须重建宿主，否则旧 ask 的 `status`（submitting/locked）、drafts、supplement 会泄漏到新视图（表现为新视图选项无反应、输入禁用）。`AskUserAppHost` 不自己管 remount，`key` 由 `ChatWindow` 提供。
 - 关闭命令（submit/cancel）响应可能晚于新 ask 打开到达：此时服务端对旧 askId 返回 stale，响应无 `pendingAsk` 时不得清掉已打开的新 ask。解析逻辑在 `lib/ask-user/resolve-pending-ask.ts` 的 `resolvePendingAskAfterClose(current, submittedAskId, response)`：当前 ask 与提交 askId 不同 → 保留当前（除非响应显式带替换）。
 - 该模块必须保持零依赖（无 `@/` 别名、无框架导入），才能被纯 Node 测试 jiti 导入。
 
@@ -103,34 +105,130 @@
 - **答案送达是 fire-and-forget**（`closeAsk` 里 `void sendCustomMessage(...).catch(日志)`）：agent 空闲时 `triggerTurn` 走完整 agent prompt，promise 要到整个 turn 结束才 resolve——`await` 它会挂住 `ask_submit` 响应，视图停在"已提交"直到 agent 处理完。提交/取消响应必须立即返回，答案在后台唤醒模型。
 - **跨设备同步**：`ask.closed` SSE 只到达提交设备的实时流（空闲会话的 SSE 在 grace 窗口后已关闭），其他设备收不到。视图显示期间客户端每 3s 轮询 `/api/sessions/[id]/state`（含持久化回退）兜底同步：远端提交/取消后，本端在数秒内关闭视图或切到新 ask。本地提交仍走 `ask_submit` 响应即时关闭。
 
-## MCP Apps 渲染（Pi Web，2026-09-26 起）
+## 共享 React 视图渲染（Pi Web，2026-09-26 起）
 
-`ask_user` 的唯一呈现是 MCP Apps 视图（固定内置文档 `ui://pi-web/ask-user.html`）；宿主不再原生渲染问题表单。设计决策与实测证据在 `.trellis/tasks/09-26-ask-user-mcp-migration/research/{browser-probe,opaque-sandbox-probe}.md`，降级态决策在 `.trellis/tasks/09-26-ask-user-apps-only/`。
+`ask_user` 的唯一呈现是共享 React 组件 `AskUserView`；宿主不再原生渲染问题表单，也不再使用 MCP Apps iframe。设计决策见 `docs/adr/0004-ask-user-shared-react-view.md`，组件契约见 `lib/ask-user/portable/react/README.md`。
 
-- **MCP 适配器** `lib/ask-user/mcp-app-adapter.ts`：进程内 `McpServer` + `Client`（`InMemoryTransport`）注册 app-only 工具 `project_ask_user`（`_meta.ui.resourceUri = ui://pi-web/ask-user.html`，`visibility: ["app"]`）与同名 `ui://` 资源（`text/html;profile=mcp-app`）。它只投影**已经打开的** ask，绝不打开新 ask，也不注册模型可见的第二个 `ask_user`。包版本钉 `@modelcontextprotocol/{client,core,server,ext-apps}@2.0.0` + `zod@4.2.0`，协商出的 core 版本是 `2025-11-25`、Apps 协议是 `2026-01-26`；不要实现或宣称 core `2026-07-28`。
-- **投影接口** `GET /api/agent/[id]/ask-view`：由 `proxy.ts` 鉴权；内存 store 或持久化 ask 存在时返回固定资源 + 有界 projection（含 `uri`/`mimeType`/`appsProtocolVersion`/`toolName`/`toolInput`/`structuredContent`/`content`/`html`），否则 404。没有通用 MCP 端点，也没有通过它开/关 ask 的路径。`coreProtocolVersion` 只用于测试证据，不下发浏览器。
-- **宿主** `components/AskUserAppHost.tsx`：一个 `<iframe sandbox="allow-scripts" srcDoc={内置文档}>`（**不带** `allow-same-origin`，也不带 `allow-forms/popups/downloads/modals`，无 `src`）。视图因此是 opaque origin：宿主发送一律 `postMessage(msg, "*")`，接收只接受 `event.source === iframeRef.contentWindow` **且** `event.origin === "null"`（顺序固定：先比 window 身份，再比 origin）。只转发当前 `sessionId`/`askId` 的 `ask_submit`/`ask_cancel`，回调返回 `undefined` 视为未确认并回 error。
-- **视图文档** `lib/ask-user/mcp-view-html.ts`：固定内置文档，脚本**内联**（opaque origin 永远不匹配 CSP `'self'`，且 `srcdoc` 会继承父页面 CSP，而 Pi Web 自身页面没有 CSP），由 meta CSP 的 `script-src 'sha256-…'` 放行；`style-src 'unsafe-inline'` 是必需项（视图用 `style="…"` 属性）。内联脚本不得包含 `</script`、反引号或 `${`。`ASK_USER_VIEW_SCRIPT_HASH` 与 meta CSP 里的哈希必须等于脚本正文的 `"sha256-" + sha256(脚本).base64`；改脚本后两处一起改（`components/AskUserAppHost.test.mjs` 重算脚本哈希，`lib/ask-user/mcp-view-html.test.mjs` 执行脚本，任一处不同步都会失败）。宿主挂载前仍用 `isBuiltinAskUserViewHtml` 做整段相等校验。
-- **视图脚本的行为回归**：原生卡片删除后，提交/取消锁定与每题提交摘要（`✓ values · otherText`）、补充输入框的透传、单选互斥与多选占位、`ask_submit` 载荷（`answers`/`otherText`/`supplement`）唯一覆盖在 `lib/ask-user/mcp-view-html.test.mjs`：它在最小 DOM shim 上执行**真实内联脚本**并按 `tools/call` 断言。改动视图脚本必须同步这些断言。
-- **视图配色来自宿主 token，禁止在帧内猜调色板**：帧是 opaque origin，既不能继承宿主的 CSS 变量，也不能解析 `var()`。Pi Web 有 5 套主题（light/dark/mist/rose/pine）+ `auto`，所以下发 `theme`（"light"/"dark"）**不足以**决定颜色：宿主把自己**计算后**的值放进 `structuredContent.tokens`（`--bg`/`--bg-panel`/`--bg-hover`/`--bg-selected`/`--border`/`--text`/`--text-muted`/`--text-dim`/`--accent`/`--accent-contrast`/`--chat-content-max-width`），视图写进自己的 `--pi-*` 变量。白名单与取值规则在 `lib/ask-user/theme-tokens.ts`（`sanitizeThemeTokenValue`：只接受 hex/`rgb()/hsl()/oklch()/…`/`transparent`/`currentcolor` 与 `px|rem|em`，拒绝 `;`、`{}`、引号、`<>`、反斜杠、`url(`、`var(`、`expression(`、`!important`、`@` 与超长值），视图脚本内**再查一遍**（内联脚本无法 import，`TOKENS` 表必须与前者手工保持一致）。缺值/非法值退回 Pi Web 浅色调，**不要**再引入 `light-dark(#…)` 之类的第二套硬编码色板。
-- **`colorScheme` 与 `theme` 分工**：`structuredContent.colorScheme`（"light"/"dark"）驱动 `color-scheme`（UA 控件与滚动条），`theme` 只作兼容回退。pine 是暗色主题但名字不是 "dark"，光看名字会把暗色主题渲染成浅色。
-- **层级关系必须与原生卡片一致**（这是"看起来不像 Pi Web"的主因）：卡片主体用 `--bg-panel`，头栏/底栏/详情块/未选中选项/输入框用 `--bg`，边框用 `--border`，选中态是 `--accent` 底 + **`--accent-contrast`** 文字（不是写死 `#fff`：dark 的 `--accent` 是浅蓝 `#a4c2f4`，白字对比度不合格）。度量同样对齐被删卡片：容器 radius 10 / `max-width: var(--pi-max-width)`、选项 `padding:7px 10px` + radius 7、详情块 `line-height:1.9`、锁定态 `opacity:0.75`、`--chat-font-size-offset` 参与所有字号。问句之间用原生卡片的 `display:grid; gap:14px`（缺它时相邻问句间距为 0px，实测修复前 13 问的 12 个间隔全是 0）；小度量同样照抄：选项符号 `opacity:0.85`、提交按钮 `padding:7px 16px`（取消 14px）、底栏提示用 `--text-dim` 而不是 `--text-muted`。Pi Web 没有 success/danger token，视图内的 `#16a34a`/`#ef4444` 与宿主组件（`SkillsConfig`/`FileExplorer`）保持同一组值。
-- **a11y 与键盘契约**：单选问题用 `role="radiogroup"` + `aria-labelledby` 指向问题文本（问题文本有 `pi-web-ask-q-<index>` id），选项是 `role="radio"` + `aria-checked` + **roving tabindex**（整个组一个 tab 停靠点；已选项或第一项为 `0`，其余 `-1`），`ArrowDown/Right`、`ArrowUp/Left`、`Home/End` 移动并选中，空组时前进箭头选第一项、后退箭头选最后一项；多选问题用 `role="group"` + `role="checkbox"`，全部留在 tab 序列里，`Space` 切换，不响应方向键。状态字符（`○/◉/☐/☑`、`✓`）一律 `aria-hidden="true"`，状态只由 `aria-checked` 表达。已答计数与锁定状态是 `role="status" aria-live="polite"`（锁定时把焦点移到状态行，避免控件 disabled 后焦点掉到 body），底部错误是 `role="alert"`，补充输入框与自定义输入框各有 `aria-label`。卡片是 `role="dialog"` + `aria-label`，**不带** `aria-modal`：跨沙箱边界无法做焦点陷阱，声称模态是假的。焦点环由脚本注入的一条 `:focus-visible` 规则提供（`style-src 'unsafe-inline'` 放行该 `<style>` 元素）；输入控件**不得**再写内联 `outline:none`，内联样式会压过这条规则（实测输入框曾因此完全没有焦点环）。
-- **帧内字体只能由宿主"投递字节"，不能让帧自己去取**：CSP 是 `default-src 'none'`，`srcdoc` 里也没有 `@font-face`；更关键的是 Chromium 会把 opaque origin 对 `/fonts/**` 的字体请求判为本地网络访问并拒绝（实测 `from origin 'null' … blocked by CORS policy: Permission was denied for this request to access the 'loopback' address space`），加 `Access-Control-Allow-Origin: *` 与 `Access-Control-Allow-Private-Network: true` 都无效，因为该权限无法授予 opaque origin。链路因此固定为四步：①`lib/ask-user/view-font-manifest.ts` 把 `app/fonts.css` + `app/fonts-lxgw-wenkai-screen.css` 解析成**清单**（`family/style/weight/display/unicode-range/url`，只允许 Pi Web 自有的两个 family 与 `/fonts/**` 源），由 `GET /api/ask-user/font-faces` 以 JSON 下发（`Cache-Control: private, max-age=300`）；②宿主用 `collectViewText`（投影里所有字符串 + 视图自绘字符 `0123456789○◉☐☑✓·—…`）算出正文字符集，用 `filterViewFontFacesByStack` **只保留宿主下发的字体栈里出现过的 family**，再用 `selectViewFontFaces` 挑 unicode-range 命中的子集（中文问句只挑真正命中的子集；上限 `ASK_VIEW_FONT_FACE_LIMIT = 128` 个、`ASK_VIEW_FONT_BYTE_LIMIT = 8MiB`，按清单顺序截断，Oxanium 在前所以拉丁永远保留）。UI 栈不引用自托管 CJK 字体，所以中文**不投递任何字节**（13 问中文问句实测只下发 Oxanium 的 2 个子集，几十 KiB）；放宽上限是为了避免长问句在 32 个子集处被截断后，同一张卡片里混用两种字体；③宿主在自己源上取 woff2 `ArrayBuffer`（按 url 缓存）并随投影一起 `postMessage` 进帧；④视图脚本 `installFonts()` 逐条校验（family 白名单、`style/weight/unicode-range` 正则、`data` 必须是 `ArrayBuffer` 且以 woff2 签名 `wOF2` 开头、单文件 ≤2MiB、总数 ≤128）后 `new FontFace(family, bytes, {style, weight, unicodeRange, display})` + `document.fonts.add`。`FontFace` 由内存字节构造，**不需要 URL、也不需要 `font-src`**，于是 CSP 保持 `default-src 'none'` 不变，帧依旧没有任何网络出口。宿主侧超时（`ASK_VIEW_FONTS_TIMEOUT_MS = 2500`）或清单不可用时退化为系统字体栈，不影响握手。
-- **问句文字用 UI 栈（`document.body`），不用聊天正文栈**：宿主 `readFontFamilyStack()` 读 `getComputedStyle(document.body).fontFamily`，也就是被删原生卡片从消息列继承到的栈（`"Oxanium", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`）：拉丁落到自托管的 Oxanium，中文落到**设备自身 sans**（iOS PingFang SC，Linux/Android Noto Sans CJK）。实测平台字体：原生卡片问句 = `Liberation Sans` + `Noto Sans CJK JP`，而改用 `--font-content` 后帧内问句 = `LXGW WenKai Screen`（楷体同字号下明显更大更重），正是用户报的"字体不对、字号太大"的根因。`--font-content`（`:root` 定义，`.markdown-body` 用 `var(--font-content)`）**只是聊天正文栈，视图不得使用**。视图侧仍有 `sanitizeFontStack` 兜底，宿主未给栈时用 `-apple-system, system-ui, 'Segoe UI', Roboto, sans-serif`，避免掉到 UA 衬线。
-- **帧必须自称 mobile-optimized，且表单控件必须继承字体**：`srcdoc` 是独立文档，父页面的 viewport meta 不生效；没有 `<meta name="viewport" content="width=device-width, initial-scale=1">` 时移动端会放大**块级**文本，而选项按钮/头栏这些 flex 行不变，于是问句看起来比选项大 1.6~1.8 倍（用户手机截图按字宽/字高反推：问句 ≈24px、选项 ≈13px；本地 headless Chromium 无法复现该引擎行为，故按标准契约修复）。`installBaseStyles()` 因此注入 `html{-webkit-text-size-adjust:100%;text-size-adjust:100%}`（WebKit 只认前缀，Blink/Gecko 认标准属性）与 `button,input,textarea{font-family:inherit}`：UA 样式表会给表单控件自己的字体（实测选项文字落到 `Arial`/`Liberation Sans` + 系统 CJK），不 inherit 时同一张卡片里问句与选项就是两种字体。
-- **隔离实测**（Chromium）：帧内 `document.cookie`、`localStorage`、`window.parent.document` 全部抛 `SecurityError`，`location.origin === "null"`；同一份文档若带 `allow-same-origin` 则三者都可读，浏览器还会警告可以逃逸沙箱。
-- **可移植性**：该方案不依赖 loopback 主机名对，在 `127.0.0.1`、`localhost`、局域网 IP、Tailscale 地址、自定义域名和 HTTPS 下同样成立。不要再引入"对侧 loopback 主机名"或第二个端口的沙箱，也不要把视图改成 `allow-same-origin`。
-- **失败与重试**：`NEXT_PUBLIC_PI_WEB_ASK_USER_APPS` 已删除——单一渲染器后它没有意义。投影非 OK、畸形、`html` 非内置文档、iframe `onError` 或 6s 握手超时都进入降级态；`askUser` 设置与 `PI_WEB_ASK_USER` 仍是工具本身的开关，与渲染路径无关。降级态提供重试（bump `reloadKey`，重新触发投影 fetch + 握手，不刷新页面），ask 保持打开。
-- **降级态契约**（`failed`）：一行错误（`chat.askUserAppFailed`）、一句恢复提示（`chat.askUserAppFailedHint`）、从 `props.ask.questions`（客户端 pending ask，**不是**失败的投影）渲染的**只读**问题列表（问题/详情/选项纯文本，`multiple` 时附 `chat.askUserAppFailedMultiple`），以及唯一可交互控件"重试"（`chat.askUserAppFailedRetry`）。无输入、无提交、无取消；文本节点由 React 转义，无 `dangerouslySetInnerHTML`。`props.ask` 是源，所以 `/ask-view` 404 也能显示问题；若 ask 已在别处关闭/取代，3s `/api/sessions/[id]/state` 轮询会清除或替换它。JS 禁用时不会渲染任何 ask 呈现（`pendingAsk` 由客户端加载后才存在），视图脚本被 CSP 拦截时 6s 握手超时后进入 `failed`；两者都是接受的取舍。
-- **当前渲染路径可观测**：宿主在 DOM 上标注 `data-ask-user-view`，只有三个值：`loading`（投影/握手进行中，`aria-busy` 占位，iframe 以 `position: fixed; left: -10000` 离屏挂载，避免零高度闪烁）、`apps`（`ui/notifications/size-changed` 在 tool-result 之后到达，iframe 显形）、`failed`（降级态）。`native` 与 `apps-pending` 标记已删除。`document.querySelector('[data-ask-user-view="apps"]')` 非空 = 正在用 Apps 视图。
-- **偏差记录**：Apps `2026-01-26` 规范要求 sandbox proxy 与宿主不同源。此处没有 proxy 层，改为让不可信视图跑在 opaque origin（实测强于"同主机不同端口"）。协议消息（`ui/initialize` / `ui/notifications/initialized` / `tool-input` / `tool-result` / `size-changed` / `tools/call` / `ui/resource-teardown`）与工具、资源元数据不变。
-- **`loading` 占位的语义**：`role="status"` + `aria-busy="true"` + `aria-label`（`chat.askUserTitle`）；`component-guidelines.md` 要求异步状态用 `role="status"`/`role="alert"`，降级态用 `role="alert"`，两者成对。
-- **未验证**：Firefox/Safari（字体投递方案不依赖本地网络权限，理论上跨浏览器成立，但只实测了 Chromium）；移动端字体放大修复的实际效果（`viewport` meta + `text-size-adjust` 是标准做法，但本机只有 Chromium，无法复现 iOS WebKit 的放大行为，修复依据是用户手机截图的反推尺寸与标准契约）；第三方扩展或远端 MCP server 的 Apps 渲染（本功能只认这一份内置文档）；系统字体环境下 Oxanium 缺失时的回退外观。
+### 分层
+
+```
+lib/ask-user/portable/view-controller.ts      纯表单状态（无框架、无 DOM、无 node）
+lib/ask-user/portable/react/AskUserView.tsx   React 视图（peer: react；自己渲染样式）
+        ↑ 消费
+components/AskUserAppHost.tsx                 Pi Web 宿主适配器：文案 + CSS 变量 + 命令
+PA 的宿主适配器                                同上，另一个仓库
+```
+
+包（`portable/`）不知道宿主是谁：没有 `@/` 别名、不 import `lib/i18n`、没有 Next、没有 `node:`、不 import 宿主调色板模块。它只读 props 和 `--pi-ask-*` CSS 命名空间。`react` 是 peer dependency，`react-dom` 由宿主提供（组件本身不 import 它）。
+
+### 宿主适配器的三项职责
+
+`components/AskUserAppHost.tsx` 只做三件事，形式行为一概不碰：
+
+1. **取文案**：用 `useI18n()` 解析 12 个显示键，组成 `labels` 传给组件。
+2. **映射变量**：在容器上把 Pi Web 的 token 映射到 `--pi-ask-*`；`readFontFamilyStack()` 读 `getComputedStyle(document.body).fontFamily` 写进 `--pi-ask-font-family`。
+3. **转发命令**：把既有的 `submitAsk` / `cancelAsk` 作为 `onSubmit` / `onCancel` 传入，不改写参数。
+
+组件不自己管理 ask 生命周期、不打开/关闭 ask：超车（supersede）、重试、轮询归 `ChatWindow` / `useAgentSession` / 服务端。`ChatWindow` 负责宿主挂载位置和 `<AskUserAppHost key={pendingAsk.askId}>` 的 remount 契约。
+
+### `--pi-ask-*` 变量契约
+
+组件只读下表变量；缺失时用 `light-dark()` / 系统字体栈兜底，因此在完全没有宿主样式的文档里也可读。
+
+| 变量 | 含义 | 组件兜底 |
+| --- | --- | --- |
+| `--pi-ask-surface` | 卡片主体背景 | `light-dark(#ffffff, #1b1b1d)` |
+| `--pi-ask-field` | 头栏/底栏/详情块/未选中选项/输入框 | `light-dark(#f6f6f7, #232326)` |
+| `--pi-ask-field-hover` | 悬停的未选中选项 | `light-dark(#ececee, #2b2b2f)` |
+| `--pi-ask-border` | 边框 | `light-dark(#d9d9de, #3a3a40)` |
+| `--pi-ask-text` | 正文 | `light-dark(#111114, #ececef)` |
+| `--pi-ask-text-muted` | 计数/详情/锁定状态 | `light-dark(#5c5c66, #a5a5b0)` |
+| `--pi-ask-text-dim` | 底栏提示 | `light-dark(#8a8a94, #7d7d88)` |
+| `--pi-ask-accent` | 选中背景 / 焦点环 | `light-dark(#2f6fed, #a4c2f4)` |
+| `--pi-ask-accent-contrast` | 选中文字 | `light-dark(#ffffff, #14161a)` |
+| `--pi-ask-success` | 摘要 `✓` | `#16a34a` |
+| `--pi-ask-danger` | 错误文字 | `#ef4444` |
+| `--pi-ask-max-width` | 容器最大宽度 | `820px` |
+| `--pi-ask-font-size-offset` | 加在所有字号上 | `0px` |
+| `--pi-ask-font-family` | 字体栈 | `-apple-system, system-ui, "Segoe UI", Roboto, sans-serif` |
+
+Pi Web 的映射在 `components/AskUserAppHost.tsx` 的 `PI_ASK_VARIABLE_MAP`：`--pi-ask-surface` ← `var(--bg-panel)`、`--pi-ask-field` ← `var(--bg)`、`--pi-ask-field-hover` ← `var(--bg-hover)`、`--pi-ask-border` ← `var(--border)`、文本三档 ← `--text` / `--text-muted` / `--text-dim`、`--pi-ask-accent` ← `var(--accent)`、`--pi-ask-accent-contrast` ← `var(--accent-contrast)`、`--pi-ask-max-width` ← `var(--chat-content-max-width)`、`--pi-ask-font-size-offset` ← `var(--chat-font-size-offset, 0px)`。`--pi-ask-success` / `--pi-ask-danger` **不映射**：组件默认值就是 Pi Web 增/删语义用的 `#16a34a` / `#ef4444`。
+
+两条容易踩错的点：
+
+- **命名空间在使用点读取，不在 `.pi-ask` 上声明。** `view-css.ts` 的每条属性写 `var(--pi-ask-x, <fallback>)`。如果组件在 `.pi-ask` 上预设 `--pi-ask-*: …`，那个声明会**遮蔽**宿主在祖先容器上的映射（CSS 变量就近解析），主题映射就永远不生效。同理，宿主侧映射必须放在组件容器（或其祖先）上，不能写在组件内部的元素上。
+- **`--pi-ask-accent-contrast` 必须是独立变量**：暗色主题里 `--pi-ask-accent` 是浅蓝，写死白字对比度不合格。使用它的地方正是被删原生卡片用 `--accent-contrast` 的位置。
+
+组件自带 `color-scheme: light dark`（`light-dark()` 需要它）与 `light-dark()` 兜底；Pi Web 的 5 套主题（light/dark/mist/rose/pine）+ `auto` 靠变量映射生效，不需要从任何投影推演 `colorScheme` / `theme`。**旧版 `ask-user-protocol` 曾禁止引入 `light-dark(#…)` 第二套色板**——那条禁令是为 opaque-origin 单宿主写的（帧里既不能继承宿主变量也不能解析 `var()`）；iframe 路径退役后，组件用 `light-dark()` 做无宿主兜底是正当的，禁令已放开。组件仍然只用 `--pi-ask-*` 命名空间，不读宿主内部名（`--bg`、`--text` 等）。
+
+### 文案契约（label 归属）
+
+组件渲染 `AskUserViewLabels` 的 12 个键：`title`、`answered`（模板，含 `{count}` / `{total}`）、`otherPlaceholder`、`multipleOtherPlaceholder`、`supplementTitle`、`supplementPlaceholder`、`submitted`、`cancelling`、`hint`、`cancel`、`submit`、`actionFailed`。
+
+- 包内自带三语默认表（`lib/ask-user/portable/react/copy.ts`，`en` / `zh-CN` / `zh-TW`）。解析顺序：`askUserViewLabels(locale ?? "en")`，再用 `labels` 里已定义的键覆盖。
+- **Pi Web 覆盖全部 12 个键**，所以它从不读包内表；PA 原样使用包内表。**每一侧文案只有一个 owner**，两边措辞可以合法地漂移。包内文本是 `lib/i18n/messages/{en,zh-CN,zh-TW}.ts` 的一次性转写，不是同步源——不要为了"统一"让 Pi Web 去读包内表，也不要加同步步骤。
+- `{count}` / `{total}` 插值留在组件内，宿主只提供模板字符串。三语 key 集合仍由 `lib/i18n/registry.test.mjs` 强制一致；删除 `chat.askUserAppFailed*` 四键后三份消息表键集合仍相等。
+
+### a11y 与键盘契约（归属组件）
+
+可访问性实现只写一次，随组件走；宿主不重复实现：
+
+| 项 | 行为 |
+| --- | --- |
+| 单选组 | `role="radiogroup"` + `aria-labelledby` 指向问题文本（`id="pi-ask-<askId>-q-<index>"`） |
+| 单选项 | `role="radio"` + `aria-checked` + roving tabindex（整组一个 tab 停靠点：已选项或第一项为 `0`，其余 `-1`） |
+| 单选键 | `ArrowDown`/`ArrowRight` 下一个、`ArrowUp`/`ArrowLeft` 上一个、`Home`/`End` 首/末；空组时前进键选第一项、后退键选最后一项；移动即选中并聚焦 |
+| 多选组 | `role="group"` + `role="checkbox"`；每项保留默认 tab 停靠点；`Space` 切换；不响应方向键 |
+| 状态字符 | `○ ◉ ☐ ☑ ✓ ✎` 一律 `aria-hidden="true"`；状态只由 `aria-checked` 表达 |
+| 计数 | `role="status"` + `aria-live="polite"` |
+| 锁定状态 | `role="status"` + `aria-live="polite"` + `tabindex="-1"`；锁定时把焦点移到这里，避免控件 disabled 后焦点掉到 body |
+| 错误 | `role="alert"` |
+| 输入框 | 自定义输入与补充 textarea 各有 `aria-label` |
+| 容器 | `role="dialog"` + `aria-label`，**不带** `aria-modal`；没有实现焦点陷阱，声称模态是假的 |
+| 焦点环 | 样式表里一条 `:focus-visible` 规则；输入控件**不得**写内联 `outline: none`（内联样式会压过该规则） |
+
+### controller 契约（`lib/ask-user/portable/view-controller.ts`）
+
+纯 reducer + selectors，无框架、无 DOM、无 node，可驱动 React `useReducer`，也可驱动纯 DOM 宿主：
+
+- `AskUserViewState.drafts` 是 **`Map`**，不是普通对象：question id 由模型生成，可能是 `__proto__` / `constructor` 这类会撞上 `Object.prototype` 的键，普通对象会污染或读错。
+- `multiple` **随 action 传递**（`{ type: "toggle-option", …, multiple }`），reducer 不需要 `AskUserQuestion` 就能解释语义，因此可单独测。
+- action：`toggle-option`、`set-other-text`、`set-supplement`、`submit-requested`、`cancel-requested`、`action-failed`。reducer 纯、不抛、不改输入。
+- selectors：`draftFor`、`isQuestionAnswered`（`values.length > 0 || otherText.trim() !== ""`）、`answeredCount`、`isLocked`、`questionSummary`（`✓ value · value · otherText`，用选项原始 value）。
+- `buildAskUserSubmission` 组装 payload：未触碰的问题跳过、空白自定义文本丢弃、空白 supplement 省略。宿主仍要过 `portable/validation.ts` 的 `validateSubmission`；controller 只保证结构。
+- `action-failed` 解锁并保留错误以便重试。"答案可能已在途"的保证来自在途锁（`submitting` / `cancelling`），不是这条路径。
+
+### `data-ask-user-view="shared"` 标记
+
+宿主容器固定标注 `data-ask-user-view="shared"`。这是"这个 ask 走哪条渲染路径"的唯一 DOM 抓手。旧的 `loading` / `apps` / `failed` 三态只服务于 iframe 生命周期（异步投影、握手、降级），单渲染器下都不是状态，已删除。`document.querySelector('[data-ask-user-view]')` 非空即当前渲染路径。
+
+### 失败与重试
+
+单一渲染器没有"投影失败"降级态：`AskUserView` 同步渲染 `props.ask`，宿主没有 fetch、没有握手、没有超时。用户可见的失败只剩**命令失败**——`onSubmit` / `onCancel` 返回的 promise reject 时 controller 解锁并显示 `labels.actionFailed`，用户可以原地重试。`askUser` 设置与 `PI_WEB_ASK_USER` 仍是**工具本身**的开关，与渲染路径无关。旧版 `NEXT_PUBLIC_PI_WEB_ASK_USER_APPS` 开关与三语 `chat.askUserAppFailed*` 四键已删除。
+
+浏览器回归在 `e2e/ask-user.mjs`（真实 Chromium）：渲染、roving tabindex、方向键、Space、选项/自定义互斥、提交锁定 + 摘要 + 状态行聚焦、reject → alert + 解锁 + 重试、取消，以及 5 套主题下 `--pi-ask-*` 映射断言。
+
+### PA 接入前置
+
+Personal Assistant 作为第二个 React 宿主，接入时只需：
+
+1. 在自己的容器上渲染 `<AskUserView>`，用 `key={ask.askId}` 让新 ask 重挂载表单。
+2. 映射 `--pi-ask-*` 变量（或全省略以保留 `light-dark()` 兜底）。
+3. 传 `locale` 和/或 `labels`；都不传就用包内三语表。
+4. `onSubmit` / `onCancel` 只做命令发送；open-ask 生命周期（supersede、关闭、重试）留在宿主，不在视图。
+5. 不用 React 的宿主可以直接驱动 `view-controller.ts` 并渲染自己的 markup，但必须自行复刻上面的 a11y 契约。
+
+跨宿主桥接的准入仍由 `portable/bridge.ts` 把守（§跨宿主桥接）；视图渲染与桥接是两件正交的事：桥接决定"谁登记 ask 并收到答案"，视图决定"怎么问"。
+
+### 为什么 Apps 路径被退役
+
+简版：PA 是 React，两个 React 宿主之间 iframe 没有隔离收益；这条 iframe 管线（适配器 + 投影端点 + 字体清单 + token 消毒 + 握手 + 降级态 + 依赖）与被删的那张原生卡片是 6:1 的成本；视图作者就是我们自己，opaque-origin 的威胁模型不成立。被否决的方案（封存 iframe 并写 conformance 门槛、两套渲染器共存、把视图拆成独立包/仓库）与后果（删 4 个 `@modelcontextprotocol/*` + `zod`、单一渲染器、包内三语文案、`data-ask-user-view="shared"`、第三方 Apps 宿主无法渲染此视图）见 `docs/adr/0004-ask-user-shared-react-view.md`。
 
 ## 文件布局
 
 - `lib/ask-user/portable/` — 可本地安装的 Pi 包（`pi.extensions: ["./index.ts"]`、`peerDependencies` 钉死 SDK 0.85.1、`private: true`、MIT `LICENSE` + `README.md` 记录 bridge 契约与本地安装）。其中 `types.ts` 为有界 DTO/限制，`validation.ts` 为唯一的提问/答案校验器，`format.ts` 为答案文本渲染，`tool.ts` 为 `createAskUserToolDefinition`（`defineTool` + TypeBox schema），`bridge.ts` 为显式 host bridge 解析（`pi.ask-user.bridge:resolve-open:v1`，要求恰好一个同步 `register`）。缺失/多个 bridge、畸形问题、ack 缺少有界 `askId`/`askedAt`、ack 的 questions 与校验后的提问身份不一致（id/文本/选项/`multiple`/顺序），或 `superseded` 不是带 `unansweredIds` 的 `reason: "superseded"` 结果，全部 fail closed，不返回 `terminate: true`。安装验证必须用目录拷贝；指回本仓库 `node_modules` 的符号链接不算独立安装。`index.ts` 为包入口，把 bridge 注入共享工具。
+- `lib/ask-user/portable/view-controller.ts` — 共享表单状态 reducer/selectors（上节）。
+- `lib/ask-user/portable/react/` — 共享 React 视图：`AskUserView.tsx`（组件）、`copy.ts`（三语默认文案 + `AskUserViewLabels`）、`view-css.ts`（`--pi-ask-*` 样式表）、`keyboard.ts`（roving tabindex 纯数学）、`fixture/`（无宿主渲染探针）。
 - `lib/ask-user/types.ts` — 再导出 `./portable/types`，并保留 Pi Web 专有的 `ASK_USER_ANSWERS_CUSTOM_TYPE` 与 `AskUserCloseResponse`
 - `lib/ask-user/store.ts` — `PendingAskStore` 状态机与 outcome 计算；校验/渲染委托给 `./portable`（对外导出面不变）
 - `lib/ask-user/persist.ts` — open ask 磁盘镜像（读/写/替换/删除，损坏降级，无框架依赖）
@@ -138,15 +236,10 @@
 - `lib/rpc-manager.ts` — 注入、命令、事件、作废钩子、`get_state` 投影
 - `lib/ask-user-settings.ts` + `app/api/settings/ask-user/route.ts` — 开关持久化（`~/.pi/agent/pi-web-settings.json` 的 `askUser` 字段）+ GET/PUT；`PI_WEB_ASK_USER` env 优先于文件
 - `hooks/useAgentSession.ts` — `pendingAsk` 状态、`submitAsk`/`cancelAsk`、事件处理、重水合
-- `lib/ask-user/mcp-app-adapter.ts` + `lib/ask-user/mcp-view-html.ts` — app-only MCP 投影与固定的内置 Apps 视图文档（含内联脚本与 `script-src` 哈希）
-- `lib/ask-user/view-fonts.ts` — 纯函数半边：family 白名单、投影文本收集、unicode-range 解析/命中、字体栈过滤（`fontFamiliesInStack`）、子集挑选（`selectViewFontFaces`）。被客户端值导入，**禁止**任何 `node:` 依赖
-- `lib/ask-user/view-font-manifest.ts` — 服务端半边：解析 `app/fonts.css` + `app/fonts-lxgw-wenkai-screen.css` 生成字体清单（`node:fs/promises` + `node:path`），只被 `app/api/ask-user/font-faces/route.ts` 值导入（拆开的原因见 `directory-structure.md` 的「同一模块里既有纯浏览器 helper 又有 node 读取」）
-- `app/api/ask-user/font-faces/route.ts` — 字体清单 JSON（`private, max-age=300`），只读，不下发字节
-- `lib/ask-user/theme-tokens.ts` — 宿主 token 白名单与 `sanitizeThemeTokenValue`（视图脚本内还有一份手工同步的 `TOKENS`/`sanitizeToken`，内联脚本无法 import）
-- `app/api/agent/[id]/ask-view/route.ts` — 鉴权后的 MCP Apps projection（只读，不开关 ask）
-- `components/AskUserAppHost.tsx` — opaque-origin `srcdoc` 沙箱宿主，唯一的 `ask_user` 渲染器（`data-ask-user-view` = loading/apps/failed）
-- `components/AskUserAppFailure.tsx` — `failed` 降级态：错误 + 恢复提示 + 只读问题列表 + 唯一的重试控件
+- `components/AskUserAppHost.tsx` — 唯一宿主适配器：取文案、映射 CSS 变量、转发命令（`data-ask-user-view="shared"`）
 - `components/SettingsPanel.tsx`（GeneralSettings）— ask_user 开关 + reload 提示/按钮
+
+已删除（不要重新引入）：`lib/ask-user/mcp-view-html.ts`、`lib/ask-user/mcp-app-adapter.ts`、`lib/ask-user/theme-tokens.ts`、`lib/ask-user/view-fonts.ts`、`lib/ask-user/view-font-manifest.ts`、`components/AskUserAppFailure.tsx`、`app/api/agent/[id]/ask-view/route.ts`、`app/api/ask-user/font-faces/route.ts`，以及 `@modelcontextprotocol/*` 4 个包与 `zod`。历史证据保留在归档任务目录（`.trellis/tasks/archive/2026-09/09-26-ask-user-mcp-migration/research/fixture/`），其中仍 import 这些包，属历史记录，不再可运行，**不要编辑**。
 
 ## 陷阱
 
@@ -158,8 +251,8 @@
 
 ## UI 布局（ask 视图随消息流滚动）
 
-- 非空会话：`AskUserAppHost` 渲染在消息滚动容器内（`messageContentRef` 内、`{rendered.slice(startIndex)}` 之后），跟随对话滚动，输入框上方不再固定占位，消息可视区域保持全高。宿主容器 `maxWidth: 820`、iframe `minHeight: 220`，无固定高度上限、无内部滚动，问题较多时由整个滚动区承担滚动。
+- 非空会话：`AskUserAppHost` 渲染在消息滚动容器内（`messageContentRef` 内、`{rendered.slice(startIndex)}` 之后），跟随对话滚动，输入框上方不再固定占位，消息可视区域保持全高。宿主容器 `maxWidth: 820`、`minHeight: 220`，无固定高度上限、无内部滚动，问题较多时由整个滚动区承担滚动。
 - 空会话（新会话页）：视图在 header 与 composer 之间，保持 `padding: 0 16px 12px`（桌面端 `paddingRight: 52`）的列对齐包装。
 - 命名约定（`ChatWindow.tsx`）：`askUserCardElement` 是裸宿主（滚动流内使用），`askUserCardInColumn` 是带列对齐 padding 的包装（仅空会话使用）。改动布局时注意两处引用语义不同。
 - ask 出现时无需额外滚动逻辑：`prompt_done`/`agent_end` 使 `agentRunning` 置 false 后，现有 `useLayoutEffect` 在 `isNearBottom` 时 `scrollToBottom`，视图自动进入视野；用户已上滚查看历史时不打扰。ask 与 agent running 不同时存在，`promptAnchorSpacer` 测量不受影响。
-- 回归测试：`components/ChatWindow.ask-user-layout.test.mjs`（源码断言）覆盖宿主在滚动容器内、composer 区不再承载 ask 视图、空会话包装、宿主无 maxHeight/内部滚动。
+- 回归测试：`components/ChatWindow.ask-user-layout.test.mjs`（源码断言）覆盖宿主在滚动容器内、composer 区不再承载 ask 视图、空会话包装、宿主无 maxHeight/内部滚动；`components/AskUserAppHost.test.mjs` 覆盖宿主只做文案/CSS 变量/命令转发、固定 `shared` 标记、以及宿主不携带任何 MCP Apps/iframe/字体投递路径。

@@ -8,8 +8,8 @@
  * palette onto the `--pi-ask-*` variables on any ancestor element.
  *
  * Deliberately free of host coupling: no `@/` alias, no `lib/i18n`, no Next,
- * no `node:` import, and no `lib/ask-user/theme-tokens.ts`. React (and
- * `react-dom`) are host-provided peer dependencies.
+ * no `node:` import, and no host palette module. React (and `react-dom`) are
+ * host-provided peer dependencies.
  */
 
 import { useEffect, useReducer, useRef } from "react";

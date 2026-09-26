@@ -85,7 +85,7 @@ export function askUserViewReducer(state: AskUserViewState, action: AskUserViewA
       // A rejection means nothing was delivered, so the form unlocks and the
       // error stays visible for a retry. The "answers may already be in flight"
       // guarantee is the in-flight lock (`submitting`/`cancelling`), not this
-      // path — see `lib/ask-user/mcp-view-html.ts:605-623`.
+      // path — see `./react/README.md`.
       return { ...state, status: "idle", error: action.error };
   }
 }
