@@ -771,3 +771,185 @@ Replaced the loopback-only MCP Apps sandbox with a single opaque-origin srcdoc v
 ### Next Steps
 
 - Firefox/Safari and a browser-level Apps-loading-failure test are still unverified; PA migration and MCP elicitation stay in separate tasks
+
+
+## Session 18: ask_user 只保留 MCP Apps 视图渲染
+
+**Date**: 2026-09-26
+**Task**: ask_user 只保留 MCP Apps 视图渲染
+**Branch**: `feat/ask-user-apps-only`
+
+### Summary
+
+删除宿主原生 AskUserCard，把应用交付的 ui:// 视图变成 ask_user 唯一呈现；宿主只留沙箱、桥接、白名单与授权，失败态改为只读问题列表 + 重试，并顺带修掉视图里从未显示的每题提交摘要。
+
+### Main Changes
+
+- components/AskUserAppHost.tsx：单一渲染器 + loading/apps/failed 三态（role=status 占位、iframe 离屏挂载到 size-changed）；删除 APPS_DISABLED/NEXT_PUBLIC_PI_WEB_ASK_USER_APPS、cardSlotRef 与焦点守卫
+- components/AskUserAppFailure.tsx：降级态（错误行 + 恢复提示 + 从 props.ask.questions 渲染的只读问题列表 + 唯一重试控件，reloadKey 重跑投影与握手，不刷新页面）
+- 删除 components/AskUserCard.tsx 与它的测试；新增 chat.askUserAppFailed/Hint/Retry/Multiple 三语键；布局断言从卡片迁到宿主容器
+- lib/ask-user/mcp-view-html.ts：submit/cancel 上锁与被拒解锁时补 refresh()，让每题提交摘要（✓ values · otherText）真正显示；哈希同步为 sha256-EloPp3Uq...（常量 + CSP meta 两处）
+- lib/ask-user/mcp-view-html.test.mjs：在 DOM shim 上执行真实内联脚本，补回被删卡片测试覆盖的锁定/摘要/补充输入/单选互斥/多选占位/ask_submit 载荷
+- .trellis/spec/frontend/ask-user-protocol.md：单渲染器契约、三态与触发条件、降级态契约、JS 禁用行为、被删标记与开关、脚本哈希规则、行为回归覆盖位置
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `367d18c` | feat(ask-user): make the MCP Apps view the only ask presentation |
+| `b662a86` | docs(spec): record the single-renderer view and its type/token contracts |
+| `b610ff7` | chore(task): add 09-26-ask-user-apps-only planning and check artifacts |
+| `e6cfd32` | chore(task): archive 09-26-ask-user-apps-only |
+
+### Testing
+
+- [OK] tsc --noEmit 0；npm run lint 干净；git diff --check 干净；全量 npm test 1472 pass / 0 fail（删除卡片 6 个测试，新增宿主 4 个 + 视图 4 个）
+- [OK] Chromium 1280x900 与 390x844：真实未关闭 ask（01a097d6…/e262443f…）marker=apps、单 srcdoc iframe sandbox=allow-scripts；拦截 GET ask-view 500 → marker=failed、只读列表、唯一重试按钮、0 输入；解除拦截点重试 → apps；真实 ask 全程未被回答（ask-view 仍 200）
+- [OK] 合成宿主端到端（真实内置文档 + 同款握手，父页自行回 tools/call）：提交后帧内出现 ✓ yes 与 ✓ eu · typed text，3/3 按钮与 2/2 输入 disabled，ask_submit 载荷含 otherText，零控制台错误（CSP 哈希放行），父页读 contentDocument 得到 null（opaque origin 保持）
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- a11y/键盘/视觉打磨（视图现在是唯一 ask UI）另开任务；Firefox/Safari 与第三方/远端 MCP Apps 渲染仍未验证并已写入 spec
+- 收尾时 PR #9 的提交历史按最终态重排（合并中间修正、spec 与 journal 各自合成一个提交），本会话的改动现落在 `367d18c`、`b662a86`、`b610ff7`、`e6cfd32`
+- PA 侧 ask_user 宿主桥接与其 MCP elicitation 迁移仍未在范围内
+
+
+## Session 19: ask_user 视图与 Pi Web 视觉对齐：token 下发、键盘/a11y、字体字节投递
+
+**Date**: 2026-09-26
+**Task**: ask_user 视图与 Pi Web 视觉对齐：token 下发、键盘/a11y、字体字节投递
+**Branch**: `feat/ask-user-apps-only`
+
+### Summary
+
+用户反馈 Apps 视图"样式不对呀，和 pi web 不一致"，并选择不新建 Trellis 任务、范围含 token + 度量 + 键盘/a11y 打磨、先看效果图再决定（随后选择"先把字体也做了"，交付并入 PR #9 同分支）。根因不是 apps-only 改动，而是卡片→视图迁移时把 GitHub Primer 色板与系统字体写死在帧内：帧是 opaque origin，既不能继承宿主 CSS/`var()`，也读不到 `--font-content`。本会话把配色/度量/键盘/a11y 全部改成宿主下发，并让 Pi Web 自托管字体以**字节**形式进入帧。
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `ea9ee69` | feat(ask-user): make the app view look and type like Pi Web |
+| `b662a86` | docs(spec): record the single-renderer view and its type/token contracts (same commit carries this session's spec edits) |
+
+### Main Changes
+
+- 新增 `lib/ask-user/theme-tokens.ts`：11 个 token 白名单 + `sanitizeThemeTokenValue`（hex/rgb/hsl/oklch…、px|rem|em，拒 `;{}`/`url(`/`var(`/`!important`/`@`/超长），视图脚本内再校验一遍
+- `components/AskUserAppHost.tsx`：`readDocumentThemeTokens()` + `colorScheme`（pine 是暗色但名字不是 dark）+ `--font-content` 字体栈 + 字体清单/字节加载（清单与文件各自缓存，超时退化）
+- `lib/ask-user/mcp-view-html.ts`：全部颜色改 `var(--pi-*)`；层级对齐被删卡片（主体 `--bg-panel`、栏 `--bg`）；选中态用 `--accent-contrast`；度量对齐；a11y/键盘（`radiogroup`/`checkbox` + roving tabindex + 方向键/Home/End + `aria-checked` + `aria-live` + 焦点环 + 去掉假 `aria-modal`）；`installFonts()` 由字节建 `FontFace`（family 白名单 + woff2 签名 + 数量/字节上限）
+- 新路由 `GET /api/ask-user/font-faces` + `lib/ask-user/view-fonts.ts`：把 `app/fonts*.css` 解析成清单，宿主按正文 unicode-range 选子集（~10/97，约 400KiB）再投递字节
+- `app/globals.css`：新增 `--font-content`（聊天正文字体栈），`.markdown-body` 改用它；宿主优先读该变量
+- 哈希：视图脚本改动后 `ASK_USER_VIEW_SCRIPT_HASH` 与 meta CSP 同步为 `sha256-XPdBPcbQlnUBD1wsIJ3uaYdmRD43RcOWS3mHPcdjCo0=`
+
+### Testing
+
+- [OK] tsc --noEmit 0；npm run lint 干净；git diff --check 干净；全量 npm test 1495 pass / 0 fail
+- [OK] 真实应用路径（Chromium，5 套主题 × 真实未关闭 ask）：帧内 10/10 选中子集 loaded、`document.fonts.check(... LXGW ...)` 为真；平台字体实测帧内问题文本 = `LXGW WenKai Screen`，聊天正文 = `LXGW WenKai Screen`（同一字体）；同一字符串两侧宽度 189 = 189；卡片色 light `#f5f5f5` / dark `#242424` / mist `#e9f0ee` / rose `#f3edef` / pine `#212b28`，pine `colorScheme=dark`；除探针自身 init script 外零控制台错误
+- [OK] 像素采样：`desktop-light.png` 主导色 `#ffffff`(1.69M px)/`#f5f5f5`(0.78M px)，蓝色像素仅 `#245bce`（GitHub 蓝 `#0969da` 已不存在）；dark 为 `#1a1a1a`+`#242424`+`#a4c2f4`；pine 无蓝
+- [OK] 实测否定项：给 `/fonts/**` 加 `Access-Control-Allow-Origin: *`（外加 `Access-Control-Allow-Private-Network: true`）仍被 Chromium 拒（`Permission was denied ... loopback address space`），而非 opaque 的跨源帧可正常加载——所以字体只能投递字节，帧的 CSP 保持 `default-src 'none'`
+- [OK] 键盘实测：Tab 顺序 = 单选组第一个选项 → 自定义输入 → 多选组 → 补充框 → Cancel → Submit；方向键移动并选中；Space 切换复选框；焦点环 `2px solid rgb(36,91,206)`
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 效果图（`public/ask-view-shots/`，未跟踪）供用户复核，本轮提交不含这些临时文件；确认后删除
+- PR #9 描述需同步补充本轮 token/键盘/字体内容；Firefox/Safari 仅 Chromium 实测，已在 spec 标注
+- 收尾时 PR #9 的提交历史按最终态重排（合并中间修正、spec 与 journal 各自合成一个提交），本会话的改动现落在 `ea9ee69` + `b662a86`
+
+
+## Session 20: ask 视图回归：字体栈、手机放大与问句间距
+
+**Date**: 2026-09-26
+**Task**: ask 视图回归：字体栈、手机放大与问句间距
+**Branch**: `feat/ask-user-apps-only`
+
+### Summary
+
+用户拿着手机截图报了两处：字体不对、问句字号太大；随后又发现问句之间没有间距。三处都指向同一个根因——MCP Apps 视图没有照抄被删原生卡片的排版契约。
+
+### Main Changes
+
+- 问句改用 UI 栈（document.body）：原先宿主转发的是 --font-content（聊天正文栈，LXGW 楷体），实测平台字体 原生卡片问句 = Liberation Sans + Noto Sans CJK JP、视图 = LXGW WenKai Screen，楷体同字号下更大更重，正是字体不对/字号太大。宿主同时只投递字体栈里出现过的 family（UI 栈下 13 问只装 1 个 Oxanium 子集 14 KiB，中文不再投递字节；改前是 20 个子集 ≈400 KiB）。lib/ask-user/view-fonts.ts 新增 fontFamiliesInStack/filterViewFontFacesByStack。
+- 手机字号放大：srcdoc 是独立文档，父页 viewport meta 不生效；帧文档现在自带 <meta name=viewport>，并注入 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}（块级文本被放大而 flex 行不变，截图反推问句 ≈24px vs 选项 13px）。同一条注入规则里补 button,input,textarea{font-family:inherit}——UA 样式表让选项文字落到 Arial。
+- 问句间距：视图的问题列表漏了原生卡片的 display:grid;gap:14px，实测 13 问的 12 个间隔全是 0px，修复后全为 14px。顺手对齐小度量：选项符号 opacity 0.85、提交按钮 padding 7px 16px、底栏提示 --text-dim。
+- 字体上限从 32 个/2MiB 放宽到 128 个/8MiB：长问句在 32 个子集处被截断会让同一段文字混用两种字体。
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `ea9ee69` | feat(ask-user): make the app view look and type like Pi Web (this session's type/spacing fixes are folded into it) |
+
+### Testing
+
+- [OK] tsc --noEmit 0 / npm run lint 无问题 / git diff --check 干净 / npm test 1498 pass 0 fail（新增 3 个：表单控件字体与 text-size-adjust 注入、栈内 family 过滤与解析、问句块 14px gap 与小度量）
+- [OK] Chromium 实测（390x844 与 1280x900，13 问真实 ask）：问句与选项平台字体都是 Noto Sans CJK JP（拉丁 Oxanium），装饰字符无豆腐块，webkitTextSizeAdjust=100%，12 个问句间隔全为 14px，控制台无错误
+- [OK] 字体投递量：13 问与单问都只安装 1 个 Oxanium 子集（14044 字节，`document.fonts.size === 1`）
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 等用户在自己的手机上确认（PWA 可能需要刷新以换掉旧客户端 bundle）
+- 确认后删除未跟踪的 public/ask-view-shots/ 并更新 PR #9 描述；PA 迁移与 MCP elicitation 仍按原计划推迟
+- 收尾时 PR #9 的提交历史按最终态重排（6 个提交，合并中间修正），本会话改动并入 `ea9ee69`
+
+
+## Session 21: PR #9 的 CI 修复：客户端 bundle 的 node: 越界与 state 500
+
+**Date**: 2026-09-26
+**Task**: PR #9 的 CI 修复：客户端 bundle 的 node: 越界与 state 500
+**Branch**: `feat/ask-user-apps-only`
+
+### Summary
+
+用户报 PR #9 CI 红。逐个 job 读日志后是两个独立失败：①`npm run build`（`next build --webpack`）因为客户端可达模块里出现 node:fs/promises 与 node:path 而失败（import trace 直指 components/AskUserAppHost.tsx）；②build 修好后 e2e 才第一次真正跑起来，`/api/sessions/e2e-compacted-session/state` 500（Cannot read properties of undefined (reading 'totalTokens')）。①是本分支视觉提交的回归（tsc/node --test/Turbopack dev 全都放过，只有 webpack 构建拦下），拆模块修复；②继承自 personal —— 服务端 state/rpc 路径与 personal 逐字节一致，客户端 3s /state 轮询来自 #8，用 try/catch 降级为 contextUsage:null。
+
+### Main Changes
+
+- lib/ask-user/view-fonts.ts 拆两半：客户端纯函数（family 白名单、字符集收集、unicode-range、栈过滤、子集挑选）+ 新增服务端 lib/ask-user/view-font-manifest.ts（node:fs/promises + node:path 解析 app/fonts*.css 生成清单）；app/api/ask-user/font-faces/route.ts 只值导入后者
+- lib/ask-user/view-fonts.test.mjs 补两条守卫断言（客户端模块不得出现 node: 说明符、文件读取半边在独立服务端模块）；清单测试移到新增 lib/ask-user/view-font-manifest.test.mjs
+- lib/rpc-manager.ts 的 get_state 用 try/catch 包住 inner.getContextUsage()，失败时 contextUsage: null（该字段本就可选）；lib/rpc-manager.test.mjs 新增行为测试：inner.getContextUsage 抛 TypeError 时状态仍返回
+- spec：directory-structure.md 增「同一模块里既有纯浏览器 helper 又有 node 读取：必须拆开」（tsc/node --test/npm run dev 全通过、只有 next build --webpack 失败的对照表）；quality-guidelines.md 增「派生指标算不出来 ≠ 整个响应失败」；ask-user-protocol.md 文件布局补 view-fonts/view-font-manifest/font-faces route/theme-tokens，并把清单归属改到 view-font-manifest.ts
+- 归档任务新增 research/ci-build-and-state-fixes.md：两处根因、完整栈、最小复现命令，以及临时 worktree 里 node_modules 不能软链（Turbopack 拒绝）的坑
+- 提交历史按最终态再次重排：字体拆分并入 ea9ee69、spec 并入 b662a86、归档笔记并入 e6cfd32，新增 1ebce20（state 降级）
+- 归属表述修正：01:57 的绿色 run（`e2184b3`）其实**已含** #8 的 /state 轮询（`54bca43`），所以这条 500 在浏览器路径上是**时机相关**的潜在 bug，不是 #8 之后才可达；服务端 state/rpc 路径与 `personal` 逐字节一致这一点不变，仍归为继承而非本 PR 引入。第二次重排就是为了改掉这句错误表述。
+- `components/AppShell.tsx`：移动端 ⋯ 面板不再在"会话数据首次到达"时被关掉。改法是 `mobileToolbarSessionIdRef` 记住上一个 id，只在"真 id → 另一个真 id"时关面板；布局变化（`isMobile`/`isNarrowMobile`）与草稿切换（`newSessionDraftId`）各自保留一条 effect。复现：390px 下把 `/api/sessions` 延迟 2.5s，旧写法面板被 `selectedSession?.id` 的 `undefined → id` 关掉，Agents 按钮永远不出现（CI 上偶发 30s 超时）。
+- e2e/subagents.mjs：助手改为按 `aria-expanded` 打开面板（不再用"按钮是否存在"推断，也不再用重试兜底），并新增 390px 回归检查（延迟会话列表 → 点开 ⋯ → 断言面板仍打开且 Agents 按钮出现）；该检查在修复前的代码上 15s 超时（已实测），修复后通过。同一条陷阱写进 `.trellis/spec/frontend/state-management.md` 的状态类 Traps。
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `ea9ee69` | feat(ask-user): make the app view look and type like Pi Web（本会话的字体模块拆分并入该提交） |
+| `1ebce20` | fix(agent): keep get_state alive when context usage cannot be computed |
+| `b662a86` | docs(spec): record the single-renderer view and its type/token contracts（并入本会话的三处规范增补） |
+| `e6cfd32` | chore(task): archive 09-26-ask-user-apps-only（并入 research/ci-build-and-state-fixes.md） |
+| `41400b0` | fix(ui): keep the mobile toolbar panel open when the restored session arrives |
+
+### Testing
+
+- [OK] 临时 worktree（硬链接 node_modules，npm ci 等价）：npm run build 通过 —— 修复前同一命令在此复现 UnhandledSchemeError
+- [OK] E2E_SERVER_MODE=start + 系统 Chromium：e2e/run.mjs 10/10 PASS（修复前 Browser errors at width 1280 报上述 500），e2e/subagents.mjs 7/7 PASS
+- [OK] 主检出：tsc --noEmit 0；npm run lint 无问题；git diff --check 干净；全量 npm test 1501 pass / 0 fail
+- [OK] e2e/subagents.mjs：三档宽度（1280 / 744 / 390）全通过；新增的 390px 回归检查在**修复前**代码上 15s 超时（先跑旧 AppShell + 新检查取证），带上修复后通过；e2e/run.mjs 同时 10/10 通过（未受这次 effect 改动影响）
+- [OK] 组件单测 12 个全过（含把 effect 语义钉住的那条）；tsc / lint / diff --check 干净；全量 npm test 1501 pass / 0 fail
+- [OK] 服务端最小复现：隔离 PI_CODING_AGENT_DIR + 手写带 compaction 的 v3 会话 → POST /api/agent/<id> {type:get_state} 得 TypeError 栈（calculateContextTokens → getContextUsage → send）
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- force push 后盯 CI：两个 job 都应转绿；若 e2e 仍红则继续读日志定位（不要先改代码）
+- PR #9 描述补 CI 章节与新的 7 提交表；用户确认后删除未跟踪的 public/ask-view-shots/
+- 清掉临时 worktree（/tmp/pr9-build、/home/xupeng/dev/personal/forked/.pr9-build）与本地 clean 分支；.trellis/tasks/09-25-* 仍按约定不提交
