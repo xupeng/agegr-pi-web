@@ -1,0 +1,32 @@
+{
+  "id": "ask-user-cross-host-prototype",
+  "name": "ask-user-cross-host-prototype",
+  "title": "Validate ask_user and prototype cross-host extension",
+  "description": "Measure ask_user behavior, prototype a portable Pi extension, and integrate an interactive-only host bridge in personal-assistant",
+  "status": "completed",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P2",
+  "creator": "xupeng",
+  "assignee": "xupeng",
+  "createdAt": "2026-09-25",
+  "completedAt": "2026-09-26",
+  "branch": null,
+  "base_branch": "personal",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "09-25-ask-user-behavior-evaluation",
+    "09-25-portable-ask-user-extension"
+  ],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "Superseded by 09-26-ask-user-shared-view on 2026-09-26. Its rendering premise changed: PR #9's MCP Apps iframe is being reversed in favour of a shared React view plus a framework-agnostic controller, because PA (the first intended second host) is React. Both child tasks (09-25-ask-user-behavior-evaluation, 09-25-portable-ask-user-extension) were completed and archived, so the remaining cross-host work moves into the new task tree. Nothing is carried over from this task directory.",
+  "meta": {
+    "superseded_by": "09-26-ask-user-shared-view",
+    "superseded_at": "2026-09-26"
+  }
+}
