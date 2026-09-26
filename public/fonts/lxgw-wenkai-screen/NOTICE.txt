@@ -1,0 +1,26 @@
+LXGW WenKai Screen (霞鹜文楷屏幕阅读版) webfonts
+==============================================
+
+97 `lxgwwenkaiscreen-subset-*.woff2` files, each covering one `unicode-range`
+slice of the `LXGW WenKai Screen` family.
+
+Source: lxgw-wenkai-screen-webfont@1.7.0
+  https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.7.0/files/
+Upstream project: https://github.com/lxgw/LxgwWenKai-Screen
+License: SIL Open Font License 1.1 -- see OFL.txt in this directory.
+LICENSE.txt is the upstream npm packaging license (MIT) and covers the packaging
+scripts, not the font software.
+
+The upstream package ships four stylesheets that all declare the same family
+name, and its `style.css` imports `lxgwwenkaiscreen.css` last, so the plain
+Screen faces are the ones that render. Only that variant is vendored here.
+Every subset is kept on purpose: the whole face is tens of megabytes, and the
+browser must be able to download only the ranges a page renders.
+
+SHA-256
+-------
+
+SHA256SUMS.txt in this directory lists the SHA-256 of every subset file. After
+changing any font here, regenerate it with:
+
+  cd public/fonts/lxgw-wenkai-screen && sha256sum *.woff2 > SHA256SUMS.txt

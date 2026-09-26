@@ -1,0 +1,21 @@
+Oxanium webfonts
+================
+
+Two variable webfont files covering the `Oxanium` family, weights 300-700:
+
+  oxanium-latin-wght-normal.woff2      (latin subset)
+  oxanium-latin-ext-wght-normal.woff2  (latin-ext subset)
+
+Source: @fontsource-variable/oxanium@5.3.0
+  https://cdn.jsdelivr.net/npm/@fontsource-variable/oxanium@5.3.0/files/
+Upstream project: https://github.com/sevmeyer/oxanium
+License: SIL Open Font License 1.1 -- see LICENSE-oxanium.txt in this directory.
+
+These files are byte-identical to the `url(...)` targets of the Google Fonts
+CSS that `app/layout.tsx` used to link from fonts.googleapis.com.
+
+SHA-256
+-------
+
+3aa555c528430aab19bb2693dc206bab557767d3082dba66400784c9cc90cfbb  oxanium-latin-wght-normal.woff2
+75b9254b2437310f3baa788ea6d005d35256cb3e98b2b723fea702f77cd31064  oxanium-latin-ext-wght-normal.woff2
