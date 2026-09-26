@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/frontend/ask-user-protocol.md", "reason": "Verify the extracted controller rules match the documented submit/cancel, supplement, locking, and summary semantics exactly, with no behaviour drift."}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "Check the controller exported types, absence of any, and that it imports nothing from host frameworks."}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Check test coverage and the canonical verification commands, and that every migrated assertion still has an equivalent."}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Accessibility and state-presentation rules the controller must keep expressible for the view layer (answered counter, locked status, error surface)."}

@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 21
+- **Total Sessions**: 22
 - **Last Active**: 2026-09-26
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~949 | Active |
+| `journal-1.md` | ~1001 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 22 | 2026-09-26 | ask_user 共享 React 视图重构 · 任务 A：抽出 portable view controller | `b8ef82e`, `dcc0e2c`, `d94c33d` | `feat/ask-user-view-controller` |
 | 21 | 2026-09-26 | PR #9 的 CI 修复：客户端 bundle 的 node: 越界与 state 500 | `ea9ee69`, `1e1ee48`, `148f4b6`, `4f30d63` | `clean` |
 | 20 | 2026-09-26 | ask 视图回归：字体栈、手机放大与问句间距 | `388ce1b` | `feat/ask-user-apps-only` |
 | 19 | 2026-09-26 | ask_user 视图与 Pi Web 视觉对齐：token 下发、键盘/a11y、字体字节投递 | `388ce1b`, `1322785` | `feat/ask-user-apps-only` |

@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/frontend/ask-user-protocol.md", "reason": "The authoritative ask_user contract: tool schema, state machine, submit/cancel payload rules, supplement semantics, and the currently-implemented view behaviours this task must extract verbatim."}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "Portable module typing rules (no any, bounded DTOs, structural types) for the new zero-dependency controller."}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "Required before duplicating validation or payload logic: validation.ts already owns answer validation; the controller must delegate rather than re-implement."}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Test conventions, source-assertion style, and the required verification commands for this repository."}

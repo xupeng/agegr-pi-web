@@ -953,3 +953,49 @@ Replaced the loopback-only MCP Apps sandbox with a single opaque-origin srcdoc v
 - force push 后盯 CI：两个 job 都应转绿；若 e2e 仍红则继续读日志定位（不要先改代码）
 - PR #9 描述补 CI 章节与新的 7 提交表；用户确认后删除未跟踪的 public/ask-view-shots/
 - 清掉临时 worktree（/tmp/pr9-build、/home/xupeng/dev/personal/forked/.pr9-build）与本地 clean 分支；.trellis/tasks/09-25-* 仍按约定不提交
+
+
+## Session 22: ask_user 共享 React 视图重构 · 任务 A：抽出 portable view controller
+
+**Date**: 2026-09-26
+**Task**: ask_user 共享 React 视图重构 · 任务 A：抽出 portable view controller
+**Branch**: `feat/ask-user-view-controller`
+
+### Summary
+
+按 Notion 页面「反转 PR #9 的 iframe 方向」进入实施。父任务 09-26-ask-user-shared-view 下拆 A/B/C 三个子任务，本轮完成 A：把 ask_user 视图的行为从 MCP Apps 内联脚本里抽成零依赖纯 reducer + 选择器，并把 mcp-view-html.test.mjs 的全部行为断言逐条平移过去。实施中发现并修掉了我自己两处错误（见 Main Changes 末两条）。
+
+### Main Changes
+
+- 新增 lib/ask-user/portable/view-controller.ts：纯 reducer + 选择器，覆盖每题 draft、单选互斥、多选共存、supplement、在途锁定、每题提交摘要、已答计数与 ask_submit 载荷组装；drafts 用 Map（question id 由模型给出，可能与 Object.prototype 冲突）；multiple 挂在 action 上使 reducer 不依赖问题对象；校验仍只在 validation.ts
+- 新增 lib/ask-user/portable/view-controller.test.mjs（11 test）：覆盖语义表每一行、reducer 纯性、__proto__ 冲突，以及源码断言（不得 import react / @/ / node:）
+- lib/ask-user/portable/index.ts 增加 controller 的 reducer、选择器与 4 个类型导出；既有导出签名不变
+- 新增 research/assertion-migration.md：mcp-view-html.test.mjs 全部 17 个顶层 test 的逐条归属（behavior→controller / view→B / pipeline→C / mixed-split），:137 与 :148 显式拆分，另记 4 条缺口。末尾附「行为 vs 管线」行数证据：669 : 1596（口径与 wc -l 原始数字都在文件里）
+- 修正我自己的事实错误：文档里把 mcp-view-html.test.mjs 写成「376 行 / 18 test」，实际是 510 行 / 17 test —— 376 是 PR #9 的 diff 变更行数，我误当成了文件长度。父任务与 A 的 prd/implement 已改，migration 文档也注明了这个漂移
+- 修正我自己的设计回归：我原先把被删卡片 AskUserCard.tsx 的「catch 里不解锁」写成设计要求，但现行视图是提交即锁定、reject 时解锁并显示错误（mcp-view-html.ts:605-623，由 mcp-view-html.test.mjs:148 断言，chat.askUserActionFailed 文案也写着「可以重试」）。action-failed 现在把 status 复位 idle，契约由在途锁定（submitting/cancelling）承担。A/B 的 prd/design/implement 与 migration 的 G1 已同步改写为「不照抄被删卡片」
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `b8ef82e` | (see git log) |
+| `dcc0e2c` | (see git log) |
+| `d94c33d` | (see git log) |
+
+### Testing
+
+- [OK] node --test lib/ask-user/portable/view-controller.test.mjs：11/11 pass
+- [OK] node --test lib/ask-user/mcp-view-html.test.mjs（未改动，仍原样通过）：17/17 pass
+- [OK] env -u NODE_PATH XDG_STATE_HOME= npm test：1512/1512 pass，0 fail
+- [OK] node_modules/.bin/tsc --noEmit 退出 0；npm run lint 无问题
+- [OK] 环境说明：本机 NODE_PATH 指向全局 pi-web 安装，会让 lib/ask-user/portable/discovery.test.mjs 的 SDK 解析断言从 MODULE_NOT_FOUND 变成 ERR_PACKAGE_PATH_NOT_EXPORTED。已在 HEAD 上把新文件移开 + stash index.ts 复现同一失败，确认是既存环境问题；CI 无 NODE_PATH 故不受影响
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 任务 B（09-26-ask-user-react-view-package）：portable/react/ 共享组件 + 三语默认文案 + 纯函数键盘契约 + CSS 变量契约文档 + fixture 证据
+- 任务 C（09-26-ask-user-retire-mcp-apps）：AskUserAppHost 瘦身为适配器后删除整条 iframe 管线（含 4 个 @modelcontextprotocol/* 与 zod），并重写 ask-user-protocol.md 与新增 ADR
+- 父任务归档与遗留 09-25 任务归档随 C 的 PR 合并（父任务无独立 PR）
