@@ -54,3 +54,17 @@ export {
   type AskUserBridgeResolution,
   type OpenAskThroughBridgeInput,
 } from "./bridge";
+export {
+  askUserViewReducer,
+  answeredCount,
+  buildAskUserSubmission,
+  createAskUserViewState,
+  draftFor,
+  isLocked,
+  isQuestionAnswered,
+  questionSummary,
+  type AskUserQuestionDraft,
+  type AskUserViewAction,
+  type AskUserViewState,
+  type AskUserViewStatus,
+} from "./view-controller";
