@@ -89,7 +89,7 @@
 | 新增一种语言 | `lib/i18n/messages/<bcp47>.ts` + 在 `lib/i18n/registry.ts` 注册 + 同步 `lib/i18n/types.ts` 的 `Locale` 联合类型 | `registry.ts` 的 `localePlugins` | 更新 `lib/i18n/registry.test.mjs` 的语言断言 |
 | 浏览器一次性探针 / 发布脚本 | `e2e/<feature>.mjs` 或 `scripts/<name>.sh` | `e2e/themes.mjs`（顶部注释写明 `node e2e/themes.mjs`）、`scripts/release-npm.sh` | 要进 CI 就必须挂进 `package.json` scripts（见下） |
 | 架构决策记录 | `docs/adr/<NNNN>-<kebab-slug>.md` | `docs/adr/0002-chat-only-tool-selection.md` | 序号递增、4 位补零 |
-| 新的服务端原生依赖 | 加进 `next.config.ts:19-27` 的 `serverExternalPackages` | 现有 `node-pty`、`undici`、`web-push`、4 个 `@earendil-works/*` | 否则 Turbopack/构建会把原生包打进 bundle |
+| 新的服务端原生依赖 | 加进 `next.config.ts:26-34` 的 `serverExternalPackages` | 现有 `node-pty`、`undici`、`web-push`、4 个 `@earendil-works/*` | 否则 Turbopack/构建会把原生包打进 bundle |
 | 组件级新样式 | 先沿用所在组件的 inline style / 全局类；结构复杂时可用 `components/<Name>.module.css` | `components/ChatMinimap.tsx:13` | CSS Module 当前仅此一例；具体选择见组件规范，不把它写成所有新样式的唯一渠道 |
 | 需要 fs / git / child_process 的模块 | 拆出纯逻辑 `lib/<name>-core.ts`（或 `-paths.ts`，不 import node），wrapper 只做 I/O 并 re-export | `lib/session-file-references-core.ts` ↔ `lib/session-file-references.ts`；`lib/file-index-paths.ts`（文件头注释写明 "Kept free of git/fs so it can be unit-tested without spawning a process"）；`lib/provider-listing.ts` ↔ `lib/provider-listing-runtime.ts` | 这样单测不需要 mock 文件系统 |
 
@@ -167,7 +167,7 @@
 
 - `tsconfig.json` 的 `include` 是 `**/*.ts` + `**/*.tsx`，
   **`*.test.mjs` 与 `e2e/*.mjs` 不参与 `tsc` 类型检查**，正确性只靠运行时。
-- `next.config.ts:19-25 serverExternalPackages` 见「新代码该放哪」。
+- `next.config.ts:26-34 serverExternalPackages` 见「新代码该放哪」。
 - `eslint.config.mjs` 用 `eslint-config-next` 的 `core-web-vitals` + `typescript` 两套 flat config，
   **忽略 `.agents/**`、`.pi/**`、`.trellis/**`**，并关掉 `react-hooks/immutability`、
   `react-hooks/refs`、`react-hooks/set-state-in-effect`（代码里依赖这些关闭，别照搬通用规则）。
