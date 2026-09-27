@@ -1296,6 +1296,95 @@
   font-size: 11px;
 }
 
+.append-system-counter {
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.append-system-editor {
+  width: 100%;
+  min-height: 240px;
+  resize: vertical;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-panel);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.append-system-editor:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.append-system-editor:disabled {
+  opacity: 0.55;
+}
+
+.append-system-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.append-system-toolbar .settings-general-error,
+.append-system-toolbar .settings-general-description {
+  margin: 0;
+}
+
+.append-system-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.append-system-scope-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.append-system-scope-list li {
+  margin: 0;
+}
+
+.append-system-reload {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--text-dim);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.append-system-override {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-panel);
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.append-system-override.is-active {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
 @media (max-width: 520px) {
   .settings-extension-ui-grid {
     grid-template-columns: 1fr;

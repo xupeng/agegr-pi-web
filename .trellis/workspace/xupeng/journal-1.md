@@ -1093,3 +1093,54 @@ Replaced the loopback-only MCP Apps sandbox with a single opaque-origin srcdoc v
 - 把 C 的 PR（base = B 的分支）与 A、B 的 PR 一起评审；三条 PR 是 stacked，A → personal，B → A，C → B，都不自行合并
 - 评审通过后合并顺序 A → B → C，然后把最上层的 base 重定向到 personal；父任务的集成评审项（全仓库残留搜索、三语键集合相等）已在 C 内完成
 - PA 仓库按 B 的 portable/react/README.md 接入：直接用包内三语默认表，不需要覆盖 labels
+
+
+## Session 25: 编辑 APPEND_SYSTEM.md：计划复核、服务端契约、设置面板与浏览器闸门
+
+**Date**: 2026-09-27
+**Task**: 编辑 APPEND_SYSTEM.md：计划复核、服务端契约、设置面板与浏览器闸门
+**Branch**: `feat/append-system-editor`
+
+### Summary
+
+本会话分两段。前半段先把搁置 8 天的 09-19-append-system-editor 计划复核到位：逐条打开它引用的 20 个代码锚点（3 处行号漂移、语义全部成立），并把 base_branch 由 main 改为 personal，走独立 PR #13 合入（merge 3092e4d，计划修正提交 164c047）。后半段在新分支 feat/append-system-editor 上完成 A/B/C 三段实施：服务端读写 pi 原生 APPEND_SYSTEM.md 的薄契约、设置面板 section、验收证据与规范登记。核心取向是只暴露 pi 已有能力、不新造存储语义，因此写入路径服务端固定、项目级文件只做只读提示、生效范围（普通会话生效，Chat only 与内建子代理不生效）写进 UI 硬要求。
+
+### Main Changes
+
+- 计划复核（PR #13，已合并为 3092e4d）：20 条锚点逐条打开确认。3 处行号漂移已修正——resource-loader.d.ts 39-47→53-54、trust-manager.js 5-15→8-16、lib/rpc-manager.ts 2222-2240→2366-2379（正常分支是 2379 起的 else，唯一传 appendSystemPrompt 的是 2375 的 subagent 分支）；关键的 discoverAppendSystemPromptFile() 精确命中 resource-loader.js:820-832，读函数体证实「项目级优先且覆盖而非叠加」；SDK 被 package.json 锁在 0.85.1，这些锚点不会自行漂移。base_branch 由 main 改 personal（否则分支会从落后主干切出）。记录 research/anchor-recheck.md
+- A 段（82b7654）：lib/append-system.ts 固定路径 + 原子 0600 写（writePrivateFileAtomicSync）+ 64 KiB 字节上限 + 缺失读作空串 + 写空字符串创建空文件而不删除 + 项目级只读探测；app/api/append-system/route.ts 是薄路由（403/415/400/500），cwd 先过 getAllowedFileRoots + isFilePathAllowed 再 existsSync，未授权返回 projectOverride:null 而不是去探测任意路径——否则该端点会变成路径存在性探测器。getAllowedFileRoots 是 async，必须 await
+- 验证期补的路由集成用例：允许根内/外两态（未授权时文件就在眼前也必须返回 null）+ PUT 带 ?cwd= 的同形返回，这条断言了「不做任意路径探测」这个安全意图，原先没有任何测试守住它
+- B 段（bc36f7b）：components/AppendSystemConfig.tsx（255 行）+ SettingsPanel 的 section/图标/挂载 + SETTINGS_SECTION_VALUES 追加 append-system（不进 PROJECT_SECTIONS，因为这是全局设置）+ 21 个 key × 三语 + app/settings.css 89 行。R3 三条生效范围说明与 R4 两态文案是硬要求；字节口径用 TextEncoder 与服务端 UTF-8 一致（用 content.length 会让中文草稿在 60000 字节附近错判：前端以为能存、服务端会拒）；重载按钮复用既有 sendAgentCommand(sessionId,{type:"reload"})，与 SettingsPanel.tsx:498-506 的 ask_user 重载同构（四处先例）
+- 测试补强：components/AppendSystemConfig.test.mjs 用源码正则锁住 R3/R4、路径只能来自服务端响应（禁止出现 APPEND_SYSTEM.md 字面量）与超限保存守卫；lib/append-system.test.mjs 追加两个用 pi 自己 DefaultResourceLoader 的契约用例（c09d914）——断言「写进去的就是 pi 会加载的追加提示」，并用 projectTrustReloadOptions（lib/rpc-manager.ts 同款闸门）证明未受信的项目文件被忽略、受信则覆盖而非叠加。踩到的坑值得记：SettingsManager.create() 默认 projectTrusted=true，不带该选项构造 loader 会无条件读到项目文件，所以未受信分支必须显式传选项
+- 浏览器闸门 33/33（隔离 worktree + 临时 PI_CODING_AGENT_DIR + 真实 Chromium）：保存逐字节、权限 0600、24000 个汉字=72000 字节被拒且不落盘、未受信与受信两态文案与样式、重载后仍显示已保存内容；移动端 390px 断言全屏 390×844、无横向溢出、编辑区可滚动（898>742）、保存按钮可达。用户真实的 ~/.pi/agent/APPEND_SYSTEM.md 只被读取作为种子，全程未写入（跑完复核仍是 322B / 8 月 7 日）
+- 规范登记：新增 .trellis/spec/frontend/append-system-prompt.md（GET/PUT 契约 + 7 条不变量 + 生效范围表 + 禁止模式）与 docs/adr/0005-append-system-prompt-editor.md；directory-structure.md 补上新路径并按 find 重测计数——它的 hooks/lib/e2e/components 计数在计划期间就已过期，与新增的「计数按 find 实测」声明自相矛盾
+- 独立复查（trellis-check）：未发现代码/测试缺陷，契约、安全边界、不变量、AC7、i18n、组件规范逐条通过；它补抓到我漏掉的一批过期计数（bin/ 5→6、public/ 80→186、57→58 个 route.ts、198→219 个 .test.mjs 等）并单独提交 6ba0e17。它报的 7 条低severity里我采纳了两处文档修正（20a3397）：design §2 的 projectOverride 注释与 §3/R4 矛盾（未受信时仍返回该字段、用 trusted:false 表达），以及 CRLF 文件一旦编辑保存会被 textarea 归一化为 LF 这一真实边界
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `82b7654` | (see git log) |
+| `bc36f7b` | (see git log) |
+| `c09d914` | (see git log) |
+| `61ef832` | (see git log) |
+| `0657791` | (see git log) |
+| `6ba0e17` | (see git log) |
+| `20a3397` | (see git log) |
+| `e9baf77` | (see git log) |
+
+### Testing
+
+- [OK] node_modules/.bin/tsc --noEmit：退出码 0
+- [OK] npm run lint：No issues found；eslint . -f json 实测 522 文件 / 0 error / 0 warning（基线 516，+6 恰为本次新增的 6 个 lint 目标）
+- [OK] env -u NODE_PATH XDG_STATE_HOME= npm test：1516 pass / 0 fail / 10 suites（基线 1497，+19 逐项可对：A 段 +12、路由集成 +1、组件源码断言 +4、loader 契约 +2）。NODE_PATH 必须解除，否则既有的 discovery.test.mjs 会失败
+- [OK] AC7：git diff --stat personal -- lib/chat-only.ts lib/subagent-prompt.ts lib/rpc-manager.ts 输出为空
+- [OK] 浏览器：33/33（真实 Chromium，隔离 worktree + 临时 agent 目录），桌面 1280×1000 与移动 390×844；npm run test:e2e 未跑（该套件在 personal 上 4 败 2 胜，根因是既有 AppShell 竞态，已在 verification-baseline.md 说明）；next build 全程未跑
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- e2e 套件在 personal 上已不可靠（近六次 4 败 2 胜），但 personal 的树与通过那次逐字节相同 ⇒ 是竞态不是回归。根因：components/AppShell.tsx:640-675 的 restoreWorkspaceContext 在首次 cwd 解析时也会执行，读 localStorage 记的「上次打开的会话」后无条件 setSelectedSession + router.replace(?session=…)，把 URL 里显式的 ?session= 顶掉；task C 新增的 ask_user e2e 会在 chat-appearance 之前切到另一个会话，于是稳定触发。建议单独立任务修复——它现在会阻塞每个 PR 的 e2e 闸门

@@ -28,8 +28,9 @@ components/SettingsPanel.tsx           新增 section「追加指令」
   "content": "……",                                      // 文件不存在时为 ""
   "exists": true,
   "maxBytes": 65536,
-  // 只读的「项目级覆盖」信息；cwd 缺失或未受信时为 null
-  "projectOverride": { "path": "<cwd>/.pi/APPEND_SYSTEM.md", "trusted": true } // 仅当该文件存在
+  // 只读的「项目级覆盖」信息：仅当该文件存在时返回；cwd 缺失或不在文件根允许表内时为 null。
+  // trusted 是实时的项目受信状态 —— false 时 pi 仍读全局文件（对应 §3 的两态文案）。
+  "projectOverride": { "path": "<cwd>/.pi/APPEND_SYSTEM.md", "trusted": false }
 }
 ```
 
