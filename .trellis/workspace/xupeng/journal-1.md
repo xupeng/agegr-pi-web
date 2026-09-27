@@ -1144,3 +1144,46 @@ Replaced the loopback-only MCP Apps sandbox with a single opaque-origin srcdoc v
 ### Next Steps
 
 - e2e 套件在 personal 上已不可靠（近六次 4 败 2 胜），但 personal 的树与通过那次逐字节相同 ⇒ 是竞态不是回归。根因：components/AppShell.tsx:640-675 的 restoreWorkspaceContext 在首次 cwd 解析时也会执行，读 localStorage 记的「上次打开的会话」后无条件 setSelectedSession + router.replace(?session=…)，把 URL 里显式的 ?session= 顶掉；task C 新增的 ask_user e2e 会在 chat-appearance 之前切到另一个会话，于是稳定触发。建议单独立任务修复——它现在会阻塞每个 PR 的 e2e 闸门
+
+
+## Session 26: 修掉让每个 PR 的 e2e 变红的 AppShell 会话恢复竞态
+
+**Date**: 2026-09-27
+**Task**: 修掉让每个 PR 的 e2e 变红的 AppShell 会话恢复竞态
+**Branch**: `feat/appshell-url-session-race`
+
+### Summary
+
+定位并修复 ?session= 深链被工作区记忆改写的竞态，用确定性 e2e 复现（修复前 2/2 失败、修复后 3/3 通过）
+
+### Main Changes
+
+- `lib/session-restore.ts`：新增纯函数 `urlSessionParam` 与 `canRestoreRememberedSession`，把"URL 会话未落定前不得恢复工作区记忆"写成可测判定
+- `components/AppShell.tsx:722-727`：`handleCwdChange` 在破坏性分支前加守卫（同步读 URL，因为紧随其后的 `router.replace(pathname)` 会先抹掉参数），并把 `initialSessionRestored` 加进依赖
+- `e2e/session-restore.mjs` + `e2e/run.mjs:419`：把"上一个文档的记忆"写成确定状态后重新深链，断言 URL 与 reload 都停在显式会话
+- 补测试：`lib/session-restore.test.mjs` 真值表 + vm 里执行真实 `handleCwdChange` 的行为测试（不发 projectKey 请求/不清 selection/不 bump sessionKey）
+- `docs(spec)`：新增 `.trellis/spec/frontend/session-restore.md`（不变量、禁止回读 URL、确定性测试要求）并写进 AGENTS.md 陷阱
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `4c3be0d` | (see git log) |
+| `1a4cdec` | (see git log) |
+| `b3f8e55` | (see git log) |
+| `3551219` | (see git log) |
+
+### Testing
+
+- [OK] tsc 退出 0；lint 525 文件 0 error 0 warning；单测 1522 pass / 0 fail（基线 1516，+6 可逐项对应）
+- [OK] e2e（隔离 worktree + dev）：未修复 2/2 在新断言失败（`actual: null`，UI 仍显示 rich 会话）；修复 3 次跑动 2 次整套全绿
+- [OK] CI 失败运行 36278491394 的 trace 证实机制：`?session=e2e-rich-session` 文档之后 reload 载入的是 `?sessionId=e2e-ask-user-session`
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 开工 PR #15（目标 personal），验证 CI e2e 是否转绿
+- （可选）单独处理 `e2e/run.mjs:292` 的虚拟化分页 flake：两侧都不可复现，但值得改成不依赖已挂载窗口

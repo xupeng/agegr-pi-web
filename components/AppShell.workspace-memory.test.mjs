@@ -8,6 +8,7 @@ import { createJiti } from "jiti";
 const source = await readFile(new URL("./AppShell.tsx", import.meta.url), "utf8");
 const jiti = createJiti(import.meta.url);
 const draftStore = await jiti.import("../lib/draft-store.ts");
+const sessionRestore = await jiti.import("../lib/session-restore.ts");
 
 function callbackBody(name, nextName) {
   const start = source.indexOf(`const ${name} = useCallback`);
@@ -73,6 +74,7 @@ test("New restores the draft after session navigation and workspace auto-restore
       const response = Promise.withResolvers();
       const context = vm.createContext({
         ...draftStore,
+        ...sessionRestore,
         crypto: globalThis.crypto,
         queueMicrotask,
         URLSearchParams,
@@ -99,6 +101,8 @@ test("New restores the draft after session navigation and workspace auto-restore
         newSessionCwd: cwd,
         newSessionDraftId: "initial",
         selectedSession: null,
+        // A user-initiated switch back to this project: no pending URL session.
+        initialSessionRestored: true,
         sessionKey: 0,
       });
       context.invalidateWorkspaceRestore = () => context.workspaceRestoreTokenRef.current++;
@@ -155,4 +159,76 @@ test("New restores the draft after session navigation and workspace auto-restore
       draftStore.clearDraft(context.activeNewSessionDraftKeyRef.current);
     });
   }
+});
+
+test("an unresolved ?session= blocks the remembered-session restore", async () => {
+  const cwd = "/race-project";
+  const otherCwd = "/other-project";
+  const remembered = { id: "remembered", cwd, projectKey: cwd };
+  const calls = [];
+  const context = vm.createContext({
+    ...draftStore,
+    ...sessionRestore,
+    crypto: globalThis.crypto,
+    queueMicrotask,
+    URLSearchParams,
+    window: { location: { pathname: "/", search: "?session=url-session" } },
+    router: { replace: (url) => calls.push(["replace", url]) },
+    fetch: (url) => {
+      calls.push(["fetch", url]);
+      return Promise.resolve({ ok: true, json: async () => ({ sessions: [remembered] }) });
+    },
+    getLastOpenSession: (key) => (key === cwd || key === otherCwd ? remembered.id : null),
+    clearLastOpen() {},
+    workspaceKeyOf: (value) => value.projectKey ?? value.cwd,
+    useCallback: (callback) => callback,
+    useGlobalKeyboardShortcuts() {},
+    activeNewSessionDraftKeyRef: { current: null },
+    activeProjectKeyRef: { current: null },
+    workspaceRestoreTokenRef: { current: 0 },
+    suppressCwdBumpRef: { current: false },
+    branchLeafChangeFnRef: { current: null },
+    liveFollowFrameRef: { current: null },
+    bashRecoveryIdRef: { current: 0 },
+    cancelEventStreamGrace() {},
+    closeEvents() {},
+    isMobile: false,
+    activeCwd: null,
+    activeFileTabId: null,
+    newSessionCwd: null,
+    newSessionDraftId: "initial",
+    selectedSession: null,
+    sessionKey: 0,
+    initialSessionRestored: false,
+  });
+  context.invalidateWorkspaceRestore = () => context.workspaceRestoreTokenRef.current++;
+  const restore = callbackBody("restoreWorkspaceContext", "handleCwdChange");
+  const cwdChange = callbackBody("handleCwdChange", "handleSelectSession");
+  const scope = `${restore}\n${cwdChange}`;
+  for (const [setter] of scope.matchAll(/\bset[A-Z]\w*(?=\()/g)) {
+    const state = setter[3].toLowerCase() + setter.slice(4);
+    context[setter] = (value) => {
+      context[state] = typeof value === "function" ? value(context[state]) : value;
+    };
+  }
+  const parkedKeyHelper = source.slice(source.indexOf("function parkedNewSessionDraftKey"), source.indexOf("export function AppShell"));
+  vm.runInContext(stripTypeScriptTypes(`${parkedKeyHelper}\n${scope}
+    globalThis.navigate = { handleCwdChange };
+  `), context);
+
+  context.navigate.handleCwdChange(cwd, cwd, cwd);
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.equal(context.activeProjectKeyRef.current, cwd, "Project identity must still sync");
+  assert.deepEqual(calls, [], "The pending URL session must block the remembered-session restore");
+  assert.equal(context.selectedSession, null, "The pending URL session must not be displaced");
+  assert.equal(context.sessionKey, 0, "The chat must not remount behind the URL restore");
+
+  // Once the URL session has been adopted, switching projects restores normally.
+  context.initialSessionRestored = true;
+  context.navigate.handleCwdChange(otherCwd, otherCwd, otherCwd);
+  await new Promise((resolve) => setImmediate(resolve));
+  const restoredFetches = calls.filter(([kind]) => kind === "fetch");
+  assert.equal(restoredFetches.length, 1, "A resolved URL session must not block the restore forever");
+  assert.match(restoredFetches[0][1], /projectKey=/);
 });

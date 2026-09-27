@@ -13,6 +13,7 @@ import { checkFilePanel, filePanelFixture } from "./file-panel.mjs";
 import { checkExtensionDialogs, extensionSource } from "./extension-dialog.mjs";
 import { checkChatAppearance } from "./chat-appearance.mjs";
 import { ASK_USER_SESSION, checkAskUserView, writeAskUserFixture } from "./ask-user.mjs";
+import { checkSessionRestore } from "./session-restore.mjs";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const mode = process.env.E2E_SERVER_MODE || "dev";
@@ -415,6 +416,13 @@ try {
     await checkExtensionDialogs(page, artifacts, viewport.width);
     await checkAskUserView(page, { base, sessionId: ASK_USER });
     if (viewport.width > 600) {
+      await checkSessionRestore(page, {
+        base,
+        sessionId: RICH,
+        staleSessionId: ASK_USER,
+        marker: ".markdown-code-block pre",
+        artifactsDir: artifacts,
+      });
       await page.goto(`${base}/?session=${RICH}`, { waitUntil: "domcontentloaded" });
       await page.locator(".markdown-code-block pre").waitFor();
       await checkChatAppearance(page);
