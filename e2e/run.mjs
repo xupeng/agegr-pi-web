@@ -317,7 +317,17 @@ try {
     if (beforeCatchUp.length !== rendered.length) {
       console.log(`PASS: history render window caught up (${beforeCatchUp.length} → ${rendered.length} of ${expectedMessages.length})`);
     }
-    assert.deepEqual(rendered, expectedMessages, "Missing, reordered, or duplicate chat messages");
+    // The retry above stops as soon as a request is seen, but a nudge that was already
+    // scheduled can still land one more page after the responses were counted, so the
+    // window may be *longer* than the pages recorded in `olderResponses`. Assert what the
+    // app actually guarantees: the mounted messages are a contiguous suffix of the session
+    // that covers at least every page this test paged in. Gaps, duplicates, reordering, and
+    // a window that lost the pages the test loaded all still fail.
+    const suffixStart = 5000 - rendered.length;
+    assert.ok(suffixStart > 0 && suffixStart <= oldest,
+      `Rendered history must cover the paged-in range (window starts at ${suffixStart}, paged to ${oldest})`);
+    assert.deepEqual(rendered, Array.from({ length: rendered.length }, (_, i) => text(suffixStart + i)),
+      "Missing, reordered, or duplicate chat messages");
     await page.screenshot({ path: join(artifacts, `history-${viewport.width}.png`) });
 
     await page.goto(`${base}/?session=${BRANCH}`, { waitUntil: "domcontentloaded" });
