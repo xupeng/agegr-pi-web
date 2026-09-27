@@ -285,10 +285,29 @@ try {
       await page.getByText(firstMessage, { exact: true }).waitFor({ state: "attached" });
       await page.getByText(text(4999), { exact: true }).evaluate((element) => element.scrollIntoView({ block: "end", behavior: "instant" }));
     }
-    assert.deepEqual(await latestUser.evaluate((element) => ({
+    const latestUserState = await latestUser.evaluate((element) => ({
       connected: element.isConnected,
       text: element.textContent,
-    })), { connected: true, text: text(4998) }, "Prepending history must preserve existing message nodes");
+    }));
+    if (!latestUserState.connected) {
+      // This assertion has failed intermittently (once in seven local runs after the
+      // upstream sync, never pre-merge). Dump enough to tell the two mechanisms apart:
+      // empty data-entry-id values mean the render fell back to index keys, which shift
+      // when older pages are prepended, while a matching node with a real entry id
+      // means the list container was recreated instead.
+      const diagnostic = await page.evaluate(() => {
+        const labelled = Array.from(document.querySelectorAll("[data-entry-id]"));
+        const matches = Array.from(document.querySelectorAll("div")).filter((node) => node.textContent === "E2E message 4998");
+        return {
+          labelledNodes: labelled.length,
+          emptyIds: labelled.filter((node) => !node.getAttribute("data-entry-id")).length,
+          matchesWithText: matches.length,
+          matchEntryIds: matches.slice(0, 3).map((node) => node.closest("[data-entry-id]")?.getAttribute("data-entry-id") ?? null),
+        };
+      });
+      console.log(`DIAG prepended history detached the latest user node: ${JSON.stringify(diagnostic)}`);
+    }
+    assert.deepEqual(latestUserState, { connected: true, text: text(4998) }, "Prepending history must preserve existing message nodes");
     await latestUser.dispose();
     assert.ok(olderResponses.length >= 2, "Scrolling must fetch consecutive older pages");
     let oldest = Number(new URL(olderResponses[0].url()).searchParams.get("before")?.slice(1));
@@ -317,7 +336,17 @@ try {
     if (beforeCatchUp.length !== rendered.length) {
       console.log(`PASS: history render window caught up (${beforeCatchUp.length} → ${rendered.length} of ${expectedMessages.length})`);
     }
-    assert.deepEqual(rendered, expectedMessages, "Missing, reordered, or duplicate chat messages");
+    // The retry above stops as soon as a request is seen, but a nudge that was already
+    // scheduled can still land one more page after the responses were counted, so the
+    // window may be *longer* than the pages recorded in `olderResponses`. Assert what the
+    // app actually guarantees: the mounted messages are a contiguous suffix of the session
+    // that covers at least every page this test paged in. Gaps, duplicates, reordering, and
+    // a window that lost the pages the test loaded all still fail.
+    const suffixStart = 5000 - rendered.length;
+    assert.ok(suffixStart > 0 && suffixStart <= oldest,
+      `Rendered history must cover the paged-in range (window starts at ${suffixStart}, paged to ${oldest})`);
+    assert.deepEqual(rendered, Array.from({ length: rendered.length }, (_, i) => text(suffixStart + i)),
+      "Missing, reordered, or duplicate chat messages");
     await page.screenshot({ path: join(artifacts, `history-${viewport.width}.png`) });
 
     await page.goto(`${base}/?session=${BRANCH}`, { waitUntil: "domcontentloaded" });

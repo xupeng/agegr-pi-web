@@ -1226,3 +1226,71 @@ e2e/run.mjs 的历史断言读 DOM 早于渲染窗口 catch-up（缺整整一页
 
 - 开 PR（目标 personal），CI 复跑整套 e2e 作为独立确认
 - 等待期间若 `caught up` 诊断打印出来，把它作为该竞态真实存在的直接证据补进 PR 评论
+
+
+## Session 28: Session 28：0.11.0 前的上游同步（37 提交、23 冲突、SDK 0.87.1）
+
+**Date**: 2026-09-27
+**Task**: Session 28：0.11.0 前的上游同步（37 提交、23 冲突、SDK 0.87.1）
+**Branch**: `merge/upstream-pre-0110-20260927-171343`
+
+### Summary
+
+Session summary was not supplied.
+
+### Main Changes
+
+把 `upstream/main` 追上：`personal` 落后 37 个提交（10 feat / 19 fix / 2 perf，404 个文件），“先同步再发 0.11.0”的用户决定把这次合并放进了发布路径的前一步。
+
+### Main Changes
+
+- 真实合并 `upstream/main@96966e5` → merge 提交 `7790ec7`：`git merge` 报 21 个内容冲突 + 2 个 modify/delete，逐条裁决并写进 `research/conflict-decisions.md`（`file — resolution — reason`）
+- 结构取本地、语义取上游：`lib/session-list-scanner.*` 保持删除（fork 用 mtime 增量缓存替代），把上游 scanner 的“同 modified 时按文件名倒序”tie-break 移植进 `mergeSessionLists()` 并补上断言；采纳上游 SM cache、`allowStale`、`snapshotRevision`、`openSessionManager`、scroll-to-bottom、`models` 面板与 subagent 相关修复
+- 两层“记住打开会话”合成：URL `?session=` > 本标签页 `sessionStorage`（上游 `ef1de89`，`lib/tab-session.ts` + `withTabOpen`）> workspace 记忆；PR #15 的 `canRestoreRememberedSession` 守卫保留，上游的 `AppShell.tab-session.test.mjs`（3 例）通过
+- 依赖按用户决定采纳上游：`@earendil-works/pi-*` 0.87.1、`next` 16.3.6、`semver` 7.8.5、`undici` 8.11.0、生产安装裁剪；`package-lock.json` 用 `npm install` 重生成，`name`/`version` 保持 `@xup3ng/pi-web` 0.10.0
+- `e2e/run.mjs` 两处测试侧改动：容忍 nudge 多触发的一页（服务端日志证明 `before=e4500` 确实被请求、DOM 是连续 suffix）；`Prepending history must preserve existing message nodes` 失败时打印自诊断
+- 任务产物 + spec 锚点修正：`.trellis/spec/frontend/{ask-user-protocol,directory-structure,session-restore}.md` 与 `AGENTS.md` 的行号/SDK 版本/三层记忆顺序（`trellis-check` 发现并直接修）
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `7790ec7` | Merge remote-tracking branch 'upstream/main' into merge/upstream-pre-0110-20260927-171343 |
+| `92d8e46` | chore(task): add 09-27-sync-upstream-pre-0110 planning artifacts |
+| `ed31361` | test(e2e): accept a nudge-triggered extra history page |
+| `716c3a9` | test(e2e): dump a diagnostic when prepending detaches the latest node |
+| `4824023` | chore(task): add 09-27-sync-upstream-pre-0110 planning and acceptance artifacts |
+| `2bf01d2` | test(session-reader): cover the ported equal-activity ordering (AC2) |
+| `a65a688` | docs(spec): repair references the upstream merge made stale |
+
+### Testing
+
+- [OK] `node_modules/.bin/tsc --noEmit` 退出 0；`npm run lint` → No issues found
+- [OK] 单测 1720 pass / 0 fail（基线 1522：上游新增用例 − 7 个随 scanner 删除 + 1 个新 tie-break 断言）
+- [OK] e2e 在隔离 worktree（`E2E_SERVER_MODE=dev`，主 checkout 的 8505 dev server 持有 `.next/dev/lock`）跑 7 次：5 绿 2 红；两次红是不同断言（一次为测试侧页数记账落后于 app 实际加载，已修；一次为 node 失联，4 次复跑未再现、已加自诊断），均记入 `research/verification-baseline.md`
+- [OK] R4 上游安全修复逐条读代码+读测试确认：`PI_WEB_PASSWORD` 剥离、Basic 节流共享、登录跳转同源校验、`models.json` 读取/写入守卫、listener 退订后仍投递
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 开 PR（目标 `personal`），CI 复跑 e2e 作为独立确认；合并后进入子任务 B：用 `scripts/release-npm.sh` 发 0.11.0
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `7790ec7` | (see git log) |
+| `92d8e46` | (see git log) |
+| `ed31361` | (see git log) |
+| `716c3a9` | (see git log) |
+| `4824023` | (see git log) |
+| `2bf01d2` | (see git log) |
+| `a65a688` | (see git log) |
+
+### Status
+
+[OK] **Completed**

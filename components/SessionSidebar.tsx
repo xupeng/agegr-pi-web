@@ -9,6 +9,7 @@ import { skillExpansionToCommand } from "@/lib/slash-display";
 import { formatRelativeTime } from "@/lib/i18n/format";
 import { useI18n } from "@/hooks/useI18n";
 import { useResizablePanel } from "@/hooks/useResizablePanel";
+import { useScrollbarVisibility } from "@/hooks/useScrollbarVisibility";
 import { DirectoryPicker } from "./DirectoryPicker";
 import { SessionSearch } from "./SessionSearch";
 import { FileExplorer, type FileExplorerHandle } from "./FileExplorer";
@@ -103,6 +104,7 @@ function ToolbarIconButton({
     </button>
   );
 }
+
 
 interface Props {
   selectedSessionId: string | null;
@@ -503,7 +505,6 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
   const [sessionSearchOpen, setSessionSearchOpen] = useState(false);
   const [sessionSearchQuery, setSessionSearchQuery] = useState("");
   const sessionSearchActive = sessionSearchOpen && Boolean(sessionSearchQuery.trim());
-  const [searchRefreshKey, setSearchRefreshKey] = useState(0);
   const [explorerRefreshDone, setExplorerRefreshDone] = useState(false);
   const [runningSessionIds, setRunningSessionIds] = useState<Set<string>>(() => new Set());
   const [unreadSessionIds, setUnreadSessionIds] = useState<Set<string>>(() => loadUnreadSessionIds());
@@ -536,6 +537,9 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
   // rows because virtualization intentionally unmounts offscreen components.
   const [collapsedSessionIds, setCollapsedSessionIds] = useState<Set<string>>(() => new Set());
   const listScrollRef = useRef<HTMLDivElement>(null);
+  const explorerScrollRef = useRef<HTMLDivElement>(null);
+  useScrollbarVisibility(listScrollRef);
+  useScrollbarVisibility(explorerScrollRef, explorerOpen && Boolean(selectedCwdProp || selectedCwd));
   const sessionPaneRef = useRef<HTMLDivElement>(null);
   const explorerSectionRef = useRef<HTMLDivElement>(null);
   const sessionPaneHeightRef = useRef(SESSION_PANE_DEFAULT_HEIGHT);
@@ -573,13 +577,17 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
   const [listScrollTop, setListScrollTop] = useState(0);
   const [focusedSessionId, setFocusedSessionId] = useState<string | null>(null);
   const latestListScrollTopRef = useRef(0);
+  const renderedListScrollTopRef = useRef(0);
   const listScrollRafRef = useRef<number | null>(null);
   const handleListScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
     latestListScrollTopRef.current = event.currentTarget.scrollTop;
     if (listScrollRafRef.current !== null) return;
     listScrollRafRef.current = requestAnimationFrame(() => {
       listScrollRafRef.current = null;
-      setListScrollTop(latestListScrollTopRef.current);
+      const nextTop = Math.floor(latestListScrollTopRef.current / SESSION_LIST_ITEM_HEIGHT) * SESSION_LIST_ITEM_HEIGHT;
+      if (renderedListScrollTopRef.current === nextTop) return;
+      renderedListScrollTopRef.current = nextTop;
+      setListScrollTop(nextTop);
     });
   }, []);
   useLayoutEffect(() => {
@@ -591,7 +599,8 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
     observer.observe(element);
     setListViewportHeight(element.clientHeight);
     latestListScrollTopRef.current = element.scrollTop;
-    setListScrollTop(element.scrollTop);
+    renderedListScrollTopRef.current = Math.floor(element.scrollTop / SESSION_LIST_ITEM_HEIGHT) * SESSION_LIST_ITEM_HEIGHT;
+    setListScrollTop(renderedListScrollTopRef.current);
     return () => observer.disconnect();
   }, [sessionSearchActive]);
   useEffect(() => () => {
@@ -771,9 +780,6 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
     await loadProjects(false, force);
     const key = selectedProjectKeyRef.current;
     if (key) await loadProjectSessions(key, force);
-    // Bump the session-search refresh key so open results refetch after any
-    // list mutation (mirrors the server's sessionListVersion signal).
-    setSearchRefreshKey((current) => current + 1);
   }, [loadProjects, loadProjectSessions]);
 
   const initialLoadDone = useRef(false);
@@ -1267,9 +1273,12 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
   // The projects endpoint is already sorted by most recent activity.
   const recentProjects = projects.map((p) => ({ key: p.key, root: p.root }));
   const showProjectFilter = recentProjects.length > 8;
-  const visibleProjects = projectFilter.trim()
-    ? recentProjects.filter((project) => project.root.toLowerCase().includes(projectFilter.trim().toLowerCase()))
-    : recentProjects;
+  const visibleProjects = useMemo(() => {
+    const query = projectFilter.trim().toLowerCase();
+    return query
+      ? recentProjects.filter((project) => project.root.toLowerCase().includes(query))
+      : recentProjects;
+  }, [projectFilter, recentProjects]);
 
   // Sessions of every worktree in the selected project are shown together
   const selectedProject = projectFor(selectedCwd);
@@ -1312,6 +1321,7 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
     ),
     [projectActivity, selectedProject],
   );
+
 
   const showWorktreeSwitcher = Boolean(
     worktreeState?.isGit
@@ -2072,10 +2082,11 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
           overflow: "hidden",
         }}
       >
-        <SessionSearch open={sessionSearchOpen} query={sessionSearchQuery} refreshKey={searchRefreshKey} selectedSessionId={selectedSessionId} onSelectSession={handleSelectSessionFromList}>
+        <SessionSearch open={sessionSearchOpen} query={sessionSearchQuery} selectedSessionId={selectedSessionId} onSelectSession={handleSelectSessionFromList}>
         <div
           ref={listScrollRef}
           onScroll={handleListScroll}
+          className="scrollbar-subtle"
           style={{
             flex: "1 1 auto",
             minHeight: 0,
@@ -2304,7 +2315,7 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
             </ToolbarIconButton>
           </div>
           {explorerOpen && (
-            <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
+            <div ref={explorerScrollRef} className="scrollbar-subtle" style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
               <FileExplorer
                 ref={fileExplorerRef}
                 cwd={selectedCwd ?? selectedCwdProp!}
@@ -2683,7 +2694,9 @@ function SessionItem({
               ) : (
                 <span title={session.modified}>{formatRelativeTime(session.modified, locale)}</span>
               )}
-              <span>{t("sidebar.messagesCount", { count: session.messageCount })}</span>
+              <span>
+                {session.detailsPending ? "…" : t("sidebar.messagesCount", { count: session.messageCount })}
+              </span>
               {session.worktreeBranch && (
                 <span
                   title={`Worktree: ${session.cwd}`}

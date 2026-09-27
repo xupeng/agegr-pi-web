@@ -19,7 +19,7 @@
 - 工具文本明确告知模型"答案将以 follow-up 唤醒，不要重复提问"；supersede 时附加旧 ask 未答列表。
 - 调用引导在 `lib/ask-user/portable/tool.ts:139-142` 的 `promptSnippet` / `promptGuidelines`：仅在工具可用、继续当前请求必须等待缺失事实、范围选择或必要决策时调用；把相关问题合并后单独、最后调用。普通对话、修辞性提问与非阻塞的后续建议仍用文字，工具不可用时也用文字。回答只用于澄清，不代替敏感操作授权。对应契约断言在 `lib/ask-user/tool.test.mjs`；断言只验证提示元数据，不证明模型遵循。实际效果要用同模型、同配置的独立会话记录调用结果；单次冒烟不能推断调用率变化。
 
-## 跨宿主桥接（SDK 0.85.1 本地原型）
+## 跨宿主桥接（SDK 0.87.1 本地原型）
 
 ### 1. 适用范围
 
@@ -51,7 +51,7 @@
 
 ### 6. 必测断言
 
-`discovery.test.mjs` 验证本地包发现、peer 为 0.85.1、拷贝目录无需指回 Pi Web 的 node_modules、缺失/重复 bridge 与畸形 ack 的失败关闭；`bridge.test.mjs` 验证边界输入和 supersede；`store.test.mjs` 验证失败的提交不会关闭已打开的 ask；`extension.test.mjs` 验证 Pi Web 开关和 session lookup。PA 的 Stage A 固定目录准入仅有隔离探针；Stage B、定时任务排除、重启后答案交付属于另一个仓库的任务，不能写成已验证。
+`discovery.test.mjs` 验证本地包发现、peer 为 0.87.1、拷贝目录无需指回 Pi Web 的 node_modules、缺失/重复 bridge 与畸形 ack 的失败关闭；`bridge.test.mjs` 验证边界输入和 supersede；`store.test.mjs` 验证失败的提交不会关闭已打开的 ask；`extension.test.mjs` 验证 Pi Web 开关和 session lookup。PA 的 Stage A 固定目录准入仅有隔离探针；Stage B、定时任务排除、重启后答案交付属于另一个仓库的任务，不能写成已验证。
 
 ### 7. 错误与正确方式
 
@@ -226,7 +226,7 @@ Personal Assistant 作为第二个 React 宿主，接入时只需：
 
 ## 文件布局
 
-- `lib/ask-user/portable/` — 可本地安装的 Pi 包（`pi.extensions: ["./index.ts"]`、`peerDependencies` 钉死 SDK 0.85.1、`private: true`、MIT `LICENSE` + `README.md` 记录 bridge 契约与本地安装）。其中 `types.ts` 为有界 DTO/限制，`validation.ts` 为唯一的提问/答案校验器，`format.ts` 为答案文本渲染，`tool.ts` 为 `createAskUserToolDefinition`（`defineTool` + TypeBox schema），`bridge.ts` 为显式 host bridge 解析（`pi.ask-user.bridge:resolve-open:v1`，要求恰好一个同步 `register`）。缺失/多个 bridge、畸形问题、ack 缺少有界 `askId`/`askedAt`、ack 的 questions 与校验后的提问身份不一致（id/文本/选项/`multiple`/顺序），或 `superseded` 不是带 `unansweredIds` 的 `reason: "superseded"` 结果，全部 fail closed，不返回 `terminate: true`。安装验证必须用目录拷贝；指回本仓库 `node_modules` 的符号链接不算独立安装。`index.ts` 为包入口，把 bridge 注入共享工具。
+- `lib/ask-user/portable/` — 可本地安装的 Pi 包（`pi.extensions: ["./index.ts"]`、`peerDependencies` 钉死 SDK 0.87.1、`private: true`、MIT `LICENSE` + `README.md` 记录 bridge 契约与本地安装）。其中 `types.ts` 为有界 DTO/限制，`validation.ts` 为唯一的提问/答案校验器，`format.ts` 为答案文本渲染，`tool.ts` 为 `createAskUserToolDefinition`（`defineTool` + TypeBox schema），`bridge.ts` 为显式 host bridge 解析（`pi.ask-user.bridge:resolve-open:v1`，要求恰好一个同步 `register`）。缺失/多个 bridge、畸形问题、ack 缺少有界 `askId`/`askedAt`、ack 的 questions 与校验后的提问身份不一致（id/文本/选项/`multiple`/顺序），或 `superseded` 不是带 `unansweredIds` 的 `reason: "superseded"` 结果，全部 fail closed，不返回 `terminate: true`。安装验证必须用目录拷贝；指回本仓库 `node_modules` 的符号链接不算独立安装。`index.ts` 为包入口，把 bridge 注入共享工具。
 - `lib/ask-user/portable/view-controller.ts` — 共享表单状态 reducer/selectors（上节）。
 - `lib/ask-user/portable/react/` — 共享 React 视图：`AskUserView.tsx`（组件）、`copy.ts`（三语默认文案 + `AskUserViewLabels`）、`view-css.ts`（`--pi-ask-*` 样式表）、`keyboard.ts`（roving tabindex 纯数学）、`fixture/`（无宿主渲染探针）。
 - `lib/ask-user/types.ts` — 再导出 `./portable/types`，并保留 Pi Web 专有的 `ASK_USER_ANSWERS_CUSTOM_TYPE` 与 `AskUserCloseResponse`
