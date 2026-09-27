@@ -285,10 +285,29 @@ try {
       await page.getByText(firstMessage, { exact: true }).waitFor({ state: "attached" });
       await page.getByText(text(4999), { exact: true }).evaluate((element) => element.scrollIntoView({ block: "end", behavior: "instant" }));
     }
-    assert.deepEqual(await latestUser.evaluate((element) => ({
+    const latestUserState = await latestUser.evaluate((element) => ({
       connected: element.isConnected,
       text: element.textContent,
-    })), { connected: true, text: text(4998) }, "Prepending history must preserve existing message nodes");
+    }));
+    if (!latestUserState.connected) {
+      // This assertion has failed intermittently (once in seven local runs after the
+      // upstream sync, never pre-merge). Dump enough to tell the two mechanisms apart:
+      // empty data-entry-id values mean the render fell back to index keys, which shift
+      // when older pages are prepended, while a matching node with a real entry id
+      // means the list container was recreated instead.
+      const diagnostic = await page.evaluate(() => {
+        const labelled = Array.from(document.querySelectorAll("[data-entry-id]"));
+        const matches = Array.from(document.querySelectorAll("div")).filter((node) => node.textContent === "E2E message 4998");
+        return {
+          labelledNodes: labelled.length,
+          emptyIds: labelled.filter((node) => !node.getAttribute("data-entry-id")).length,
+          matchesWithText: matches.length,
+          matchEntryIds: matches.slice(0, 3).map((node) => node.closest("[data-entry-id]")?.getAttribute("data-entry-id") ?? null),
+        };
+      });
+      console.log(`DIAG prepended history detached the latest user node: ${JSON.stringify(diagnostic)}`);
+    }
+    assert.deepEqual(latestUserState, { connected: true, text: text(4998) }, "Prepending history must preserve existing message nodes");
     await latestUser.dispose();
     assert.ok(olderResponses.length >= 2, "Scrolling must fetch consecutive older pages");
     let oldest = Number(new URL(olderResponses[0].url()).searchParams.get("before")?.slice(1));
