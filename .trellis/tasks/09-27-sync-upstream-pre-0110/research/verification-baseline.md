@@ -41,7 +41,7 @@ cp -al node_modules <worktree>/node_modules        # /home, hardlinks, tmpfs wou
 cd <worktree> && E2E_SERVER_MODE=dev node e2e/run.mjs
 ```
 
-Seven runs, 6 green / 2 red, and the two reds were **different** assertions:
+Seven runs, 5 green / 2 red, and the two reds were **different** assertions:
 
 | Run | Result | Failure |
 |-----|--------|---------|
@@ -79,8 +79,8 @@ gathered so far:
 `716c3a9` makes the next occurrence self-diagnosing (node count, empty `data-entry-id`
 count, and the entry id of any node carrying the same text), which separates "the render
 fell back to index keys" from "the list container was recreated". Recorded as a known
-intermittent gate rather than fixed, because three of the four follow-up runs at both
-viewports were green and no mechanism was found in the code the merge touched.
+intermittent gate rather than fixed, because all four follow-up runs at both viewports
+were green and no mechanism was found in the code the merge touched.
 
 ## R4 spot checks (upstream security fixes present in the merged tree)
 
@@ -115,7 +115,7 @@ viewports were green and no mechanism was found in the code the merge touched.
 |----|--------|
 | AC1 merge commit + PR body links the decision file | merge exists; PR body written at open |
 | AC2 modify/delete resolved deliberately, scanner stays deleted, tie-break ported | done (`mergeSessionLists()`), recorded |
-| AC3 tsc / lint / unit / e2e green | done for the first three; e2e 6/7 green with one documented intermittent assertion |
+| AC3 tsc / lint / unit / e2e green | done for the first three; e2e 5/7 green with one documented intermittent assertion |
 | AC4 R4 fixes present and spot-checked | done (table above) |
 | AC5 dependency decision recorded, SDK-dependent tests pass | done |
 | AC6 `AGENTS.md` re-read and corrected | done (`listSessionsIncremental` line rewritten) |
