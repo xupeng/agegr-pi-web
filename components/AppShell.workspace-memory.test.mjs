@@ -103,6 +103,7 @@ test("New restores the draft after session navigation and workspace auto-restore
         selectedSession: null,
         // A user-initiated switch back to this project: no pending URL session.
         initialSessionRestored: true,
+        sessionCatalog: [],
         sessionKey: 0,
       });
       context.invalidateWorkspaceRestore = () => context.workspaceRestoreTokenRef.current++;
@@ -119,6 +120,16 @@ test("New restores the draft after session navigation and workspace auto-restore
       const makeCleanup = vm.runInContext(stripTypeScriptTypes(`((isNew, newSessionDraftKey) => {
         const sessionHookMountedRef = { current: true };
         const newSessionPromotedRef = { current: false };
+        const sessionIdRef = { current: null };
+        const dataRef = { current: null };
+        const messagesRef = { current: [] };
+        const entryIdsRef = { current: [] };
+        const activeLeafIdRef = { current: null };
+        const historyCursorRef = { current: null };
+        const hasEarlierMessagesRef = { current: false };
+        const getSessionViewSnapshot = () => null;
+        const setSessionViewSnapshot = () => false;
+        const deleteSessionViewSnapshot = () => {};
         ${hookSource.slice(cleanupStart, cleanupEnd)}
       })`), context);
       let mountedKey = context.sessionKey;
@@ -200,6 +211,7 @@ test("an unresolved ?session= blocks the remembered-session restore", async () =
     selectedSession: null,
     sessionKey: 0,
     initialSessionRestored: false,
+    sessionCatalog: [],
   });
   context.invalidateWorkspaceRestore = () => context.workspaceRestoreTokenRef.current++;
   const restore = callbackBody("restoreWorkspaceContext", "handleCwdChange");

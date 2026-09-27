@@ -202,3 +202,4 @@ test("does not expose disk-backed actions for transient sessions", () => {
   assert.match(sessionItemSource, /\{hovered && !session\.transient && \(/);
 });
 
+

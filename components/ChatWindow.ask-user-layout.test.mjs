@@ -32,7 +32,7 @@ test("composer area no longer hosts the ask_user card", () => {
 test("empty new-session page keeps the column-aligned ask_user card", () => {
   assert.match(
     chatWindowSource,
-    /\{askUserCardInColumn\}\s*<div className="relative shrink-0">\s*\{chatInputElement\}/,
+    /\{askUserCardInColumn\}\s*<div className="relative shrink-0">(?:\s*\{!isEmptyNew && \([\s\S]*?\)\}\s*)?\{chatInputElement\}/,
   );
 });
 
