@@ -261,7 +261,23 @@ try {
     for (let turn = 0; turn < 2; turn++) {
       const responsePromise = page.waitForResponse((response) =>
         new URL(response.url()).pathname === `/api/sessions/${LONG}/context`);
-      await sentinel.evaluate((element) => element.scrollIntoView({ block: "start", behavior: "instant" }));
+      const requestPromise = page.waitForRequest((request) => {
+        const url = new URL(request.url());
+        return url.pathname === `/api/sessions/${LONG}/context` && url.searchParams.has("before");
+      });
+      const scrollToSentinel = () =>
+        sentinel.evaluate((element) => element.scrollIntoView({ block: "start", behavior: "instant" }));
+      // The sentinel's IntersectionObserver is installed by an effect, so a single
+      // instant scroll can land before the app is listening (a cold dev server needs
+      // seconds to become interactive, and then no request is ever made). Re-issue the
+      // scroll until the fetch starts, then stop so no duplicate page is requested.
+      const nudge = setInterval(() => { void scrollToSentinel().catch(() => {}); }, 750);
+      try {
+        await scrollToSentinel();
+        await requestPromise;
+      } finally {
+        clearInterval(nudge);
+      }
       const response = await responsePromise;
       const older = (await response.json()).context;
       const firstMessage = older.messages.find((message) => message.role === "user")?.content;
@@ -287,10 +303,21 @@ try {
       assert.equal(older.oldestEntryId, `e${oldest}`);
       assert.equal(older.hasMore, true);
     }
-    const rendered = await page.getByText(/^E2E message \d{4}$/).allTextContents();
     // The sidebar also displays the first message as the session title.
-    assert.deepEqual(rendered.filter((value) => value !== text(0)),
-      Array.from({ length: 5000 - oldest }, (_, i) => text(oldest + i)), "Missing, reordered, or duplicate chat messages");
+    const mountedMessages = async () => (await page.getByText(/^E2E message \d{4}$/).allTextContents())
+      .filter((value) => value !== text(0));
+    const expectedMessages = Array.from({ length: 5000 - oldest }, (_, i) => text(oldest + i));
+    const beforeCatchUp = await mountedMessages();
+    // ChatWindow keeps the render window at least as large as the loaded messages
+    // (components/ChatWindow.tsx:667-672), but only after that effect has flushed, so the
+    // DOM legitimately lags the page that was just prepended. Wait for the oldest loaded
+    // message to be mounted instead of reading the window mid-flush.
+    await page.getByText(text(oldest), { exact: true }).waitFor({ state: "attached" });
+    const rendered = await mountedMessages();
+    if (beforeCatchUp.length !== rendered.length) {
+      console.log(`PASS: history render window caught up (${beforeCatchUp.length} → ${rendered.length} of ${expectedMessages.length})`);
+    }
+    assert.deepEqual(rendered, expectedMessages, "Missing, reordered, or duplicate chat messages");
     await page.screenshot({ path: join(artifacts, `history-${viewport.width}.png`) });
 
     await page.goto(`${base}/?session=${BRANCH}`, { waitUntil: "domcontentloaded" });
