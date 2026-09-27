@@ -18,10 +18,12 @@
 |------|---------|--------|
 | typecheck | `node_modules/.bin/tsc --noEmit` | exit 0 |
 | lint | `npm run lint` | `ESLint: No issues found` |
-| unit | `env -u NODE_PATH XDG_STATE_HOME= npm test` | **1719 pass, 0 fail, 0 skipped** (48.9 s) |
+| unit | `env -u NODE_PATH XDG_STATE_HOME= npm test` | **1720 pass, 0 fail, 0 skipped** (44.3 s) |
 
 Unit reconciliation: fork baseline 1522. Upstream adds 38 commits' worth of tests; the
-fork deletes `lib/session-list-scanner.test.mjs` (7 upstream cases). Net +197. No test
+fork deletes `lib/session-list-scanner.test.mjs` (7 upstream cases). Net +197, plus one
+check-agent test added after review (`lib/session-reader.test.mjs`: the equal-`modified`
+reverse-filename ordering the scanner used to cover) = **1720**. No test
 file disappeared (`git diff --diff-filter=D f186cdb..HEAD -- '*test*'` is empty) and no
 test file lost lines except where the behaviour it asserted was deliberately changed
 (`lib/rpc-manager*.test.mjs`: the exact prompt now travels through a

@@ -96,5 +96,6 @@ and `lib/subagent-runtime.test.mjs` keep **both** sides' tests, and the upstream
 `allowStale` tests were ported onto the fork's real scan path (3 tests, since the
 scanner's `listSessions` mock seam no longer exists).
 
-**Result: `env -u NODE_PATH XDG_STATE_HOME= npm test` → 1719 pass, 0 fail** (fork baseline
-1522; the +197 delta is upstream's added suites minus the 7 deleted scanner tests).
+**Result: `env -u NODE_PATH XDG_STATE_HOME= npm test` → 1720 pass, 0 fail** (fork baseline
+1522; the +198 delta is upstream's added suites minus the 7 deleted scanner tests, plus
+one check-agent test for the ported equal-`modified` ordering).
