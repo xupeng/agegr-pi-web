@@ -1,0 +1,29 @@
+{
+  "id": "release-0110",
+  "name": "release-0110",
+  "title": "Publish @xup3ng/pi-web 0.11.0 on top of an upstream sync",
+  "description": "User request: publish a new npm version (0.11.0 decided) after first merging upstream/main's 37 pending commits into personal. Deliverables: (A) sync-upstream-pre-0110 merged via PR, (B) npm-release-0110 published, verified, bump committed to personal, dev server restored.",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "xupeng",
+  "assignee": "xupeng",
+  "createdAt": "2026-09-27",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "personal",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "09-27-sync-upstream-pre-0110",
+    "09-27-npm-release-0110"
+  ],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {}
+}
