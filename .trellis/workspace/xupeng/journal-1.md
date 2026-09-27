@@ -1187,3 +1187,42 @@ Replaced the loopback-only MCP Apps sandbox with a single opaque-origin srcdoc v
 
 - 开工 PR #15（目标 personal），验证 CI e2e 是否转绿
 - （可选）单独处理 `e2e/run.mjs:292` 的虚拟化分页 flake：两侧都不可复现，但值得改成不依赖已挂载窗口
+
+
+## Session 27: 修掉 e2e 历史分页段的两处测试侧竞态
+
+**Date**: 2026-09-27
+**Task**: 修掉 e2e 历史分页段的两处测试侧竞态
+**Branch**: `feat/e2e-history-window-race`
+
+### Summary
+
+e2e/run.mjs 的历史断言读 DOM 早于渲染窗口 catch-up（缺整整一页 50 条，1/4 概率），同一循环的瞬时滚动还可能早于 IntersectionObserver 装好导致 30s 超时；两处都在测试侧修掉
+
+### Main Changes
+
+- `e2e/run.mjs:303-319`：断言前先等最旧的已加载消息挂载（app 保证"渲染窗口 ≥ 已加载消息"，见 `components/ChatWindow.tsx:667-672`），再做完整 deepEqual，并在等待真的发生时打印 catch-up 诊断
+- `e2e/run.mjs:261-281`：sentinel 滚动改为 750ms 重试直到观察到 `?before=` 请求即停，避免冷启动下"没有任何请求"以及重复请求同一页
+- 任务产物 `.trellis/tasks/archive/2026-09/09-27-e2e-history-window-race/`：prd/design/implement + research（改动前失败日志、冷启动无请求的 server.log 证据、热/冷验证跑动、诊断未触发的诚实说明）
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `e016b49` | (see git log) |
+| `93e61f1` | (see git log) |
+| `46d7219` | (see git log) |
+
+### Testing
+
+- [OK] 热缓存与 `rm -rf .next` 冷启动各跑一次整套 e2e：均 13 条 PASS、无 AssertionError/TimeoutError
+- [OK] tsc 退出 0；npm run lint 退出 0；单测 1522 pass / 0 fail（本次只改 e2e，无数量变化）
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 开 PR（目标 personal），CI 复跑整套 e2e 作为独立确认
+- 等待期间若 `caught up` 诊断打印出来，把它作为该竞态真实存在的直接证据补进 PR 评论

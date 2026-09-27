@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 26
+- **Total Sessions**: 27
 - **Last Active**: 2026-09-27
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~1188 | Active |
+| `journal-1.md` | ~1228 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 27 | 2026-09-27 | 修掉 e2e 历史分页段的两处测试侧竞态 | `e016b49`, `93e61f1`, `46d7219` | `feat/e2e-history-window-race` |
 | 26 | 2026-09-27 | 修掉让每个 PR 的 e2e 变红的 AppShell 会话恢复竞态 | `4c3be0d`, `1a4cdec`, `b3f8e55` | `feat/appshell-url-session-race` |
 | 25 | 2026-09-27 | 编辑 APPEND_SYSTEM.md：计划复核、服务端契约、设置面板与浏览器闸门 | `82b7654`, `bc36f7b`, `c09d914`, `61ef832`, `0657791`, `6ba0e17`, `20a3397`, `e9baf77` | `feat/append-system-editor` |
 | 24 | 2026-09-26 | ask_user 共享 React 视图重构 · 任务 C：切换渲染并删除 MCP Apps 管线 | `0101e0a`, `853a0eb`, `d8f3807`, `7058d8b`, `826482a` | `feat/ask-user-retire-mcp-apps` |
