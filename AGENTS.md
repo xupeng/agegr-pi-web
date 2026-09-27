@@ -201,6 +201,11 @@ hooks/
 ### Session files can be fully rewritten
 `parentSession` in the header is **display metadata only** — has zero effect on chat content. Safe to `writeFileSync` the entire file (pi does this itself during migrations). Used when cascade-reparenting children on delete.
 
+### An explicit `?session=` outranks the remembered workspace session
+Two restore paths both call `setSelectedSession`, and only one of them writes the URL: the sidebar adopts the URL's `?session=` after a round trip and deliberately skips `router.replace`, while `handleCwdChange`'s cross-project branch (`components/AppShell.tsx:752-763`) restores `getLastOpenSession(projectKey)` and rewrites the URL to it. The remembered value is written only after adoption (`:591-597`), so in a fresh document it is still the **previous document's** session. Without a guard, a cwd report arriving before adoption made the second path win the race: the UI showed the URL session while the URL pointed at the stale one, so the next reload landed on the wrong session (this is what made `checkChatAppearance`'s reload flaky).
+
+The guard is `canRestoreRememberedSession()` (`lib/session-restore.ts:28`, used at `components/AppShell.tsx:722-727`): while `initialSessionRestored` is false (set on adoption `:808` or on a failed restore `:1035`) and the URL still carries `?session=`, the cwd-change path returns before touching the selection or the URL. Read the URL **at the call site** — the `router.replace(pathname)` at `:764` strips the param before the restore's async fetch resolves. Invariants and the required tests are in `.trellis/spec/frontend/session-restore.md`; `e2e/session-restore.mjs` reproduces the stale-memory ordering deterministically.
+
 ### ToolCall field normalization
 Pi stores toolCall blocks as `{type:"toolCall", id, name, arguments}` but `ToolCallContent` uses `{toolCallId, toolName, input}`. `normalizeToolCalls()` in `lib/normalize.ts` handles this — called in both `session-reader.ts` (file load) and `handleAgentEvent` in `hooks/useAgentSession.ts` (streaming).
 
