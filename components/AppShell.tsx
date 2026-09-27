@@ -39,6 +39,7 @@ import {
 } from "@/lib/browser-notifications";
 import { setupPushSubscription } from "@/lib/push-client";
 import { getInitialNavigation } from "@/lib/initial-navigation";
+import { canRestoreRememberedSession, urlSessionParam } from "@/lib/session-restore";
 import { rekeyDraft } from "@/lib/draft-store";
 import {
   clearLastOpen,
@@ -713,6 +714,16 @@ export function AppShell() {
     ) {
       return;
     }
+    // An explicit ?session= owns this document until the sidebar has adopted it:
+    // the remembered session read below is still the previous document's value,
+    // and restoring it would replace the selection *and* rewrite the URL, so the
+    // next reload would land on the wrong session.
+    if (!canRestoreRememberedSession({
+      initialSessionRestored,
+      hasUrlSession: urlSessionParam(typeof window === "undefined" ? "" : window.location.search) !== null,
+    })) {
+      return;
+    }
     // Close any session that belongs to a different project — it no longer
     // matches the selected project directory.
     const previousDraftKey = activeNewSessionDraftKeyRef.current;
@@ -751,7 +762,7 @@ export function AppShell() {
       restoreWorkspaceContext(newProject, cwd);
     }
     router.replace(typeof window !== "undefined" ? window.location.pathname : "/", { scroll: false });
-  }, [activeCwd, activeFileTabId, invalidateWorkspaceRestore, newSessionCwd, router, selectedSession, restoreWorkspaceContext]);
+  }, [activeCwd, activeFileTabId, initialSessionRestored, invalidateWorkspaceRestore, newSessionCwd, router, selectedSession, restoreWorkspaceContext]);
 
   const handleSelectSession = useCallback((session: SessionInfo, isRestore = false, entryId?: string, blockIndex?: number) => {
     setSearchTarget(entryId ? { sessionId: session.id, entryId, blockIndex } : null);
