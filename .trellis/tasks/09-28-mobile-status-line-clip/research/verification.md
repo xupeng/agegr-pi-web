@@ -144,3 +144,46 @@ run 1 的失败位置与 `?session=` / 工作区记忆恢复有关（`?session=e
 - e2e 的 `expectWrap` 只在移动视口强制（390px）；1280px 列宽更大，是否折行不作为契约。
 - 未覆盖"扩展注入的临时块"（`ExtensionStatusBar` / `ExtensionWidgets`）：它们在 composer 之下的
   另一个容器里，不在消息滚动流内，不属本症状。
+
+## 手机尺寸实时客户端的补充实测（Chromium 模拟，非用户设备）
+
+定稿后又做了一轮"真机同构"观测，用来把用户看到的画面和我这边的渲染对齐（脚本
+`test-results/observer-live-status.mjs`，gitignored；连的是用户自己的 8505 dev server 与**本会话**，
+只读采样，不改任何会话文件）：
+
+视口 390×844、`deviceScaleFactor: 3`、`isMobile/hasTouch`、`display-mode: standalone`
+（`Emulation.setEmulatedMedia`）、safe-area bottom 34px。观察者在**一轮开始前**挂上，因此完整经历了
+"文字流式 → 工具调用 → bash 运行"的实时客户端状态：
+
+| 时刻 | 状态行 | 行数 | 末行相对滚动容器底边 | `atBottom` |
+|------|--------|------|---------------------|------------|
+| 文字流式期间 | 不渲染 | — | — | true |
+| 工具调用参数流式（`正在生成参数...`） | 不渲染 | — | — | true |
+| bash 开始输出 `row-90` | `正在运行 bash... row-90` | 3 | −10px | true |
+| `row-180` | 同上 | 5 | −10px | true |
+| `row-270` | 同上 | 7 | −10px | true |
+| `hold-1..6`（保持最长 36s） | 同上 | 7 | −10px | true |
+
+两点结论：
+
+1. 状态行在**实时客户端**上确实渲染（不需要重连/重载），且从 3 行涨到 7 行全程贴底、末行在底边
+   上方 10px —— 与修复前的 `+29px` 被裁形成对照。
+2. 文字流式期间状态行不渲染是**既有条件**（`components/ChatWindow.tsx:1281` 的
+   `!hasStreamingContent`）决定的，本任务没有改动它，也不属于本次症状。
+
+## 用户人工验收（2026-09-28，iOS PWA standalone）
+
+**结论：通过。**
+
+用户在 8505 dev server（工作树停在分支 `fix/mobile-status-line-clip`）上的已安装 PWA（standalone）
+里验收：把 PWA 划掉重开后，运行期间尾部状态行折行时**末行完整可见**，并被自动保持在输入框上方
+（截图显示 `Running bash... row-180` 连同其后的折行内容完整可见，紧贴 composer 上沿）。
+
+过程记录（用于区分"环境"与"代码"两类原因）：
+
+- 首次尝试时用户在手机上**看不到**该状态行、需要上滑才能找到它。当时该 PWA 已被安装，bundled
+  JS 由 service worker 缓存，工作树里的修复未生效 —— 排除办法是划掉重开（拉取新 bundle）。
+  重开后同一轮观察即通过。本节按证据类型区分：**缓存/生效范围属于环境问题**，不是本任务代码的
+  失败，但也**没有**去验证其 bundle 内容，因此这里只记录现象与处置，不宣称已定位到具体缓存层。
+- 本文件其余小节的全部数值都来自 Chromium（Playwright）模拟视口，**不是**用户设备上的测量；
+  两者一致（都显示末行完整、自动贴底），但真机结论以本节为准。

@@ -79,7 +79,8 @@ agent 运行期间，消息列表尾部的**临时状态行**（`phaseLabel(agen
 - [x] AC4 `e2e/run.mjs` 增加确定性回归断言（mock SSE + 长会话 fixture），并在隔离副本里实际跑通，
       证据（命令、退出码、失败前置数/断言通过数）写入 `research/verification.md`。
 - [x] AC5 门禁三件套 `node_modules/.bin/tsc --noEmit`、`npm run lint`、`npm test` 退出码 0。
-- [ ] AC6 用户真机（iOS PWA standalone）人工验收：运行中状态行折行时末行完整可见。
+- [x] AC6 用户真机（iOS PWA standalone）人工验收：运行中状态行折行时末行完整可见。
+      （2026-09-28 通过；过程与证据类型见 `research/verification.md` 的"用户人工验收"小节。）
 
 ## Notes
 
@@ -105,5 +106,5 @@ agent 运行期间，消息列表尾部的**临时状态行**（`phaseLabel(agen
 ## Acceptance Status
 
 - AC1–AC5 已完成，测量值、命令与退出码见 `research/verification.md`。
-- AC6 待用户在真机（iOS PWA standalone）上验收。真机请重点看：bash 运行时状态行折到第二/第三行时，
-  末行是否完整可见；以及上滚之后状态行变化是否**不**会把视图拉回底部。
+- AC6 已由用户在 iOS PWA standalone 上验收通过（2026-09-28）：状态行折行时末行完整可见并自动贴底。
+  首次尝试失败的原因是已安装 PWA 仍在跑缓存 bundle，划掉重开后同一轮观察即通过。
