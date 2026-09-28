@@ -11,7 +11,7 @@ import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 import { checkFilePanel, filePanelFixture } from "./file-panel.mjs";
 import { checkExtensionDialogs, extensionSource } from "./extension-dialog.mjs";
-import { checkChatAppearance, checkChatColumnAlignment } from "./chat-appearance.mjs";
+import { checkChatAppearance, checkChatColumnAlignment, checkMinimapTypography } from "./chat-appearance.mjs";
 import { ASK_USER_SESSION, checkAskUserView, writeAskUserFixture } from "./ask-user.mjs";
 import { checkSessionRestore } from "./session-restore.mjs";
 
@@ -34,6 +34,7 @@ const BRANCH = "e2e-branch-session";
 const RICH = "e2e-rich-session";
 const COMPACTED = "e2e-compacted-session";
 const APPEND = "e2e-external-append-session";
+const TYPO = "e2e-typography-session";
 const ASK_USER = ASK_USER_SESSION;
 const text = (i) => `E2E message ${String(i).padStart(4, "0")}`;
 const ids = (start, end) => Array.from({ length: end - start }, (_, i) => `e${start + i}`);
@@ -128,6 +129,23 @@ try {
     message("root", null, "user", "E2E wrapper root"),
     message("reply", "root", "assistant", "E2E wrapper reply"),
   ]);
+  // Minimap preview typography needs one heading-only answer (all three levels),
+  // one paragraph-only answer, a user prompt and a tool call in the same
+  // conversation, and enough content that the rail is visible.
+  writeSession(TYPO, [
+    message("typo-user", null, "user", "E2E typography question"),
+    message("typo-answer", "typo-user", "assistant", [{ type: "text", text: "E2E typography paragraph line.\n\n".repeat(120) }]),
+    message("typo-user-2", "typo-answer", "user", "E2E typography headings question"),
+    message("typo-call", "typo-user-2", "assistant", [
+      { type: "toolCall", id: "typo-t1", name: "bash", arguments: { command: "echo typo" } },
+    ]),
+    message("typo-answer-2", "typo-call", "assistant", [{ type: "text", text: [
+      "# E2E typography h1",
+      "## E2E typography h2",
+      "### E2E typography h3",
+      "E2E typography tail paragraph.\n\n".repeat(120),
+    ].join("\n\n") }]),
+  ]);
   // ask_user browser coverage needs no model and no wrapper: the state route
   // falls back to the persisted open ask when the wrapper is gone, so a plain
   // page.goto renders the shared view. The ask commands are stubbed in the
@@ -178,7 +196,7 @@ try {
     const response = await fetch(`${base}/api/sessions`, { signal: AbortSignal.timeout(5000) }).catch(() => null);
     if (response?.ok) {
       const { sessions } = await response.json();
-      assert.deepEqual(sessions.map((session) => session.id).sort(), [LONG, BRANCH, RICH, COMPACTED, APPEND, ASK_USER].sort());
+      assert.deepEqual(sessions.map((session) => session.id).sort(), [LONG, BRANCH, RICH, COMPACTED, APPEND, ASK_USER, TYPO].sort());
       break;
     }
     assert.ok(Date.now() < deadline, "Server readiness timed out; see server.log");
@@ -360,6 +378,14 @@ try {
     assert.deepEqual(rendered, Array.from({ length: rendered.length }, (_, i) => text(suffixStart + i)),
       "Missing, reordered, or duplicate chat messages");
     await page.screenshot({ path: join(artifacts, `history-${viewport.width}.png`) });
+
+    if (viewport.width > 600) {
+      // Minimap preview typography (AC1/AC3/AC4): the rail is only hittable on a
+      // scrollable session, so this probe runs on the dedicated TYPO fixture.
+      await page.goto(`${base}/?session=${TYPO}`, { waitUntil: "domcontentloaded" });
+      await page.locator("[data-entry-id='typo-answer-2'] h1").waitFor();
+      await checkMinimapTypography(page, `${viewport.width}px minimap preview`, "E2E typography question");
+    }
 
     await page.goto(`${base}/?session=${BRANCH}`, { waitUntil: "domcontentloaded" });
     await page.getByText("Active branch answer", { exact: true }).waitFor();

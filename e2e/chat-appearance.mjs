@@ -29,6 +29,134 @@ export async function checkChatColumnAlignment(page, label) {
   return geometry;
 }
 
+/**
+ * AC1/AC3/AC4 for the minimap hover preview: the preview panel mirrors the sidebar
+ * session list (12px title / 11px meta / 10px small labels), keeps the Oxanium and
+ * Cascadia families, and preserves the row geometry the panel was tuned around.
+ *
+ * Only run this on a scrollable conversation: a short session hides the 36px rail
+ * (`visibility: hidden`), so the pointer cannot hover it. `sidebarTitle` is the
+ * session title whose sidebar row should be compared against the preview sizes.
+ */
+export async function checkMinimapTypography(page, label, sidebarTitle) {
+  // The rail flips to `visible` only after the message list is measured as
+  // scrollable, which lags the first paint of a freshly navigated session.
+  await page.waitForFunction(() => {
+    const rail = document.querySelector(".chat-content .scrollbar-subtle")?.nextElementSibling;
+    return !!rail && getComputedStyle(rail).visibility === "visible";
+  });
+  const rail = await page.evaluate(() => {
+    const scroll = document.querySelector(".chat-content .scrollbar-subtle");
+    const element = scroll?.nextElementSibling;
+    if (!element) return null;
+    const rect = element.getBoundingClientRect();
+    return {
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+      width: rect.width,
+      visibility: getComputedStyle(element).visibility,
+    };
+  });
+  assert.ok(rail, `${label}: minimap rail must sit beside the scroll container`);
+  assert.equal(rail.visibility, "visible", `${label}: minimap rail must be visible on a scrollable session`);
+  assert.ok(rail.width >= 36, `${label}: minimap rail must keep its 36px slot`);
+  await page.mouse.move(rail.x, rail.y);
+  await page.locator("[data-minimap-preview-box]").waitFor();
+
+  // Read every target in one frame so a repaint cannot land between reads.
+  const observed = await page.evaluate(() => {
+    const box = document.querySelector("[data-minimap-preview-box]");
+    if (!box) return null;
+    const read = (element) => {
+      if (!element) return null;
+      const computed = getComputedStyle(element);
+      return {
+        fontSize: computed.fontSize,
+        fontFamily: computed.fontFamily,
+        height: element.getBoundingClientRect().height,
+      };
+    };
+    const one = (selector) => box.querySelector(selector);
+    return {
+      bodyFont: getComputedStyle(document.body).fontFamily,
+      user: read(one("[data-minimap-preview-user]")),
+      // `.paragraph` is the only preview button without its own data-* hook.
+      paragraph: read(one("button:not([data-level]):not([data-minimap-preview-user]):not([data-minimap-preview-assistant])")),
+      heading1: read(one('[data-level="1"]')),
+      heading2: read(one('[data-level="2"]')),
+      heading3: read(one('[data-level="3"]')),
+      number: read(one("[data-minimap-preview-index] > span")),
+      assistantJump: read(one("[data-minimap-preview-assistant]")),
+      toolBadge: read(one('[data-minimap-preview-index] [role="img"]')),
+    };
+  });
+  assert.ok(observed, `${label}: minimap preview must be open`);
+  console.log(`TYPO ${label}: ${JSON.stringify(observed)}`);
+
+  const expectFontSize = (name, entry, px) => {
+    assert.ok(entry, `${label}: minimap preview must render ${name}`);
+    assert.equal(entry.fontSize, `${px}px`, `${label}: ${name} must be ${px}px`);
+  };
+  expectFontSize("user preview", observed.user, 12);
+  expectFontSize("paragraph preview", observed.paragraph, 12);
+  expectFontSize("h1 preview", observed.heading1, 12);
+  expectFontSize("h2 preview", observed.heading2, 11);
+  expectFontSize("h3 preview", observed.heading3, 11);
+  expectFontSize("turn number", observed.number, 10);
+  expectFontSize("assistant jump", observed.assistantJump, 10);
+  if (observed.toolBadge) {
+    expectFontSize("tool badge", observed.toolBadge, 10);
+  } else {
+    console.log(`NOTE ${label}: no tool call in this fixture, skipping the .toolBadge size check`);
+  }
+
+  // AC3: only font sizes moved; every family is unchanged.
+  for (const [name, entry] of [
+    ["user preview", observed.user],
+    ["paragraph preview", observed.paragraph],
+    ["h1 preview", observed.heading1],
+  ]) {
+    assert.ok(entry.fontFamily.includes("Oxanium"), `${label}: ${name} must keep the root Oxanium stack (${entry.fontFamily})`);
+  }
+  assert.equal(observed.user.fontFamily, observed.bodyFont, `${label}: preview body font must stay the document root font`);
+  for (const [name, entry] of [
+    ["turn number", observed.number],
+    ["assistant jump", observed.assistantJump],
+    ["tool badge", observed.toolBadge],
+  ]) {
+    if (!entry) continue;
+    assert.ok(entry.fontFamily.includes("Cascadia"), `${label}: ${name} must keep the mono stack (${entry.fontFamily})`);
+  }
+
+  // AC4: the min-height/line-height balance the 36px rail depends on is intact.
+  const expectHeight = (name, entry, px) => {
+    assert.ok(entry, `${label}: minimap preview must render ${name}`);
+    assert.ok(Math.abs(entry.height - px) < 0.5, `${label}: ${name} must stay ${px}px tall (measured ${entry.height})`);
+  };
+  expectHeight("h1 preview", observed.heading1, 32);
+  expectHeight("h2 preview", observed.heading2, 28);
+  expectHeight("h3 preview", observed.heading3, 26);
+  expectHeight("user preview", observed.user, 32);
+
+  if (sidebarTitle) {
+    await page.locator(`[title="${sidebarTitle}"]`).first().waitFor({ state: "attached" });
+    const sidebar = await page.evaluate((title) => {
+      const titleNode = document.querySelector(`[title="${title}"]`);
+      if (!titleNode) return null;
+      return {
+        title: getComputedStyle(titleNode).fontSize,
+        meta: titleNode.nextElementSibling ? getComputedStyle(titleNode.nextElementSibling).fontSize : null,
+      };
+    }, sidebarTitle);
+    assert.ok(sidebar?.title, `${label}: sidebar row for "${sidebarTitle}" must be mounted`);
+    assert.equal(observed.user.fontSize, sidebar.title, `${label}: preview body must match the sidebar session title size`);
+    assert.equal(observed.heading2.fontSize, sidebar.meta, `${label}: preview secondary must match the sidebar meta size`);
+    console.log(`TYPO ${label} sidebar: ${JSON.stringify(sidebar)}`);
+  }
+
+  return observed;
+}
+
 export async function checkChatAppearanceReset(page) {
   const width = page.getByRole("slider", { name: "Chat content width", exact: true });
   const fontSize = page.getByRole("slider", { name: "Chat font size", exact: true });
