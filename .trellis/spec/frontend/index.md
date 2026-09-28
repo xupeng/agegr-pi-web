@@ -29,6 +29,7 @@
 | [Clickable file paths](./clickable-file-paths.md) | Turn written-file extraction (apply_patch / trellis / Agent 快照)、索引校验链化、`PathText`、产物卡片与打开授权 | Written |
 | [会话停滞看门狗](./stall-watchdog.md) | 阈值来源与优先级、工具级宽限、`stall_aborted` 事件契约、arm/disarm/dispose 不变量、与 idle 回收的边界、已知边界 | Written |
 | [会话恢复与 URL 优先级](./session-restore.md) | `?session=` 深链 vs 工作区记忆恢复的顺序、`initialSessionRestored` 门禁、禁止在异步恢复里回读 URL、确定性测试要求 | Written |
+| [对话尾部跟随](./chat-tail-follow.md) | 会自增长的三类尾部内容、唯一跟随原语 `followTailIfAttached` 的门禁、临时块的触发键、禁止用样式换遮挡、e2e 回归 | Written |
 
 ---
 
