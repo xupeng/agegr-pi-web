@@ -1370,3 +1370,44 @@ Verified the published 0.11.0 tarball against npm; committed the frozen-source v
 
 - 对话区对齐修复随下一个版本发布（0.11.1 或 0.12.0）。
 - 发布脚本未留存 bump 提交与 publish 调试日志，若要固定流程可考虑补一个 release runbook spec。
+
+
+## Session 31: 小地图字号对齐左侧栏并归档
+
+**Date**: 2026-09-28
+**Task**: 小地图字号对齐左侧栏并归档
+**Branch**: `fix/minimap-typography`
+
+### Summary
+
+把悬停预览的字号逐级对齐左侧栏（正文 14→12、h2 12→11、徽标 9→10），字体与行几何不动；补 e2e 计算样式断言与规范的「界面外壳固定字号」例外，用户人工验收通过后归档。
+
+### Main Changes
+
+- components/ChatMinimap.module.css 只改 5 处 font-size；字号映射与左侧栏 12/11/10px 一致，h1/h2/h3/用户行仍为 32/28/26/32px。
+- e2e/chat-appearance.mjs 新增 checkMinimapTypography()，为此加了专用的可滚动 TYPO fixture（现有 fixture 覆盖不到 h1/h3/段落+徽标）。
+- component-guidelines.md：把 offset 规则收窄为「对话区正文里的可见文本」，并新增「界面外壳固定字号」例外判据。
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `85642da` | (see git log) |
+| `76119a6` | (see git log) |
+| `c38918d` | (see git log) |
+| `5358bd4` | (see git log) |
+| `5433244` | (see git log) |
+
+### Testing
+
+- [OK] tsc --noEmit、npm run lint（554 文件 0/0）、npm test（1720 通过 0 失败）全部 exit 0；未跑 e2e 浏览器套件。
+- [OK] 按用户决定不跑浏览器测试，页面验收由用户在 8505 上完成并确认通过。
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- e2e 断言与 TYPO fixture 仍是未运行代码，将来跑完整套件时需确认侧栏 [title] 唯一性与 fixture 产出目标。
+- PR #20 待合并，合并后本任务的归档与会话日志即随 PR 进入 personal。
