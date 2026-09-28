@@ -193,12 +193,24 @@ MessageView (:302, memo)          按 message.role 分派
 .chat-content { --chat-font-size-offset: calc(var(--chat-content-font-size, 14px) - 14px); }
 ```
 
-**新增任何对话区可见文本，字号必须写成 `calc(<设计字号>px + var(--chat-font-size-offset, 0px))`**，
+**对话区正文里的可见文本，字号必须写成 `calc(<设计字号>px + var(--chat-font-size-offset, 0px))`**，
 且 fallback 不能省（`MessageView` 在 `.chat-content` 之外也会渲染，如
 `components/ChatWindow.tsx:1248-1250` 的 `bashExecution`；缺 fallback 会算出 `calc(12px + )`）。
 使用点：`components/MessageView.tsx` 12 处、`TurnWrittenFiles.tsx:38/88/137/143/156/177`、
 `MermaidBlock.tsx` 2 处、`app/globals.css:657/710/852`。
 不要写死 `px/rem`，也不要把 offset 套到非对话区域。
+
+**例外：界面外壳是固定字号，不读 offset。** 判据是元素的职责与视觉基准，而不是它的 DOM 祖先：
+属于应用外壳（和左侧栏同一层）、需要与左侧栏字号一致的元素不受上面规则约束。注意小地图预览
+虽然物理上位于 `.chat-content` 内部（`components/ChatWindow.tsx:976/1287`），继承得到
+`--chat-font-size-offset`，但它属于外壳，因此不走 offset。
+
+当前唯一实例是小地图悬停预览（`components/ChatMinimap.module.css` 的 `.preview`）：正文 12px、
+次级 11px（h2 / h3）、序号与跳转标签 10px、`.toolBadge` 10px 都是固定 `px`，不跟随
+`--chat-content-font-size`。理由是预览面板镜像左侧栏会话列表（12px 标题 / 11px 元信息 / 10px
+小标签），若跟随对话区字号，同一层外壳会出现两套字号。证据见
+`.trellis/tasks/09-28-minimap-typography/research/verification.md`（字号与行高的期望值与门禁实测值，
+以及按用户决定未运行的 e2e 断言）和用户 2026-09-28 的决定。
 
 ## 可访问性
 
