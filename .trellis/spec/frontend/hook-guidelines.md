@@ -159,6 +159,41 @@ function getServerSnapshot(): T { return SERVER_SNAPSHOT; }  // ← 必须有
 > 为什么不用 Context、四种共享机制怎么选、以及 `globalThis` 服务端注册表：见
 > [state-management.md](./state-management.md)。
 
+## 全局快捷键（`useGlobalKeyboardShortcuts`）
+
+`hooks/useKeyboardShortcuts.ts` 是应用级快捷键的**唯一注册点**，由 `components/AppShell.tsx:882`
+挂载，监听 `window` 的 `keydown`。它**不检查 `event.target` 的标签**，所以输入框 / 终端面板聚焦时
+这些组合照样生效；只有 `Esc` 主动给 `INPUT` / `TEXTAREA` 让路（`ChatInput` 要自己处理菜单与停止）。
+
+| 组合 | 行为 |
+|------|------|
+| `Esc` | 停止运行中的 agent（走模块级 `globalAbortHandler`，见 `hooks/useKeyboardShortcuts.ts:13-16`） |
+| `Ctrl+Alt+N` | 在当前项目目录新建会话 |
+| `Ctrl/Cmd+Shift+-`、`Ctrl/Cmd+Shift+=` | 对话区字号 −1px / +1px（`lib/chat-font-size-shortcut.ts`） |
+| `Ctrl/Cmd+Shift+0` | 对话区字号恢复默认（`CHAT_CONTENT_FONT_SIZE_DEFAULT`，同一 setter） |
+
+新增组合时按下面的分工写，不要把所有判断堆进 handler：
+
+- **识别逻辑抽成纯函数**：`lib/chat-font-size-shortcut.ts` 的
+  `chatFontSizeShortcutFromKey(event)` 返回 `{ kind: "step"; delta: -1 | 1 }` / `{ kind: "reset" }`
+  / `null`（`null` = 不是我们的键），测试直接用 `jiti` import
+  （`lib/chat-font-size-shortcut.test.mjs`，本仓库唯一的"纯函数 + 事件对象"快捷键测试）。
+  handler 只做「`preventDefault()` + 调用 setter」，这样「Shift 下 `e.key` 是 `_` / `+` / `)`」这类
+  布局陷阱才有回归保护。**返回 `null` 而不是 `0` 是有意的**：`0` 会被误读成"按了但没变化"，
+  而 `null` 明确表示这个事件不属于本快捷键（`Esc` / `Ctrl+Alt+N` 继续往下走）。
+- **`preventDefault()` 是行为的一部分，不是礼貌**：`Ctrl+Shift+=` 同时是 Chrome/Chromium 的
+  浏览器放大快捷键。页面 `keydown` 在 Chrome/Firefox 可取消它，**Safari 常拦不住**（尤其 macOS
+  的 `Cmd` 组合），会既改字号又缩放页面——这是已知限制，本仓库不修，也不要在文案或注释里宣称
+  所有桌面浏览器都可用。
+- **状态改动必须走该状态的既有 setter**：字号用的是 `hooks/useChatAppearance.ts` 的 `setFontSize`，
+  不要自己写 `localStorage` 或直接改 `--chat-content-font-size`，否则设置页滑块、跨标签页与
+  clamp 规则会分叉。端点（12/24）由 `clampChatContentFontSize` 决定：到界后继续按键仍然
+  `preventDefault()`，但不得把值重置为默认。**恢复默认只发生在 `Ctrl/Cmd+Shift+0` 上**，
+  并且用的是同一个 `setFontSize(CHAT_CONTENT_FONT_SIZE_DEFAULT)`，不是另写一遍常量。
+- **可发现性**：设置页的字号滑块同时带 `aria-keyshortcuts`
+  （`components/SettingsPanel.tsx`）与一行可见提示（`settings.chatContentFontSizeShortcut`，
+  三语言齐备）。
+
 ## Naming
 
 - 文件名 = hook 名（`useTheme.ts` 导出 `useTheme`）；没有 barrel。
@@ -233,3 +268,9 @@ const { KEYBOARD_RETRY_DELAYS, shouldUseVisualViewportHeight } = await jiti.impo
     （`useAgentSession.ts:370-371,692-703`）。
 14. **自定义 memo 比较器未追踪的数据可能无法靠 prop 更新传递**；文件索引因此采用模块级缓存订阅
     （`hooks/useFileIndex.ts:5-13`）。不是所有 memo 都阻断 prop：比较器跟踪的变化与 Context 更新仍能传递。
+15. **全局快捷键优先匹配 `event.code`，`event.key` 只做兜底**：Shift 按下时 US 布局的
+    `Shift+-` / `Shift+=` 报 `_` / `+`，非 US 布局报完全不同的字符，而物理键始终是
+    `Minus` / `Equal`（数字小键盘是 `NumpadSubtract` / `NumpadAdd`）。只比对 `e.key === "-"`
+    的写法在 Mac / 非 US 键盘上直接失效（`lib/chat-font-size-shortcut.ts:52-60`）。
+16. **`AltGr` 在 Windows/Linux 布局上以 `Ctrl+Alt` 到达**：新的 Ctrl 系列组合必须排除 `altKey`，
+    否则德语等布局的 `AltGr+-` 会被当成快捷键（`lib/chat-font-size-shortcut.ts:50`）。
