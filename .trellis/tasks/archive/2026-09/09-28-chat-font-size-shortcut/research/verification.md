@@ -28,8 +28,10 @@ PR 目标分支：`personal`
 | `npm run lint` | `ESLint: No issues found`；`eslint . -f json` 覆盖 **558** 个文件，0 error / 0 warning |
 | `npm test` | `tests 1736 / pass 1736 / fail 0`，`duration_ms 79812` |
 
-`npm test` 基线为 1720 通过（上一任务 `09-28-mobile-status-line-clip` 的记录），本次新增
-8 + 3 = 11 个用例；本机实测总数 1736（含既有子测试计数差异），失败 0。
+计数归因（对齐上一次会话 `journal-1.md` 的 Session 32 记录：`npm test` 1725 通过、
+`eslint` 556 文件）：本任务新增 **8** 个 `lib/chat-font-size-shortcut.test.mjs` 用例与 **3** 个
+`components/ChatAppearance.test.mjs` 用例，正好 1725 + 11 = **1736**；新增 **2** 个 lint 目标
+（两个新的 `lib/` 文件），正好 556 + 2 = **558**。两项增量都能被本次改动解释，无未归因差异。
 
 **基线来源**（按 `quality-guidelines.md` 要求写明）：本机 checkout
 `/home/xupeng/dev/personal/forked/agegr-pi-web`，依赖树为 `package-lock.json` 对应的 npm 树
@@ -37,8 +39,7 @@ PR 目标分支：`personal`
 已按 `quality-guidelines.md` 的「识别特征」逐条确认）。
 
 文件覆盖数 558；本任务**净新增** 2 个 lint 目标（`lib/chat-font-size-shortcut.ts`、
-`lib/chat-font-size-shortcut.test.mjs`），其余改动文件本来就在覆盖范围内。与上一任务记录的
-554 相差 4，其中 2 个不是本任务带来的（本任务开工前的同树基线未单独测量过，不臆测归因）。
+`lib/chat-font-size-shortcut.test.mjs`），其余改动文件本来就在覆盖范围内（见上一段的归因）。
 **诊断数 0 error / 0 warning，与基线一致**，因此无需按规则级别 / 插件版本归因。
 
 ## 步骤 2：纯函数单元测试覆盖的边界

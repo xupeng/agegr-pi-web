@@ -124,7 +124,7 @@
 | AC4 输入框聚焦 / 不触发缩放 | 部分 | 聚焦 composer 时生效；浏览器缩放无法从页面断言 |
 | AC5 纯函数测试 | 通过 | `lib/chat-font-size-shortcut.test.mjs` |
 | AC6 三语言 + aria | 通过 | `npm test` 的语言包与设置页断言 |
-| AC7 门禁 | 通过 | `tsc` exit 0；`lint` 无问题；`npm test` 1735 通过 0 失败 |
+| AC7 门禁 | 通过 | `tsc` exit 0；`lint` 558 文件 0/0；`npm test` 1736 通过 0 失败 |
 | AC8 规范 | 通过 | `hook-guidelines.md` 新小节 + Traps 15/16 |
 | AC9 `Ctrl/Cmd+Shift+0` 复位 | **用户人工验收通过（2026-09-28）** | 单元测试（Digit0 / Numpad0 / `)` 回落 / `Ctrl+0` 不触发）+ 自检 15 → 14 |
 
