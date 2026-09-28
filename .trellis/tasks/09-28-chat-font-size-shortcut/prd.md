@@ -88,20 +88,21 @@
 
 ## Acceptance Criteria
 
-- [ ] AC1 按 `Ctrl+Shift+=` 一次，字号 +1；按 `Ctrl+Shift+-` 一次，字号 −1；连续按键线性步进，
+- [x] AC1 按 `Ctrl+Shift+=` 一次，字号 +1；按 `Ctrl+Shift+-` 一次，字号 −1；连续按键线性步进，
       且与设置页滑块显示值、对话区实际计算字号三者一致（真实浏览器验收）。
       实现后自检通过（12→13→14→13，`--chat-content-font-size` 与 `localStorage` 同步），
-      **待用户人工验收**。
+      **用户 2026-09-28 人工验收通过**。
 - [x] AC2 在 12px 下限继续按减号、24px 上限继续按加号，字号停在端点，`localStorage`
       （`pi-chat-content-font-size`）写入的值也在 `[12,24]` 内，不出现默认值回落。
       单元测试 + 实现后自检（下限按减号仍 12），clamp 仍由 `clampChatContentFontSize` 负责。
 - [ ] AC3 macOS 上 `Cmd+Shift+-` / `Cmd+Shift+=` 与 Ctrl 组合同效（真实浏览器验收）。
       **本机为 Linux，未验证**；仅有单元测试覆盖 `metaKey` 分支与 Playwright 的 `Meta` 修饰键路径。
 - [ ] AC4 快捷键在输入框聚焦时同样生效，且不触发页面自身的浏览器缩放（在可拦截的浏览器上）。
-      前半句通过（聚焦 `.chat-input-textarea` 时步进生效）；后半句未断言（页面读不到浏览器 zoom）。
+      前半句通过（聚焦 `.chat-input-textarea` 时步进生效，用户人工验收确认）；后半句未断言
+      （页面读不到浏览器 zoom）。
 - [x] AC5 快捷键识别是**纯函数**并有单元测试覆盖：`Minus`/`Equal`（含 `e.key` 为 `_`/`+` 的布局）、
       缺少 `shiftKey` 时不触发、数字小键盘行为与实现一致。
-      `lib/chat-font-size-shortcut.test.mjs` 7 用例，`npm test` 全绿。
+      `lib/chat-font-size-shortcut.test.mjs` 8 用例，`npm test` 全绿。
 - [x] AC6 设置页提示三语言齐备，且带 `aria-keyshortcuts`（沿用 `ChatInput` 的既有约定）；
       语言包 key 在 `en` / `zh-CN` / `zh-TW` 中都存在。
 - [x] AC7 门禁三件套退出码 0：`node_modules/.bin/tsc --noEmit`、`npm run lint`、`npm test`。
@@ -109,7 +110,7 @@
       注册位置、`preventDefault` 的理由与 Safari 的已知限制。
 - [x] AC9 `Ctrl/Cmd+Shift+0` 恢复默认字号：单元测试覆盖 `Digit0` / `Numpad0`（含 Shift 下
       `e.key` 为 `)` 的布局）、不带 Shift 的 `Ctrl+0` 不触发；设置页提示与 `aria-keyshortcuts`
-      同时包含该组合；真实浏览器自检从 15px 复位到 14px。
+      同时包含该组合；真实浏览器自检从 15px 复位到 14px，**用户 2026-09-28 人工验收通过**。
 
 ## 验收状态（2026-09-28，实现完成后）
 
@@ -117,7 +118,7 @@
 
 | 项 | 状态 | 依据 |
 |----|------|------|
-| AC1 步进与三处一致 | 自检通过，**待用户人工验收** | 真实浏览器冒烟：12→13→14→13；设置页与 CSS 变量、localStorage 同步 |
+| AC1 步进与三处一致 | **用户人工验收通过（2026-09-28）** | 真实浏览器冒烟：12→13→14→13；设置页与 CSS 变量、localStorage 同步 |
 | AC2 端点 clamp | 通过 | 单元测试 + 上限/下限自检 |
 | AC3 macOS `Cmd` | **未验证** | 本机 Linux；`Meta` 分支仅单元测试覆盖 |
 | AC4 输入框聚焦 / 不触发缩放 | 部分 | 聚焦 composer 时生效；浏览器缩放无法从页面断言 |
@@ -125,7 +126,14 @@
 | AC6 三语言 + aria | 通过 | `npm test` 的语言包与设置页断言 |
 | AC7 门禁 | 通过 | `tsc` exit 0；`lint` 无问题；`npm test` 1735 通过 0 失败 |
 | AC8 规范 | 通过 | `hook-guidelines.md` 新小节 + Traps 15/16 |
-| AC9 `Ctrl/Cmd+Shift+0` 复位 | 自检通过 | 单元测试（Digit0 / Numpad0 / `)` 回落 / `Ctrl+0` 不触发）+ 自检 15 → 14 |
+| AC9 `Ctrl/Cmd+Shift+0` 复位 | **用户人工验收通过（2026-09-28）** | 单元测试（Digit0 / Numpad0 / `)` 回落 / `Ctrl+0` 不触发）+ 自检 15 → 14 |
+
+### 人工验收结论（2026-09-28）
+
+用户在 `http://localhost:8505/` 上按 AC1、AC4（输入框聚焦生效）与新增的 AC9 逐项操作，
+**验收通过**。用户同时提出并确认了新增的 `Ctrl/Cmd+Shift+0` 复位行为（决策 6）。
+AC3（macOS `Cmd` 实机）与 Safari 行为在本机 Linux 环境仍然**未验证**，两侧均已记入
+`research/verification.md` 的未覆盖清单。
 
 **未覆盖（已知，不再声称已自动验证）**：macOS `Cmd` 与 Safari 实机行为、浏览器自身缩放是否被
 抑制、`e2e/chat-appearance.mjs` 新增断言的可运行性（按用户 2026-09-28 决定未执行）、

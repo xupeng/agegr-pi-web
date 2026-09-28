@@ -116,7 +116,7 @@ Fira Code / … / monospace）；滑块的 `aria-describedby` 指向
 
 | AC | 状态 | 依据 |
 |----|------|------|
-| AC1 步进与三处一致（滑块 / CSS 变量 / localStorage） | **实现后自检通过；待用户人工验收** | 步骤 3 的 12→13→14→13 与 `localStorage` 记录 |
+| AC1 步进与三处一致（滑块 / CSS 变量 / localStorage） | **用户人工验收通过（2026-09-28）** | 步骤 3 的 12→13→14→13 与 `localStorage` 记录；用户在 8505 上确认 |
 | AC2 端点 clamp、不回落默认 | 单元测试 + 自检通过 | `ctrl+shift+minus at 12` 仍 12；clamp 由 `clampChatContentFontSize` 负责 |
 | AC3 macOS `Cmd` 组合同效 | **未验证** | 本机 Linux；仅单元测试覆盖 `metaKey` 分支 |
 | AC4 输入框聚焦时生效、不触发页面缩放 | 部分通过 | 聚焦 `.chat-input-textarea` 时步进生效（自检）；「不触发页面缩放」未断言 |
@@ -124,7 +124,7 @@ Fira Code / … / monospace）；滑块的 `aria-describedby` 指向
 | AC6 三语言提示 + `aria-keyshortcuts` | 通过 | 语言包测试 + 自检读到属性；渲染文案见步骤 3 |
 | AC7 门禁三件套 exit 0 | 通过 | 步骤 1 |
 | AC8 规范记录注册位置 / `preventDefault` 理由 / Safari 限制 | 通过 | `.trellis/spec/frontend/hook-guidelines.md` 新小节 + Traps 15/16 |
-| AC9 `Ctrl/Cmd+Shift+0` 复位默认 | 单元测试 + 自检通过 | `Digit0` / `Numpad0` / `)` / 不带 Shift 的 `Ctrl+0`；自检 15 → 14 |
+| AC9 `Ctrl/Cmd+Shift+0` 复位默认 | **用户人工验收通过（2026-09-28）** | `Digit0` / `Numpad0` / `)` / 不带 Shift 的 `Ctrl+0`；自检 15 → 14 |
 
 **未覆盖 / 需人工确认**：macOS `Cmd` 与 Safari 的真实行为、浏览器缩放是否被抑制、
 `e2e/chat-appearance.mjs` 新增断言的可运行性、非 US 布局与数字小键盘的实机按键。
