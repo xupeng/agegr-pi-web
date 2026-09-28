@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 28
-- **Last Active**: 2026-09-27
+- **Total Sessions**: 29
+- **Last Active**: 2026-09-28
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~1296 | Active |
+| `journal-1.md` | ~1333 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 29 | 2026-09-28 | Complete npm release 0.11.0 closeout | `8891b62`, `19d1de3`, `c5770f1` | `release/npm-0110` |
 | 28 | 2026-09-27 | Session 28：0.11.0 前的上游同步（37 提交、23 冲突、SDK 0.87.1） | `7790ec7`, `92d8e46`, `ed31361`, `716c3a9`, `4824023`, `2bf01d2`, `a65a688` | `merge/upstream-pre-0110-20260927-171343` |
 | 27 | 2026-09-27 | 修掉 e2e 历史分页段的两处测试侧竞态 | `e016b49`, `93e61f1`, `46d7219` | `feat/e2e-history-window-race` |
 | 26 | 2026-09-27 | 修掉让每个 PR 的 e2e 变红的 AppShell 会话恢复竞态 | `4c3be0d`, `1a4cdec`, `b3f8e55` | `feat/appshell-url-session-race` |
