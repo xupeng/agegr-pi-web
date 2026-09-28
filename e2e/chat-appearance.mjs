@@ -1,5 +1,34 @@
 import assert from "node:assert/strict";
 
+export async function checkChatColumnAlignment(page, label) {
+  const geometry = await page.evaluate(async () => {
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const scroll = document.querySelector(".chat-content .scrollbar-subtle");
+    const fieldset = document.querySelector(".chat-content > .relative.shrink-0 > fieldset");
+    const message = scroll?.firstElementChild?.firstElementChild;
+    const composer = fieldset?.querySelector(":scope > div");
+    if (!scroll || !fieldset || !message || !composer) return null;
+    const bounds = (element) => {
+      const rect = element.getBoundingClientRect();
+      return { left: rect.left, right: rect.right };
+    };
+    return {
+      message: bounds(message), composer: bounds(composer),
+      scrollWidth: scroll.getBoundingClientRect().width,
+      availableWidth: scroll.parentElement.getBoundingClientRect().width,
+      gutter: scroll.offsetWidth - scroll.clientWidth,
+      scrollable: scroll.scrollHeight > scroll.clientHeight,
+      documentOverflow: document.documentElement.scrollWidth > innerWidth,
+    };
+  });
+  assert.ok(geometry, `${label}: chat column and composer must be mounted`);
+  console.log(`ALIGN ${label}: ${JSON.stringify(geometry)}`);
+  assert.ok(Math.abs(geometry.message.left - geometry.composer.left) <= 1, `${label}: left edges differ`);
+  assert.ok(Math.abs(geometry.message.right - geometry.composer.right) <= 1, `${label}: right edges differ`);
+  assert.equal(geometry.documentOverflow, false, `${label}: no horizontal document overflow`);
+  return geometry;
+}
+
 export async function checkChatAppearanceReset(page) {
   const width = page.getByRole("slider", { name: "Chat content width", exact: true });
   const fontSize = page.getByRole("slider", { name: "Chat font size", exact: true });

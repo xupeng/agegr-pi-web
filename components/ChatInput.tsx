@@ -1841,7 +1841,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
         border: 0,
         background: "transparent",
         padding: compact ? 0 : "0 16px 8px",
-        paddingRight: compact ? 0 : isMobile ? 16 : 52, // desktop: 16px base + 36px for ChatMinimap alignment
+        paddingRight: compact ? 0 : `calc(${isMobile ? 16 : 52}px + var(--chat-scrollbar-gutter, 0px))`, // desktop also reserves the 36px minimap
         opacity: builtinCommandPending ? 0.5 : 1,
         transition: "opacity 0.15s",
       }}

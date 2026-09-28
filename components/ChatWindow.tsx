@@ -760,6 +760,19 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
 
   const isEmptyNew = isNew && messages.length === 0 && !streamState.isStreaming && !sessionBusy;
   useScrollbarVisibility(scrollContainerRef, Boolean(session?.id) || !isEmptyNew);
+  const chatRootRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const scroll = scrollContainerRef.current;
+    const root = chatRootRef.current;
+    if (!scroll || !root) return;
+    const syncGutter = () => {
+      root.style.setProperty("--chat-scrollbar-gutter", `${scroll.offsetWidth - scroll.clientWidth}px`);
+    };
+    syncGutter();
+    const observer = new ResizeObserver(syncGutter);
+    observer.observe(scroll);
+    return () => observer.disconnect();
+  }, [isEmptyNew, loading, scrollContainerRef]);
   const hasStreamingContent = Boolean(streamState.streamingMessage?.content.length);
   const messageCwd = session?.cwd ?? newSessionCwd ?? undefined;
   const fileIndex = useFileIndex(messageCwd);
@@ -959,6 +972,7 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
 
   return (
     <div
+      ref={chatRootRef}
       className="chat-content relative flex h-full min-w-0 flex-col overflow-hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       onDragEnter={handleDragEnter}

@@ -11,7 +11,7 @@ import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 import { checkFilePanel, filePanelFixture } from "./file-panel.mjs";
 import { checkExtensionDialogs, extensionSource } from "./extension-dialog.mjs";
-import { checkChatAppearance } from "./chat-appearance.mjs";
+import { checkChatAppearance, checkChatColumnAlignment } from "./chat-appearance.mjs";
 import { ASK_USER_SESSION, checkAskUserView, writeAskUserFixture } from "./ask-user.mjs";
 import { checkSessionRestore } from "./session-restore.mjs";
 
@@ -251,6 +251,18 @@ try {
     await page.goto(`${base}/?session=${LONG}`, { waitUntil: "domcontentloaded" });
     assert.equal((await stateReady).status(), 200);
     await page.getByText(text(4999), { exact: true }).waitFor();
+    const longGeometry = await checkChatColumnAlignment(page, `${viewport.width}px long conversation`);
+    assert.equal(longGeometry.scrollable, true);
+    await page.locator(".chat-content .scrollbar-subtle").evaluate((scroll) => { scroll.scrollTop = scroll.scrollHeight; });
+    const scrolledGeometry = await checkChatColumnAlignment(page, `${viewport.width}px scrolled conversation`);
+    assert.deepEqual(scrolledGeometry.message, longGeometry.message, "Scrolling must not move the message column sideways");
+    assert.deepEqual(scrolledGeometry.composer, longGeometry.composer, "Scrolling must not move the composer sideways");
+    if (viewport.width > 600) {
+      const originalViewport = page.viewportSize();
+      await page.setViewportSize({ width: 800, height: 800 });
+      await checkChatColumnAlignment(page, "800px narrow desktop conversation");
+      await page.setViewportSize(originalViewport);
+    }
     const latestUser = await page.getByText(text(4998), { exact: true }).elementHandle();
     assert.ok(latestUser, "Latest user message must be mounted before pagination");
     const sentinel = page.getByText("Scroll up to load earlier messages", { exact: true });
@@ -351,6 +363,16 @@ try {
 
     await page.goto(`${base}/?session=${BRANCH}`, { waitUntil: "domcontentloaded" });
     await page.getByText("Active branch answer", { exact: true }).waitFor();
+    const shortGeometry = await checkChatColumnAlignment(page, `${viewport.width}px short conversation`);
+    assert.equal(shortGeometry.scrollable, false);
+    assert.equal(shortGeometry.availableWidth - shortGeometry.scrollWidth, viewport.width > 600 ? 36 : 0,
+      "The minimap rail must keep its layout slot even when hidden");
+    await page.setViewportSize({ width: viewport.width, height: 300 });
+    const resizedShortGeometry = await checkChatColumnAlignment(page, `${viewport.width}px short conversation after resize`);
+    assert.equal(resizedShortGeometry.scrollable, true, "A short conversation should scroll in a short viewport");
+    assert.deepEqual(resizedShortGeometry.message, shortGeometry.message, "Becoming scrollable must not move the message column sideways");
+    assert.deepEqual(resizedShortGeometry.composer, shortGeometry.composer, "Becoming scrollable must not move the composer sideways");
+    await page.setViewportSize(viewport);
     assert.equal(await page.getByText("Inactive branch answer", { exact: true }).count(), 0);
     const thinkingRequests = [];
     page.on("request", (request) => {
@@ -368,7 +390,11 @@ try {
     assert.equal(await finalMessage.getByRole("button", { name: /^Thinking/ }).count(), 0);
     assert.equal(await finalMessage.getByText("test/E2E Model", { exact: true }).count(), 1);
     assert.equal(thinkingRequests.length, 0);
+    const collapsedGeometry = await checkChatColumnAlignment(page, `${viewport.width}px collapsed process details`);
     await processDetails.click();
+    const expandedGeometry = await checkChatColumnAlignment(page, `${viewport.width}px expanded process details`);
+    assert.deepEqual(expandedGeometry.message, collapsedGeometry.message, "Growing content must not move the message column sideways");
+    assert.deepEqual(expandedGeometry.composer, collapsedGeometry.composer, "Growing content must not move the composer sideways");
     assert.equal(await thinking.count(), 3);
     assert.equal(await thinking.last().innerText(), "E2E final reasoning");
     assert.equal(thinkingRequests.length, 0);
@@ -490,6 +516,19 @@ try {
     context = undefined;
     page = undefined;
   }
+  context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  page = await context.newPage();
+  await page.goto(`${base}/?session=${BRANCH}`, { waitUntil: "domcontentloaded" });
+  await page.getByText("Active branch answer", { exact: true }).waitFor();
+  const touchGeometry = await checkChatColumnAlignment(page, "390px touch short conversation");
+  await page.setViewportSize({ width: 390, height: 300 });
+  const touchScrolledGeometry = await checkChatColumnAlignment(page, "390px touch scrollable conversation");
+  assert.equal(touchScrolledGeometry.scrollable, true);
+  assert.deepEqual(touchScrolledGeometry.message, touchGeometry.message);
+  assert.deepEqual(touchScrolledGeometry.composer, touchGeometry.composer);
+  await context.close();
+  context = undefined;
+  page = undefined;
 } catch (error) {
   console.error(error);
   process.exitCode = 1;
