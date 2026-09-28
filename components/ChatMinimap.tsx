@@ -622,8 +622,6 @@ export function ChatMinimap({
     previewBox.scrollTop = Math.max(0, targetTop);
   }, [allNodes, minimapHovered, nearestNodeIndex]);
 
-  if (!visible) return null;
-
   const lastNodeTop = positionedNodes.length > 0
     ? positionedNodes[positionedNodes.length - 1].topRatio * minimapHeight
     : MINIMAP_PADDING;
@@ -642,6 +640,7 @@ export function ChatMinimap({
       style={{
         width: MINIMAP_WIDTH,
         flexShrink: 0,
+        visibility: visible ? "visible" : "hidden",
         position: "relative",
         cursor: "pointer",
         userSelect: "none",

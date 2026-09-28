@@ -174,6 +174,18 @@ MessageView (:302, memo)          按 message.role 分派
 - Tailwind 可用但非主流（`app/globals.css:2` + `:33-47` 的 `@theme` 已接好）。
   修改时沿用所在组件的样式渠道，不做无关的 Tailwind 迁移。
 
+### 消息列与输入框的横向对齐
+
+- `components/ChatWindow.tsx:1039-1050` 的滚动列预留 `scrollbar-gutter: stable`，并与
+  `components/ChatMinimap.tsx` 的 36px 轨道并排。轨道即使暂不可见也保留宽度，否则短对话
+  切换到可滚动时消息列会横向移动。
+- `components/ChatWindow.tsx` 在布局阶段测量 `scroll.offsetWidth - scroll.clientWidth`，
+  将实际槽位宽度设为根节点的 `--chat-scrollbar-gutter`；`components/ChatInput.tsx` 的右
+  padding 在小地图预留宽度之外加上此变量。不要写死 10px：`app/globals.css:518-522`
+  在粗指针设备将滚动条设为 6px，原生滚动条宽度也可能不同。
+- `e2e/chat-appearance.mjs:3 checkChatColumnAlignment()` 同帧比较消息内容与 composer 的左右
+  边界；长/短会话、变为可滚动、内容展开、触屏与窄屏均需保持相同的横向坐标。
+
 ### 对话区字号：必须走 offset 变量
 
 ```css

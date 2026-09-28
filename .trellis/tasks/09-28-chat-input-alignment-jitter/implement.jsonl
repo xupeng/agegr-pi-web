@@ -1,0 +1,4 @@
+{"file":".trellis/spec/frontend/index.md","reason":"前端规范入口与开发检查清单"}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"对话组件布局、样式及组件测试约定"}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"真实浏览器验证与三件套质量门禁"}
+{"file":".trellis/spec/guides/index.md","reason":"变更常量及跨组件布局前的思考指南"}
