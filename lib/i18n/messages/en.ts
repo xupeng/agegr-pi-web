@@ -22,6 +22,7 @@ export const enLocale: LocalePlugin = {
     "settings.resetChatContentWidth": "Reset chat content width",
     "settings.resetChatContentFontSize": "Reset chat font size",
     "settings.chatContentWidthDescription": "Set the maximum width of messages and the composer.",
+    "settings.chatContentFontSizeShortcut": "Shortcut: Ctrl/⌘ + Shift + - / = / 0 (0 restores the default)",
     "settings.themeLight": "Light",
     "settings.themeDark": "Dark",
     "settings.themeMist": "Mist",

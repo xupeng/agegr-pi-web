@@ -7,8 +7,14 @@ const chatWindow = await readFile(new URL("./ChatWindow.tsx", import.meta.url), 
 const chatInput = await readFile(new URL("./ChatInput.tsx", import.meta.url), "utf8");
 const settingsPanel = await readFile(new URL("./SettingsPanel.tsx", import.meta.url), "utf8");
 const globals = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+const settingsCss = await readFile(new URL("../app/settings.css", import.meta.url), "utf8");
 const chatAppearanceHook = await readFile(new URL("../hooks/useChatAppearance.ts", import.meta.url), "utf8");
+const keyboardShortcutsHook = await readFile(new URL("../hooks/useKeyboardShortcuts.ts", import.meta.url), "utf8");
+const enLocale = await readFile(new URL("../lib/i18n/messages/en.ts", import.meta.url), "utf8");
+const zhCnLocale = await readFile(new URL("../lib/i18n/messages/zh-CN.ts", import.meta.url), "utf8");
+const zhTwLocale = await readFile(new URL("../lib/i18n/messages/zh-TW.ts", import.meta.url), "utf8");
 const jiti = createJiti(import.meta.url);
+const { CHAT_FONT_SIZE_SHORTCUT_ARIA, CHAT_FONT_SIZE_STEP } = await jiti.import("../lib/chat-font-size-shortcut.ts");
 const {
   CHAT_CONTENT_FONT_SIZE_STORAGE_KEY,
   LEGACY_CHAT_FONT_SIZE_OFFSET_STORAGE_KEY,
@@ -85,4 +91,35 @@ test("migrates the former relative font offset into the canonical absolute prefe
 
   assert.equal(readStoredChatContentFontSize(null), 14);
   assert.doesNotMatch(globals, /Fork defaults: larger comfortable chat font/);
+});
+
+test("the desktop shortcut reuses the shared preference instead of a second store", () => {
+  assert.match(keyboardShortcutsHook, /chatFontSizeShortcutFromKey\(e\)/);
+  assert.match(keyboardShortcutsHook, /useChatAppearance\(\)/);
+  assert.match(keyboardShortcutsHook, /fontSize \+ fontShortcut\.delta \* CHAT_FONT_SIZE_STEP/);
+  // The reset key must go through the same setter with the shared default.
+  assert.match(keyboardShortcutsHook, /fontShortcut\.kind === "reset"[\s\S]*CHAT_CONTENT_FONT_SIZE_DEFAULT/);
+  // Consuming the key matters as much as changing the size: Ctrl+Shift+= is
+  // also Chromium's own page-zoom shortcut.
+  assert.match(keyboardShortcutsHook, /e\.preventDefault\(\)/);
+  // No second write path into --chat-content-font-size or localStorage.
+  assert.doesNotMatch(keyboardShortcutsHook, /localStorage|chat-content-font-size/);
+  assert.equal(CHAT_FONT_SIZE_STEP, 1);
+});
+
+test("Settings names the shortcut next to the font size slider", () => {
+  assert.match(settingsPanel, /aria-keyshortcuts=\{CHAT_FONT_SIZE_SHORTCUT_ARIA\}/);
+  assert.match(settingsPanel, /settings-chat-content-font-size-shortcut/);
+  assert.match(settingsPanel, /t\("settings\.chatContentFontSizeShortcut"\)/);
+  assert.match(settingsCss, /\.settings-chat-shortcut \{/);
+  assert.equal(
+    CHAT_FONT_SIZE_SHORTCUT_ARIA,
+    "Control+Shift+- Meta+Shift+- Control+Shift+= Meta+Shift+= Control+Shift+0 Meta+Shift+0",
+  );
+});
+
+test("every locale spells out both modifier sets", () => {
+  assert.match(enLocale, /"settings\.chatContentFontSizeShortcut": "Shortcut: Ctrl\/⌘ \+ Shift \+ - \/ = \/ 0 \(0 restores the default\)"/);
+  assert.match(zhCnLocale, /"settings\.chatContentFontSizeShortcut": "快捷键：Ctrl\/⌘ \+ Shift \+ - \/ = \/ 0（0 恢复默认字号）"/);
+  assert.match(zhTwLocale, /"settings\.chatContentFontSizeShortcut": "快速鍵：Ctrl\/⌘ \+ Shift \+ - \/ = \/ 0（0 恢復預設字級）"/);
 });

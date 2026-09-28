@@ -1236,6 +1236,14 @@
   accent-color: var(--accent);
 }
 
+.settings-chat-shortcut {
+  margin: 6px 0 0;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
 .settings-font-size {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
