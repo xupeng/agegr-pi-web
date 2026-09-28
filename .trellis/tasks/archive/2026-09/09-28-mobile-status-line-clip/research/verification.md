@@ -28,6 +28,9 @@
   它只驱动浏览器（被测代码由 `REPRO_BASE` 提供），import 的是**入库的断言**——
   `e2e/status-tail.mjs` 的 `checkStatusTailFollow()`——所以红灯/绿灯对照跑的就是 e2e 断言本身，
   只是省掉整套 e2e。
+- **副本与临时产物未留存**：隔离副本在任务收尾时删除（2.6G），`test-results/` 下的采样日志与
+  诊断脚本（见"手机尺寸实时客户端"一节）同样是临时产物、未随任务入库。复现时请按上面两行重建
+  副本与 agent 目录；随任务入库、仍然在仓库里的是 harness 与 `e2e/status-tail.mjs` 本身。
 - 用户主 checkout 的 dev server 未被重启或改动。
 
 ## 复现（修复前）
@@ -124,9 +127,9 @@ E2E_SERVER_MODE=dev node e2e/run.mjs
 | run 1 | 失败，但**不在本任务的断言上** | 6 条 `PASS` 后，`e2e/session-restore.mjs:43`（`checkSessionRestore` 的第二次 `open()`）等 `.markdown-code-block pre` 超过 10s 超时 |
 | run 2 | **全绿** | 13 条 `PASS`，日志结尾是套件最后一步的两个 touch 视口断言；无 `Error`/`Timeout`；`finally` 清理跑完（无残留 `/tmp/pi-web-e2e-*`） |
 
-run 2 的服务端日志（`test-results/e2e/server.log`）里 `e2e-status-tail-session` 出现 8 次、
-`GET /?session=e2e-status-tail-session` 出现 2 次 ⇒ 新检查在 1280px 与 390px 两个视口都真实执行，
-且整轮套件在其后继续跑完。
+run 2 的服务端日志（当时落在 `test-results/e2e/server.log`；该目录是 e2e 运行产物、已随收尾删除，
+下次跑套件会重建）里 `e2e-status-tail-session` 出现 8 次、`GET /?session=e2e-status-tail-session`
+出现 2 次 ⇒ 新检查在 1280px 与 390px 两个视口都真实执行，且整轮套件在其后继续跑完。
 
 run 1 的失败位置与 `?session=` / 工作区记忆恢复有关（`?session=e2e-rich-session` 的第二次 `open()`
 等不到 markdown 代码块），与本任务改动的跟随路径无交集（改的是 `followTailIfAttached` 的调用点，
@@ -147,9 +150,9 @@ run 1 的失败位置与 `?session=` / 工作区记忆恢复有关（`?session=e
 
 ## 手机尺寸实时客户端的补充实测（Chromium 模拟，非用户设备）
 
-定稿后又做了一轮"真机同构"观测，用来把用户看到的画面和我这边的渲染对齐（脚本
-`test-results/observer-live-status.mjs`，gitignored；连的是用户自己的 8505 dev server 与**本会话**，
-只读采样，不改任何会话文件）：
+定稿后又做了一轮"真机同构"观测，用来把用户看到的画面和我这边的渲染对齐（临时脚本
+`test-results/observer-live-status.mjs`，连的是用户自己的 8505 dev server 与**本会话**，只读采样，
+不改任何会话文件；该脚本与其采样日志是临时诊断产物，**未留存**）：
 
 视口 390×844、`deviceScaleFactor: 3`、`isMobile/hasTouch`、`display-mode: standalone`
 （`Emulation.setEmulatedMedia`）、safe-area bottom 34px。观察者在**一轮开始前**挂上，因此完整经历了

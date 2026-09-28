@@ -34,9 +34,9 @@ agent 运行期间，消息列表尾部的**临时状态行**（`phaseLabel(agen
 
 ### 复现证据（修复前，隔离副本 + Playwright 390×844 + `isMobile/hasTouch` 触摸视口）
 
-脚本：`test-results/repro-status-tail.mjs`（不入库，隔离副本内运行）。用 mock `EventSource` 把
-`agent_start` / `tool_execution_start` / `tool_execution_update` 灌进应用自己的 SSE 处理链，因此
-不需要模型即可复现真实运行态。
+脚本：`research/repro-status-tail.mjs`（随任务入库，在隔离副本里对着 `REPRO_BASE` 原地运行）。
+用 mock `EventSource` 把 `agent_start` / `tool_execution_start` / `tool_execution_update` 灌进
+应用自己的 SSE 处理链，因此不需要模型即可复现真实运行态。
 
 | 阶段 | 状态行行数 | 末行 bottom | 滚动容器 bottom | 裁切 | `scrollerAtBottom` |
 |------|-----------|------------|----------------|------|--------------------|
