@@ -1,0 +1,3 @@
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"门禁逐项对照、验证基线来源、a11y 事实（lint 通过不等于 a11y 通过）"}
+{"file":".trellis/spec/frontend/hook-guidelines.md","reason":"本次新增的「全局快捷键」小节即被核对对象；依赖数组、cleanup、模块级 setter 复用"}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"核对设置页提示与 aria 属性是否符合既有约定，测试是否非空断言"}

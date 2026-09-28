@@ -1,0 +1,22 @@
+SMOKE title agegr-pi-web - Pi Web
+SMOKE hint true
+SMOKE aria-keyshortcuts Control+Shift+- Meta+Shift+- Control+Shift+= Meta+Shift+= Control+Shift+0 Meta+Shift+0
+SMOKE hint style {
+  color: 'rgb(94, 102, 115)',
+  fontSize: '11px',
+  sameFamilyAsOutput: true
+}
+SMOKE after Home 12 12px
+SMOKE ctrl+shift+minus at 12 (clamp) 12 12px
+SMOKE ctrl+shift+equal 13 13px stored 13
+SMOKE meta+shift+equal 14 14px
+SMOKE before ctrl+shift+0 14
+SMOKE ctrl+shift+0 (reset) 14 14px stored 14
+SMOKE before meta+shift+0 15
+SMOKE meta+shift+0 (reset) 14 14px
+SMOKE ctrl+equal (browser zoom, must not change ours) 14 14px
+SMOKE ctrl+0 (browser zoom reset, must not change ours) 14 14px
+SMOKE with field focused TEXTAREA:chat-input-textarea 15 15px
+SMOKE reset with field focused 14 14px
+SMOKE after reload 14px 14
+SMOKE page errors none
