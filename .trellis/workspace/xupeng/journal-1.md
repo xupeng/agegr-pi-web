@@ -1294,3 +1294,40 @@ Session summary was not supplied.
 ### Status
 
 [OK] **Completed**
+
+
+## Session 29: Complete npm release 0.11.0 closeout
+
+**Date**: 2026-09-28
+**Task**: Complete npm release 0.11.0 closeout
+**Branch**: `release/npm-0110`
+
+### Summary
+
+Verified the published 0.11.0 tarball against npm; committed the frozen-source version bump, audit, report and task archive on the release branch.
+
+### Main Changes
+
+- Published registry tarball SHA-256 matches archived tarball; file count 827, latest 0.11.0.
+- Version bump based on frozen release source 92e4cec; audit and archive carried in the task PR.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `8891b62` | (see git log) |
+| `19d1de3` | (see git log) |
+| `c5770f1` | (see git log) |
+
+### Testing
+
+- [OK] npm view version, latest, integrity and shasum; sha256sum archived tarball; task.py validate; 8505 returned HTTP 200.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Merge the task PR into personal to deliver the version commit and archive; reconcile duplicate local release edits in the shared checkout after the merge.
+- Original publish debug log is unavailable; report records this deviation.

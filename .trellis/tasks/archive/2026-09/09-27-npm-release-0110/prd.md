@@ -50,12 +50,12 @@ leave the developer checkout usable.
 
 ## Acceptance Criteria
 
-- [ ] AC1 `npm view @xup3ng/pi-web version` → `0.11.0`; `dist-tags.latest` → `0.11.0`.
-- [ ] AC2 `dist.integrity`, `dist.shasum` and `dist.fileCount` are recorded and the remote
+- [x] AC1 `npm view @xup3ng/pi-web version` → `0.11.0`; `dist-tags.latest` → `0.11.0`.
+- [x] AC2 `dist.integrity`, `dist.shasum` and `dist.fileCount` are recorded and the remote
       tarball matches the archived one (content comparison; see design §5).
-- [ ] AC3 The audit table shows version 0.11.0 and no forbidden entries; the webfont
+- [x] AC3 The audit table shows version 0.11.0 and no forbidden entries; the webfont
       license files are present.
-- [ ] AC4 The smoke test from the packed tarball reported a successful page and font
+- [x] AC4 The smoke test from the packed tarball reported a successful page and font
       request; the temporary prefix was removed afterwards.
 - [ ] AC5 The publish log lines are quoted in the report, including the exact published
       `@xup3ng/pi-web@0.11.0` file count.
@@ -63,8 +63,15 @@ leave the developer checkout usable.
       `HEAD == origin/personal`.
 - [ ] AC7 The dev server listens on 8505 again and serves the app; `git status
       --porcelain` is empty.
-- [ ] AC8 `research/release-report.md` exists and every deviation (notably that the user
+- [x] AC8 `research/release-report.md` exists and every deviation (notably that the user
       ran the script while this task audited at its prompt) is explained.
+
+AC5 cannot be checked: the original npm publish debug log was not retained; registry
+metadata independently confirms the exact published file count and integrity. AC6 and
+the clean-checkout clause of AC7 remain merge-dependent: #18 advanced `personal` after
+the frozen release point, so the bump and archive are submitted in this task's branch
+instead of directly pushed to `personal`. The 8505 server is healthy. The user authorized
+closeout with these deviations; see `research/release-report.md` for evidence and status.
 
 ## Out of scope
 
