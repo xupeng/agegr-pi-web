@@ -587,8 +587,11 @@ test("keeps live following cancellable when the user scrolls away from the tail"
   assert.match(scrollToBottomSource, /const container = scrollContainerRef\.current;\s*if \(!container\) return;/);
   assert.match(scrollToBottomSource, /container\.scrollTo\(\{ top: container\.scrollHeight, behavior \}\);\s*previousScrollTopRef\.current = container\.scrollTop;/);
   assert.doesNotMatch(scrollToBottomSource, /scrollIntoView/);
-  assert.match(streamUpdateSource, /liveFollowFrameRef\.current === null/);
-  assert.match(streamUpdateSource, /requestAnimationFrame\(\(\) => \{[\s\S]*?liveFollowFrameRef\.current = null;[\s\S]*?if \(isNearBottomRef\.current\) scrollToBottom\("auto"\)/);
+  // The streaming path follows through the shared primitive (asserted below),
+  // which owns the frame coalescing and the deferred scroll.
+  assert.match(streamUpdateSource, /followTailIfAttached\(\);/);
+  assert.match(scrollToBottomSource, /if \(liveFollowFrameRef\.current !== null\) return;/);
+  assert.match(scrollToBottomSource, /requestAnimationFrame\(\(\) => \{[\s\S]*?liveFollowFrameRef\.current = null;[\s\S]*?if \(isNearBottomRef\.current\) scrollToBottom\("auto"\)/);
   assert.match(scrollHandlerSource, /!wasAttached && isAttached && isAgentRunning[\s\S]*?scrollToBottom\("auto"\)/);
   assert.match(scrollHandlerSource, /cancelAnimationFrame\(liveFollowFrameRef\.current\)/);
   assert.match(source, /previousScrollTopRef\.current = container\.scrollTop;\s*container\.addEventListener\("scroll", handleScrollPositionChange/);
@@ -623,7 +626,10 @@ test("keeps a newly sent user message at the top while its response starts", () 
     source.indexOf("// Load model list"),
   );
 
-  assert.match(streamUpdateSource, /!pendingScrollToUserRef\.current && isNearBottomRef\.current/);
+  // The gate moved into the shared follow primitive; the delta path must use it
+  // rather than follow unconditionally.
+  assert.match(streamUpdateSource, /followTailIfAttached\(\);/);
+  assert.match(source, /const followTailIfAttached = useCallback\(\(\) => \{\s*if \(pendingScrollToUserRef\.current \|\| !isNearBottomRef\.current\) return;/);
   assert.match(source, /const \[promptAnchorActive, setPromptAnchorActive\] = useState\(false\)/);
   assert.match(source, /pendingScrollToUserRef\.current = true;\s*setPromptAnchorActive\(true\)/);
   assert.match(userScrollSource, /const targetTop = Math\.min\(Math\.max\(0, elAbsTop - 16\), maxScrollTop\)/);

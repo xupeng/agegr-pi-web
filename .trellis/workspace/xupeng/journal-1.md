@@ -1411,3 +1411,47 @@ Verified the published 0.11.0 tarball against npm; committed the frozen-source v
 
 - e2e 断言与 TYPO fixture 仍是未运行代码，将来跑完整套件时需确认侧栏 [title] 唯一性与 fixture 产出目标。
 - PR #20 待合并，合并后本任务的归档与会话日志即随 PR 进入 personal。
+
+
+## Session 32: 09-28-mobile-status-line-clip: 修复运行状态行折行后的尾部跟随
+
+**Date**: 2026-09-28
+**Task**: 09-28-mobile-status-line-clip: 修复运行状态行折行后的尾部跟随
+**Branch**: `fix/mobile-status-line-clip`
+
+### Summary
+
+Session summary was not supplied.
+
+### Main Changes
+
+- hooks/useAgentSession.ts 抽出唯一尾部跟随原语 followTailIfAttached（门禁 pendingScrollToUser + isNearBottom，rAF 内复查再滚动），流式 delta 与新的状态行触发键共用它。
+- components/ChatWindow.tsx 用 tailStatusKey（状态行文本 + Running command 行 + pending bash 命令）在 useLayoutEffect 里请求跟随；DOM 提交后、paint 前合并到每帧一次。排版/字号/间距未改。
+- 新增 components/ChatWindow.status-tail-follow.test.mjs（5 条源码级断言）、e2e/status-tail.mjs（AC1 折行贴底 / AC2 上滚不被拉回 / AC3 文本无变化不滚动）并接入 e2e/run.mjs。
+- 新增 .trellis/spec/frontend/chat-tail-follow.md：三类自增长尾部内容、唯一原语契约、触发键取自渲染文本、禁止用缩小 padding/字号换遮挡。
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `4cdb078` | fix(chat): keep the running-status tail in view when it wraps |
+| `bd4d1a4` | docs(spec): record the chat tail-follow contract |
+| `4fe1aee` | chore(task): add 09-28-mobile-status-line-clip planning and acceptance artifacts |
+| `df287c9` | chore(task): record 09-28-mobile-status-line-clip manual acceptance |
+| `d0f2054` | chore(task): archive 09-28-mobile-status-line-clip |
+
+### Testing
+
+- [OK] tsc --noEmit exit 0；eslint . 556 文件 0 error 0 warning；npm test 1725 通过 0 失败（基线 1720 + 新增 5）。
+- [OK] 隔离副本（git archive + 硬链接 node_modules，30161 端口）跑完整 e2e：run 2 全绿 13 PASS；修复前源码上新增断言为 RED（390px 裁 68px、1280px 裁 9px）。
+- [OK] 手机尺寸实时客户端（390x844、standalone 媒体查询、safe-area 34px）实测：状态行 3→5→7 行全程末行 -10px、atBottom 为真；用户在 iOS PWA standalone 真机验收通过（首次未通过是已安装 PWA 跑缓存 bundle，划掉重开即恢复）。
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- PR 待推送/创建：分支 fix/mobile-status-line-clip 携带 6 个提交（工作 + spec + 任务产物 +
+  验收记录 + 归档 + 本日志），按仓库约定归档与日志必须随该 PR 进入 personal。
+- 已知偏差（已记入 spec）：状态行仍为固定 text-[13px]，未接 --chat-font-size-offset。

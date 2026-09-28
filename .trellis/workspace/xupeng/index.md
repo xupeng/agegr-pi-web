@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 31
+- **Total Sessions**: 32
 - **Last Active**: 2026-09-28
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~1413 | Active |
+| `journal-1.md` | ~1450 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 32 | 2026-09-28 | 09-28-mobile-status-line-clip: 修复运行状态行折行后的尾部跟随 | - | `fix/mobile-status-line-clip` |
 | 31 | 2026-09-28 | 小地图字号对齐左侧栏并归档 | `85642da`, `76119a6`, `c38918d`, `5358bd4`, `5433244` | `fix/minimap-typography` |
 | 30 | 2026-09-28 | 归档 0.11.0 发布父任务与对话区对齐任务 | `0bce161`, `23781a0`, `78cdf0f` | `personal` |
 | 29 | 2026-09-28 | Complete npm release 0.11.0 closeout | `8891b62`, `19d1de3`, `c5770f1` | `release/npm-0110` |

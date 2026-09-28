@@ -1,0 +1,3 @@
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"门禁、验证基线来源、数据链路脚本不等于浏览器验证"}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"核对新增断言与样式/字号规则是否自洽"}
+{"file":".trellis/spec/frontend/hook-guidelines.md","reason":"核对 layout effect 依赖数组与 disable 注释要求"}

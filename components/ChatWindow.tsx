@@ -300,7 +300,7 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
     handleRecallQueue,
     handleBuiltinSlashCommand,
     handleToolPresetChange, handleThinkingLevelChange, loadSlashCommands, scrollUserMsgToTop,
-    loadContext, activeLeafId, scrollToBottom, scrollToMessage,
+    loadContext, activeLeafId, scrollToBottom, scrollToMessage, followTailIfAttached,
   } = useAgentSession({
     session, sessionRunning, newSessionCwd, newSessionDraftKey, onAgentEnd: wrappedOnAgentEnd, onAttentionNeeded, onSessionCreated, onSessionForked,
     modelsRefreshKey, chatInputRef, onBranchDataChange, onSubagentRecordsChange, onSystemPromptChange, onSystemToolsChange, onSystemInfoLoaderChange, onSessionStatsPanelOpen,
@@ -774,6 +774,17 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
     return () => observer.disconnect();
   }, [isEmptyNew, loading, scrollContainerRef]);
   const hasStreamingContent = Boolean(streamState.streamingMessage?.content.length);
+  // The ephemeral run-status line rendered below the messages. It is not a
+  // message: it has no entry id and produces no assistant delta, so its
+  // rendered text is tracked separately (see the tail follow below).
+  const statusText = agentRunning && !hasStreamingContent && agentPhase
+    ? phaseLabel(agentPhase, t)
+    : null;
+  // Everything that renders below the last message and can appear or grow on its
+  // own: the status line, the "running command" line, and the pending bash card.
+  const tailStatusKey = statusText !== null || bashRunning || pendingBash
+    ? `${statusText ?? ""}|${bashRunning && !pendingBash ? "cmd" : ""}|${pendingBash?.command ?? ""}`
+    : "";
   const messageCwd = session?.cwd ?? newSessionCwd ?? undefined;
   const fileIndex = useFileIndex(messageCwd);
   const promptAnchorSpacerRef = useRef<HTMLDivElement | null>(null);
@@ -873,6 +884,20 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
   useLayoutEffect(() => {
     promptAnchorUpdateRef.current?.();
   }, [streamState.streamingMessage]);
+
+  // A bash tool streams its output as the tool-execution progress, and the
+  // status line renders that last output line — so the line wraps to a second
+  // or third row while nothing else about the conversation changes: not a
+  // message, not an assistant delta. Neither tail follow in `useAgentSession`
+  // sees it, and the extra rows used to land outside the viewport, half-hidden
+  // under the composer, until the user dragged the list a second time. Keyed on
+  // the rendered block so a wrapping status line re-pins the tail the same way
+  // streaming content does; the hook keeps the only-scroll-while-attached
+  // contract.
+  useLayoutEffect(() => {
+    if (!tailStatusKey) return;
+    followTailIfAttached();
+  }, [tailStatusKey, followTailIfAttached]);
 
   const availableThinkingLevels = displayModelValue
     ? (modelThinkingLevels[`${displayModelValue.provider}:${displayModelValue.modelId}`] ?? null)
@@ -1253,9 +1278,9 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
               <MessageView message={streamState.streamingMessage as AgentMessage} toolResults={toolResultsMap} isStreaming modelNames={modelNames} cwd={messageCwd} onOpenFile={onOpenFile} onOpenSession={onOpenSession} />
             )}
 
-            {agentRunning && !hasStreamingContent && agentPhase && (
+            {statusText !== null && (
               <div className="break-words py-2 text-[13px] text-text-muted">
-                <span className="animate-[pulse_1.5s_infinite]">{phaseLabel(agentPhase, t)}</span>
+                <span className="animate-[pulse_1.5s_infinite]">{statusText}</span>
               </div>
             )}
 
