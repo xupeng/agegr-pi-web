@@ -144,3 +144,13 @@ TYPO fixture 调一次 `checkMinimapTypography(page, "1280px minimap preview", "
   侧栏行 `[title="E2E typography question"]` 是否唯一，都需用户跑一次真机才能确认。
 - 未在浏览器实测计算字号与行高；上表的期望值来自 CSS 源码推导。
 - 未探测 8505 开发服务的编译产物，未提交任何 commit（按任务要求）。
+
+## 用户人工验收（2026-09-28）
+
+用户在 8505 开发服务上（工作树停在 `fix/minimap-typography`，改动已生效）完成页面验收并确认
+**通过**：悬停预览的字号与左侧栏会话行一致，字体未变，行高与定位/点击行为正常。
+
+需要区分证据类型：本节记录的是**用户的人工结论**，不是本文件里的浏览器实测数值。本任务自始至终
+没有执行 `e2e` 套件、没有启动 Playwright/Chromium，因此 `checkMinimapTypography()` 与 `TYPO`
+fixture 的运行时正确性仍然未经验证；若将来跑完整套件，`[title="E2E typography question"]` 的
+唯一性与 fixture 产出目标这两处可能需要微调。
