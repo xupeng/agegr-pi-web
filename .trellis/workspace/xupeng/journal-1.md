@@ -1455,3 +1455,54 @@ Session summary was not supplied.
 - PR 待推送/创建：分支 fix/mobile-status-line-clip 携带 6 个提交（工作 + spec + 任务产物 +
   验收记录 + 归档 + 本日志），按仓库约定归档与日志必须随该 PR 进入 personal。
 - 已知偏差（已记入 spec）：状态行仍为固定 text-[13px]，未接 --chat-font-size-offset。
+
+
+## Session 33: 09-28-chat-font-size-shortcut: 桌面快捷键 Ctrl/Cmd+Shift+-/= 调整对话区字号
+
+**Date**: 2026-09-28
+**Task**: 09-28-chat-font-size-shortcut: 桌面快捷键 Ctrl/Cmd+Shift+-/= 调整对话区字号
+**Branch**: `feat/chat-font-size-shortcut`
+
+### Summary
+
+在既有全局快捷键 handler 上新增对话区字号快捷键族（-1px / +1px / 0 复位默认），复用 useChatAppearance 的唯一 setter；设置页字号滑块下加三语提示与 aria-keyshortcuts。用户人工验收通过。
+
+### Main Changes
+
+- hooks/useKeyboardShortcuts.ts 在既有 window keydown handler 里最先匹配新组合：preventDefault() + setFontSize()，字号仍走 useChatAppearance 的唯一写入路径，不新增 localStorage 或 CSS 变量写入。
+- lib/chat-font-size-shortcut.ts 新增纯函数 chatFontSizeShortcutFromKey（返回 {kind:step,delta} / {kind:reset} / null）：优先读 event.code（Shift 下 US 布局 e.key 是 _ / + / )），无 code 才回落 e.key，必须带 Shift，排除 altKey（AltGr=Ctrl+Alt）与 isComposing；0 键复位到 CHAT_CONTENT_FONT_SIZE_DEFAULT。
+- components/SettingsPanel.tsx + app/settings.css：字号滑块下加一行三语提示（settings.chatContentFontSizeShortcut）并挂 aria-keyshortcuts / aria-describedby，提示行与同组 output 同为 11px 等宽。
+- 测试：新增 lib/chat-font-size-shortcut.test.mjs（8 用例：物理键优先、Numpad、无 code 回落、无 Shift/AltGr/输入法不触发、Digit0 复位）；components/ChatAppearance.test.mjs 新增 3 条源码断言；e2e/chat-appearance.mjs 加同款断言但按用户决定未执行。
+- 规范：.trellis/spec/frontend/hook-guidelines.md 新增「全局快捷键」小节（注册点、纯函数分工、preventDefault 的理由与 Safari 已知限制、走既有 setter）与 Traps 15/16（code 优先于 key、AltGr 以 Ctrl+Alt 到达）。
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `bbfc767` | feat(chat): step the chat font size with Ctrl/Cmd+Shift+- and = |
+| `72e679b` | docs(spec): record the global keyboard shortcut contract |
+| `8ea5d51` | chore(task): add 09-28-chat-font-size-shortcut planning and verification artifacts |
+| `fbd7b66` | chore(task): record 09-28-chat-font-size-shortcut manual acceptance |
+| `b2e405b` | chore(task): archive 09-28-chat-font-size-shortcut |
+| `4a077fe` | chore: record journal |
+
+推送前把同一特性的渐进迭代（`Ctrl/Cmd+Shift+0` 复位）折回它所属的提交：复位逻辑合进
+feat 提交、spec 补充合进 docs(spec) 提交、两次任务产物合进同一条 chore(task) 提交。
+最终树与整理前**逐字节相同**（`git diff 44d2b01 HEAD` 为空），因此本次整理没有让任何
+已验证内容失效。
+
+### Testing
+
+- [OK] tsc --noEmit exit 0；eslint . 558 文件 0 error 0 warning（上一会话 556 + 本任务 2 个新 lib 文件）；npm test 1736 通过 0 失败（上一会话 1725 + 新增 11）。
+- [OK] 真实浏览器自检（复用 8505 既有 dev server，未重启）：Ctrl+Shift+=/- 步进 12→13→14→13、12px 下限 clamp、Meta 分支、Ctrl+Shift+0 从 15 复位到 14、composer 聚焦时生效、Ctrl+= / Ctrl+0 不改字号、刷新后持久化、无 pageerror；脚本与日志见任务 research/。
+- [OK] 用户 2026-09-28 在 localhost:8505 人工验收 AC1（步进与三处一致）、AC4（输入框聚焦生效）、AC9（0 复位）通过。
+- [SKIP] e2e/chat-appearance.mjs 的新断言本次未执行（用户选择人工验收，且该 checkout 的 dev server 持有 .next/dev/lock）；macOS 实机 Cmd 组合与 Safari 对 preventDefault 的忽略未验证（本机 Linux）。
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 推送 feat/chat-font-size-shortcut 并开 draft PR，目标分支 personal；PR 携带工作、spec、任务产物、验收、归档与本日志提交。
+- 已知限制（已入 spec，不修）：Safari 无法可靠拦截 Ctrl+Shift+= 的浏览器页面缩放，可能既改字号又缩放页面。

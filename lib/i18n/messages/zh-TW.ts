@@ -22,6 +22,7 @@ export const zhTWLocale: LocalePlugin = {
     "settings.resetChatContentWidth": "重設聊天內容寬度",
     "settings.resetChatContentFontSize": "重設聊天字體大小",
     "settings.chatContentWidthDescription": "設定訊息內容和輸入框的最大寬度。",
+    "settings.chatContentFontSizeShortcut": "快速鍵：Ctrl/⌘ + Shift + - / = / 0（0 恢復預設字級）",
     "settings.themeLight": "淺色",
     "settings.themeDark": "深色",
     "settings.themeMist": "霧青",

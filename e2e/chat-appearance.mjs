@@ -238,6 +238,58 @@ export async function checkChatAppearance(page) {
   await openSettings();
   assert.equal(await width.inputValue(), "2000");
   assert.equal(await fontSize.inputValue(), "18");
+
+  const shortcutHint = page.getByText(
+    "Shortcut: Ctrl/⌘ + Shift + - / = / 0 (0 restores the default)",
+    { exact: true },
+  );
+  assert.equal(await shortcutHint.isVisible(), true, "Settings must name the font size shortcut");
+  assert.equal(
+    await fontSize.getAttribute("aria-keyshortcuts"),
+    "Control+Shift+- Meta+Shift+- Control+Shift+= Meta+Shift+= Control+Shift+0 Meta+Shift+0",
+  );
+
+  // Ctrl/Cmd+Shift+- and Ctrl/Cmd+Shift+= step the chat font size by one pixel,
+  // exactly like one notch of the slider. `code`-based matching is what keeps
+  // them working under Shift and on non-US layouts, and preventDefault is what
+  // keeps Chromium's own Ctrl+Shift+= page zoom out of the way. Ctrl/Cmd+Shift+0
+  // puts the shared default back through the same setter.
+  //
+  // NOTE: written but never executed for 09-28-chat-font-size-shortcut (the
+  // user chose manual acceptance). See the task's research/verification.md.
+  await fontSize.press("Home");
+  await page.keyboard.press("Control+Shift+Minus");
+  assert.equal(await fontSize.inputValue(), "12", "The lower bound must clamp, not reset");
+  await page.keyboard.press("Control+Shift+Equal");
+  assert.equal(await fontSize.inputValue(), "13");
+  await page.keyboard.press("Meta+Shift+Equal");
+  assert.equal(await fontSize.inputValue(), "14");
+  await page.keyboard.press("Meta+Shift+Minus");
+  assert.equal(await fontSize.inputValue(), "13");
+  await fontSize.press("End");
+  await page.keyboard.press("Control+Shift+Equal");
+  assert.equal(await fontSize.inputValue(), "24", "The upper bound must clamp too");
+  await page.keyboard.press("Control+Shift+0");
+  assert.equal(await fontSize.inputValue(), "14", "The reset key must restore the default");
+  assert.equal(
+    await page.evaluate(() => localStorage.getItem("pi-chat-content-font-size")),
+    "14",
+  );
+  await fontSize.press("Home");
+  for (let i = 12; i < 18; i++) await page.keyboard.press("Control+Shift+Equal");
+  await closeSettings();
+  // Registered on window, so it must keep working with the composer focused
+  // rather than the slider.
+  await textarea.focus();
+  await page.keyboard.press("Control+Shift+Equal");
+  assert.equal(await font(textarea), "19px");
+  assert.equal(
+    await page.evaluate(() => localStorage.getItem("pi-chat-content-font-size")),
+    "19",
+  );
+  await openSettings();
+  assert.equal(await fontSize.inputValue(), "19");
+
   await checkChatAppearanceReset(page);
   for (const viewport of [{ width: 1280, height: 600 }, { width: 320, height: 568 }]) {
     await page.setViewportSize(viewport);

@@ -14,6 +14,7 @@ import {
   CHAT_CONTENT_FONT_SIZE_MIN,
   useChatAppearance,
 } from "@/hooks/useChatAppearance";
+import { CHAT_FONT_SIZE_SHORTCUT_ARIA } from "@/lib/chat-font-size-shortcut";
 import { sendAgentCommand } from "@/lib/agent-client";
 import type { ExtensionUiVisibilitySettingsResponse, ShellToolSettingsResponse } from "@/lib/api-types";
 import {
@@ -349,8 +350,16 @@ function GeneralSettings({ sessionId, onSessionReloaded, quoteSelectionEnabled, 
               max={CHAT_CONTENT_FONT_SIZE_MAX}
               step={1}
               value={fontSize}
+              aria-keyshortcuts={CHAT_FONT_SIZE_SHORTCUT_ARIA}
+              aria-describedby="settings-chat-content-font-size-shortcut"
               onChange={(event) => setFontSize(Number(event.target.value))}
             />
+            <p
+              className="settings-chat-shortcut"
+              id="settings-chat-content-font-size-shortcut"
+            >
+              {t("settings.chatContentFontSizeShortcut")}
+            </p>
           </div>
           <div className="settings-chat-option settings-chat-switch-option">
             <span>{t("settings.quoteSelection")}</span>
