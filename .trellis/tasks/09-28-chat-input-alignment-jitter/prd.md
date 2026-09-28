@@ -18,9 +18,30 @@
 
 ## Acceptance Criteria
 
-- [ ] 桌面端长/短对话、运行中内容增长和滚动状态切换时，消息列与输入框的左右边界在浏览器实测中保持对齐且无横向跳变。
-- [ ] 移动端不存在新增的水平溢出或输入框错位；小地图与滚动条仍可正常使用。
-- [ ] 对根因有尺寸测量或等效可重复证据，回归测试可在现有测试体系中执行。
+- [x] 桌面端长/短对话、运行中内容增长和滚动状态切换时，消息列与输入框的左右边界在浏览器实测中保持对齐且无横向跳变。
+- [x] 移动端不存在新增的水平溢出或输入框错位；小地图与滚动条仍可正常使用。
+- [x] 对根因有尺寸测量或等效可重复证据，回归测试可在现有测试体系中执行。
+
+## 验收结论（2026-09-28）
+
+修复经 [#18](https://github.com/xupeng/agegr-pi-web/pull/18) 合入 `personal`（修复提交
+`5ddd4e7`，合并提交 `134de42`），证据见 `research/verification.md` 与
+`research/browser-geometry.md`。
+
+- **根因**：滚动列 `[scrollbar-gutter:stable]` 保留了真实滚动条槽位，而 composer 的右
+  内边距只预留了 36px 小地图。`components/ChatWindow.tsx:762-775` 现在把
+  `offsetWidth - clientWidth` 写入根节点 `--chat-scrollbar-gutter`，
+  `components/ChatInput.tsx:1844` 据此增加右内边距，小地图轨道在不可见时改为占位而非
+  返回 `null`（`components/ChatMinimap.tsx:640-643`）。
+- **浏览器实测**（真实 Chromium）：1280px 长/短会话 `337..1157`，800px `276..738`，
+  390px 普通指针 `16..364`、触屏 `16..368`；滚动到底、短会话从不可滚动变为可滚动、
+  触屏指针切换前后横坐标不变，`documentElement` 无水平溢出。
+- **回归验证**：`e2e/chat-appearance.mjs` 的 `checkChatColumnAlignment()` 同帧比较消息列
+  与 composer 的左右边界；`e2e/run.mjs` 在长/短会话、滚动到底、800px 窄桌面、390px 触屏
+  与内容展开前后调用它。
+- **未覆盖项**：这些新增断言尚未在完整 `npm run test:e2e` 套件中跑到——本 checkout 的
+  8505 服务持有 `.next/dev/lock`，`e2e/run.mjs` 禁止并发启动服务，因此真实浏览器测量改
+  用指向该服务的只读脚本完成。上述测量只走读取路径，未向任何会话发送消息。
 
 ## Out of Scope
 

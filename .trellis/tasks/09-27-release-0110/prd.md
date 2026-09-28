@@ -50,21 +50,33 @@ final integration check.
 
 ## Acceptance (whole request)
 
-- [ ] AC1 `upstream/main` is merged into `personal` through a reviewed PR, with the
+- [x] AC1 `upstream/main` is merged into `personal` through a reviewed PR, with the
       conflict decisions recorded, and the full suite green (typecheck, lint, unit,
-      e2e).
-- [ ] AC2 `@xup3ng/pi-web@0.11.0` is on the registry with `latest` pointing at it, and
+      e2e). 已核实：PR #17（`c477bec`）；tsc / lint / unit 绿（1720 通过 0 失败），
+      e2e 在隔离 worktree 5/7 绿，两条红色见 `09-27-sync-upstream-pre-0110` 的报告。
+- [x] AC2 `@xup3ng/pi-web@0.11.0` is on the registry with `latest` pointing at it, and
       the published artifact is verified (integrity / shasum / fileCount / remote tgz
-      byte-compare against the archived tgz).
-- [ ] AC3 The package audit passed: embedded version 0.11.0, expected entry list,
+      byte-compare against the archived tgz). 已核实：复核时重新下载远程 tgz，与归档包
+      sha256 相同；registry metadata 见 `research/integration-review.md`。
+- [x] AC3 The package audit passed: embedded version 0.11.0, expected entry list,
       webfont licenses present, and no `.git`/`.trellis`/`.next/dev`/`*.js.map`/`.env`
-      entries.
-- [ ] AC4 `personal` carries `chore: bump version to 0.11.0` and is pushed; `HEAD ==
-      origin/personal`.
-- [ ] AC5 The main checkout is healthy again: dev server listening on 8505, the app
-      serves a page, `git status` clean.
-- [ ] AC6 Each child has its own evidence report, and this parent records the final
+      entries. 已核实：`09-27-npm-release-0110/research/artifacts/pre-publish-audit.md`。
+- [x] AC4 `personal` carries `chore: bump version to 0.11.0` and is pushed; `HEAD ==
+      origin/personal`. 已核实：`8891b62` 经 PR #19 合入，`HEAD == origin/personal ==
+      91cd660`。
+- [x] AC5 The main checkout is healthy again: dev server listening on 8505, the app
+      serves a page, `git status` clean. 已核实：PID 2228435 在 8505 监听并返回 200。
+- [x] AC6 Each child has its own evidence report, and this parent records the final
       integrated state (identifiers, tgz sha256, publish log lines, verification table).
+      已核实：见 `research/integration-review.md`；其中 **publish 原始日志行无法提供**，
+      改用 registry metadata 作为独立来源，已作为偏差记录。
+
+## 验收结论（2026-09-28）
+
+两个子任务的交付物都已合并并核验：上游同步经 PR #17 合入，0.11.0 已在公开发布并经
+字节比对确认，bump 提交与归档产物经 PR #19 进入 `personal`，开发服务与工作区状态正常。
+`research/integration-review.md` 记录最终集成状态与四项偏差——其中最重要的是 **npm 上的
+0.11.0 早于 PR #18，因此不含对话区对齐修复**，该修复随下一个版本发布。
 
 ## Out of scope
 
