@@ -509,6 +509,27 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
     previousScrollTopRef.current = container.scrollTop;
   }, []);
 
+  /**
+   * Re-pin the tail of the message list, but only while the reader is already
+   * there. Both the streaming follow and the ephemeral-tail follow go through
+   * this one implementation so their contract cannot drift:
+   *
+   * - `pendingScrollToUserRef` is a deliberate jump to the prompt; that position
+   *   outranks the tail until the jump has been performed.
+   * - `liveFollowFrameRef` coalesces bursts of events into one scroll per frame.
+   * - the scroll is deferred to an animation frame because callers run inside
+   *   agent-event handling, before React has committed the new content to the
+   *   DOM; scrolling first would target stale layout.
+   */
+  const followTailIfAttached = useCallback(() => {
+    if (pendingScrollToUserRef.current || !isNearBottomRef.current) return;
+    if (liveFollowFrameRef.current !== null) return;
+    liveFollowFrameRef.current = requestAnimationFrame(() => {
+      liveFollowFrameRef.current = null;
+      if (isNearBottomRef.current) scrollToBottom("auto");
+    });
+  }, [scrollToBottom]);
+
   const currentModel = currentModelOverride ?? liveModel ?? data?.context.model ?? pendingModel ?? null;
   const displayModel = isNew
     ? (newSessionModel ?? newSessionDefaultModel)
@@ -1847,14 +1868,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         }
         // Live-follow the streaming output only when the user is already near
         // the bottom of the message list. If they scrolled up, leave them there.
-        if (!pendingScrollToUserRef.current && isNearBottomRef.current && liveFollowFrameRef.current === null) {
-          // Defer the scroll so React has time to update the DOM with the new
-          // streaming content; otherwise scrollIntoView may target stale layout.
-          liveFollowFrameRef.current = requestAnimationFrame(() => {
-            liveFollowFrameRef.current = null;
-            if (isNearBottomRef.current) scrollToBottom("auto");
-          });
-        }
+        followTailIfAttached();
         break;
       }
       case "message_end": {
@@ -2020,7 +2034,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         setExtensionDialog((current) => current?.id === event.id ? null : current);
         break;
     }
-  }, [addNotice, allowTrellisCallsFromMessage, cancelEventStreamGrace, flushTrellisReplay, handleExtensionUiRequest, ingestTrellisToolDetails, liveEventsBelongToView, notifyPromptStage, onAgentEnd, refreshViewedSession, scheduleEventStreamClose, scrollToBottom, settleUiStage, syncLiveModel, translate]);
+  }, [addNotice, allowTrellisCallsFromMessage, cancelEventStreamGrace, flushTrellisReplay, followTailIfAttached, handleExtensionUiRequest, ingestTrellisToolDetails, liveEventsBelongToView, notifyPromptStage, onAgentEnd, refreshViewedSession, scheduleEventStreamClose, settleUiStage, syncLiveModel, translate]);
   handleAgentEventRef.current = handleAgentEvent;
 
   const handleSend = useCallback(async (message: string, images?: AttachedImage[]) => {
@@ -2972,6 +2986,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
     setNoticePaused: setPausedNoticeId,
     handleToolPresetChange, handleThinkingLevelChange, loadTools, loadSlashCommands, setActiveLeafId, setData, setMessages, loadContext,
     scrollToBottom, scrollUserMsgToTop, scrollToMessage,
+    followTailIfAttached,
     dispatch, setAgentRunning, setForkingEntryId,
     bashRunning, pendingBash,
     // Subscriptions
