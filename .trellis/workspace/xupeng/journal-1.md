@@ -1331,3 +1331,42 @@ Verified the published 0.11.0 tarball against npm; committed the frozen-source v
 
 - Merge the task PR into personal to deliver the version commit and archive; reconcile duplicate local release edits in the shared checkout after the merge.
 - Original publish debug log is unavailable; report records this deviation.
+
+
+## Session 30: 归档 0.11.0 发布父任务与对话区对齐任务
+
+**Date**: 2026-09-28
+**Task**: 归档 0.11.0 发布父任务与对话区对齐任务
+**Branch**: `personal`
+
+### Summary
+
+核实两个任务的验收状态后归档：npm 0.11.0 已发布并经字节比对确认，开发服务与工作区正常；父任务的最终集成状态与四项偏差记录在 research/integration-review.md。
+
+### Main Changes
+
+- 父任务 09-27-release-0110：写入集成复核（ref 一致性、registry 与 tgz 比对、checkout 状态、子任务报告、最终状态）并勾选 AC1-AC6。
+- 09-28-chat-input-alignment-jitter：勾选三条 AC 并记录根因、浏览器实测坐标与新增 e2e 断言；标注新增断言未在完整套件中跑到。
+- 如实记录偏差：npm 上的 0.11.0 早于 PR #18，不含对话区对齐修复（归档包内 grep chat-scrollbar-gutter 为 0）。
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `0bce161` | (see git log) |
+| `23781a0` | (see git log) |
+| `78cdf0f` | (see git log) |
+
+### Testing
+
+- [OK] npm view @xup3ng/pi-web version dist-tags.latest dist.fileCount dist.shasum dist.integrity 全部匹配；重新下载的远程 tgz 与归档包 sha256 相同（1c6112e1…）。
+- [OK] curl http://localhost:8505/ 返回 200（PID 2228435）；git status --porcelain 为空；task.py validate 两个任务均通过。
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- 对话区对齐修复随下一个版本发布（0.11.1 或 0.12.0）。
+- 发布脚本未留存 bump 提交与 publish 调试日志，若要固定流程可考虑补一个 release runbook spec。
