@@ -27,8 +27,11 @@ export async function checkExtensionDialogs(page, artifacts, width) {
   };
   page.on("request", onRequest);
   const start = async (mode) => {
-    await page.mouse.move(0, 0);
-    await page.locator("[data-minimap-preview-box]").waitFor({ state: "hidden" });
+    const preview = page.locator("[data-minimap-preview-box]");
+    // The panel is click-toggled, so moving the pointer away no longer dismisses it; close it
+    // explicitly, but only when it is open — Escape means "stop agent" globally.
+    if (await preview.isVisible()) await page.keyboard.press("Escape");
+    await preview.waitFor({ state: "hidden" });
     const input = page.locator("textarea").last();
     await input.fill(`/e2e-dialog ${mode}`);
     await page.getByRole("button", { name: "Send", exact: true }).click();

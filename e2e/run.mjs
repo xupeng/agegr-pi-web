@@ -450,7 +450,8 @@ try {
       await node.waitFor();
       const rect = await node.boundingBox();
       assert.ok(rect);
-      await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);
+      // The preview panel opens on a rail click, not on hover.
+      await page.mouse.click(rect.x + rect.width / 2, rect.y + rect.height / 2);
       const preview = page.locator("[data-minimap-preview-box]");
       await preview.getByRole("button", { name: "E2E compaction anchor", exact: true }).waitFor();
       await preview.getByRole("button", { name: "E2E compacted heading", exact: true }).click();
