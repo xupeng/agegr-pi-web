@@ -22,10 +22,14 @@ Verified identical to isolation-baseline.md on start:
 - [x] SDK fallout fixed (preflight disposition, steer/followUp return, catalog URL types, session-file-on-first-message, portable peer pins). Added focused regression.
 - [x] Final gates: tsc 0, lint 0/0 (564 files), test 1753 pass; e2e pass (2nd run; 1st was cold-compile timeout).
 - [x] Real-SDK runtime smoke (session/tools/commands/settings/chat-only exact prompt).
-- [ ] Parent commit(s): staged merge first, then upgrade diff, then task artifacts.
+- [x] Parent commits: merge `59f3d71`, upgrade `d04c860`, local input guard `06abb9a`, spec `96fce15`, artifacts `64c623e`.
 
 ## Status: implementation complete, merge ACTIVE, no commit/push/PR/archive performed.
 ## Details: research/conflict-decisions.md, research/verification-report.md, research/logs/.
+
+The status above is the implementer's handoff checkpoint. The parent subsequently
+committed the resolved merge and upgrade separately, verified upstream ancestry, and
+accepted the independently checked candidate; final archive/journal follow on the same branch.
 
 ## Commit-separation constraint (from parent)
 - Stage ONLY pure upstream merge product paths with explicit `git add` BEFORE any Pi 0.99.1 upgrade/API edits.

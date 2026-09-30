@@ -52,4 +52,5 @@ Preserve baseline and final counts/reports in `research/`. Never use a baseline 
 - [x] Work commits created separately; upstream ancestry verified; original dirty-file hashes preserved.
 - [x] Isolated preview started at http://127.0.0.1:30142/ and returned HTTP 200; it uses its own Pi data directory and offline catalog mode.
 - [x] Applicable SDK/default-settings/ask_user spec updates prepared.
-- [ ] Task artifacts, final archive and journal committed on the feature branch before delivery; no PR or push authorized.
+- [x] Task artifacts committed as `64c623e`; work and spec commits are on the isolated feature branch.
+- Final delivery gate: archive and journal must follow on this same branch; no PR or push authorized.
