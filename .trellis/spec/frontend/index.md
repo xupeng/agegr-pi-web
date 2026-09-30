@@ -20,6 +20,8 @@
 | [State Management](./state-management.md) | 状态落点分类、跨组件共享四种机制、服务端状态、URL 状态、localStorage 持久化、SSR/Hydration、陷阱 | Written |
 | [Quality Guidelines](./quality-guidelines.md) | 门禁基线、禁止/必须遵循的模式、测试要求、Code Review 清单（另含"验证基线必须来自与锁文件一致的依赖树"） | Written |
 | [Type Safety](./type-safety.md) | tsconfig 实际严格度、类型归属、运行时守卫、常见写法、禁用写法 | Written |
+| [Pi SDK 输入接收契约](./pi-sdk-admission.md) | Pi 0.99.1 disposition、RPC admission/完成边界、SDK 迁移必测断言 | Written |
+| [模型默认设置](./model-default-settings.md) | 会话选择与显式全局保存边界、项目覆盖拒绝、SDK 写盘错误检查 | Written |
 | [Trellis subagent execution snapshots](./trellis-subagent-records.md) | Single owner for exact tool/kind gate, bounded branch API projection, evidence/watermarks, scoped hook ownership and read-only UI | Written |
 | [ask_user 提问协议](./ask-user-protocol.md) | ask_user 工具契约、状态机、事件/命令协议 | Written |
 | [追加系统指令编辑契约](./append-system-prompt.md) | APPEND_SYSTEM.md 的 GET/PUT 契约、写入路径固定与允许表闸门、生效范围、字节上限 | Written |
