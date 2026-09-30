@@ -22,6 +22,10 @@ interface DefaultPreferencesRequest {
   thinkingLevel?: unknown;
 }
 
+function isRequestObject(body: unknown): body is DefaultPreferencesRequest {
+  return body !== null && typeof body === "object" && !Array.isArray(body);
+}
+
 function parseEdit(body: DefaultPreferencesRequest): DefaultPreferencesEdit | null {
   const edit: DefaultPreferencesEdit = {};
   if (body.provider !== undefined || body.modelId !== undefined) {
@@ -45,11 +49,14 @@ function parseEdit(body: DefaultPreferencesRequest): DefaultPreferencesEdit | nu
  * so it goes through the same allow-list as `/api/models`.
  */
 export async function PUT(req: Request) {
-  let body: DefaultPreferencesRequest;
+  let body: unknown;
   try {
-    body = await req.json() as DefaultPreferencesRequest;
+    body = await req.json();
   } catch {
     return Response.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+  if (!isRequestObject(body)) {
+    return Response.json({ error: "Expected provider and modelId, or a valid thinkingLevel" }, { status: 400 });
   }
   const edit = parseEdit(body);
   if (!edit) {
