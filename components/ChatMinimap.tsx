@@ -23,7 +23,6 @@ interface Props {
 const MINIMAP_WIDTH = 36;
 const MAX_NODE_GAP = 50;
 const MINIMAP_PADDING = 12;
-const PREVIEW_HIDE_DELAY = 250;
 const NAVIGATION_ACTIVE_LOCK_MS = 1600;
 
 /**
@@ -265,9 +264,8 @@ export function ChatMinimap({
   const [allNodes, setAllNodes] = useState<NodeInfo[]>([]);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [minimapHeight, setMinimapHeight] = useState(600);
-  const [minimapHovered, setMinimapHovered] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [mouseYRatio, setMouseYRatio] = useState<number | null>(null);
-  const draggingRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const allNodesRef = useRef<NodeInfo[]>([]);
   const nodeLayoutRef = useRef<NodeLayout>({
@@ -277,7 +275,6 @@ export function ChatMinimap({
   });
   const previewBoxRef = useRef<HTMLDivElement>(null);
   const previewItemRefs = useRef(new Map<number, HTMLDivElement>());
-  const previewHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeNodeLockRef = useRef<{ index: number; until: number } | null>(null);
   const pendingNavigationRef = useRef<{
     nodeIndex: number;
@@ -557,70 +554,51 @@ export function ChatMinimap({
     scrollEl.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
   }, [lockActiveNode, onRevealHistory, scrollContainer]);
 
-  const cancelPreviewHide = useCallback(() => {
-    if (!previewHideTimerRef.current) return;
-    clearTimeout(previewHideTimerRef.current);
-    previewHideTimerRef.current = null;
+  // The preview panel opens on a rail click, never on hover: a click on the rail is
+  // only the switch, and every jump happens from an entry inside the panel.
+  const togglePreview = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    if (previewBoxRef.current?.contains(event.target as Node)) return;
+    setPreviewOpen((open) => !open);
   }, []);
 
-  const showPreview = useCallback(() => {
-    cancelPreviewHide();
-    setMinimapHovered(true);
-  }, [cancelPreviewHide]);
-
-  const schedulePreviewHide = useCallback(() => {
-    cancelPreviewHide();
-    previewHideTimerRef.current = setTimeout(() => {
-      previewHideTimerRef.current = null;
-      setMinimapHovered(false);
-      setMouseYRatio(null);
-    }, PREVIEW_HIDE_DELAY);
-  }, [cancelPreviewHide]);
-
-  useEffect(() => () => cancelPreviewHide(), [cancelPreviewHide]);
-
-  const handleMouseDown = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    if (!visible) return;
-
-    draggingRef.current = true;
-    showPreview();
-    const rect = event.currentTarget.getBoundingClientRect();
-    const pointerRatio = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
-    setMouseYRatio(pointerRatio);
-    const jumpToPointer = (clientY: number, behavior: ScrollBehavior) => {
-      const ratio = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
-      const node = findNearestNode(ratio);
-      if (node) {
-        scrollToNode(node, behavior);
-      }
+  useEffect(() => {
+    if (!visible) {
+      setPreviewOpen(false);
+      return;
+    }
+    if (!previewOpen) return;
+    const handleOutside = (event: MouseEvent) => {
+      if (containerRef.current?.contains(event.target as Node)) return;
+      setPreviewOpen(false);
     };
-
-    jumpToPointer(event.clientY, "smooth");
-    const onMove = (moveEvent: MouseEvent) => {
-      if (!draggingRef.current) return;
-      jumpToPointer(moveEvent.clientY, "auto");
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || event.isComposing) return;
+      // Escape is also the global "stop agent" shortcut (`hooks/useKeyboardShortcuts.ts`), and a
+      // rail click leaves the focus outside a textarea/input, so closing the panel must consume
+      // the key in the capture phase instead of dismissing the panel and aborting the run at once.
+      event.stopPropagation();
+      setPreviewOpen(false);
     };
-    const onUp = () => {
-      draggingRef.current = false;
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("keydown", handleKeyDown, true);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("keydown", handleKeyDown, true);
     };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-  }, [findNearestNode, scrollToNode, showPreview, visible]);
+  }, [previewOpen, visible]);
 
   const nearestNode = mouseYRatio === null ? null : findNearestNode(mouseYRatio);
   const nearestNodeIndex = nearestNode?.index ?? null;
 
   useEffect(() => {
-    if (!minimapHovered || nearestNodeIndex === null) return;
+    if (!previewOpen || nearestNodeIndex === null) return;
     const previewBox = previewBoxRef.current;
     const previewItem = previewItemRefs.current.get(nearestNodeIndex);
     if (!previewBox || !previewItem) return;
     const targetTop = previewItem.offsetTop
       - (previewBox.clientHeight - previewItem.offsetHeight) / 2;
     previewBox.scrollTop = Math.max(0, targetTop);
-  }, [allNodes, minimapHovered, nearestNodeIndex]);
+  }, [allNodes, previewOpen, nearestNodeIndex]);
 
   const lastNodeTop = positionedNodes.length > 0
     ? positionedNodes[positionedNodes.length - 1].topRatio * minimapHeight
@@ -630,9 +608,7 @@ export function ChatMinimap({
   return (
     <div
       ref={containerRef}
-      onMouseDown={handleMouseDown}
-      onMouseEnter={showPreview}
-      onMouseLeave={schedulePreviewHide}
+      onClick={togglePreview}
       onMouseMove={(event) => {
         const rect = event.currentTarget.getBoundingClientRect();
         setMouseYRatio((event.clientY - rect.top) / rect.height);
@@ -663,7 +639,7 @@ export function ChatMinimap({
       />
 
       {positionedNodes.map((node) => {
-        const isNearest = minimapHovered && nearestNode?.index === node.index;
+        const isNearest = previewOpen && nearestNode?.index === node.index;
         const isActive = activeIndex === node.index;
 
         return (
@@ -701,12 +677,11 @@ export function ChatMinimap({
         );
       })}
 
-      {minimapHovered && allNodes.length > 0 && (
+      {previewOpen && allNodes.length > 0 && (
         <div
           ref={previewBoxRef}
           className={styles.preview}
           data-minimap-preview-box=""
-          onMouseEnter={showPreview}
           onMouseDown={(event) => event.stopPropagation()}
           onMouseMove={(event) => event.stopPropagation()}
         >

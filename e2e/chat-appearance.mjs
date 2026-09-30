@@ -30,12 +30,12 @@ export async function checkChatColumnAlignment(page, label) {
 }
 
 /**
- * AC1/AC3/AC4 for the minimap hover preview: the preview panel mirrors the sidebar
+ * AC1/AC3/AC4 for the minimap click preview: the preview panel mirrors the sidebar
  * session list (12px title / 11px meta / 10px small labels), keeps the Oxanium and
  * Cascadia families, and preserves the row geometry the panel was tuned around.
  *
  * Only run this on a scrollable conversation: a short session hides the 36px rail
- * (`visibility: hidden`), so the pointer cannot hover it. `sidebarTitle` is the
+ * (`visibility: hidden`), so the pointer cannot click it. `sidebarTitle` is the
  * session title whose sidebar row should be compared against the preview sizes.
  */
 export async function checkMinimapTypography(page, label, sidebarTitle) {
@@ -60,7 +60,11 @@ export async function checkMinimapTypography(page, label, sidebarTitle) {
   assert.ok(rail, `${label}: minimap rail must sit beside the scroll container`);
   assert.equal(rail.visibility, "visible", `${label}: minimap rail must be visible on a scrollable session`);
   assert.ok(rail.width >= 36, `${label}: minimap rail must keep its 36px slot`);
+  // The panel is click-toggled: hovering the rail must leave it closed.
   await page.mouse.move(rail.x, rail.y);
+  assert.equal(await page.locator("[data-minimap-preview-box]").count(), 0,
+    `${label}: hovering the minimap rail must not open the preview`);
+  await page.mouse.click(rail.x, rail.y);
   await page.locator("[data-minimap-preview-box]").waitFor();
 
   // Read every target in one frame so a repaint cannot land between reads.
