@@ -1,0 +1,4 @@
+{"file":".trellis/spec/guides/upstream-sync.md","reason":"Preserve fork semantics and merge history; document conflict resolutions and auto-merge review."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Lockfile-consistent baseline, quality gates, real browser evidence and dev-checkout isolation."}
+{"file":".trellis/spec/frontend/type-safety.md","reason":"Existing SDK adapter ownership and type-safety constraints for API changes."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Review SDK to wrapper to SSE to hook to UI contracts."}

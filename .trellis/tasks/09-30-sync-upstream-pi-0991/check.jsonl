@@ -1,0 +1,5 @@
+{"file":".trellis/spec/guides/upstream-sync.md","reason":"Independent semantic review of conflicts, intentional deletions and preservation of fork behaviours."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Verify clean target dependency tree, unit/lint/type gates and browser coverage limitations."}
+{"file":".trellis/spec/frontend/type-safety.md","reason":"Do not hide migration failures with unsafe casts or weakened compiler settings."}
+{"file":".trellis/spec/frontend/session-restore.md","reason":"Protect URL/session memory precedence during upstream hook and startup changes."}
+{"file":".trellis/spec/frontend/ask-user-protocol.md","reason":"Protect shared ask_user integration during SDK migration."}
