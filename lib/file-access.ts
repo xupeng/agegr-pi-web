@@ -1,4 +1,4 @@
-import { existsSync, readdirSync } from "fs";
+import { existsSync } from "fs";
 import { homedir } from "os";
 import path from "path";
 import { getAdditionalAllowedRoots, normalizeSlashes } from "./allowed-roots";
@@ -31,21 +31,10 @@ export async function getAllowedFileRoots(): Promise<Set<string>> {
     if (s.projectRoot) roots.add(normalizeSlashes(s.projectRoot));
   }
 
-  // Also allow ~/pi-cwd-* directories created by the default-cwd endpoint.
-  try {
-    for (const name of readdirSync(homedir())) {
-      if (/^pi-cwd-\d{8}$/.test(name)) {
-        roots.add(normalizeSlashes(path.join(homedir(), name)));
-      }
-    }
-  } catch {
-    // ignore if home is unreadable
-  }
-
   // The shared attachment fallback (~/pi-web-attachments) holds images
   // uploaded before a session had a cwd, plus all legacy home-directory
   // attachments. allowFileRoot() is in-memory and lost on restart, so the
-  // directory is persisted here like pi-cwd-* to keep old @-mentions readable.
+  // directory is persisted here to keep old @-mentions readable.
   try {
     const attachmentDir = path.join(homedir(), "pi-web-attachments");
     if (existsSync(attachmentDir)) roots.add(normalizeSlashes(attachmentDir));
