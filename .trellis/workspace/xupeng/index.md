@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 33
-- **Last Active**: 2026-09-28
+- **Total Sessions**: 34
+- **Last Active**: 2026-09-30
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~1505 | Active |
+| `journal-1.md` | ~1549 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 34 | 2026-09-30 | Sync upstream and upgrade Pi to 0.99.1 | `59f3d71`, `d04c860`, `06abb9a`, `96fce15`, `64c623e`, `2a52815` | `merge/upstream-pi-0991-20260930` |
 | 33 | 2026-09-28 | 09-28-chat-font-size-shortcut: 桌面快捷键 Ctrl/Cmd+Shift+-/= 调整对话区字号 | `bbfc767`, `72e679b`, `8ea5d51`, `fbd7b66`, `b2e405b`, `4a077fe` | `feat/chat-font-size-shortcut` |
 | 32 | 2026-09-28 | 09-28-mobile-status-line-clip: 修复运行状态行折行后的尾部跟随 | - | `fix/mobile-status-line-clip` |
 | 31 | 2026-09-28 | 小地图字号对齐左侧栏并归档 | `85642da`, `76119a6`, `c38918d`, `5358bd4`, `5433244` | `fix/minimap-typography` |

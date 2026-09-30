@@ -14,7 +14,6 @@ import {
 } from "./project-command-env";
 import { cacheSessionPath, getLatestModelChange, invalidateSessionListCache, readLatestSessionEntryId, resolveSessionPath } from "./session-reader";
 import { getProjectTrustStatus, projectTrustReloadOptions } from "./project-trust";
-import { persistExplicitStartupPreferences } from "./startup-preferences";
 import { renderStallAbortText, STALL_ABORT_CUSTOM_TYPE, type StallAbortNoticeDetails } from "./message-display";
 import { resolveStallWatchdogSettings, StallWatchdog, type StallWatchdogStall } from "./stall-watchdog";
 import { notifySessionComplete } from "./web-push";
@@ -877,8 +876,11 @@ export class AgentSessionWrapper {
               source: "rpc",
               // Match pi's RPC contract: acknowledge only after synchronous prompt
               // validation and extension preflight have accepted the submission.
-              preflightResult: (success) => {
-                if (success) acceptPreflight();
+              // Pi 0.99 invokes this only once the prompt is accepted, with the
+              // disposition it was accepted as ("started" | "queued" | "handled");
+              // a rejected prompt throws before it fires. Any invocation is an ack.
+              preflightResult: () => {
+                acceptPreflight();
               },
             });
           } catch (error) {
@@ -2425,22 +2427,6 @@ export async function startRpcSession(
       ...(toolsOption !== undefined ? { tools: toolsOption } : {}),
       ...(subagentResources ? { excludeTools: [...SUBAGENT_CONTROL_TOOL_NAMES] } : {}),
     });
-
-    const persistedPreferences = await persistExplicitStartupPreferences(
-      services.settingsManager,
-      {
-        ...(effectiveInitialModel ? { model: effectiveInitialModel } : {}),
-        ...(thinkingLevel ? { thinkingLevel } : {}),
-      },
-      {
-        ...(inner.model
-          ? { model: { provider: inner.model.provider, modelId: inner.model.id } }
-          : {}),
-        thinkingLevel: inner.thinkingLevel,
-        supportsThinking: inner.supportsThinking(),
-      },
-    );
-    if (persistedPreferences.modelDefaultChanged) invalidateModelsCache();
 
     // If specific tool names were requested (non-empty), set the active tools to the
     // requested builtin coding tools PLUS all extension/package tools, so installed

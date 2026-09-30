@@ -1506,3 +1506,44 @@ feat 提交、spec 补充合进 docs(spec) 提交、两次任务产物合进同�
 
 - 推送 feat/chat-font-size-shortcut 并开 draft PR，目标分支 personal；PR 携带工作、spec、任务产物、验收、归档与本日志提交。
 - 已知限制（已入 spec，不修）：Safari 无法可靠拦截 Ctrl+Shift+= 的浏览器页面缩放，可能既改字号又缩放页面。
+
+
+## Session 34: Sync upstream and upgrade Pi to 0.99.1
+
+**Date**: 2026-09-30
+**Task**: Sync upstream and upgrade Pi to 0.99.1
+**Branch**: `merge/upstream-pi-0991-20260930`
+
+### Summary
+
+Merged three upstream commits through 433d09e in an isolated worktree, upgraded all four Pi pins and portable peers to 0.99.1, repaired SDK contracts and default-request validation; preserved personal and its dirty files.
+
+### Main Changes
+
+- Retained fork semantics across six conflicts and adopted upstream list continuation, explicit default saving and dated cwd.
+- Recorded SDK admission/default-settings specs, independent review and task acceptance; archive stays on the feature branch.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `59f3d71` | (see git log) |
+| `d04c860` | (see git log) |
+| `06abb9a` | (see git log) |
+| `96fce15` | (see git log) |
+| `64c623e` | (see git log) |
+| `2a52815` | (see git log) |
+
+### Testing
+
+- [OK] Clean npm ci tree: tsc pass; lint 565 files, zero diagnostics; 1755 unit tests and 84 focused tests pass.
+- [OK] Desktop/mobile/subagent e2e pass on warm second run; real SDK lifecycle probe passes with six simulated provider calls and zero network.
+- [OK] Upstream ancestry verified; all original dirty-file hashes unchanged; two pre-existing audit advisories remain.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Local branch only, ready for later review/PR to personal; no push, PR, publish or personal integration performed. Isolated offline preview at http://127.0.0.1:30142/.
