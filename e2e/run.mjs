@@ -511,9 +511,12 @@ try {
     const heading = page.getByRole("heading", { name: "E2E compacted heading", exact: true });
     await heading.waitFor({ state: "attached" });
     if (viewport.width > 600) {
-      const node = page.locator("[data-minimap-node-index='0']");
-      await node.waitFor();
-      const rect = await node.boundingBox();
+      // The preview opens from the rail itself, so which tick the pointer lands on does not
+      // matter: a tick only exists for an outline row, so the rail's node indices are the outline
+      // rows' indices (sparse) rather than a dense 0..n sequence.
+      const rail = page.locator(".chat-content .scrollbar-subtle + div");
+      await rail.waitFor();
+      const rect = await rail.boundingBox();
       assert.ok(rect);
       // Resting the pointer on the rail opens the preview panel; the click also covers the
       // touch-device path, where a tap is the only way in.
