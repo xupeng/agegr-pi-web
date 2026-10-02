@@ -267,8 +267,8 @@ try {
   assert.equal(detailA.trellisSubagentRecords.leafValid, true);
   console.log("PASS: records older than page 50 are included in the bounded detail projection");
 
-  browser = await chromium.launch(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
-    ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
+  browser = await chromium.launch(process.env.PLAYWRIGHT_EXECUTABLE_PATH || process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+    ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH || process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
     : {});
   for (const device of [
     { viewport: { width: 1280, height: 800 }, hasTouch: false },
@@ -277,6 +277,7 @@ try {
   ]) {
     const { viewport, hasTouch } = device;
     context = await browser.newContext({ viewport, hasTouch, locale: "en-US" });
+    await context.tracing.start({ screenshots: true, snapshots: true });
     await context.addInitScript((targetSession) => {
       const OriginalEventSource = window.EventSource;
       class MockEventSource {
@@ -707,9 +708,24 @@ try {
       await page.getByText("Live final result", { exact: true }).last().waitFor();
       await page.getByRole("button", { name: /trellis-check .* Succeeded/ }).filter({ hasText: "Live reconnect prompt" }).waitFor();
 
+      // Upstream deliberately forbids moving the live SDK leaf mid-run.
+      // Keep the historical-settlement test, but enter that view while idle.
+      const navigationsBeforeRunningClick = branchCommands.filter(command => command.type === "navigate_tree").length;
+      await openBranches();
+      await page.getByText("Branch X choice", { exact: true }).click();
+      await delay(200);
+      assert.equal(branchCommands.filter(command => command.type === "navigate_tree").length, navigationsBeforeRunningClick,
+        "A running branch click must not navigate the SDK leaf");
+      branchRunning = false;
+      await page.evaluate(() => window.__emitTrellisAgentEvent({ type: "agent_settled" }));
+      await page.getByRole("button", { name: "Stop agent", exact: true }).waitFor({ state: "hidden" });
       await openBranches();
       await page.getByText("Branch X choice", { exact: true }).click();
       await page.locator("[data-entry-id='branch-x']:not([data-message-role])").waitFor();
+      branchRunning = true;
+      await page.evaluate(() => window.__emitTrellisAgentEvent({ type: "connected", isStreaming: true }));
+      await delay(200);
+      branchRunning = false;
       await page.evaluate(() => window.__emitTrellisAgentEvent({ type: "agent_settled" }));
       await delay(400);
       await openAgents();
@@ -724,6 +740,7 @@ try {
     assert.equal(requests.some((url) => /\/api\/sessions\/(a-run|b-run|x-run|y-run|live-run)(?:[/?]|$)/.test(url)), false);
     assert.deepEqual(errors, [], `Browser errors at width ${viewport.width}`);
     console.log(`PASS: ${viewport.width}px records-only, built-in-only, mixed, empty, branch, and read-only interactions`);
+    await context.tracing.stop({ path: join(artifacts, `trace-${viewport.width}.zip`) });
     await context.close();
     context = undefined;
     page = undefined;

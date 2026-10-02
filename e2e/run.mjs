@@ -15,11 +15,20 @@ import { checkChatAppearance, checkChatColumnAlignment, checkMinimapTypography }
 import { ASK_USER_SESSION, checkAskUserView, writeAskUserFixture } from "./ask-user.mjs";
 import { checkSessionRestore } from "./session-restore.mjs";
 import { STATUS_TAIL_SESSION, checkStatusTailFollow, statusTailEntries } from "./status-tail.mjs";
+import { CODEMODE_SESSION, QUEUE_SESSION, codemodeEntries, checkMcpCodemode, checkHistoryEdit, checkExtensionQueues, checkTouchEnter } from "./upstream-interactions.mjs";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const mode = process.env.E2E_SERVER_MODE || "dev";
 assert.ok(mode === "dev" || mode === "start", "E2E_SERVER_MODE must be dev or start");
 assert.ok(mode !== "dev" || !existsSync(join(root, ".next/dev/lock")), "Use a checkout without an active dev server");
+// Diagnostic selection never replaces the unfiltered npm run test:e2e gate.
+const checkGroup = process.env.E2E_CHECK_GROUP || "full";
+assert.ok(["full", "interactive", "touch"].includes(checkGroup), "E2E_CHECK_GROUP must be full, interactive or touch");
+if (checkGroup !== "full") console.log(`TARGETED: ${checkGroup} checks only; not the complete e2e gate`);
+const selectedWidth = process.env.E2E_VIEWPORT_WIDTH ? Number(process.env.E2E_VIEWPORT_WIDTH) : null;
+assert.ok(selectedWidth === null || selectedWidth === 1280 || selectedWidth === 390, "E2E_VIEWPORT_WIDTH must be 1280 or 390");
+const viewports = [{ width: 1280, height: 800 }, { width: 390, height: 844 }]
+  .filter(viewport => checkGroup !== "touch" && (selectedWidth === null || viewport.width === selectedWidth));
 const artifacts = join(root, "test-results/e2e");
 mkdirSync(artifacts, { recursive: true });
 const agentDir = mkdtempSync(join(tmpdir(), "pi-web-e2e-"));
@@ -158,6 +167,11 @@ try {
   ]);
   writeAskUserFixture(agentDir, ASK_USER);
   writeSession(STATUS_TAIL, statusTailEntries());
+  writeSession(CODEMODE_SESSION, codemodeEntries(message));
+  writeSession(QUEUE_SESSION, [
+    message("queue-root", null, "user", "AC6 queue fixture prompt"),
+    message("queue-answer", "queue-root", "assistant", "AC6 queue fixture answer"),
+  ]);
 
   const probe = createServer();
   probe.listen(0, "127.0.0.1");
@@ -199,7 +213,7 @@ try {
     const response = await fetch(`${base}/api/sessions`, { signal: AbortSignal.timeout(5000) }).catch(() => null);
     if (response?.ok) {
       const { sessions } = await response.json();
-      assert.deepEqual(sessions.map((session) => session.id).sort(), [LONG, BRANCH, RICH, COMPACTED, APPEND, ASK_USER, TYPO, STATUS_TAIL].sort());
+      assert.deepEqual(sessions.map((session) => session.id).sort(), [LONG, BRANCH, RICH, COMPACTED, APPEND, ASK_USER, TYPO, STATUS_TAIL, CODEMODE_SESSION, QUEUE_SESSION].sort());
       break;
     }
     assert.ok(Date.now() < deadline, "Server readiness timed out; see server.log");
@@ -251,10 +265,22 @@ try {
     console.log("PASS: external session-file appends are visible on force/mount reads");
   }
 
-  browser = await chromium.launch(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
-    ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
+  // Cold Turbopack compilation can consume the browser's entire 30s response
+  // budget before hydration even starts. Prepare only HTTP routes, then retain
+  // the original browser/status assertions against this exact isolated server.
+  const warmStarted = Date.now();
+  const document = await fetch(`${base}/?session=${LONG}`, { signal: AbortSignal.timeout(120_000) });
+  assert.equal(document.status, 200, "Candidate document HTTP preflight");
+  await document.text();
+  const statePreflight = await fetch(`${base}/api/sessions/${LONG}/state`, { signal: AbortSignal.timeout(120_000) });
+  assert.equal(statePreflight.status, 200, "Candidate state HTTP preflight");
+  await statePreflight.json();
+  console.log(`HTTP preflight ${base}: document/state 200 in ${Date.now() - warmStarted}ms`);
+
+  browser = await chromium.launch(process.env.PLAYWRIGHT_EXECUTABLE_PATH || process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+    ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH || process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
     : {});
-  for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 }]) {
+  for (const viewport of viewports) {
     context = await browser.newContext({ viewport, locale: "en-US" });
     await context.tracing.start({ screenshots: true, snapshots: true });
     page = await context.newPage();
@@ -268,9 +294,46 @@ try {
       const url = new URL(response.url());
       if (url.pathname === `/api/sessions/${LONG}/context` && url.searchParams.has("before")) olderResponses.push(response);
     });
-    const stateReady = page.waitForResponse((response) => new URL(response.url()).pathname === `/api/sessions/${LONG}/state`);
-    await page.goto(`${base}/?session=${LONG}`, { waitUntil: "domcontentloaded" });
-    assert.equal((await stateReady).status(), 200);
+    // Independent AC6 fixtures run first so a retained legacy failure cannot
+    // prevent collecting their evidence. The full legacy checks still follow.
+    await checkMcpCodemode(page, { base, artifacts, width: viewport.width });
+    await checkExtensionQueues(page, { base, artifacts, width: viewport.width });
+    await checkHistoryEdit(page, { base, artifacts, width: viewport.width });
+    if (checkGroup === "interactive") {
+      // A retained history-node failure can prevent later smoke checks running.
+      // This explicitly selected diagnostic group does not waive that failure.
+      await page.goto(`${base}/?session=${RICH}`, { waitUntil: "domcontentloaded" });
+      await page.locator(".markdown-code-block pre").waitFor();
+      await checkFilePanel(page, previewFile);
+      await checkExtensionDialogs(page, artifacts, viewport.width);
+      await checkAskUserView(page, { base, sessionId: ASK_USER });
+      await checkStatusTailFollow(page, { base, sessionId: STATUS_TAIL, expectWrap: viewport.width <= 600 });
+      if (viewport.width > 600) {
+        await checkSessionRestore(page, {
+          base, sessionId: RICH, staleSessionId: ASK_USER,
+          // The smoke path can leave this long answer at its reading tail.
+          // Verify the whole fixture answer, not an offscreen code sub-block.
+          marker: "[data-entry-id='answer']:not([data-message-role])", artifactsDir: artifacts,
+        });
+        await page.goto(`${base}/?session=${RICH}`, { waitUntil: "domcontentloaded" });
+        await page.locator("[data-entry-id='answer']:not([data-message-role])").waitFor();
+        await page.locator(".chat-content .scrollbar-subtle").evaluate(scroll => { scroll.scrollTop = 0; });
+        await page.locator(".markdown-code-block pre").waitFor();
+        await checkChatAppearance(page);
+      }
+      assert.deepEqual(errors, [], `Browser errors in targeted interactive group at width ${viewport.width}`);
+      console.log(`PASS: TARGETED ${viewport.width}px file panel, dialogs, ask, status tail and applicable restore/appearance`);
+      await context.tracing.stop({ path: join(artifacts, `trace-${viewport.width}.zip`) });
+      await context.close();
+      context = undefined;
+      page = undefined;
+      continue;
+    }
+    const [, stateResponse] = await Promise.all([
+      page.goto(`${base}/?session=${LONG}`, { waitUntil: "domcontentloaded" }),
+      page.waitForResponse((response) => new URL(response.url()).pathname === `/api/sessions/${LONG}/state`),
+    ]);
+    assert.equal(stateResponse.status(), 200);
     await page.getByText(text(4999), { exact: true }).waitFor();
     const longGeometry = await checkChatColumnAlignment(page, `${viewport.width}px long conversation`);
     assert.equal(longGeometry.scrollable, true);
@@ -396,7 +459,9 @@ try {
     assert.equal(shortGeometry.scrollable, false);
     assert.equal(shortGeometry.availableWidth - shortGeometry.scrollWidth, viewport.width > 600 ? 36 : 0,
       "The minimap rail must keep its layout slot even when hidden");
-    await page.setViewportSize({ width: viewport.width, height: 300 });
+    // Compact mobile chrome lets this two-message fixture fit at 300px.
+    // Keep the overflow/alignment assertions, using a genuinely short viewport.
+    await page.setViewportSize({ width: viewport.width, height: viewport.width > 600 ? 300 : 180 });
     const resizedShortGeometry = await checkChatColumnAlignment(page, `${viewport.width}px short conversation after resize`);
     assert.equal(resizedShortGeometry.scrollable, true, "A short conversation should scroll in a short viewport");
     assert.deepEqual(resizedShortGeometry.message, shortGeometry.message, "Becoming scrollable must not move the message column sideways");
@@ -477,12 +542,48 @@ try {
         });
         return readingOffset(target);
       };
+      const stableHistoryPosition = async (target, pendingRequests) => {
+        // A response is not a committed prepend. Moving the sentinel starts a
+        // cascade whose captured distance can overwrite this test's positioning.
+        // Re-park without weakening the 120px/<5px condition or using sleeps.
+        const deadline = Date.now() + 30_000;
+        let stableReads = 0;
+        while (Date.now() < deadline) {
+          await positionForReading(target);
+          await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+          const offset = await readingOffset(target);
+          stableReads = pendingRequests.size === 0 && Math.abs(offset - 120) < 5 ? stableReads + 1 : 0;
+          if (stableReads === 2) return offset;
+        }
+        assert.fail("Earlier history must settle at 120px with no pending pages before capturing its reading position");
+      };
       await selectSession(text(0), "e4999");
-      const olderPage = page.waitForResponse((response) => response.url().includes(`/api/sessions/${LONG}/context?`));
-      await page.getByText("Scroll up to load earlier messages", { exact: true }).evaluate((element) => element.scrollIntoView({ block: "start", behavior: "instant" }));
-      await olderPage;
+      const pendingOlderRequests = new Set();
+      const trackOlderRequest = request => {
+        const url = new URL(request.url());
+        if (url.pathname === `/api/sessions/${LONG}/context` && url.searchParams.has("before")) pendingOlderRequests.add(request);
+      };
+      const finishOlderRequest = request => pendingOlderRequests.delete(request);
+      page.on("request", trackOlderRequest);
+      page.on("requestfinished", finishOlderRequest);
+      page.on("requestfailed", finishOlderRequest);
       const olderMessage = page.locator("[data-entry-id='e4920']");
-      const olderOffset = await positionForReading(olderMessage);
+      let olderOffset;
+      try {
+        await Promise.all([
+          page.getByText("Scroll up to load earlier messages", { exact: true }).evaluate((element) => element.scrollIntoView({ block: "start", behavior: "instant" })),
+          page.waitForResponse(response => {
+            const url = new URL(response.url());
+            return url.pathname === `/api/sessions/${LONG}/context` && url.searchParams.has("before");
+          }),
+        ]);
+        olderOffset = await stableHistoryPosition(olderMessage, pendingOlderRequests);
+        console.log(`READING ${viewport.width}px: captured settled older history at ${olderOffset}px`);
+      } finally {
+        page.off("request", trackOlderRequest);
+        page.off("requestfinished", finishOlderRequest);
+        page.off("requestfailed", finishOlderRequest);
+      }
       await selectSession("Render **E2E markdown**", "user");
       const process = page.getByRole("button", { name: /process details/i });
       await process.click();
@@ -542,21 +643,26 @@ try {
     }
     assert.deepEqual(errors, [], `Browser errors at width ${viewport.width}`);
     console.log(`PASS: ${viewport.width}px browser pagination, branch, markdown, code, tool call, and compaction navigation`);
-    await context.tracing.stop();
+    await context.tracing.stop({ path: join(artifacts, `trace-${viewport.width}.zip`) });
     await context.close();
     context = undefined;
     page = undefined;
   }
   context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  await context.tracing.start({ screenshots: true, snapshots: true });
   page = await context.newPage();
   await page.goto(`${base}/?session=${BRANCH}`, { waitUntil: "domcontentloaded" });
   await page.getByText("Active branch answer", { exact: true }).waitFor();
   const touchGeometry = await checkChatColumnAlignment(page, "390px touch short conversation");
-  await page.setViewportSize({ width: 390, height: 300 });
+  // Short coarse-pointer chrome now collapses at 300px, so two messages fit.
+  // Use a genuinely overflowing viewport rather than demanding old chrome height.
+  await page.setViewportSize({ width: 390, height: 180 });
   const touchScrolledGeometry = await checkChatColumnAlignment(page, "390px touch scrollable conversation");
   assert.equal(touchScrolledGeometry.scrollable, true);
   assert.deepEqual(touchScrolledGeometry.message, touchGeometry.message);
   assert.deepEqual(touchScrolledGeometry.composer, touchGeometry.composer);
+  await checkTouchEnter(page, { sessionId: BRANCH, artifacts });
+  await context.tracing.stop({ path: join(artifacts, "trace-touch.zip") });
   await context.close();
   context = undefined;
   page = undefined;

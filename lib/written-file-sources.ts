@@ -28,6 +28,14 @@ export { TRELLIS_SUBAGENT_TOOL_NAME };
 export const AGENT_TOOL_NAME = "Agent";
 export const SUBAGENT_DETAILS_KIND = "pi-web-subagent";
 
+/** Render accepts decorated names; host snapshots must not promote remote result paths. */
+export type WrittenFileEvidencePolicy = "render" | "snapshot";
+
+/** Exact result sources shared by snapshot construction and session file authorization. */
+export function isTrustedWrittenFileResultToolName(toolName: string): boolean {
+  return toolName === "apply_patch" || toolName === TRELLIS_SUBAGENT_TOOL_NAME || toolName === AGENT_TOOL_NAME;
+}
+
 export type WrittenFileOperation = "add" | "update" | "move" | "write" | "edit";
 export type WrittenFileOrigin =
   | "tool-input"
@@ -372,10 +380,14 @@ export function extractRawWrittenFiles(
   toolName: string,
   input: Record<string, unknown> | undefined,
   result: ToolResultEvidence | undefined,
+  policy: WrittenFileEvidencePolicy = "render",
 ): RawWrittenFile[] {
   if (!result || result.isError) return [];
 
   if (isApplyPatchToolName(toolName)) {
+    // Both structured summaries and legacy text are result-controlled. A broad
+    // UI name match is not authority to place them in an Agent completion snapshot.
+    if (policy === "snapshot" && !isTrustedWrittenFileResultToolName(toolName)) return [];
     if (result.details !== undefined && result.details !== null) {
       return parseApplyPatchDetails(result.details) ?? [];
     }
@@ -470,11 +482,14 @@ function readToolCallBlock(block: unknown): OrderedToolCall | null {
 /**
  * Collect the files a persisted session wrote, from assistant `toolCall` blocks
  * paired with their `toolResult` entries. Used by the subagent runtime to
- * snapshot a child session's writes at completion time.
+ * snapshot a child session's writes at completion time with policy="snapshot".
+ * Decorated write/edit paths still come from model-issued inputs, not results;
+ * rendering keeps its existing broader apply_patch name compatibility by default.
  */
 export function extractWrittenFilesFromEntries(
   entries: readonly SessionEntry[],
   cwd?: string,
+  policy: WrittenFileEvidencePolicy = "render",
 ): WrittenFile[] {
   const calls: OrderedToolCall[] = [];
   const results = new Map<string, ToolResultEvidence>();
@@ -507,7 +522,7 @@ export function extractWrittenFilesFromEntries(
   for (const call of calls) {
     const result = results.get(call.id);
     if (!result) continue;
-    raw.push(...extractRawWrittenFiles(call.name, call.input, result));
+    raw.push(...extractRawWrittenFiles(call.name, call.input, result, policy));
   }
   return resolveAndMergeWrittenFiles(raw, cwd);
 }

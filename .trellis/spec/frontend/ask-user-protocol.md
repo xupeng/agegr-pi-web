@@ -14,7 +14,9 @@
 
 - 工具名 `ask_user`，通过 InlineExtension（`lib/ask-user/extension.ts`）注册，注入到主会话的 `extensionFactories`（非 chatOnly、非子代理会话）。
 - 作为扩展而非 SDK `customTools`，工具在每次会话 reload 时重新注册，所以设置开关变更后 reload 会话即可生效（与 built-in subagents 同生命周期）。
+- 历史 `navigate_tree` 仅 carry 原本 active、仍 registered 且非 hidden 的 `ask_user`，不因目标分支记录早于工具开启而丢掉会话级能力；注册但未激活的 ask、Chat-only/空 pin 不回灌。使用 `rpc-manager.ts` 的 session-tool carry + 既有 resolver，不恢复 active-all 扩展逻辑；行为回归在 `rpc-manager-tool-exposure.test.mjs`（pinned/unpinned、inactive/hidden、Chat-only）。
 - 参数：`questions[]`（每项 `id/question/detail?/options[]/multiple?`）。限制：≤20 问题、每题 ≤12 选项、id ≤128、文本 ≤1000、自定义文本 ≤4000。
+- 曝光：portable 工具明确 `exposure: "model-only"`，仅由模型直接调用，Code mode only 下仍声明；脚本的 `ALL_TOOLS`/`ctx.executeTool()` 不包含也不能执行它，不能打开持久问题后吞掉 terminate 语义。真实 SDK + faux provider 回归在 `lib/ask-user/codemode.integration.test.mjs`，同时验证直接调用登记问题且不再请求模型。
 - 执行：登记为会话 open ask 后返回 `{ terminate: true }`；畸形问题集抛 `PendingAskValidationError`（变 error tool result，模型可自纠重发）。
 - 工具文本明确告知模型"答案将以 follow-up 唤醒，不要重复提问"；supersede 时附加旧 ask 未答列表。
 - 调用引导在 `lib/ask-user/portable/tool.ts:139-142` 的 `promptSnippet` / `promptGuidelines`：仅在工具可用、继续当前请求必须等待缺失事实、范围选择或必要决策时调用；把相关问题合并后单独、最后调用。普通对话、修辞性提问与非阻塞的后续建议仍用文字，工具不可用时也用文字。回答只用于澄清，不代替敏感操作授权。对应契约断言在 `lib/ask-user/tool.test.mjs`；断言只验证提示元数据，不证明模型遵循。实际效果要用同模型、同配置的独立会话记录调用结果；单次冒烟不能推断调用率变化。
@@ -65,7 +67,7 @@
 - `submit`：校验答案匹配 open ask（未知 id / 重复 / 选项不存在 / multiple 冲突 / 超长均拒绝），拒绝时 ask 保持打开。
 - `cancel`：无答案关闭，outcome 全未答。
 - `cancelOpen`：用户发普通消息时作废（`prompt` 命令 preflight 接受后调用），`triggerTurn: false` 搭用户消息便车，不单独唤醒。
-- `forgetSession`：wrapper `destroy()` 时清理**内存**。
+- `forgetSession`：wrapper `destroy()` 时清理**内存**；仅当 registry 未登记同 ID 的新 wrapper 或仍登记自身时清理。旧 closing wrapper 超时后迟到的 destroy 不得清掉 replacement 重水合的 ask（`lib/rpc-manager-shutdown.test.mjs` 行为回归）。
 - store 为进程级单例（`globalThis.__piAskUserStore`，与 `__piSessions` 同模式防 Next.js 热重载丢失）。
 
 ### 持久化与重水合（跨 wrapper 生命周期）

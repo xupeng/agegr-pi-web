@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 34
-- **Last Active**: 2026-09-30
+- **Total Sessions**: 35
+- **Last Active**: 2026-10-02
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~1549 | Active |
+| `journal-1.md` | ~1589 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 35 | 2026-10-02 | Merge upstream MCP and Code mode updates | `56a45e4`, `73f38df`, `459bdc3`, `ecf95e3` | `merge/upstream-mcp-codemode-20261002` |
 | 34 | 2026-09-30 | Sync upstream and upgrade Pi to 0.99.1 | `59f3d71`, `d04c860`, `06abb9a`, `96fce15`, `64c623e`, `2a52815` | `merge/upstream-pi-0991-20260930` |
 | 33 | 2026-09-28 | 09-28-chat-font-size-shortcut: 桌面快捷键 Ctrl/Cmd+Shift+-/= 调整对话区字号 | `bbfc767`, `72e679b`, `8ea5d51`, `fbd7b66`, `b2e405b`, `4a077fe` | `feat/chat-font-size-shortcut` |
 | 32 | 2026-09-28 | 09-28-mobile-status-line-clip: 修复运行状态行折行后的尾部跟随 | - | `fix/mobile-status-line-clip` |

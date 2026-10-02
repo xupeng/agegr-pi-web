@@ -134,6 +134,9 @@ function assertReportableOpen(result: PendingAskOpenResult): void {
 export function createAskUserToolDefinition(deps: AskUserToolDeps) {
   return defineTool<typeof AskUserParams, AskUserToolDetails>({
     name: "ask_user",
+    // Opening a persistent ask terminates a model turn; nested scripts cannot
+    // propagate that termination and must never open one.
+    exposure: "model-only",
     label: "Ask user",
     description: "Post a set of questions to the user as a browser form and end this run. Answers arrive later as a follow-up message; the user may leave any question unanswered.",
     promptSnippet: "ask_user: ask for blocking clarification or a required decision; ends the run, answers return as a follow-up",

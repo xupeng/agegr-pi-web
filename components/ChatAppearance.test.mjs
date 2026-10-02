@@ -4,6 +4,8 @@ import test from "node:test";
 import { createJiti } from "jiti";
 
 const chatWindow = await readFile(new URL("./ChatWindow.tsx", import.meta.url), "utf8");
+const messageView = await readFile(new URL("./MessageView.tsx", import.meta.url), "utf8");
+const codemodeView = await readFile(new URL("./CodemodeToolView.tsx", import.meta.url), "utf8");
 const chatInput = await readFile(new URL("./ChatInput.tsx", import.meta.url), "utf8");
 const settingsPanel = await readFile(new URL("./SettingsPanel.tsx", import.meta.url), "utf8");
 const globals = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
@@ -24,6 +26,15 @@ const {
 } = await jiti.import("../hooks/useChatAppearance.ts");
 
 const widthVariable = /var\(--chat-content-max-width, 820px\)/g;
+
+test("new Code mode, edit and queue labels follow the shared chat font preference", () => {
+  const offsetFont = /fontSize: "calc\(11px \+ var\(--chat-font-size-offset, 0px\)\)"/;
+  const waitingLabel = chatWindow.slice(chatWindow.indexOf("function ExtensionWaitingCount"), chatWindow.indexOf("function ExtensionDialog("));
+  const cancelButton = messageView.slice(messageView.indexOf("{canCancelEdit && ("), messageView.indexOf("{canFork && (", messageView.indexOf("{canCancelEdit && (")));
+  const callCount = messageView.slice(messageView.indexOf("{codemodeCallCount > 0 && ("), messageView.indexOf("{duration !== undefined", messageView.indexOf("{codemodeCallCount > 0 && (")));
+  for (const label of [waitingLabel, cancelButton, callCount]) assert.match(label, offsetFont);
+  assert.doesNotMatch(codemodeView, /fontSize:\s*\d/);
+});
 
 test("chat content keeps the existing 820px default behind one shared variable", () => {
   assert.equal((chatWindow.match(widthVariable) ?? []).length, 2);
