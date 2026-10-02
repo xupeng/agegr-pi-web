@@ -6,14 +6,15 @@
 
 - app 根节点高度 = `var(--app-viewport-height, 100dvh)`（`AppShell.tsx` 的根 `<div>`）。
 - 键盘打开时设置 `--app-viewport-height` 为 `visualViewport.height`，关闭时移除（回退 `100dvh`）。
-- 判定（纯函数 `shouldUseVisualViewportHeight`）：焦点在可编辑元素（INPUT/SELECT/TEXTAREA/contentEditable）且未缩放且 `innerHeight - viewportHeight > 1`。
-- 驱动事件：visualViewport resize/scroll、window resize、focusin/focusout、pageshow，全部经 rAF 节流。
+- 判定（纯函数 `shouldUseVisualViewportHeight`）：焦点在可编辑元素（INPUT/SELECT/TEXTAREA/contentEditable），且 `innerHeight / scale - viewportHeight > KEYBOARD_MIN_HEIGHT_PX`（60px；非正 scale 回落为 1）。按 scale 消除仅由 zoom 造成的收缩，但允许缩放状态下的真实键盘；60px 门槛排除工具栏/安全区小变化。
+- 驱动事件：visualViewport resize/scroll、window resize、focusin/focusout、pageshow，全部经 rAF 节流。键盘打开还设置 `html[data-keyboard-open]`，小屏或短 coarse-pointer 屏隐藏 composer 的次要控制行和扩展状态栏。
 
 ## 关键决策
 
+- **每个触发后的稳定检测**：保留上游 `[48, 120, 240, 420, 720]` ms 的串行 settle chain，一次只运行一条链；输入不重启链，避免连续输入无限推迟末次测量。composition/keyup 补足候选栏变化；capture input 仅有一个监听 owner。卸载时清除所有 rAF、retry/settle timer、CSS 变量与 data 属性。
 - **focus 后延迟重试**（`KEYBOARD_RETRY_DELAYS = [300, 700, 1200]`）：iOS 键盘滑入动画约 250-300ms，原生壳（无 keyboard avoidance 的 WKWebView）可能在动画期间不派发 visualViewport resize。focusin 后立即 rAF 读取会看到全高而误判"无键盘"，延迟重试覆盖动画窗口，保证点击输入框后 ≤500ms 内收缩，无需等用户输入文字。
 - **keydown/input 兜底**（capture）：对完全不派发 resize 的壳，首次按键/IME 输入再检查一次已稳定的视口高度。
-- **滚动恢复仅发生在开/关转换**：iOS 会推动布局视口，键盘开/关时 `window.scrollTo(0,0)` 一次；不在每个 visualViewport 事件恢复，避免与消息列表顶部 rubber-band overscroll 打架导致 jitter（`e91c965` 修复）。
+- **滚动恢复仅发生在开/关转换**：iOS 会推动布局视口，键盘开/关且 scale 约等于 1、页面确实偏移时 `window.scrollTo(0,0)` 一次；缩放时不重置页面，保护 pinch 位置；不在每个 visualViewport 事件恢复，避免与消息列表顶部 rubber-band overscroll 打架导致 jitter（`e91c965` 修复）。
 - **设置幂等**：重复设置/移除 CSS 变量无害，因此 rAF 与延迟重试可自由叠加。
 
 ## 原生壳（WKWebView）注意事项

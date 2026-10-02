@@ -46,7 +46,12 @@ parseApplyPatchSummaryText(text: string): RawWrittenFile[]
 parseEditDiffCounts(details: unknown): { added: number; removed: number } | null
 extractTrellisWrittenFiles(details: unknown): RawWrittenFile[]
 extractSubagentSnapshotWrittenFiles(details: unknown): RawWrittenFile[]
-extractWrittenFilesFromEntries(entries: SessionEntry[], cwd?: string): WrittenFile[]
+type WrittenFileEvidencePolicy = "render" | "snapshot";
+isTrustedWrittenFileResultToolName(toolName: string): boolean
+extractRawWrittenFiles(toolName: string, input: Record<string, unknown> | undefined,
+  result: ToolResultEvidence | undefined, policy?: WrittenFileEvidencePolicy): RawWrittenFile[]
+extractWrittenFilesFromEntries(entries: readonly SessionEntry[], cwd?: string,
+  policy?: WrittenFileEvidencePolicy): WrittenFile[]
 
 // lib/path-linkify.ts
 interface FileIndexLookup { cwd: string; relative: Set<string>; byBaseName: Map<string, string[]>;
@@ -60,7 +65,7 @@ useFileIndex(cwd?: string): { lookup: FileIndexLookup | null; status: "idle" | "
 
 // components/TurnWrittenFiles.tsx
 type OpenWrittenFileHandler = (filePath: string,
-  options?: { modeHint?: "diff"; sourceSessionId?: string }) => void
+  options?: { modeHint?: "diff"; sourceSessionId?: string; page?: number }) => void
 ```
 
 ## 3. Contracts
@@ -100,6 +105,15 @@ Traps, all reproduced against real sessions:
 - Never derive files from the patch body (`*** Add File:` headers). On partial failure that is not the
   set of files actually written.
 
+**Render compatibility is not snapshot authority.** The default extraction policy is `render`,
+which retains decorated-name helpers for UI cards. `lib/subagent-runtime.ts` explicitly passes
+`"snapshot"` for both fresh and reopened/resumed completion snapshots. Result-controlled patch
+summaries (structured or legacy text) require the shared exact-result gate: `apply_patch`,
+`trellis_subagent`, `Agent`. A remote/decorated patch card must not become parent authorization
+merely because a host Agent completion copied its paths. Do not duplicate the success parser or
+globally tighten the UI name helpers. Decorated write/edit paths still come from model-issued
+arguments; result details may enrich edit counts but cannot nominate a different path.
+
 ### 3.2 Linkification
 
 - The index is `/api/file-index?cwd=`: cwd-relative `/`-separated paths, `MAX_FILES = 5000`,
@@ -116,8 +130,9 @@ Traps, all reproduced against real sessions:
 - `:line` / `:line:col` suffixes are display metadata and are stripped before matching.
 - Markdown explicit links (`[x](./y.md)`) keep their previous behavior and are **exempt** from the
   index check. Never claim that all explicit links are guaranteed to exist.
-- Card entries are also exempt: their existence is proven by the tool call that wrote them, which is
-  why a card may legitimately point outside the allowed roots.
+- Card entries are also exempt from the index requirement: confirmed writes may legitimately point
+  outside the allowed roots. A render-facing decorated-tool card is not itself proof of an
+  authorized write; its open action must still pass the server boundary.
 
 ### 3.3 Rendering
 
@@ -135,6 +150,12 @@ Traps, all reproduced against real sessions:
 - Tool results stay collapsed by default. Linkification inside them is only observable after expanding.
 - Any new chat-surface typography uses `calc(Xpx + var(--chat-font-size-offset, 0px))`, never a fixed
   `px`/`rem` value (see [settings-dialog-mobile.md](./settings-dialog-mobile.md)).
+- `MarkdownBody` renderer function types must survive initial/unchanged/changed file-index
+  refreshes. `useLinkifiedChildren` reads the current lookup inside named block renderers;
+  do not capture the lookup in a callback that becomes a dependency of the renderer `useMemo`.
+  Message entry keys cannot prevent an inner paragraph/code subtree from remounting when its
+  React element type changes. The renderer factory depends on `cwd/isStreaming/onOpenFile`,
+  not the periodically renewed index. Removed paths must still stop linking immediately.
 
 ### 3.4 Opening and authorization
 
@@ -159,6 +180,17 @@ Traps, all reproduced against real sessions:
   lets a card open a subagent-written path outside the roots (for example `/tmp/...`), which is exactly
   why `sourceSessionId` is carried on the entry. An isolated subagent worktree is registered as an
   allowed root by `addWorktree`, so those paths already pass on the root check.
+- `session-file-references-core.ts` excludes system/context-edit/store entries and arbitrary
+  non-coding result text/details, while preserving U's allowed model prose/arguments. Fork
+  patch/Trellis supplementary grants reuse the shared exact gate and success extractor with
+  `"snapshot"`; preview-only, failed traces and decorated remote summaries cannot grant paths.
+  U's exact Agent/collection/control path-reporting remains a distinct recursive result policy.
+- Already-promoted historical `Agent.writtenFiles` has lost child provenance. The new snapshot
+  boundary prevents fresh promotion and rejects decorated-call history when rescanned on resume,
+  but does not migrate/revalidate old polluted Agent records (including nested exact snapshots).
+  They may still authorize under the existing path-reporting policy. Historical child-session
+  revalidation requires a separate policy; do not claim retrospective cleanup or silently forbid
+  otherwise legitimate legacy snapshots. See [MCP/Code mode](./mcp-codemode.md) for runtime scope.
 
 ### 3.5 Card
 
@@ -174,6 +206,8 @@ Traps, all reproduced against real sessions:
 | Condition | Result |
 |---|---|
 | Tool result missing, or `isError === true` | Skipped; never listed |
+| Decorated patch result under `snapshot` policy | Structured and legacy summaries rejected; render compatibility unchanged |
+| Old promoted Agent snapshot with lost source provenance | Not retroactively revalidated; historical pollution remains an explicit limitation |
 | `details` absent | Result-text fallback (`apply_patch` only), or `input.path` for `write`/`edit` |
 | `details` present but unparseable | **No** text fallback: returning nothing beats fabricating a written file |
 | `delete` operation, or a delete-only patch | Not listed |
@@ -184,6 +218,7 @@ Traps, all reproduced against real sessions:
 | More than 32 traces in a run | All traces inspected; no file lost |
 | Raw relative path with no `cwd` | Dropped |
 | Index loading, failed, or `lookup === null` | Plain text, identical to the no-feature rendering |
+| New lookup on the 10s file-index refresh | Existing renderer function/DOM identity retained; link eligibility updates |
 | Index `truncated` | Exact matches still link; unique-basename completion disabled |
 | Path not in the index | Plain text |
 | `import.meta`, over-long token, URL scheme | Plain text |
@@ -208,6 +243,10 @@ Traps, all reproduced against real sessions:
 - `lib/written-file-sources.test.mjs`: `apply_patch` `add`/`update`/`delete`/`move`, partial failure,
   delete-only, stale preview, unparseable details, text fallback, >32 traces, malformed args,
   non-succeeded status, snapshot fields, entry pairing, dedupe/merge order, `sourceSessionId` backfill.
+- `lib/written-file-sources.check.test.mjs`, `session-file-references.fork-evidence.test.mjs`,
+  `subagent-runtime.test.mjs`: child entries → snapshot → host Agent details → parent authorization
+  rejects decorated structured/legacy summaries, including fresh SDK child and reopen/resume;
+  preserve exact patch/Trellis/Agent success, relative paths/counts and model-issued write/edit args.
 - `lib/turn-written-files.test.mjs`: the pre-existing 15 assertions must not change; new cases cover
   multi-file `apply_patch`, relative paths and the subagent branches.
 - `lib/path-linkify.test.mjs`: exact hits, unique/completed basenames, ambiguity, `truncated` downgrade,
@@ -215,6 +254,9 @@ Traps, all reproduced against real sessions:
 - `lib/file-index-paths.test.mjs`: `subtractDeletedPaths` (normal, empty inputs, spaces, non-ASCII).
 - `components/MarkdownBody.test.mjs`: inline code link, miss stays code, no nested anchor, no wrapper
   for table cells.
+- `components/MarkdownBody.identity.test.mjs`: real-source memo harness keeps renderer function
+  types across initial/empty/unchanged/changed lookup and old block functions consume current
+  lookup; existing e2e DOM handle assertion proves mounted paragraphs survive history prepends.
 - `components/TurnWrittenFiles.test.mjs`: file name and `title` = absolute path, inline action row,
   numbers only when present, total only when complete.
 - `components/MessageView.test.mjs`: tool-call structure assertions stay green; notification cards
@@ -230,13 +272,21 @@ Traps, all reproduced against real sessions:
 const traces = decodeTools(run.tools);
 // Wrong: preview lists hunks that failed to apply.
 const files = details.preview.files.map((f) => f.filePath);
+// Wrong: render compatibility can promote an untrusted result path to parent authority.
+const childSnapshot = extractWrittenFilesFromEntries(entries, cwd);
 // Wrong: a shape-based guess creates dead links.
 if (/\.\w{2,4}$/.test(token)) return link(token);
 
 // Correct: authoritative success list, statistics from the preview, always resolved against cwd.
-const written = parseApplyPatchDetails(details) ?? parseApplyPatchSummaryText(resultText);
+const written = details === undefined || details === null
+  ? parseApplyPatchSummaryText(resultText)
+  : (parseApplyPatchDetails(details) ?? []);
 const files = resolveAndMergeWrittenFiles(written, cwd);
 const match = linkifyToken(token, { lookup: lookupFromIndex });
+// Correct at the host completion boundary (fresh and reopen/resume):
+const childSnapshot = extractWrittenFilesFromEntries(entries, cwd, "snapshot");
+// Correct: index reads live inside stable component renderers, not their factory deps.
+// Wrong: [lookup] -> callback -> renderer useMemo creates new element types every TTL.
 ```
 
 ## 8. Verification method

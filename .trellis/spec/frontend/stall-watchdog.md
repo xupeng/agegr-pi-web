@@ -120,7 +120,7 @@ inner.sendCustomMessage(
 ### 进度定义与计时模型
 
 - **任何 agent 事件都算进度**，不区分「有用/没用」：模型 delta、`tool_execution_start|update|end`、`agent_settled` 等，全部经 `lib/rpc-manager.ts:346 start()` 里那**唯一**的 `inner.subscribe` 回调进入 `observe()`。
-- 观测与 pi-web 看到的事件完全一致，**不引入第二套真相**：在-flight 工具直接复用既有 `lib/rpc-manager.ts:251 activeToolEvents`（`lastActiveToolCallId` 只做「最近被触碰的工具」指针，不重排 map，因为 `onEvent()` 会把该 map 重放给重连的浏览器）。
+- 观测与 pi-web 看到的事件完全一致，**不引入第二套真相**：在-flight 工具直接复用既有 `lib/rpc-manager.ts:251 activeToolEvents`（`lastActiveToolCallId` 只做「最近被触碰的工具」指针，不重排 map，因为 `onEvent()` 会把该 map 的顶层事件重放给重连的浏览器；嵌套调用保留在同一 map 供工具级预算使用，但不重放为顶层卡片，父调用结束清除其后代，迟到的 nested end 无害）。
 - 计时是**每次事件重新 arm 一个 `setTimeout`**（`lib/stall-watchdog.ts:290 reschedule()`），超时时长取当前 `effectiveTimeoutMs`。触发前再次核对 `now - lastEventAt >= timeoutMs`（`:298 fire()`），所以定时器晚到不会误杀。
 - 判定按「无事件时长」而非 turn 总时长：pi 事件流**没有 keepalive**，一条合法的长命令可以长时间零事件，这正是工具级宽限存在的原因。
 

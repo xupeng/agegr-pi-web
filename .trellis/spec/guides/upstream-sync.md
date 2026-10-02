@@ -146,3 +146,14 @@ amend 会让那些引用失效。修复提交 + 复验记录比重写历史更�
 - 上游新增的对话区排版可能写死字号，违反
   [quality-guidelines.md](../frontend/quality-guidelines.md) 的
   `calc(Xpx + var(--chat-font-size-offset, 0px))` 契约。
+
+## 8. 同步运行时能力的额外检查
+
+MCP / Code mode 的可执行契约见 [mcp-codemode.md](../frontend/mcp-codemode.md)。这类同步不是“加几个 factory”即可：
+
+- 主会话、新建子代理、重开子代理和 Chat-only 各有资源构造策略，不能只改主会话路径；新增 active/exposure 规则要同时复核预设、reload、navigate。
+- 上游减小 SSE 数据时，先枚举 fork 实时 consumer；Trellis tool-end 的 structured final 桥接与 inner watchdog 的进度观测不是同一层，不得因瘦身丢掉其中之一。
+- 文件授权收紧必须同时验证合法 structured 成功产物和负向 spoof/preview；不要用“保留 fork”恢复任意 result 文本授权，也不要新造另一套成功证据 parser。
+- `NODE_ENV=production` 会令裸 `npm ci` 省略 devDependencies；要复算完整门禁依赖树时使用 `npm ci --include=dev`，不能把缺 tsc/eslint 当源码错误。
+- 全套测试隔离 HOME 与 `PI_CODING_AGENT_DIR`，小 fixture 根用 `/tmp` 避免 SDK 扫入主目录祖先的 `.agents/skills`；node_modules 仍放同级磁盘 worktree。不要全局 `PI_OFFLINE=1` 绕过套件的 mocked command，避免把环境提前拒绝当实际功能回归。
+- 真浏览器使用清洁环境、独立数据和已核实的 executable；编译配置/Chromium 测试不等于真实 Safari 16.2 或 Windows 验证。

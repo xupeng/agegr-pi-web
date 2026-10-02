@@ -21,6 +21,7 @@
 | [Quality Guidelines](./quality-guidelines.md) | 门禁基线、禁止/必须遵循的模式、测试要求、Code Review 清单（另含"验证基线必须来自与锁文件一致的依赖树"） | Written |
 | [Type Safety](./type-safety.md) | tsconfig 实际严格度、类型归属、运行时守卫、常见写法、禁用写法 | Written |
 | [Pi SDK 输入接收契约](./pi-sdk-admission.md) | Pi 0.99.1 disposition、RPC admission/完成边界、SDK 迁移必测断言 | Written |
+| [MCP / Code mode 运行时](./mcp-codemode.md) | 内置加载、惰性连接与信任、工具曝光、只读 policy、环境、默认设置、SSE/UI 队列与 fork 兼容 | Written |
 | [模型默认设置](./model-default-settings.md) | 会话选择与显式全局保存边界、项目覆盖拒绝、SDK 写盘错误检查 | Written |
 | [Trellis subagent execution snapshots](./trellis-subagent-records.md) | Single owner for exact tool/kind gate, bounded branch API projection, evidence/watermarks, scoped hook ownership and read-only UI | Written |
 | [ask_user 提问协议](./ask-user-protocol.md) | ask_user 工具契约、状态机、事件/命令协议 | Written |
