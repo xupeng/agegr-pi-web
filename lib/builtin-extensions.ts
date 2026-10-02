@@ -89,11 +89,15 @@ export async function runCodemodeSelfTest(options: CodemodeSelfTestOptions = {})
   const controller = new AbortController();
   let timer: NodeJS.Timeout | undefined;
   const timedOut = new Promise<never>((_, reject) => {
+    // Kept ref'd on purpose: the caller awaits this race, so the process must
+    // not exit with the promise still pending. `node --test` does exactly that
+    // on Node 22 once only unref'd timers remain, which cancelled the whole
+    // file. Every path clears the timer, so it never holds a shutdown open
+    // for longer than the sandbox it is waiting for.
     timer = setTimeout(() => {
       controller.abort();
       reject(new Error(`the sandbox did not answer within ${timeoutMs} ms`));
     }, timeoutMs);
-    timer.unref?.();
   });
   try {
     const run = (async () => {
