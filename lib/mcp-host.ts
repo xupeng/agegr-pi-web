@@ -217,8 +217,11 @@ class ConnectAttempt {
 function delay(ms: number): { promise: Promise<void>; cancel: () => void } {
   let timer: NodeJS.Timeout | undefined;
   const promise = new Promise<void>((resolve) => {
+    // Ref'd on purpose: both callers await this deadline and cancel it when the
+    // wait settles or is aborted, so the timer must be able to fire. An unref'd
+    // timer never fires when nothing else is pending — Node 22's `node --test`
+    // then exits the file with the promise pending and cancels its tests.
     timer = setTimeout(resolve, ms);
-    timer.unref?.();
   });
   return { promise, cancel: () => clearTimeout(timer) };
 }
