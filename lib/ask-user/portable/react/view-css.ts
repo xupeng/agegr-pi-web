@@ -204,7 +204,16 @@ export const ASK_USER_VIEW_CSS = `
   line-height: 1.45;
   min-width: 0;
 }
-.pi-ask-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.pi-ask-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+  /* A narrow host wraps the hint onto its own line and drops the two buttons
+     onto the next one; \`space-between\` pads only a line holding more than one
+     item, so without this the wrapped actions sat at the bottom-LEFT (a phone,
+     or a ~520px column). The auto margin right-aligns them in both layouts. */
+  margin-left: auto;
+}
 .pi-ask-cancel {
   padding: 7px 14px;
   border-radius: 7px;
