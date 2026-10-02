@@ -1547,3 +1547,43 @@ Merged three upstream commits through 433d09e in an isolated worktree, upgraded 
 ### Next Steps
 
 - Local branch only, ready for later review/PR to personal; no push, PR, publish or personal integration performed. Isolated offline preview at http://127.0.0.1:30142/.
+
+
+## Session 35: Merge upstream MCP and Code mode updates
+
+**Date**: 2026-10-02
+**Task**: Merge upstream MCP and Code mode updates
+**Branch**: `merge/upstream-mcp-codemode-20261002`
+
+### Summary
+
+Integrated fixed upstream d733d43 with a real two-parent merge; preserved personal fork behavior and adopted security/runtime fixes. Full isolated static and unfiltered Chromium browser gates passed. Local branch only; no push, PR, publish, or personal advance.
+
+### Main Changes
+
+- Resolved all 27 conflicts semantically; retained MCP/Code mode runtime, fork ask/exact prompt/watchdog/Trellis/files/cache/restore/minimap/tail contracts.
+- Fixed snapshot source laundering and ask navigation carry; stabilized Markdown renderer identity and evidence-based browser fixture preconditions without weakening assertions.
+- Updated seven specs and committed planning/acceptance evidence; archived task on the feature branch.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `56a45e4` | (see git log) |
+| `73f38df` | (see git log) |
+| `459bdc3` | (see git log) |
+| `ecf95e3` | (see git log) |
+
+### Testing
+
+- [OK] TypeScript exit 0; full isolated unit 2123/2123 versus L 1755/1755; committed-source lint 629 targets with 0 errors/warnings.
+- [OK] Unfiltered npm run test:e2e exit 0: 1280/390 core and new interactions, 390/744 coarse touch, complete 1280/744/390 Trellis; source checksums unchanged.
+- [OK] Default lint exits 0; only one unused-var warning in an uncommitted diagnostic observer. No ESLint rule/config weakening.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- No remote action. Review the local branch separately; keep historical polluted Agent snapshot, real Safari/Windows/MCP/provider and running thinking/fork coverage limitations explicit.
