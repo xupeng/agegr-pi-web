@@ -1,0 +1,4 @@
+# Local raw logs, diffs and environment evidence are retained for diagnosis,
+# but only reviewed reports/summaries belong to the task's commit batch.
+research/logs/
+research/*.log

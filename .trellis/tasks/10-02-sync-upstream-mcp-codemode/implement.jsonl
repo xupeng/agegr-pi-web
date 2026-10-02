@@ -1,0 +1,17 @@
+{"file":".trellis/spec/guides/upstream-sync.md","reason":"真实 merge、逐 hunk 并集和 fork 契约保护"}
+{"file":".trellis/spec/frontend/mcp-codemode.md","reason":"本次接入的 MCP/Code mode 跨层运行时和 fork 兼容契约"}
+{"file":".trellis/spec/frontend/index.md","reason":"受影响前端与跨层规范入口"}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"锁文件一致基线、类型/lint/unit/browser 门禁"}
+{"file":".trellis/spec/frontend/pi-sdk-admission.md","reason":"0.99.1 disposition、接收和完成不能混淆"}
+{"file":".trellis/spec/frontend/ask-user-protocol.md","reason":"持久 ask、共享 React、重水合与 follow-up 交付"}
+{"file":".trellis/spec/frontend/stall-watchdog.md","reason":"inner event 观察、settled 和工具宽限不能被 SSE 优化破坏"}
+{"file":".trellis/spec/frontend/session-list-refresh.md","reason":"按需项目与单行刷新、增量缓存和竞态门禁"}
+{"file":".trellis/spec/frontend/session-restore.md","reason":"URL/tab/workspace 恢复顺序"}
+{"file":".trellis/spec/frontend/clickable-file-paths.md","reason":"成功写入证据、sourceSessionId 和共享打开 options"}
+{"file":".trellis/spec/frontend/trellis-subagent-records.md","reason":"历史/live 快照证据和单 owner"}
+{"file":".trellis/spec/frontend/append-system-prompt.md","reason":"追加系统指令和授权边界"}
+{"file":".trellis/spec/frontend/model-default-settings.md","reason":"显式默认保存和会话级选择边界"}
+{"file":".trellis/spec/frontend/chat-tail-follow.md","reason":"tail attached/detached 和临时内容布局"}
+{"file":".trellis/spec/frontend/mobile-keyboard-viewport.md","reason":"移动视口和输入兼容"}
+{"file":".trellis/spec/frontend/settings-dialog-mobile.md","reason":"对话字号 offset、移动布局和字体"}
+{"file":".trellis/tasks/10-02-sync-upstream-mcp-codemode/research/merge-analysis.md","reason":"冻结目标、冲突清单和语义风险，未验证项不可当通过"}
