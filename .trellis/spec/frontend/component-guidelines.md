@@ -177,8 +177,14 @@ MessageView (:302, memo)          按 message.role 分派
 ### 消息列与输入框的横向对齐
 
 - `components/ChatWindow.tsx:1039-1050` 的滚动列预留 `scrollbar-gutter: stable`，并与
-  `components/ChatMinimap.tsx` 的 24px 刻度轨道并排（两侧常量必须同步：`MINIMAP_WIDTH` /
-  `CHAT_MINIMAP_WIDTH`）。轨道即使暂不可见也保留宽度，否则短对话切换到可滚动时消息列会横向移动。
+  `components/ChatMinimap.tsx` 的刻度轨道并排。轨道即使暂不可见也保留宽度，否则短对话切换到
+  可滚动时消息列会横向移动。
+- 轨道宽度与列内边距**只有一处定义**：`lib/chat-layout.ts`（`CHAT_MINIMAP_WIDTH` /
+  `CHAT_COLUMN_PADDING` / `chatColumnRightInset()`），`ChatWindow.tsx`、`ChatInput.tsx`、
+  `ChatMinimap.tsx` 全部从这里取。消息列在轨道旁边滚动，而 composer 与空会话页那些整宽 wrapper
+  跨满整个对话区、把轨道算作右内边距，两边必须由同一个值推导；轨道从 36px 收到 24px 时，
+  `ChatInput.tsx` 里一份写死的 `52px`（= 36 + 16）没跟着改，composer 整体左移 12px、与消息列
+  错开 6px，只有 e2e 的 `checkChatColumnAlignment()` 抓到了——改轨道宽度必须同时检查这里。
 - `components/ChatWindow.tsx` 在布局阶段测量 `scroll.offsetWidth - scroll.clientWidth`，
   将实际槽位宽度设为根节点的 `--chat-scrollbar-gutter`；`components/ChatInput.tsx` 的右
   padding 在小地图预留宽度之外加上此变量。不要写死 10px：`app/globals.css:518-522`

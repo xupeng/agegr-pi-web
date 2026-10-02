@@ -18,6 +18,7 @@ import { ChatMinimap, useMessageRefs } from "./ChatMinimap";
 import { ExtensionStatusBar } from "./ExtensionStatusBar";
 import { AnsiText } from "./AnsiText";
 import { useI18n } from "@/hooks/useI18n";
+import { CHAT_COLUMN_PADDING, CHAT_MINIMAP_WIDTH, chatColumnRightInset } from "@/lib/chat-layout";
 import { phaseLabel } from "@/lib/chat-phase-label";
 import { useAgentSession, type NoticeItem } from "@/hooks/useAgentSession";
 import { useDragDrop } from "@/hooks/useDragDrop";
@@ -75,11 +76,6 @@ interface Props {
   playDoneSound?: () => void;
   unlockAudio?: () => void;
 }
-// Keep in step with `MINIMAP_WIDTH` in `components/ChatMinimap.tsx`: the rail's slot is reserved
-// even while it is hidden, so the message column does not shift when a session becomes scrollable.
-const CHAT_MINIMAP_WIDTH = 24;
-const CHAT_COLUMN_PADDING = 16;
-
 function NewSessionUpdateLink({
   label,
 }: {
@@ -958,7 +954,7 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
     <div
       style={{
         padding: "0 16px 12px",
-        paddingRight: isMobile ? 16 : 52,
+        paddingRight: chatColumnRightInset(isMobile),
       }}
     >
       {askUserCardElement}
@@ -1401,7 +1397,7 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
       )}
 
       {isEmptyNew && (
-        <div className="mb-3 w-full" style={{ paddingLeft: 16, paddingRight: isMobile ? 16 : 52 }}>
+        <div className="mb-3 w-full" style={{ paddingLeft: CHAT_COLUMN_PADDING, paddingRight: chatColumnRightInset(isMobile) }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, maxWidth: "var(--chat-content-max-width, 820px)", margin: "0 auto", fontFamily: "var(--font-mono)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 7 : 10, minWidth: 0, flex: 1, lineHeight: 1.4, overflow: "hidden" }}>
               <Image src="/icons/apple-touch-icon.png" width={32} height={32} alt="" priority style={{ flexShrink: 0 }} />

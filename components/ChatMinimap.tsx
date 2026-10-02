@@ -12,6 +12,7 @@ import { isMessageGroupAnchor, splitFinalAssistantBlocks } from "@/lib/message-d
 import type { AgentMessage, AssistantMessage, CustomMessage, TextContent, UserMessage } from "@/lib/types";
 import { useI18n } from "@/hooks/useI18n";
 import { useHoverCapable } from "@/hooks/useIsMobile";
+import { CHAT_MINIMAP_WIDTH } from "@/lib/chat-layout";
 import styles from "./ChatMinimap.module.css";
 
 interface Props {
@@ -27,7 +28,6 @@ interface Props {
  * further right per level, so a whole conversation's structure fits in a strip this narrow. The row
  * titles live in the preview panel: a hover opens it on a mouse, a tap on a touch screen.
  */
-const MINIMAP_WIDTH = 24;
 /** Tick pitch: Notion's 2px line plus a 12px gap. A longer outline compresses, never overflows. */
 const TICK_GAP_MAX = 14;
 /** Notion anchors its outline this far below the top of the view instead of centring it. */
@@ -710,7 +710,7 @@ export function ChatMinimap({
       // A tick has no room for a label, so the row under the pointer names itself.
       title={!previewOpen && nearestNode ? nearestNode.text : undefined}
       style={{
-        width: MINIMAP_WIDTH,
+        width: CHAT_MINIMAP_WIDTH,
         flexShrink: 0,
         visibility: visible ? "visible" : "hidden",
         position: "relative",
