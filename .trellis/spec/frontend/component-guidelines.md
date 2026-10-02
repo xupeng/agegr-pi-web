@@ -177,8 +177,14 @@ MessageView (:302, memo)          按 message.role 分派
 ### 消息列与输入框的横向对齐
 
 - `components/ChatWindow.tsx:1039-1050` 的滚动列预留 `scrollbar-gutter: stable`，并与
-  `components/ChatMinimap.tsx` 的 36px 轨道并排。轨道即使暂不可见也保留宽度，否则短对话
-  切换到可滚动时消息列会横向移动。
+  `components/ChatMinimap.tsx` 的刻度轨道并排。轨道即使暂不可见也保留宽度，否则短对话切换到
+  可滚动时消息列会横向移动。
+- 轨道宽度与列内边距**只有一处定义**：`lib/chat-layout.ts`（`CHAT_MINIMAP_WIDTH` /
+  `CHAT_COLUMN_PADDING` / `chatColumnRightInset()`），`ChatWindow.tsx`、`ChatInput.tsx`、
+  `ChatMinimap.tsx` 全部从这里取。消息列在轨道旁边滚动，而 composer 与空会话页那些整宽 wrapper
+  跨满整个对话区、把轨道算作右内边距，两边必须由同一个值推导；轨道从 36px 收到 24px 时，
+  `ChatInput.tsx` 里一份写死的 `52px`（= 36 + 16）没跟着改，composer 整体左移 12px、与消息列
+  错开 6px，只有 e2e 的 `checkChatColumnAlignment()` 抓到了——改轨道宽度必须同时检查这里。
 - `components/ChatWindow.tsx` 在布局阶段测量 `scroll.offsetWidth - scroll.clientWidth`，
   将实际槽位宽度设为根节点的 `--chat-scrollbar-gutter`；`components/ChatInput.tsx` 的右
   padding 在小地图预留宽度之外加上此变量。不要写死 10px：`app/globals.css:518-522`
@@ -205,12 +211,41 @@ MessageView (:302, memo)          按 message.role 分派
 虽然物理上位于 `.chat-content` 内部（`components/ChatWindow.tsx:976/1287`），继承得到
 `--chat-font-size-offset`，但它属于外壳，因此不走 offset。
 
-当前唯一实例是小地图悬停预览（`components/ChatMinimap.module.css` 的 `.preview`）：正文 12px、
-次级 11px（h2 / h3）、序号与跳转标签 10px、`.toolBadge` 10px 都是固定 `px`，不跟随
+当前唯一实例是小地图预览面板（`components/ChatMinimap.module.css` 的 `.preview`）：轮次标题 12px、
+h1 与正文 12px、h2 / h3 11px、序号与 `.toolBadge` 10px 都是固定 `px`，不跟随
 `--chat-content-font-size`。理由是预览面板镜像左侧栏会话列表（12px 标题 / 11px 元信息 / 10px
 小标签），若跟随对话区字号，同一层外壳会出现两套字号。证据见
 `.trellis/tasks/09-28-minimap-typography/research/verification.md`（字号与行高的期望值与门禁实测值，
-以及按用户决定未运行的 e2e 断言）和用户 2026-09-28 的决定。
+以及按用户决定未运行的 e2e 断言）和用户 2026-09-28 的决定。行高（h1 26 / h2 24 / h3 22 /
+轮次标题 24）由 `e2e/chat-appearance.mjs` 的 `checkMinimapTypography()` 锁住，改行高必须同步改断言。
+
+### 小地图：刻度轨道与 Notion 式大纲
+
+- 轨道（`components/ChatMinimap.tsx` 的 `MINIMAP_WIDTH`）是**刻度**而不是圆点：一个大纲行 = 一条
+  2px 圆角横线，`data-level` 决定宽度（h1/正文 16px、h2 12px、h3 8px），靠 CSS 的
+  `margin-inline-start: auto` 右对齐，因此越深的层级左边越缩进而右边缘对齐。这套尺寸与
+  2px + 12px 的固定间距来自 Notion 的文档大纲轨道（`app.notion.com` 实测：`height:2px;
+  border-radius:2px; width:16px/12px; margin-inline-start:0/4px; background: rgba(28,19,1,0.11)`，
+  当前项换成深色实色），改样式前先用 CDP 复核，别凭印象调。轨道容器本身**不画任何东西**：没有
+  背景、没有左边框，只有一列悬空刻度，用户明确否决过带背景/边线的"右边长长一条"；那 24px 仍
+  作为 flex 兄弟节点预留宽度，消息列因此不贴着窗口边缘，但视觉上不该看出有一条独立栏目。
+- 轨道行与预览行出自同一个 `NodeInfo` 列表：只要某轮次的回答有大纲行，该轮次的标题行就只出现在
+  面板里；回答完全没有大纲（纯工具调用/代码块）时，标题行本身充当一条刻度，避免轨道整段空白。
+- 大纲行与预览面板的渲染共享同一个过滤规则 `isOutlineHeading()`（`lib/markdown-outline.ts`，
+  深度 ≤3 的根级 heading，无 heading 时退回第一段）。改规则必须同时改
+  `remarkPreviewOutline()`，否则刻度会指向面板里不存在的行。
+- `tickSpacing()` 是纯函数：起点是 Notion 的**固定顶锚** `RAIL_TOP_ANCHOR = 130`（不是垂直居中，
+  用户明确要求"固定 130px 顶锚"），行数少时保持 14px 固定间距，装不下就从锚点往下压缩到刚好
+  铺满，`fillsHeight` 随之决定悬停命中半径。只有轨道本身比锚点还短时锚点才让位，绝不裁掉刻度
+  ——看不见的刻度等于点不到的标题。改布局先改它并补 `components/ChatMinimap.test.mjs`。
+- 面板的开关在鼠标与触摸上是两套：`useHoverCapable()`（`hooks/useIsMobile.ts`，`(hover: hover)`）
+  为真时鼠标**停在轨道上即展开**（`HOVER_OPEN_DELAY_MS = 120`，避免只是路过右边缘就闪出 240px
+  面板），离开即收起（面板是轨道的子节点，所以移进面板不算离开，行点击不会误关）；此时点击轨道
+  不再切换（`togglePreview` 直接返回），否则展开状态下一点就关。触摸设备保持点按切换，`mouseenter`
+  在触摸上只是点按的一部分，不能当作悬停。
+- 加载窗口从半途开始（首个条目是 assistant，提问在上方未加载）时，`measureNodes()` 会为这段
+  回答合成一个轮次（`userMessage: null`，面板标题行显示 `…`），否则长会话的窗口一旦错过提问，
+  轨道与面板都会整段空掉。
 
 ## 可访问性
 

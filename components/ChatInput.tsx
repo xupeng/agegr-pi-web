@@ -36,6 +36,7 @@ import { useIsMobile, useIsTouchDevice } from "@/hooks/useIsMobile";
 import { useEnterSendMode } from "@/hooks/useEnterSendMode";
 import { useI18n } from "@/hooks/useI18n";
 import { useChatAppearance } from "@/hooks/useChatAppearance";
+import { chatColumnRightInset } from "@/lib/chat-layout";
 import type { ToolPreset } from "@/lib/tool-presets";
 import { SelectorRow } from "./SelectorRow";
 import { ModelSelector, type ModelSelectorOption } from "./ModelSelector";
@@ -1881,7 +1882,8 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
         border: 0,
         background: "transparent",
         padding: compact ? 0 : "0 16px 8px",
-        paddingRight: compact ? 0 : `calc(${isMobile ? 16 : 52}px + var(--chat-scrollbar-gutter, 0px))`, // desktop also reserves the 36px minimap
+        // Desktop also reserves the minimap rail, which spans this whole content area.
+        paddingRight: compact ? 0 : `calc(${chatColumnRightInset(isMobile)}px + var(--chat-scrollbar-gutter, 0px))`,
         opacity: builtinCommandPending ? 0.5 : 1,
         transition: "opacity 0.15s",
       }}

@@ -28,8 +28,9 @@ export async function checkExtensionDialogs(page, artifacts, width) {
   page.on("request", onRequest);
   const start = async (mode) => {
     const preview = page.locator("[data-minimap-preview-box]");
-    // The panel is click-toggled, so moving the pointer away no longer dismisses it; close it
-    // explicitly, but only when it is open — Escape means "stop agent" globally.
+    // The panel now follows the pointer (open on hover, closed on leave), but a pointer resting on
+    // the rail keeps it open, so close it explicitly — but only when it is open, since Escape means
+    // "stop agent" globally.
     if (await preview.isVisible()) await page.keyboard.press("Escape");
     await preview.waitFor({ state: "hidden" });
     const input = page.locator("textarea").last();

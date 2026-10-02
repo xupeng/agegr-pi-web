@@ -20,7 +20,7 @@ const jiti = createJiti(import.meta.url, {
   jsx: { runtime: "automatic" },
   tsconfigPaths: true,
 });
-const { AssistantOutline, countToolCalls } = await jiti.import("./ChatMinimap.tsx");
+const { AssistantOutline, countToolCalls, tickSpacing } = await jiti.import("./ChatMinimap.tsx");
 
 test("renders math in headings without disabling heading navigation", () => {
   const html = renderToStaticMarkup(
@@ -65,4 +65,29 @@ test("counts no tool calls for non-assistant or string-content messages", () => 
   assert.equal(countToolCalls({ role: "user", content: "run the tests" }), 0);
   assert.equal(countToolCalls({ role: "assistant", content: "plain string" }), 0);
   assert.equal(countToolCalls({ role: "assistant" }), 0);
+});
+
+test("keeps the outline rail's fixed pitch below Notion's top anchor", () => {
+  // Notion's rail: 2px ticks 12px apart, the group anchored 130px down, never centred.
+  const spacing = tickSpacing(3, 600);
+  assert.equal(spacing.gap, 14);
+  assert.equal(spacing.start, 130);
+  assert.equal(spacing.fillsHeight, false);
+});
+
+test("anchors a single or empty outline at the top anchor too", () => {
+  assert.deepEqual(tickSpacing(1, 600), { gap: 14, start: 130, fillsHeight: false });
+  assert.deepEqual(tickSpacing(0, 600), { gap: 14, start: 130, fillsHeight: false });
+});
+
+test("compresses a long outline until every tick fits below the anchor", () => {
+  const spacing = tickSpacing(100, 600);
+  assert.equal(spacing.gap, (600 - 130 - 8) / 99);
+  assert.equal(spacing.start, 130);
+  assert.equal(spacing.fillsHeight, true);
+});
+
+test("lifts the anchor on a rail shorter than the anchor itself", () => {
+  assert.equal(tickSpacing(3, 100).start, 92);
+  assert.equal(tickSpacing(3, 4).start, 8);
 });

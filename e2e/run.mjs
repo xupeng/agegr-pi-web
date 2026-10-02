@@ -457,7 +457,7 @@ try {
     await page.getByText("Active branch answer", { exact: true }).waitFor();
     const shortGeometry = await checkChatColumnAlignment(page, `${viewport.width}px short conversation`);
     assert.equal(shortGeometry.scrollable, false);
-    assert.equal(shortGeometry.availableWidth - shortGeometry.scrollWidth, viewport.width > 600 ? 36 : 0,
+    assert.equal(shortGeometry.availableWidth - shortGeometry.scrollWidth, viewport.width > 600 ? 24 : 0,
       "The minimap rail must keep its layout slot even when hidden");
     // Compact mobile chrome lets this two-message fixture fit at 300px.
     // Keep the overflow/alignment assertions, using a genuinely short viewport.
@@ -511,11 +511,15 @@ try {
     const heading = page.getByRole("heading", { name: "E2E compacted heading", exact: true });
     await heading.waitFor({ state: "attached" });
     if (viewport.width > 600) {
-      const node = page.locator("[data-minimap-node-index='0']");
-      await node.waitFor();
-      const rect = await node.boundingBox();
+      // The preview opens from the rail itself, so which tick the pointer lands on does not
+      // matter: a tick only exists for an outline row, so the rail's node indices are the outline
+      // rows' indices (sparse) rather than a dense 0..n sequence.
+      const rail = page.locator(".chat-content .scrollbar-subtle + div");
+      await rail.waitFor();
+      const rect = await rail.boundingBox();
       assert.ok(rect);
-      // The preview panel opens on a rail click, not on hover.
+      // Resting the pointer on the rail opens the preview panel; the click also covers the
+      // touch-device path, where a tap is the only way in.
       await page.mouse.click(rect.x + rect.width / 2, rect.y + rect.height / 2);
       const preview = page.locator("[data-minimap-preview-box]");
       await preview.getByRole("button", { name: "E2E compaction anchor", exact: true }).waitFor();
