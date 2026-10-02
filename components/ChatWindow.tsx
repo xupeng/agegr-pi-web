@@ -75,7 +75,9 @@ interface Props {
   playDoneSound?: () => void;
   unlockAudio?: () => void;
 }
-const CHAT_MINIMAP_WIDTH = 36;
+// Keep in step with `MINIMAP_WIDTH` in `components/ChatMinimap.tsx`: the rail's slot is reserved
+// even while it is hidden, so the message column does not shift when a session becomes scrollable.
+const CHAT_MINIMAP_WIDTH = 24;
 const CHAT_COLUMN_PADDING = 16;
 
 function NewSessionUpdateLink({

@@ -30,11 +30,12 @@ export async function checkChatColumnAlignment(page, label) {
 }
 
 /**
- * AC1/AC3/AC4 for the minimap click preview: the preview panel mirrors the sidebar
- * session list (12px title / 11px meta / 10px small labels), keeps the Oxanium and
- * Cascadia families, and preserves the row geometry the panel was tuned around.
+ * AC1/AC3/AC4 for the minimap click preview: the preview panel is an outline of the
+ * conversation (12px turn title / 12px h1 and prose / 11px h2 and h3 / 10px number and
+ * tool badge), keeps the Oxanium and Cascadia families, and preserves the row geometry the
+ * indent-by-level rows were tuned around.
  *
- * Only run this on a scrollable conversation: a short session hides the 36px rail
+ * Only run this on a scrollable conversation: a short session hides the rail
  * (`visibility: hidden`), so the pointer cannot click it. `sidebarTitle` is the
  * session title whose sidebar row should be compared against the preview sizes.
  */
@@ -59,13 +60,16 @@ export async function checkMinimapTypography(page, label, sidebarTitle) {
   });
   assert.ok(rail, `${label}: minimap rail must sit beside the scroll container`);
   assert.equal(rail.visibility, "visible", `${label}: minimap rail must be visible on a scrollable session`);
-  assert.ok(rail.width >= 36, `${label}: minimap rail must keep its 36px slot`);
-  // The panel is click-toggled: hovering the rail must leave it closed.
+  assert.ok(rail.width >= 24, `${label}: minimap rail must keep its 24px tick column`);
+  // A mouse opens the panel by resting on the rail, with no click at all (`HOVER_OPEN_DELAY_MS`
+  // delays it; asserting the delay itself would race the assertion against the timer).
   await page.mouse.move(rail.x, rail.y);
-  assert.equal(await page.locator("[data-minimap-preview-box]").count(), 0,
-    `${label}: hovering the minimap rail must not open the preview`);
-  await page.mouse.click(rail.x, rail.y);
   await page.locator("[data-minimap-preview-box]").waitFor();
+  // Clicking the rail while it is open must not toggle the panel shut under the pointer.
+  await page.mouse.click(rail.x, rail.y);
+  await page.waitForTimeout(100);
+  assert.equal(await page.locator("[data-minimap-preview-box]").count(), 1,
+    `${label}: clicking the open minimap rail must keep the preview open`);
 
   // Read every target in one frame so a repaint cannot land between reads.
   const observed = await page.evaluate(() => {
@@ -85,12 +89,11 @@ export async function checkMinimapTypography(page, label, sidebarTitle) {
       bodyFont: getComputedStyle(document.body).fontFamily,
       user: read(one("[data-minimap-preview-user]")),
       // `.paragraph` is the only preview button without its own data-* hook.
-      paragraph: read(one("button:not([data-level]):not([data-minimap-preview-user]):not([data-minimap-preview-assistant])")),
+      paragraph: read(one("button:not([data-level]):not([data-minimap-preview-user])")),
       heading1: read(one('[data-level="1"]')),
       heading2: read(one('[data-level="2"]')),
       heading3: read(one('[data-level="3"]')),
-      number: read(one("[data-minimap-preview-index] > span")),
-      assistantJump: read(one("[data-minimap-preview-assistant]")),
+      number: read(one("[data-minimap-turn-number]")),
       toolBadge: read(one('[data-minimap-preview-index] [role="img"]')),
     };
   });
@@ -107,7 +110,6 @@ export async function checkMinimapTypography(page, label, sidebarTitle) {
   expectFontSize("h2 preview", observed.heading2, 11);
   expectFontSize("h3 preview", observed.heading3, 11);
   expectFontSize("turn number", observed.number, 10);
-  expectFontSize("assistant jump", observed.assistantJump, 10);
   if (observed.toolBadge) {
     expectFontSize("tool badge", observed.toolBadge, 10);
   } else {
@@ -125,22 +127,22 @@ export async function checkMinimapTypography(page, label, sidebarTitle) {
   assert.equal(observed.user.fontFamily, observed.bodyFont, `${label}: preview body font must stay the document root font`);
   for (const [name, entry] of [
     ["turn number", observed.number],
-    ["assistant jump", observed.assistantJump],
     ["tool badge", observed.toolBadge],
   ]) {
     if (!entry) continue;
     assert.ok(entry.fontFamily.includes("Cascadia"), `${label}: ${name} must keep the mono stack (${entry.fontFamily})`);
   }
 
-  // AC4: the min-height/line-height balance the 36px rail depends on is intact.
+  // AC4: every outline row keeps the fixed shell height it was tuned to, so the rail's tick
+  // spacing and the panel's scroll position stay stable.
   const expectHeight = (name, entry, px) => {
     assert.ok(entry, `${label}: minimap preview must render ${name}`);
     assert.ok(Math.abs(entry.height - px) < 0.5, `${label}: ${name} must stay ${px}px tall (measured ${entry.height})`);
   };
-  expectHeight("h1 preview", observed.heading1, 32);
-  expectHeight("h2 preview", observed.heading2, 28);
-  expectHeight("h3 preview", observed.heading3, 26);
-  expectHeight("user preview", observed.user, 32);
+  expectHeight("h1 preview", observed.heading1, 26);
+  expectHeight("h2 preview", observed.heading2, 24);
+  expectHeight("h3 preview", observed.heading3, 22);
+  expectHeight("user preview", observed.user, 24);
 
   if (sidebarTitle) {
     await page.locator(`[title="${sidebarTitle}"]`).first().waitFor({ state: "attached" });

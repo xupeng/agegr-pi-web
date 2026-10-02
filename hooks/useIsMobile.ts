@@ -11,6 +11,10 @@ const NARROW_MOBILE_QUERY = "(max-width: 480px)";
 // device regardless of viewport width, so keyboard Enter must not be treated
 // as a desktop send shortcut on these devices.
 const TOUCH_QUERY = "(pointer: coarse)";
+// A pointer that can rest on a target without clicking it. Hover-revealed UI
+// must stay click-reachable on a touch screen, where `mouseenter` fires only
+// as part of a tap.
+const HOVER_QUERY = "(hover: hover)";
 
 function subscribeToQuery(query: string, cb: () => void): () => void {
   if (typeof window === "undefined" || !window.matchMedia) return () => {};
@@ -30,6 +34,8 @@ const subscribeNarrowMobile = (cb: () => void) => subscribeToQuery(NARROW_MOBILE
 const getNarrowMobileSnapshot = () => queryMatches(NARROW_MOBILE_QUERY);
 const subscribeTouch = (cb: () => void) => subscribeToQuery(TOUCH_QUERY, cb);
 const getTouchSnapshot = () => queryMatches(TOUCH_QUERY);
+const subscribeHover = (cb: () => void) => subscribeToQuery(HOVER_QUERY, cb);
+const getHoverSnapshot = () => queryMatches(HOVER_QUERY);
 
 function getServerSnapshot(): boolean {
   return false;
@@ -57,4 +63,13 @@ export function useIsNarrowMobile(): boolean {
  */
 export function useIsTouchDevice(): boolean {
   return useSyncExternalStore(subscribeTouch, getTouchSnapshot, getServerSnapshot);
+}
+
+/**
+ * Returns true when the primary input device hovers (mouse, trackpad, stylus
+ * that reports hover). Hover-to-reveal affordances gate on this so a touch
+ * screen keeps its click/tap path.
+ */
+export function useHoverCapable(): boolean {
+  return useSyncExternalStore(subscribeHover, getHoverSnapshot, getServerSnapshot);
 }

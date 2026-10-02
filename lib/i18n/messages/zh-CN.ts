@@ -597,7 +597,6 @@ export const zhCNLocale: LocalePlugin = {
     "chat.imageNotSupportedTitle": "图片可能无法发送",
     "chat.imageNotSupportedBody": "当前选择的模型（{model}）不支持图片输入，附加的图片可能会被忽略。",
     "chat.tokensSaved": "节省 {saved}",
-    "chatMinimap.locateAssistant": "定位助手消息",
     "chatMinimap.toolCalls": "本轮 {count} 次工具调用",
     "i18n.close": "关闭",
     "i18n.copy": "复制",

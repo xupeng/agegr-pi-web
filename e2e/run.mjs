@@ -457,7 +457,7 @@ try {
     await page.getByText("Active branch answer", { exact: true }).waitFor();
     const shortGeometry = await checkChatColumnAlignment(page, `${viewport.width}px short conversation`);
     assert.equal(shortGeometry.scrollable, false);
-    assert.equal(shortGeometry.availableWidth - shortGeometry.scrollWidth, viewport.width > 600 ? 36 : 0,
+    assert.equal(shortGeometry.availableWidth - shortGeometry.scrollWidth, viewport.width > 600 ? 24 : 0,
       "The minimap rail must keep its layout slot even when hidden");
     // Compact mobile chrome lets this two-message fixture fit at 300px.
     // Keep the overflow/alignment assertions, using a genuinely short viewport.
@@ -515,7 +515,8 @@ try {
       await node.waitFor();
       const rect = await node.boundingBox();
       assert.ok(rect);
-      // The preview panel opens on a rail click, not on hover.
+      // Resting the pointer on the rail opens the preview panel; the click also covers the
+      // touch-device path, where a tap is the only way in.
       await page.mouse.click(rect.x + rect.width / 2, rect.y + rect.height / 2);
       const preview = page.locator("[data-minimap-preview-box]");
       await preview.getByRole("button", { name: "E2E compaction anchor", exact: true }).waitFor();
