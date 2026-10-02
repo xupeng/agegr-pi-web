@@ -3,7 +3,6 @@
 import {
   Children,
   createContext,
-  useCallback,
   useContext,
   useMemo,
   type ComponentProps,
@@ -14,7 +13,7 @@ import ReactMarkdown, { type Components, type ExtraProps } from "react-markdown"
 import { parsePdfPageFragment, resolveLocalFileHref, shouldOpenLocalFileInApp } from "@/lib/file-links";
 import { encodeFilePathForApi } from "@/lib/file-paths";
 import { linkifyPlainText, linkifyToken, type FileIndexLookup } from "@/lib/path-linkify";
-import { markdownRehypePlugins, markdownRemarkPlugins, markdownUrlTransform, normalizeDisplayMath } from "@/lib/markdown";
+import { markdownRehypePlugins, markdownRemarkPlugins, markdownUrlTransform, markdownUserRemarkPlugins, normalizeDisplayMath } from "@/lib/markdown";
 import { FileIndexProvider, useFileIndexContext } from "./FileIndexContext";
 import { PathText } from "./PathText";
 import { ImagePreview } from "./ImagePreview";
@@ -29,6 +28,8 @@ interface MarkdownBodyProps {
   isStreaming?: boolean;
   cwd?: string;
   onOpenFile?: OpenWrittenFileHandler;
+  /** Preserve user-typed line breaks. */
+  keepLineBreaks?: boolean;
 }
 
 function MarkdownImage({
@@ -76,14 +77,16 @@ function linkifyChildren(
   return changed ? mapped : children;
 }
 
-export function MarkdownBody({ children, className, isStreaming, cwd, onOpenFile }: MarkdownBodyProps) {
-  const normalizedMarkdown = useMemo(() => normalizeDisplayMath(children), [children]);
+function useLinkifiedChildren(children: ReactNode, onOpenFile?: OpenWrittenFileHandler): ReactNode {
   const lookup = useFileIndexContext();
-  const linkifyBlockChildren = useCallback(
-    (node: ReactNode) => (lookup && onOpenFile ? linkifyChildren(node, lookup, onOpenFile) : node),
-    [lookup, onOpenFile],
-  );
-  // Stable renderer identities keep stateful blocks mounted across message hover updates.
+  return lookup && onOpenFile ? linkifyChildren(children, lookup, onOpenFile) : children;
+}
+
+export function MarkdownBody({ children, className, isStreaming, cwd, onOpenFile, keepLineBreaks }: MarkdownBodyProps) {
+  const normalizedMarkdown = useMemo(() => normalizeDisplayMath(children), [children]);
+  // Read the changing index inside each renderer, not in the memo's closure.
+  // TTL refreshes must update links without changing React element types and
+  // remounting paragraphs/code blocks underneath stable message entry keys.
   const components = useMemo<Components>(() => ({
     code: function CodeRenderer({ className, children, ...props }) {
       // An existing anchor disables automatic links for all its descendants.
@@ -135,21 +138,21 @@ export function MarkdownBody({ children, className, isStreaming, cwd, onOpenFile
     pre({ children }) {
       return <>{children}</>;
     },
-    p({ children, ...props }) {
+    p: function ParagraphRenderer({ children, ...props }) {
       delete props.node;
-      return <p {...props}>{linkifyBlockChildren(children)}</p>;
+      return <p {...props}>{useLinkifiedChildren(children, onOpenFile)}</p>;
     },
-    li({ children, ...props }) {
+    li: function ListItemRenderer({ children, ...props }) {
       delete props.node;
-      return <li {...props}>{linkifyBlockChildren(children)}</li>;
+      return <li {...props}>{useLinkifiedChildren(children, onOpenFile)}</li>;
     },
-    td({ children, ...props }) {
+    td: function TableCellRenderer({ children, ...props }) {
       delete props.node;
-      return <td {...props}>{linkifyBlockChildren(children)}</td>;
+      return <td {...props}>{useLinkifiedChildren(children, onOpenFile)}</td>;
     },
-    th({ children, ...props }) {
+    th: function TableHeaderRenderer({ children, ...props }) {
       delete props.node;
-      return <th {...props}>{linkifyBlockChildren(children)}</th>;
+      return <th {...props}>{useLinkifiedChildren(children, onOpenFile)}</th>;
     },
     a({ href, children, ...props }) {
       // `node` is react-markdown metadata, not a DOM attribute.
@@ -192,12 +195,12 @@ export function MarkdownBody({ children, className, isStreaming, cwd, onOpenFile
         </div>
       );
     },
-  }), [cwd, isStreaming, onOpenFile, linkifyBlockChildren]);
+  }), [cwd, isStreaming, onOpenFile]);
 
   return (
     <div className={["markdown-body", className].filter(Boolean).join(" ")}>
       <ReactMarkdown
-        remarkPlugins={markdownRemarkPlugins}
+        remarkPlugins={keepLineBreaks ? markdownUserRemarkPlugins : markdownRemarkPlugins}
         rehypePlugins={markdownRehypePlugins}
         urlTransform={onOpenFile ? markdownUrlTransform : undefined}
         components={components}

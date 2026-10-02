@@ -6,7 +6,7 @@ export const extensionSource = `export default function (pi) {
     handler: async (mode, ctx) => {
       let result;
       if (mode === "timeout") {
-        await ctx.ui.select("E2E timeout", ["Wait"], { timeout: 4000 });
+        await ctx.ui.select("E2E timeout", ["Wait"], { timeout: 8000 });
         result = await ctx.ui.input("E2E after timeout");
       } else if (mode === "select") {
         result = await ctx.ui.select("E2E select", Array.from({ length: 30 }, (_, i) => "Option " + (i + 1)));
@@ -83,6 +83,7 @@ export async function checkExtensionDialogs(page, artifacts, width) {
     const countdown = timed.getByText(/expires in \ds/);
     await countdown.waitFor();
     const initialCountdown = await countdown.innerText();
+    console.log(`COUNTDOWN ${width}px: ${initialCountdown}`);
     await page.waitForFunction(initial => {
       const text = document.querySelector('[role="dialog"]')?.textContent;
       return text?.includes("expires in") && !text.includes(initial);

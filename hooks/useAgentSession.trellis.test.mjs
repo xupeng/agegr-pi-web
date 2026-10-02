@@ -48,7 +48,7 @@ test("live tool events feed the shared decoder and are gated by branch ownership
   assert.match(eventsSource, /case "tool_execution_end"[\s\S]*?ingestTrellisToolDetails\(id, name, result\?\.details, "tool-end"\)/);
   assert.match(eventsSource, /completed\.role === "toolResult"[\s\S]*?ingestTrellisToolDetails\([\s\S]*?"message"/);
   // Generic one-line progress and completed tool-result chat messages remain.
-  assert.match(eventsSource, /const progress = getToolExecutionProgress\(event\.partialResult\)/);
+  assert.match(eventsSource, /const progress = name === CODEMODE_TOOL_NAME[\s\S]*?: getToolExecutionProgress\(event\.partialResult\)/);
   assert.match(eventsSource, /including generic and Trellis tool results[\s\S]*?setMessages/);
 });
 

@@ -12,7 +12,7 @@ test("touch devices keep keyboard Enter as newline regardless of viewport width"
   assert.match(chatInputSource, /const isMobileOrTouch = isMobile \|\| isTouchDevice;/);
   assert.match(
     chatInputSource,
-    /const sendShortcut = e\.key === "Enter" && !e\.shiftKey && \(!isMobileOrTouch \|\| e\.ctrlKey \|\| e\.metaKey\);/,
+    /const sendShortcut = isMobileOrTouch \|\| enterSendMode === "ctrlEnter"\s*\? enterKey && \(e\.ctrlKey \|\| e\.metaKey\)\s*: enterKey;/,
   );
 });
 

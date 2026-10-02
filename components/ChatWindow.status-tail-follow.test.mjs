@@ -38,7 +38,7 @@ test("follows streaming content through that primitive", () => {
 test("keys the status line on its rendered text, not on the phase object", () => {
   assert.match(
     source,
-    /const statusText = agentRunning && !hasStreamingContent && agentPhase\s*\n\s*\? phaseLabel\(agentPhase, t\)\s*\n\s*: null;/,
+    /const statusText = agentRunning && !hasStreamingContent && \(agentPhase \|\| isCompacting\)\s*\n\s*\? phaseLabel\(agentPhase, t, isCompacting\)\s*\n\s*: null;/,
     "the run status must be one value shared by the render and the follow",
   );
   assert.match(
