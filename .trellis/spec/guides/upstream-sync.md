@@ -13,13 +13,19 @@
 ## 2. 前置事实收集（先做，别直接 merge）
 
 ```bash
-git fetch upstream main                       # 注意：这会推进 refs/remotes/upstream/main
+git remote -v
+git config --get-all remote.for-sync.fetch   # remote 名不等于写入的 tracking namespace
+git ls-remote for-sync refs/heads/main       # 核实服务端 TARGET
+git fetch for-sync main                     # 本机 refspec 写 refs/remotes/upstream/*
+git rev-parse FETCH_HEAD refs/remotes/upstream/main
 git rev-parse HEAD upstream/main              # 记录 BASE / TARGET
 git merge-base HEAD upstream/main             # 上次同步点
 git rev-list --count HEAD..upstream/main      # 落后提交数
 git diff --shortstat "$(git merge-base HEAD upstream/main)"..upstream/main
 git diff --name-status "$(git merge-base HEAD upstream/main)"..upstream/main --diff-filter=D
 ```
+
+先核对 fetch refspec：本机 `for-sync` 实际配置为 `+refs/heads/*:refs/remotes/upstream/*`，所以抓取它会更新 `upstream/main`，不是 `for-sync/main`。其它 checkout 不得照搬 remote 名；若 refspec 不确定，用显式 `git fetch <remote> refs/heads/main:refs/remotes/upstream/main`（非快进先检查，不盲加 `+`），并对比 `ls-remote`、`FETCH_HEAD` 与 tracking ref。只看 fetch 成功或旧 `upstream/main` 不足以冻结目标。
 
 必查三项：
 
@@ -50,9 +56,10 @@ git merge --no-ff upstream/main
 每个冲突文件的处理流程：
 
 ```bash
-git show :1:<file> > /tmp/base.txt     # 共同祖先
-git show :2:<file> > /tmp/ours.txt     # 本 fork
-git show :3:<file> > /tmp/theirs.txt   # 上游
+SCRATCH=$(mktemp -d /var/tmp/pi-web-sync-review.XXXXXX) # 先核实磁盘，见 §8
+git show :1:<file> > "$SCRATCH/base.txt"     # 共同祖先
+git show :2:<file> > "$SCRATCH/ours.txt"     # 本 fork
+git show :3:<file> > "$SCRATCH/theirs.txt"   # 上游
 grep -nE '^(<<<<<<<|=======|>>>>>>>)' <file>   # 解决后必须无输出
 ```
 
@@ -104,9 +111,11 @@ grep -nE '^(<<<<<<<|=======|>>>>>>>)' <file>   # 解决后必须无输出
 验证顺序（退出码即判据）：
 
 ```bash
+LOG_ROOT=$(mktemp -d /var/tmp/pi-web-sync-logs.XXXXXX) # 已核实的普通磁盘
 node_modules/.bin/tsc --noEmit ; echo "tsc=$?"
-npm run lint 2>&1 | tee /tmp/lint-after.txt ; echo "lint=${PIPESTATUS[0]}"
-npm test 2>&1 | tee /tmp/test-after.txt ; echo "test=${PIPESTATUS[0]}"
+npm run lint 2>&1 | tee "$LOG_ROOT/lint-after.txt" ; echo "lint=${PIPESTATUS[0]}"
+# npm test 须在下述独立 HOME/agent-dir/TMPDIR 环境内执行
+npm test 2>&1 | tee "$LOG_ROOT/test-after.txt" ; echo "test=${PIPESTATUS[0]}"
 ```
 
 - **lint 基线必须现场实测**，不要复用记忆里的数字（本仓库曾把「历史 14 条
@@ -155,5 +164,17 @@ MCP / Code mode 的可执行契约见 [mcp-codemode.md](../frontend/mcp-codemode
 - 上游减小 SSE 数据时，先枚举 fork 实时 consumer；Trellis tool-end 的 structured final 桥接与 inner watchdog 的进度观测不是同一层，不得因瘦身丢掉其中之一。
 - 文件授权收紧必须同时验证合法 structured 成功产物和负向 spoof/preview；不要用“保留 fork”恢复任意 result 文本授权，也不要新造另一套成功证据 parser。
 - `NODE_ENV=production` 会令裸 `npm ci` 省略 devDependencies；要复算完整门禁依赖树时使用 `npm ci --include=dev`，不能把缺 tsc/eslint 当源码错误。
-- 全套测试隔离 HOME 与 `PI_CODING_AGENT_DIR`，小 fixture 根用 `/tmp` 避免 SDK 扫入主目录祖先的 `.agents/skills`；node_modules 仍放同级磁盘 worktree。不要全局 `PI_OFFLINE=1` 绕过套件的 mocked command，避免把环境提前拒绝当实际功能回归。
+- 全套测试隔离 HOME 与 `PI_CODING_AGENT_DIR`，fixture 根避开主目录祖先的 `.agents/skills`；node_modules 仍放同级磁盘 worktree。不要全局 `PI_OFFLINE=1` 绕过套件的 mocked command，避免把环境提前拒绝当实际功能回归。
+- `/tmp` 的 EDQUOT/ENOSPC 先当环境故障：检查 `df -hT /tmp /var/tmp`、`df -i /tmp /var/tmp` 与实际小文件写入/配额，空间显示有余不代表用户配额可写。本机 `/tmp` 为 tmpfs，`/var/tmp` 已核实在普通 btrfs 磁盘；日志/fixture 可改放 `/var/tmp`，不必清空用户 temp。HOME、agent-dir 与 TMPDIR 是独立入口，改 TMPDIR 不会隔离 SDK 凭据/设置；同时 unset XDG，避免宿主 cache/config/data/runtime 路径穿透。仅清理本次创建、已核对 owner 的目录，不清用户或其他任务 temp：
+
+  ```bash
+  TEST_ROOT=$(mktemp -d /var/tmp/pi-web-sync-tests.XXXXXX)
+  mkdir -p "$TEST_ROOT/home" "$TEST_ROOT/agent" "$TEST_ROOT/tmp"
+  (unset XDG_CONFIG_HOME XDG_CACHE_HOME XDG_DATA_HOME XDG_STATE_HOME XDG_RUNTIME_DIR XDG_CONFIG_DIRS XDG_DATA_DIRS
+   export HOME="$TEST_ROOT/home" PI_CODING_AGENT_DIR="$TEST_ROOT/agent" TMPDIR="$TEST_ROOT/tmp"
+   npm test > "$TEST_ROOT/test.log" 2>&1)
+  echo "test=$?"
+  ```
+
+  固定写 `/tmp` 的测试还须单独审查，不宣称改 TMPDIR 就全部迁移；环境失败与真实断言失败分别记录，修复后重新完整复验。
 - 真浏览器使用清洁环境、独立数据和已核实的 executable；编译配置/Chromium 测试不等于真实 Safari 16.2 或 Windows 验证。

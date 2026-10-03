@@ -1,0 +1,31 @@
+{
+  "id": "sync-upstream",
+  "name": "sync-upstream",
+  "title": "同步上游更新",
+  "description": "Merge frozen upstream 6fcd7d4 into personal while preserving fork contracts and upgrading Pi to 1.0.0.",
+  "status": "completed",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P2",
+  "creator": "xupeng",
+  "assignee": "xupeng",
+  "createdAt": "2026-10-03",
+  "completedAt": "2026-10-03",
+  "branch": "merge/upstream-20261003",
+  "base_branch": "personal",
+  "worktree_path": "/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/upstream-sync-20261003",
+  "commit": "18a284d1c4481a8e79fa441f5448129ee8d6f704",
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "Task creation, final planning and five-batch local commit plan approved. All acceptance gates passed in isolated worktrees; no push, PR, personal merge or release authorized.",
+  "meta": {
+    "base": "8d376f3b1b98adf91f2ae651a7188745b1f563fd",
+    "target": "6fcd7d44981ab51a21d6cd6eb06d361d0e3d3068",
+    "spec_commit": "b9c5bcb1a5d8428428dfd29f70351d688b77a7f2",
+    "verification": "tsc=0; lint=0 (704 files, 0 errors/warnings); npm test=2757/2757; full Chromium e2e=0; settings desktop/mobile smoke=0"
+  }
+}

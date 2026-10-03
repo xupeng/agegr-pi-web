@@ -58,6 +58,12 @@ pi-web 只做「编辑全局那一个文件」的入口，不新造存储、不�
    错判 —— 服务端会拒，前端却以为可以保存。
 7. **派生提示失败不得升级为整体失败**：项目级探测抛错时 `projectOverride` 退化为 `null`，
    不能把一次成功的保存变成 500（同 `quality-guidelines.md` 的「派生指标算不出来 ≠ 整个响应失败」）。
+8. **已挂载页面的信任提示随项目状态刷新，但不覆盖草稿**：`SettingsPanel.tsx` 将
+   `trust={projectTrust}` 传入 AppendSystem；`AppendSystemConfig.tsx` 的 effect 依赖
+   `[cwd, projectTrustReloadKey(trust)]`。同 cwd 已成功加载后，只替换 `projectOverride`，
+   不改全局 `state.content` 或独立 `draft`。首次加载/切 cwd 仍初始化编辑器；cleanup 同时
+   abort 请求并标记取消，即使 fetch 忽略 abort，旧 trust/cwd/卸载响应也不能提交到当前页面。
+   不要按 trust key remount 或直接复用会 `setDraft` 的完整加载来刷新派生提示。
 
 ## 生效范围（用户可见文案是硬要求）
 
@@ -86,6 +92,8 @@ ask_user 开关同一路径），不引入自动重启。
 - 单测：`lib/append-system.test.mjs`（含用 pi 自己的 `DefaultResourceLoader` 断言
   「写进去的就是 pi 加载的追加提示」与「项目级覆盖而非叠加」两态）、
   `app/api/append-system/route.test.mjs`（403/415/400 与允许表闸门）、
-  `components/AppendSystemConfig.test.mjs`（R3 三条范围文案与 R4 两态、字节口径、路径来源）。
+  `components/AppendSystemConfig.test.mjs`（R3 三条范围文案与 R4 两态、字节口径、路径来源；
+  实际 effect 的 trust false→true、草稿/基线保留、初始化、迟到/失败响应），
+  `components/SettingsPanel.test.mjs`（信任 prop 必须传入且不得 remount）。
 - 浏览器：见任务 `09-19-append-system-editor` 的 `research/browser-verification.md`。
 - i18n：新增文案三语齐全，`lib/i18n/registry.test.mjs` 强制 key 与占位符一致。

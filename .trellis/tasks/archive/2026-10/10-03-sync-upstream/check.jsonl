@@ -1,0 +1,6 @@
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"锁文件一致的基线、退出码、真实浏览器证据"}
+{"file":".trellis/spec/guides/upstream-sync.md","reason":"双侧语义复核与无删除/祖先关系门禁"}
+{"file":".trellis/spec/frontend/mcp-codemode.md","reason":"新增MCP能力不得删fork runtime契约"}
+{"file":".trellis/spec/frontend/clickable-file-paths.md","reason":"成功产物精确来源与授权"}
+{"file":".trellis/spec/frontend/append-system-prompt.md","reason":"信任刷新不得丢未保存草稿"}
+{"file":".trellis/tasks/archive/2026-10/10-03-sync-upstream/research/planning.md","reason":"目标SHA和兼容性范围"}
