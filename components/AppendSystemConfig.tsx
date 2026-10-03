@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import { sendAgentCommand } from "@/lib/agent-client";
-import type { AppendSystemPromptResponse } from "@/lib/api-types";
+import type { AppendSystemPromptResponse, ProjectTrustStatus } from "@/lib/api-types";
+import { projectTrustReloadKey } from "./settings-ui-helpers";
 import {
   ConfigButton,
   ConfigDetail,
@@ -19,6 +20,7 @@ import {
 
 interface Props {
   cwd?: string | null;
+  trust?: ProjectTrustStatus | null;
   sessionId?: string | null;
   onClose: () => void;
   onSessionReloaded?: () => void;
@@ -32,6 +34,7 @@ function appendSystemUrl(cwd: string | null): string {
 
 export function AppendSystemConfig({
   cwd = null,
+  trust = null,
   sessionId = null,
   onClose,
   onSessionReloaded,
@@ -46,26 +49,44 @@ export function AppendSystemConfig({
   const [reloading, setReloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(appendSystemUrl(cwd), { cache: "no-store" });
-      const data = await response.json() as AppendSystemPromptResponse & { error?: string };
-      if (!response.ok || data.error) throw new Error(data.error ?? `HTTP ${response.status}`);
-      setState(data);
-      setDraft(data.content);
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
-    } finally {
-      setLoading(false);
-    }
-  }, [cwd]);
+  const loadedCwdRef = useRef<string | null | undefined>(undefined);
+  const trustReloadKey = projectTrustReloadKey(trust);
 
   useEffect(() => {
+    const controller = new AbortController();
+    let cancelled = false;
+    // Visited panes stay mounted. A trust change refreshes only the read-only
+    // override hint, never the global baseline or an unsaved editor draft.
+    const refreshOnly = loadedCwdRef.current === cwd;
+    if (!refreshOnly) {
+      setLoading(true);
+      setError(null);
+    }
+    const load = async () => {
+      try {
+        const response = await fetch(appendSystemUrl(cwd), { cache: "no-store", signal: controller.signal });
+        const data = await response.json() as AppendSystemPromptResponse & { error?: string };
+        if (!response.ok || data.error) throw new Error(data.error ?? `HTTP ${response.status}`);
+        if (cancelled) return;
+        if (refreshOnly) {
+          setState((current) => current ? { ...current, projectOverride: data.projectOverride } : current);
+        } else {
+          setState(data);
+          setDraft(data.content);
+          loadedCwdRef.current = cwd;
+        }
+      } catch (cause) {
+        if (!cancelled) setError(cause instanceof Error ? cause.message : String(cause));
+      } finally {
+        if (!cancelled && !refreshOnly) setLoading(false);
+      }
+    };
     void load();
-  }, [load]);
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [cwd, trustReloadKey]);
 
   useEffect(() => {
     if (!savedOk) return;

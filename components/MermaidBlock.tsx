@@ -316,6 +316,9 @@ export const CodeBlock = memo(function CodeBlock({ code, lang, headerAction, isS
             padding: "11px 13px",
             fontSize: "calc(12.5px + var(--chat-font-size-offset, 0px))",
             lineHeight: 1.62,
+            // The light `vs` theme puts its own 1px #ddd border on <pre>; the
+            // block's wrapper already draws the frame.
+            border: "none",
             borderRadius: 0,
             // 主题里 vs 用 backgroundColor、vscDarkPlus 用 background，
             // customStyle 必须与当前主题同一种写法，否则简写/非简写并存

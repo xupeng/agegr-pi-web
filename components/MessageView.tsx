@@ -27,7 +27,7 @@ import { extractSubagentSnapshotWrittenFiles, resolveAndMergeWrittenFiles } from
 import { skillExpansionToCommand } from "@/lib/slash-display";
 import type { SubagentToolDetails } from "@/lib/subagent-extension";
 import { CODEMODE_TOOL_NAME, codemodeCalls, codemodeScript, codemodeScriptPreview, stripCodemodeHeader } from "@/lib/codemode-view";
-import { CodemodeCallList, CodemodeScript } from "./CodemodeToolView";
+import { CodemodeCallList } from "./CodemodeToolView";
 import { mcpToolLabel, prettyMcpResultText } from "@/lib/mcp-tool-display";
 import type {
   AgentMessage,
@@ -1159,7 +1159,7 @@ function isSubagentToolDetails(value: unknown): value is SubagentToolDetails {
   return details.kind === "pi-web-subagent" && typeof details.sessionId === "string";
 }
 
-function ToolCallBlock({ block, result, duration, onOpenFile, onOpenSession }: { block: ToolCallContent; result?: ToolResultMessage; duration?: number; onOpenFile?: (filePath: string) => void; onOpenSession?: (sessionId: string) => void }) {
+function ToolCallBlock({ block, result, duration, onOpenFile, onOpenSession }: { block: ToolCallContent; result?: ToolResultMessage; duration?: number; onOpenFile?: OpenWrittenFileHandler; onOpenSession?: (sessionId: string) => void }) {
   const { t } = useI18n();
   const [expanded, setExpanded] = useState(() => isToolCallExpanded(block.toolCallId));
   const toggleExpanded = () => {
@@ -1268,14 +1268,8 @@ function ToolCallBlock({ block, result, duration, onOpenFile, onOpenSession }: {
         )}
       </div>
 
-      {/* ── Expanded: codemode script and the calls it made ── */}
-      {expanded && codemode && <CodemodeScript code={codemode.code} isError={isError} />}
-      {expanded && codemode && (
-        <CodemodeCallList calls={codemode.calls} omitted={codemode.omitted} isError={isError} />
-      )}
-
-      {/* ── Expanded: input args (only when no richer view exists) ── */}
-      {expanded && !codemode && (isStreamingInput || !isEditTool) && !patchFiles && (
+      {/* ── Expanded: input args (only when no richer view exists); a codemode script in place of its JSON ── */}
+      {expanded && (isStreamingInput || !isEditTool) && !patchFiles && (
         <pre
           style={{
             margin: 0,
@@ -1290,8 +1284,13 @@ function ToolCallBlock({ block, result, duration, onOpenFile, onOpenSession }: {
             wordBreak: "break-all",
           }}
         >
-          <PathText text={inputStr} onOpenFile={onOpenFile} />
+          {codemode ? codemode.code.replace(/\r/g, "").trimEnd() : <PathText text={inputStr} onOpenFile={onOpenFile} />}
         </pre>
+      )}
+
+      {/* ── Expanded: the calls a codemode script made ── */}
+      {expanded && codemode && (
+        <CodemodeCallList calls={codemode.calls} omitted={codemode.omitted} isError={isError} />
       )}
 
       {/* ── Result images — always visible, independent of the collapsed details ── */}

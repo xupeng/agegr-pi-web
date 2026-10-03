@@ -49,14 +49,9 @@ export async function checkMcpCodemode(page, { base, artifacts, width }) {
   const code = page.getByRole("button", { name: /codemode.*const found/ });
   await code.click();
   const codeCard = code.locator("../..");
-  assert.equal(await codeCard.locator(".tool-codemode-script .markdown-code-lang").innerText(), "javascript");
-  const renderedScript = await codeCard.locator(".tool-codemode-script pre").evaluate(pre => {
-    // SyntaxHighlighter includes visible line-number chrome in innerText.
-    // Remove only that chrome from a detached clone; compare every script byte.
-    const clone = pre.cloneNode(true);
-    clone.querySelectorAll(".linenumber").forEach(number => number.remove());
-    return clone.textContent;
-  });
+  // Upstream now renders the script in the ordinary tool-input box, not a
+  // separately highlighted CodeBlock. Keep checking every script byte.
+  const renderedScript = await codeCard.locator("pre").first().textContent();
   assert.equal(renderedScript, script);
   assert.equal(await codeCard.locator("li").count(), 2, "Nested calls stay inside the Code mode card");
   const firstCall = codeCard.locator("li").first();
@@ -68,7 +63,7 @@ export async function checkMcpCodemode(page, { base, artifacts, width }) {
   assert.equal(await codeCard.locator("pre").last().innerText(), "AC6 script output", "Script transport header must not appear in output");
   const readSizes = async () => {
     const codeSizes = await codeCard.evaluate(card => {
-      const script = card.querySelector(".tool-codemode-script pre");
+      const script = card.querySelector("pre");
       const row = card.querySelector("li");
       const label = row?.parentElement?.previousElementSibling;
       const count = card.querySelector("button")?.querySelectorAll(":scope > span")[2];
