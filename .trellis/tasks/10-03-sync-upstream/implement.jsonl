@@ -1,0 +1,7 @@
+{"file":".trellis/spec/guides/upstream-sync.md","reason":"合并边界、逐块冲突与独立依赖树验证"}
+{"file":".trellis/spec/frontend/pi-sdk-admission.md","reason":"SDK 接收/完成边界与 portable peer 一致性"}
+{"file":".trellis/spec/frontend/mcp-codemode.md","reason":"MCP惰性连接、Stop、工具曝光与fork安全契约"}
+{"file":".trellis/spec/frontend/ask-user-protocol.md","reason":"model-only提问与持久问题生命周期"}
+{"file":".trellis/spec/frontend/trellis-subagent-records.md","reason":"Trellis final与记录ownership"}
+{"file":".trellis/spec/frontend/append-system-prompt.md","reason":"项目覆盖提示与全局草稿边界"}
+{"file":".trellis/tasks/10-03-sync-upstream/research/planning.md","reason":"固定SHA、14冲突与语义交集证据"}

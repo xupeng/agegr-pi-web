@@ -1,0 +1,3 @@
+PASS: 1280px Settings MCP global/project/Code mode; Trust updates Append hint and preserves unsaved draft
+PASS: 390px Settings MCP global/project/Code mode; Trust updates Append hint and preserves unsaved draft
+SETTINGS_SMOKE_PASS base=http://127.0.0.1:40951 fixture=/var/tmp/pi-web-settings-smoke-HRgiSg
