@@ -1587,3 +1587,42 @@ Integrated fixed upstream d733d43 with a real two-parent merge; preserved person
 ### Next Steps
 
 - No remote action. Review the local branch separately; keep historical polluted Agent snapshot, real Safari/Windows/MCP/provider and running thinking/fork coverage limitations explicit.
+
+
+## Session 36: Sync upstream and upgrade Pi to 1.0.0
+
+**Date**: 2026-10-03
+**Task**: Sync upstream and upgrade Pi to 1.0.0
+**Branch**: `merge/upstream-20261003`
+
+### Summary
+
+Merged 47 frozen upstream commits through 6fcd7d4 in an isolated worktree, preserved fork contracts, upgraded all Pi pins and portable peers to 1.0.0, and archived the verified task on its own branch.
+
+### Main Changes
+
+- Resolved 14 merge conflicts; integrated MCP settings/import/Test/OAuth/trust and Code mode controls without losing ask_user, Trellis, minimap or file-authorization contracts.
+- Fixed mounted Append instructions trust hints without overwriting unsaved drafts; adapted source-aware test fixtures and Code mode e2e assertions; updated seven executable specs.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `18a284d` | (see git log) |
+| `b9c5bcb` | (see git log) |
+| `5ad64d7` | (see git log) |
+| `cc58f6d` | (see git log) |
+
+### Testing
+
+- [OK] Clean npm ci baselines: 2134/2134 Node tests; final candidate: 2757/2757, tsc exit 0, lint 704 files with 0 errors/warnings.
+- [OK] Unfiltered npm run test:e2e passed across desktop/tablet/mobile; independent 1280px/390px MCP settings/trust/Append draft smoke passed.
+- [OK] Frozen work commit 18a284d has exact BASE/TARGET parents, all 47 upstream commits reachable, no product deletion, no dev compiler/lint weakening; archive manifests validate.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Task branch remains local. Push, PR creation, merging into personal and npm release require a separate user request; Safari/Windows and real external OAuth/model completion remain untested.
