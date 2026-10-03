@@ -6,6 +6,7 @@
 - 候选 worktree `agegr-pi-web-worktrees/upstream-sync-20261003`，分支 `merge/upstream-20261003`。
 - 用户确认五批本地提交方案后，已逐路径审计并暂存160个产品路径，形成非快进合并 `18a284d1c4481a8e79fa441f5448129ee8d6f704`；父提交精确为 BASE 与 TARGET，`git merge-base --is-ancestor TARGET HEAD` 成功，上游独有提交数47，无未合并 index 条目。spec 提交为 `b9c5bcb1a5d8428428dfd29f70351d688b77a7f2`。
 - 冻结工作提交 H=`18a284d1c4481a8e79fa441f5448129ee8d6f704`。后续仅 task/spec/归档/日志元数据，不改被检产品树；最终任务分支 HEAD 在会话交付中报告。
+- 产物提交 `5ad64d7134ac18a46486627b65648edf5add522d`；task.py archive 已将任务标记 completed 并移入 `.trellis/tasks/archive/2026-10/10-03-sync-upstream/`，研究 manifests 同步归档路径保持可校验。归档与日志只在任务分支提交。
 - 主 checkout 的 personal 仍为 BASE，只存在任务规划目录；未修改/重启其开发服务，未发布、push、创建 PR。
 
 ## 干净依赖树与最终门禁
