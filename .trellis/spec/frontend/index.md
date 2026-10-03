@@ -20,8 +20,9 @@
 | [State Management](./state-management.md) | 状态落点分类、跨组件共享四种机制、服务端状态、URL 状态、localStorage 持久化、SSR/Hydration、陷阱 | Written |
 | [Quality Guidelines](./quality-guidelines.md) | 门禁基线、禁止/必须遵循的模式、测试要求、Code Review 清单（另含"验证基线必须来自与锁文件一致的依赖树"） | Written |
 | [Type Safety](./type-safety.md) | tsconfig 实际严格度、类型归属、运行时守卫、常见写法、禁用写法 | Written |
-| [Pi SDK 输入接收契约](./pi-sdk-admission.md) | Pi 0.99.1 disposition、RPC admission/完成边界、SDK 迁移必测断言 | Written |
-| [MCP / Code mode 运行时](./mcp-codemode.md) | 内置加载、惰性连接与信任、工具曝光、只读 policy、环境、默认设置、SSE/UI 队列与 fork 兼容 | Written |
+| [Pi SDK 输入接收契约](./pi-sdk-admission.md) | disposition 历史起点与当前 Pi 1.0.0 pins、MCP prepare/RPC admission/完成边界、SDK 迁移必测断言 | Written |
+| [MCP / Code mode 运行时](./mcp-codemode.md) | 内置加载、惰性连接/fresh trust、direct-only wait/slash/dispose、工具曝光、Code mode 预算/only、SSE/UI 与 fork 兼容 | Written |
+| [MCP 设置面板](./mcp-settings.md) | config/import 写入与脱敏、Test/OAuth flows、project trust 与结构化拒绝、验证边界 | Written |
 | [模型默认设置](./model-default-settings.md) | 会话选择与显式全局保存边界、项目覆盖拒绝、SDK 写盘错误检查 | Written |
 | [Trellis subagent execution snapshots](./trellis-subagent-records.md) | Single owner for exact tool/kind gate, bounded branch API projection, evidence/watermarks, scoped hook ownership and read-only UI | Written |
 | [ask_user 提问协议](./ask-user-protocol.md) | ask_user 工具契约、状态机、事件/命令协议 | Written |

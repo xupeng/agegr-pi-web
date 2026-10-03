@@ -2,13 +2,13 @@
 
 ## 1. 适用范围
 
-Pi 0.99.1 升级涉及 SDK -> RPC wrapper -> HTTP/SSE -> hook 的接收与完成边界。
-结构适配归 `lib/pi-types.ts:157`，接收串行化与完成归 `lib/rpc-manager.ts:824`。
+历史起点是 Pi 0.99.1 的 disposition 迁移；当前四个 direct Pi pin 与 portable 的两个 Pi peer 均为 **1.0.0**（`package.json:63-66`、`lib/ask-user/portable/package.json:12-15`）。本契约仍约束 SDK -> RPC wrapper -> HTTP/SSE -> hook 的接收与完成边界，不因升版本改写历史。
+结构适配归 `lib/pi-types.ts:167`，接收串行化与完成归 `lib/rpc-manager.ts` 的 `send()` prompt 分支。
 这不是新增浏览器响应格式；不能把 SDK 的 disposition 当作整个 agent run 已完成。
 
 ## 2. 签名
 
-`AgentSessionLike` 的窄适配面（`lib/pi-types.ts:157`）：
+`AgentSessionLike` 的窄适配面（`lib/pi-types.ts:167`）：
 
 ```ts
 prompt(text: string, options?: {
@@ -24,10 +24,11 @@ followUp(text: string, images?: ImageContent[]): Promise<"handled" | "queued">;
 ## 3. 契约
 
 - SDK `preflightResult` 仅在接收成功时调用，值不是旧版 boolean；拒绝通过 prompt promise 的 rejection 传播。
-- `AgentSessionWrapper.send({ type: "prompt", message, ... })` 等待接收闸门再返回 `null`；不等待整个模型回合结束（`lib/rpc-manager.ts:840`）。
+- `AgentSessionWrapper.send({ type: "prompt", message, ... })` 等待接收闸门再返回 `null`；不等待整个模型回合结束（`lib/rpc-manager.ts` 的 admission promise）。
 - 接收后才作废旧的 open ask；接收前错误不应作废问题。生命周期仍遵循 [ask_user 协议](./ask-user-protocol.md)。
-- prompt promise 完成负责释放 pending count、检查运行状态及通知；接收后失败走 `prompt_error`，非 streamingBehavior 的终态走 `prompt_done`（`lib/rpc-manager.ts:894`）。
+- prompt promise 完成负责释放 pending count、检查运行状态及通知；接收后失败走 `prompt_error`，非 streamingBehavior 的终态走 `prompt_done`（`lib/rpc-manager.ts` 的 prompt completion 分支）。
 - 并发 prompt 只串行化 admission；已经接收的输入不持锁等待整个 agent run。
+- MCP prepare 在 SDK admission 之前：空闲 prompt 按 extension invocation 分类为 wait/register/none，wait 仅等待有 direct 声明的服务器；Stop 在此时拒绝未发送消息并保留旧 ask。`/mcp` register-only 不代表模型回合开始，extension handled 也不代表模型 completion。分类与生命周期细节由 [mcp-codemode](./mcp-codemode.md) 单独拥有（`rpc-manager.ts:1038`、`mcp-command.ts:70`）。
 - 新会话文件可在第一个用户消息写入后已存在，不能以目录是否为空判断 clone 取消；应比较 clone 前后的文件集合（`lib/rpc-manager.test.mjs` 的 assistant-free clone 用例）。
 
 ## 4. 校验与错误矩阵
