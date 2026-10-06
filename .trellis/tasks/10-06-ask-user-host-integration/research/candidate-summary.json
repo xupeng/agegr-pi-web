@@ -1,0 +1,30 @@
+{
+  "scope": "preliminary snapshot only",
+  "ref": "d6be56655884c495e7534afcbc027a4a0546d66b",
+  "tree": "690e96fa14835fb44794c12de6f538423ec274ba",
+  "install": "same baseline npm ci --include=dev; no reinstall",
+  "gates": {
+    "tscExit": 0,
+    "lintExit": 0,
+    "eslintExit": 0,
+    "testsExit": 0
+  },
+  "lint": {
+    "files": 703,
+    "errors": 0,
+    "warnings": 0,
+    "baselineFiles": 704,
+    "diff": -1
+  },
+  "tests": {
+    "tests": 2743,
+    "suites": 13,
+    "pass": 2743,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "testDiffFromBaseline": -15,
+  "installedProbeExit": 0
+}

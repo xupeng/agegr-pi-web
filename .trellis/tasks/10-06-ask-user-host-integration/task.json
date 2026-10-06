@@ -1,0 +1,28 @@
+{
+  "id": "ask-user-host-integration",
+  "name": "ask-user-host-integration",
+  "title": "Investigate and repair updated AskUser host integration",
+  "description": "",
+  "status": "in_progress",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P2",
+  "creator": "xupeng",
+  "assignee": "xupeng",
+  "createdAt": "2026-10-06",
+  "completedAt": null,
+  "branch": "ask-user-host-integration",
+  "base_branch": "personal",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "Final implementation and regression commits authorized by the user on 2026-10-06. Clean gates, installed-source smoke and Chromium host-chain checks passed. Production distribution, real TUI UI/PTY, Safari/iOS and Windows remain unverified; local closeout does not claim release validation or authorize deployment.",
+  "meta": {
+    "description": "Investigate the discovered pi-ask-user package, host bridge absence, registration collisions and Web projection; plan a bounded repair preserving Web contracts."
+  }
+}

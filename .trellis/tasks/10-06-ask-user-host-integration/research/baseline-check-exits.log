@@ -1,0 +1,3 @@
+tsc_exit=0
+eslint_exit=0
+npm_test_exit=1

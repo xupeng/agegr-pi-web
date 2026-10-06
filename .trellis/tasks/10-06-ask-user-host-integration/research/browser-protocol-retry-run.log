@@ -1,0 +1,3 @@
+pi-tmp: workspace /home/xupeng/.cache/pi-tmp/01a10f47-ae69-753b-a8de-d77bd690adfd/ask-user-browser-protocol-retry-1k_0x08j
+PASS offline host browser chain (minimal protocol fixture only), session 01a10fc6-efc7-719d-873f-8836bac68f28
+browser_protocol-retry_exit=0

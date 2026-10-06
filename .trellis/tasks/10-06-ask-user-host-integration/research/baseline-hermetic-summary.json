@@ -1,0 +1,24 @@
+{
+  "ref": "128fc3c7dd8cdf60aa4ebe12e7ec3c75c964f61f",
+  "worktree": "/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/ask-user-host-validation-20261006-01a10f47",
+  "counts": {
+    "tests": 2758,
+    "suites": 13,
+    "pass": 2758,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "exit": 0,
+  "strictOfflinePrior": {
+    "tests": 2758,
+    "pass": 2754,
+    "fail": 4,
+    "exit": 1
+  },
+  "network": "bwrap --unshare-net; only loopback",
+  "preloadSha256": "8ea74f498b1146d99273c14d08a79a4119410465ab6fac81a443be29f17aebd5",
+  "mockWorkerSha256": "99043c5dc642b3e70af10c72e6432c90379d562ff090be5a027e66e4ed170d11",
+  "candidateValidated": false
+}

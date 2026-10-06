@@ -1,0 +1,3 @@
+pi-tmp: workspace /home/xupeng/.cache/pi-tmp/01a10fa1-d7ee-753b-a8de-d7aa28090808/ask-user-baseline-final-tests-a42uw06e
+npm_test_final_exit=1
+pi-tmp: retained failure workspace (7 idle days): /home/xupeng/.cache/pi-tmp/01a10fa1-d7ee-753b-a8de-d7aa28090808/ask-user-baseline-final-tests-a42uw06e
