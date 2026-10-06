@@ -1704,3 +1704,44 @@ Confirmed fork-only provenance, removed the Web editor/API while preserving nati
 ### Next Steps
 
 - Create PR to xupeng/agegr-pi-web:personal and merge the exact head after GitHub checks/e2e pass, as requested.
+
+
+## Session 39: Instance-wide notification center and tablet anchoring
+
+**Date**: 2026-10-06
+**Task**: Instance-wide notification center and tablet anchoring
+**Branch**: `feat/notification-center-sync`
+
+### Summary
+
+Implemented shared cross-project notifications, durable revision acknowledgment, public SDK run classification, canonical visible-result proof, and responsive chat-column anchoring; user confirmed the layout and authorized one PR, merge, and Git closeout.
+
+### Main Changes
+
+- Server-authoritative completion records and read-only pending aggregation; preserve lazy session loading, subagent suppression, and Pi 1.0.0 pins.
+- Shared center/sidebar state, safe final-result navigation and acknowledgment, tablet column centering and mobile fullscreen.
+- Archived the task on its feature branch with planning, raw isolated evidence, executable specs, and this journal; exclude the concurrent subagent-model-selection task.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `1c0fde4` | (see git log) |
+| `c914947` | (see git log) |
+| `3a3790b` | (see git log) |
+| `afe1857` | (see git log) |
+
+### Testing
+
+- [OK] Lock-consistent complete TypeScript and lint passed; 3005 tests / 13 suites / zero failures or skips; 39 targeted regressions.
+- [OK] Latest API-stubbed Chromium layout: 10 scenarios, 39 measurements, 15 screenshots; product and lock hashes unchanged after verification.
+- [OK] Earlier isolated real SDK + Next + two-context browser: 14 pass, one native-focus environment skip; keep SDK exception and unrun platform limits disclosed.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Create the single authorized PR targeting xupeng/agegr-pi-web personal; wait for remote CI, merge with the checked head, fast-forward personal, and safely remove only this task branch.
+- Keep user-requested LAN dev server 8505 running; do not publish or deploy the existing production service.
