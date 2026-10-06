@@ -20,7 +20,7 @@
 
 ## 真实目录树
 
-计数按 `find` 实测（2026-09-27）；增删文件时同步，别只改总数。
+以下数字是 `find` 实测的 2026-09-27 历史快照，不作为当前门禁计数；本次 AskUser 目录迁移见下方说明，验证的当前覆盖数在任务 research 中按同树记录。
 
 ```text
 仓库根
@@ -45,8 +45,8 @@
 │   └── *.test.mjs          45   与组件同目录同前缀
 ├── hooks/         20 files   11 个 use*.ts|tsx（全部首行 "use client"）+ 9 个测试
 ├── lib/          310 files   158 .ts（kebab-case，服务端 + 共享逻辑混合）+ 145 .test.mjs
-│                             + 7 个 portable 包文件（ask-user/portable 的 LICENSE/README/package.json 等）
-│   ├── ask-user/            7   后端子系统：index.ts(barrel) + store/persist/tool/types/…
+│                             + 7 个当时的 portable 包文件（2026-10-06 已删除，非现行安装入口）
+│   ├── ask-user/                Web host 子系统：index.ts + store/persist/types/protocol/validation/format；view/ + controller
 │   └── i18n/                8   format.ts + registry.ts + types.ts + messages/{en,zh-CN,zh-TW}.ts
 ├── e2e/           11 files   10 个 .mjs（Playwright 回归）+ README.md
 ├── bin/            6 files   npm CLI 入口 pi-web（CommonJS）
@@ -61,6 +61,8 @@
 ```
 
 ### 依赖方向（按 TS/TSX 顶层静态 import 声明计数，含同目录相对导入）
+
+2026-10-06 AskUser 落位：系统扩展通过 SDK 运行时发现；本仓库 `lib/ask-user/` 只保留 Web host/协议/状态与现有 React 视图，不再含可安装 portable 包或内建工具。客户端只消费 Web-owned DTO/controller/view，不静态导入系统工具、SDK 或 TUI。`lib/ask-user/view/` 是既有 UI 的迁移，仍不反向依赖 `components/`。详见 [ask-user-protocol.md](ask-user-protocol.md)。
 
 | 目录 | 它 import 了 | 谁 import 它 |
 |------|--------------|--------------|

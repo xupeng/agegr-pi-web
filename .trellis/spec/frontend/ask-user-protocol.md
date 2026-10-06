@@ -4,60 +4,48 @@
 
 ## 背景与设计决策
 
-`ask_user` 让模型向用户提问，问题以**共享 React 组件**（`lib/ask-user/portable/react/AskUserView`）呈现，答案以 follow-up 消息唤醒模型。实现参考 `pi-web` fork（`src/server/sessions/askUserTool.ts` + `pendingAskStore.ts`），移植为 agegr-pi-web 架构。
+`ask_user` 让模型向用户提问，问题以**共享 React 组件**（`lib/ask-user/view/AskUserView`）呈现，答案以 follow-up 消息唤醒模型。实现参考 `pi-web` fork（`src/server/sessions/askUserTool.ts` + `pendingAskStore.ts`），移植为 agegr-pi-web 架构。
 
 **核心决策：异步非阻塞，不用 `ctx.ui`。** `ctx.ui.*` 是阻塞式（agent 运行被 pin 住、SSE 长连、状态易失）。`ask_user` 调用后返回 `terminate: true` 结束本轮运行，问题存为进程级状态，答案通过 `sendCustomMessage(..., { triggerTurn: true, deliverAs: "followUp" })` 送达模型。
 
-**渲染决策：共享 React 视图，不用 MCP Apps iframe。** 2026-09-26 起 `ask_user` 的唯一呈现是一个框架无关 controller + React 组件（`lib/ask-user/portable/react/`），由每个宿主做一层薄适配器。MCP Apps 的 opaque-origin `srcdoc` 沙箱、握手、消息校验与字体字节投递已整体删除。决策与「删除而非封存」的理由在 `docs/adr/0004-ask-user-shared-react-view.md`；本文件末尾有一节摘要。
+**渲染决策：共享 React 视图，不用 MCP Apps iframe。** 2026-09-26 起 `ask_user` 的唯一呈现是一个框架无关 controller + React 组件（`lib/ask-user/view/`），由每个宿主做一层薄适配器。MCP Apps 的 opaque-origin `srcdoc` 沙箱、握手、消息校验与字体字节投递已整体删除。决策与「删除而非封存」的理由在 `docs/adr/0004-ask-user-shared-react-view.md`；本文件末尾有一节摘要。
 
-## 工具契约
+## 系统工具与宿主契约（2026-10-06）
 
-- 工具名 `ask_user`，通过 InlineExtension（`lib/ask-user/extension.ts`）注册，注入到主会话的 `extensionFactories`（非 chatOnly、非子代理会话）。
-- 作为扩展而非 SDK `customTools`，工具在每次会话 reload 时重新注册，所以设置开关变更后 reload 会话即可生效（与 built-in subagents 同生命周期）。
-- 历史 `navigate_tree` 仅 carry 原本 active、仍 registered 且非 hidden 的 `ask_user`，不因目标分支记录早于工具开启而丢掉会话级能力；注册但未激活的 ask、Chat-only/空 pin 不回灌。使用 `rpc-manager.ts` 的 session-tool carry + 既有 resolver，不恢复 active-all 扩展逻辑；行为回归在 `rpc-manager-tool-exposure.test.mjs`（pinned/unpinned、inactive/hidden、Chat-only）。
-- 参数：`questions[]`（每项 `id/question/detail?/options[]/multiple?`）。限制：≤20 问题、每题 ≤12 选项、id ≤128、文本 ≤1000、自定义文本 ≤4000。
-- 曝光：portable 工具明确 `exposure: "model-only"`，仅由模型直接调用，Code mode only 下仍声明；脚本的 `ALL_TOOLS`/`ctx.executeTool()` 不包含也不能执行它，不能打开持久问题后吞掉 terminate 语义。真实 SDK + faux provider 回归在 `lib/ask-user/codemode.integration.test.mjs`，同时验证直接调用登记问题且不再请求模型。
-- 执行：登记为会话 open ask 后返回 `{ terminate: true }`；畸形问题集抛 `PendingAskValidationError`（变 error tool result，模型可自纠重发）。
-- 工具文本明确告知模型"答案将以 follow-up 唤醒，不要重复提问"；supersede 时附加旧 ask 未答列表。
-- 调用引导在 `lib/ask-user/portable/tool.ts:139-142` 的 `promptSnippet` / `promptGuidelines`：仅在工具可用、继续当前请求必须等待缺失事实、范围选择或必要决策时调用；把相关问题合并后单独、最后调用。普通对话、修辞性提问与非阻塞的后续建议仍用文字，工具不可用时也用文字。回答只用于澄清，不代替敏感操作授权。对应契约断言在 `lib/ask-user/tool.test.mjs`；断言只验证提示元数据，不证明模型遵循。实际效果要用同模型、同配置的独立会话记录调用结果；单次冒烟不能推断调用率变化。
+- 唯一工具源是 SDK 按用户原 settings/packages/extensions/trust 发现的系统安装扩展。Web 不安装/锁定另一份包，不静态导入机器安装路径，无内建工具 fallback。
+- Web 的 `lib/ask-user/extension.ts` 只注册同 loader 的 bridge listener，不注册工具/schema/prompt/execute，不实现 bridge caller/resolver，不模拟 TUI。
+- `lib/ask-user/extension-policy.ts` 只复制/投影工具 Map。恰好一个 discovered `ask_user` 保留 execute/schema/prompt/source 和原 SDK 默认激活语义；direct 投影为 model-only，原 defaultActive 保持。hidden 原定义保持 withdrawn；原 codemode/deferred 即使显式 defaultActive:true 也默认 inactive，投影时归一化为 false，不能因曝光投影变成默认 active。原输入对象不 mutate，仍能通过显式 SDK selection 激活。多个不同 resolved source 明确诊断并撤销 ask 工具，保留扩展其它 tools/commands/flags/handlers。工厂已运行，policy 不是初始化副作用沙箱。
+- 主会话 normal/pinned/configured 按原 SDK 工具选择工作。Chat-only/子代理没有 Web host；子代理即便加载扩展也撤销 ask_user 并通过 excludeTools 防御。资源过滤/hidden/defaultActive:false 不回灌。
+- SDK 1.0.0 的原 reload 会重新激活 default-active extension tools（includeAllExtensionTools），包括 setActiveToolsByName 先关闭的 direct 工具；Web 沿用该 SDK 行为，不添加 active-all 回灌。navigate carry 只保留原 active、仍 registered、非 hidden 的 session tools，coding pins 不变。
+- 参数与模型引导由系统扩展提供。Web host v1 合同限制 ≤20 问题、每题 ≤12 选项、id ≤128、文本 ≤1000、自定义/supplement ≤4000。宿主校验 DTO/浏览器输入，不维护第二份模型参数 schema 或提示。
+- model-only 保证 Code mode only 仍直接声明 ask；ALL_TOOLS/ctx.executeTool 不可调用，避免 nested execution 吞掉 terminate。posted/terminate 由实际工具在 host ack 校验后决定。
 
-## 跨宿主桥接（SDK 1.0.0 本地包）
+## 同 loader 的 v1 Web host
 
-### 1. 适用范围
+Channel: `pi.ask-user.bridge:resolve-open:v1`。`pi.events.on` 监听器必须同步 `resolution.register(async open)`；异步工作只在 open 中。SDK 跟踪订阅，reload/dispose 清理；不用 global bus。
 
-`lib/ask-user/portable/` 是 `private: true` 的本地 Pi 包，入口由 `package.json` 的 `pi.extensions: ["./index.ts"]` 发现。Pi Web 仍由 `lib/ask-user/extension.ts` 直接给共享工具工厂注入 `open`，不走下面的事件桥；其他宿主必须显式绑定。安装包本身不会创建卡片、提供答案 API、授权写操作或唤醒模型，也不自动启用 PA 定时任务里的 `ask_user`。
+`open` 收到 unknown，经 `lib/ask-user/protocol.ts` 解码为 `{ version:1, conversationId, questions }`。核验 version、有界 DTO、conversationId 与绑定 loader 的 SessionManager 身份一致，再实时查 registry 的 alive 且 sessionId 匹配 wrapper。缺失、closing、错身份、畸形/未知版本均拒绝，不触碰别的会话。有效请求调用既有 wrapper.openAsk，返回 `{ ask:{askId,askedAt,questions},superseded? }`。
 
-### 2. 签名
+外部工具负责恰好一个同步 bridge、匹配问题 ack 与 posted/terminate；Web 不复制 resolver。Web ack 证明内存登记与结构，不声称写盘事务或 exactly-once（仍 best-effort mirror）。TUI 只在其真实 tui host 使用原生投影。
 
-`openAskThroughBridge(bus, { conversationId, questions }): Promise<PendingAskOpenResult>` 定义在 `lib/ask-user/portable/bridge.ts`。包入口 `index.ts` 在工具执行时发出 `pi.ask-user.bridge:resolve-open:v1`，同一个 SDK resource loader 上的宿主监听器必须同步调用事件请求的 `register(open)`，`open(request): Promise<PendingAskOpenResult>` 可以异步登记。监听器不能先 `await` 再注册。
+测试分两类，不互相冒充：`discovery-host.integration.test.mjs`/`codemode.integration.test.mjs` 使用自包含小型 **test-only protocol peer** 经真实 SDK package discovery；`e2e/ask-user-host.mjs` 默认也是该 peer 的离线 host 浏览器链。真实系统源烟测需显式 ASK_USER_HOST_SOURCE 指向独立包拷贝，后者不是产品依赖/默认 fixture。`e2e/ask-user.mjs` 的持久化+命令 stub 仅证明 view，不证明 host 全链。
 
-### 3. 契约
+### 校验、错误与必测例
 
-- `open` 收到 `{ version: 1, conversationId: string, questions: AskUserQuestion[] }`；问题先经过 `portable/validation.ts` 的有界校验并被复制。`conversationId` 是不透明会话身份，不是 Pi Web 的 SSE/持久化字段。
-- 宿主 `open` 负责在 resolve 前登记可恢复的 ask，并返回 `{ ask: { askId, askedAt, questions }, superseded? }`；`ask.questions` 必须与调用的 id、文本、选项、多选标志及顺序一致。发生替换时 `superseded.reason` 必须为 `"superseded"`，并包含可报告的 `unansweredIds`。
-- `pi.events` 属于 loader；另一个 loader 的监听器不生效。SDK event bus 的 `emit()` 返回值不表示已绑定，监听异常也可能被 SDK 捕获，必须计数同步注册。只有宿主 resolve 且 ack 有效后，工具才返回 `terminate: true`。ack 的持久化真实性仍由受信任宿主保证，包只能校验结构和问题身份。
-
-### 4. 校验与错误矩阵
-
-| 条件 | 结果 |
+| 输入/状态 | 宿主行为 |
 | --- | --- |
-| 空/重复/超限问题或畸形运行时字段 | `PendingAskValidationError`，不触发宿主 `open` |
-| 缺失、延后或重复 `register` | `AskUserBridgeError`，不调用 `open` |
-| 宿主 `open` 拒绝 | 原错误传播，不返回 `terminate: true` |
-| 缺失 ack、问题不匹配、不可报告的 supersede | `AskUserBridgeError`，不返回 `terminate: true` |
-| 恰好一次同步注册、成功登记且有效 ack | 返回共享工具结果并 `terminate: true` |
+| v1、有界问题、绑定身份一致且 wrapper alive | 调 existing openAsk，返回匹配 ack；工具决定 posted/terminate |
+| 未知 version、畸形/超限 questions、空或错 conversationId | 拒绝，不登记或 supersede 旧 ask |
+| 未绑定身份、missing/closing/错误身份 wrapper | 拒绝，不访问其他会话 store |
+| 多个不同 ask_user 来源 | 工具级撤销并诊断，其他资源保持 |
+| 无系统包、资源被排除、hidden/defaultActive:false | 无备用或自动回灌；旧 pending 仍可展示/关闭 |
+| 多/延后 bridge 或坏 ack | 由实际扩展 resolver 拒绝；Web 不复制 resolver 或报告假成功 |
 
-### 5. 正常/边界/错误案例
+正常例：一个已安装系统工具通过唯一同 loader host 登记问题，回答在同会话续跑。边界例：codemode/defaultActive:true 投影后仍默认 inactive，显式选择可激活。错误例：拿另一个会话身份发 open，不得 supersede 当前问题。
 
-正常：`lib/ask-user/portable/discovery.test.mjs` 从**独立拷贝**的目录加载包，同 loader 的 inline 宿主登记并返回匹配的 ask。边界：`lib/ask-user/extension.test.mjs` 证明 Pi Web 开关关闭时不注册工具，打开时仍直接查找实时 session。错误：无监听器或伪造不同问题的 ack 都由 `bridge.ts` 拒绝；不会用成功结果掩盖未登记的 ask。
+必测断言由 extension、extension-policy、discovery-host、codemode 与 rpc-host 集成测试负责：原 SDK/投影 exposure×defaultActive×defaultTools×recorded loadout 对照，真实 reload 三轮无累积监听，单次 direct ask 不续发模型请求，nested 拒绝、same-session submit/cancel、重建保持 askId、admission 与迟到竞态。实际系统源另经独立拷贝烟测和真实 Chromium 验证，不能拿 peer 的简化 ack 校验替代。
 
-### 6. 必测断言
-
-`discovery.test.mjs` 验证本地包发现、两个 Pi peer 均为 1.0.0 且与实际 SDK identity 一致、拷贝目录无需指回 Pi Web 的 node_modules、缺失/重复 bridge 与畸形 ack 的失败关闭；`bridge.test.mjs` 验证边界输入和 supersede；`store.test.mjs` 验证失败的提交不会关闭已打开的 ask；`extension.test.mjs` 验证 Pi Web 开关和 session lookup。PA 的 Stage A 固定目录准入仅有隔离探针；Stage B、定时任务排除、重启后答案交付属于另一个仓库的任务，不能写成已验证。
-
-### 7. 错误与正确方式
-
-错误：工具发现没有桥接宿主时返回 `{ terminate: true }`，再寄希望于某个浏览器稍后显示卡片。正确：在执行时通过同 loader 的事件请求拿到**唯一、同步注册**的 `open`，等待宿主登记和有效 ack；否则抛错，让模型得到 error tool result。禁止用全局变量或直接导入 Next/PA 内部模块绕过宿主准入。
+错误方式：静态导入系统目录、重注册 Web 工具，或在曝光投影后无条件激活全部注册工具。正确方式：SDK 原发现、同 loader bridge-only host、仅工具级必要投影并按 SDK 原语义保持选择，版本/身份/输入不合约即拒绝。
 
 ## 状态机（`lib/ask-user/store.ts` 的 `PendingAskStore`）
 
@@ -109,19 +97,19 @@
 
 ## 共享 React 视图渲染（Pi Web，2026-09-26 起）
 
-`ask_user` 的唯一呈现是共享 React 组件 `AskUserView`；宿主不再原生渲染问题表单，也不再使用 MCP Apps iframe。设计决策见 `docs/adr/0004-ask-user-shared-react-view.md`，组件契约见 `lib/ask-user/portable/react/README.md`。
+`ask_user` 的唯一呈现是共享 React 组件 `AskUserView`；宿主不再原生渲染问题表单，也不再使用 MCP Apps iframe。设计决策见 `docs/adr/0004-ask-user-shared-react-view.md`，组件契约见 `lib/ask-user/view/README.md`。
 
 ### 分层
 
 ```
-lib/ask-user/portable/view-controller.ts      纯表单状态（无框架、无 DOM、无 node）
-lib/ask-user/portable/react/AskUserView.tsx   React 视图（peer: react；自己渲染样式）
+lib/ask-user/view-controller.ts      纯表单状态（无框架、无 DOM、无 node）
+lib/ask-user/view/AskUserView.tsx   React 视图（peer: react；自己渲染样式）
         ↑ 消费
 components/AskUserAppHost.tsx                 Pi Web 宿主适配器：文案 + CSS 变量 + 命令
 PA 的宿主适配器                                同上，另一个仓库
 ```
 
-包（`portable/`）不知道宿主是谁：没有 `@/` 别名、不 import `lib/i18n`、没有 Next、没有 `node:`、不 import 宿主调色板模块。它只读 props 和 `--pi-ask-*` CSS 命名空间。`react` 是 peer dependency，`react-dom` 由宿主提供（组件本身不 import 它）。
+Web-owned view/controller 不依赖工具核心：没有 `@/` 别名、不 import `lib/i18n`、没有 Next、没有 `node:`、不 import 宿主调色板模块。它只读 props 和 `--pi-ask-*` CSS 命名空间。`react` / `react-dom` 由 Web 应用提供（组件本身不 import 它）。
 
 ### 宿主适配器的三项职责
 
@@ -167,7 +155,7 @@ Pi Web 的映射在 `components/AskUserAppHost.tsx` 的 `PI_ASK_VARIABLE_MAP`：
 
 组件渲染 `AskUserViewLabels` 的 12 个键：`title`、`answered`（模板，含 `{count}` / `{total}`）、`otherPlaceholder`、`multipleOtherPlaceholder`、`supplementTitle`、`supplementPlaceholder`、`submitted`、`cancelling`、`hint`、`cancel`、`submit`、`actionFailed`。
 
-- 包内自带三语默认表（`lib/ask-user/portable/react/copy.ts`，`en` / `zh-CN` / `zh-TW`）。解析顺序：`askUserViewLabels(locale ?? "en")`，再用 `labels` 里已定义的键覆盖。
+- 包内自带三语默认表（`lib/ask-user/view/copy.ts`，`en` / `zh-CN` / `zh-TW`）。解析顺序：`askUserViewLabels(locale ?? "en")`，再用 `labels` 里已定义的键覆盖。
 - **Pi Web 覆盖全部 12 个键**，所以它从不读包内表；PA 原样使用包内表。**每一侧文案只有一个 owner**，两边措辞可以合法地漂移。包内文本是 `lib/i18n/messages/{en,zh-CN,zh-TW}.ts` 的一次性转写，不是同步源——不要为了"统一"让 Pi Web 去读包内表，也不要加同步步骤。
 - `{count}` / `{total}` 插值留在组件内，宿主只提供模板字符串。三语 key 集合仍由 `lib/i18n/registry.test.mjs` 强制一致；删除 `chat.askUserAppFailed*` 四键后三份消息表键集合仍相等。
 
@@ -189,7 +177,7 @@ Pi Web 的映射在 `components/AskUserAppHost.tsx` 的 `PI_ASK_VARIABLE_MAP`：
 | 容器 | `role="dialog"` + `aria-label`，**不带** `aria-modal`；没有实现焦点陷阱，声称模态是假的 |
 | 焦点环 | 样式表里一条 `:focus-visible` 规则；输入控件**不得**写内联 `outline: none`（内联样式会压过该规则） |
 
-### controller 契约（`lib/ask-user/portable/view-controller.ts`）
+### controller 契约（`lib/ask-user/view-controller.ts`）
 
 纯 reducer + selectors，无框架、无 DOM、无 node，可驱动 React `useReducer`，也可驱动纯 DOM 宿主：
 
@@ -197,7 +185,7 @@ Pi Web 的映射在 `components/AskUserAppHost.tsx` 的 `PI_ASK_VARIABLE_MAP`：
 - `multiple` **随 action 传递**（`{ type: "toggle-option", …, multiple }`），reducer 不需要 `AskUserQuestion` 就能解释语义，因此可单独测。
 - action：`toggle-option`、`set-other-text`、`set-supplement`、`submit-requested`、`cancel-requested`、`action-failed`。reducer 纯、不抛、不改输入。
 - selectors：`draftFor`、`isQuestionAnswered`（`values.length > 0 || otherText.trim() !== ""`）、`answeredCount`、`isLocked`、`questionSummary`（`✓ value · value · otherText`，用选项原始 value）。
-- `buildAskUserSubmission` 组装 payload：未触碰的问题跳过、空白自定义文本丢弃、空白 supplement 省略。宿主仍要过 `portable/validation.ts` 的 `validateSubmission`；controller 只保证结构。
+- `buildAskUserSubmission` 组装 payload：未触碰的问题跳过、空白自定义文本丢弃、空白 supplement 省略。宿主仍要过 `validation.ts` 的 `validateSubmission`；controller 只保证结构。
 - `action-failed` 解锁并保留错误以便重试。"答案可能已在途"的保证来自在途锁（`submitting` / `cancelling`），不是这条路径。
 
 ### `data-ask-user-view="shared"` 标记
@@ -206,7 +194,7 @@ Pi Web 的映射在 `components/AskUserAppHost.tsx` 的 `PI_ASK_VARIABLE_MAP`：
 
 ### 失败与重试
 
-单一渲染器没有"投影失败"降级态：`AskUserView` 同步渲染 `props.ask`，宿主没有 fetch、没有握手、没有超时。用户可见的失败只剩**命令失败**——`onSubmit` / `onCancel` 返回的 promise reject 时 controller 解锁并显示 `labels.actionFailed`，用户可以原地重试。`askUser` 设置与 `PI_WEB_ASK_USER` 仍是**工具本身**的开关，与渲染路径无关。旧版 `NEXT_PUBLIC_PI_WEB_ASK_USER_APPS` 开关与三语 `chat.askUserAppFailed*` 四键已删除。
+单一渲染器没有"投影失败"降级态：`AskUserView` 同步渲染 `props.ask`，宿主没有 fetch、没有握手、没有超时。用户可见的失败只剩**命令失败**——`onSubmit` / `onCancel` 返回的 promise reject 时 controller 解锁并显示 `labels.actionFailed`，用户可以原地重试。AskUser 专用 Web UI/API/helper/env 开关已退役；旧 askUser:false 与 PI_WEB_ASK_USER=0 不再消费，不做真实配置迁移写入。历史 pending 的展示/关闭不要求当前系统工具可用。旧版 `NEXT_PUBLIC_PI_WEB_ASK_USER_APPS` 开关与三语 `chat.askUserAppFailed*` 四键已删除。
 
 浏览器回归在 `e2e/ask-user.mjs`（真实 Chromium）：渲染、roving tabindex、方向键、Space、选项/自定义互斥、提交锁定 + 摘要 + 状态行聚焦、reject → alert + 解锁 + 重试、取消，以及 5 套主题下 `--pi-ask-*` 映射断言。
 
@@ -220,7 +208,7 @@ Personal Assistant 作为第二个 React 宿主，接入时只需：
 4. `onSubmit` / `onCancel` 只做命令发送；open-ask 生命周期（supersede、关闭、重试）留在宿主，不在视图。
 5. 不用 React 的宿主可以直接驱动 `view-controller.ts` 并渲染自己的 markup，但必须自行复刻上面的 a11y 契约。
 
-跨宿主桥接的准入仍由 `portable/bridge.ts` 把守（§跨宿主桥接）；视图渲染与桥接是两件正交的事：桥接决定"谁登记 ask 并收到答案"，视图决定"怎么问"。
+Web 只拥有版本化 host DTO 与入口解码；外部工具解析 bridge 与核验 ack；视图渲染与桥接是两件正交的事：桥接决定"谁登记 ask 并收到答案"，视图决定"怎么问"。
 
 ### 为什么 Apps 路径被退役
 
@@ -228,28 +216,26 @@ Personal Assistant 作为第二个 React 宿主，接入时只需：
 
 ## 文件布局
 
-- `lib/ask-user/portable/` — 可本地安装的 Pi 包（`pi.extensions: ["./index.ts"]`、`peerDependencies` 的两个 Pi 包钉死 1.0.0、`private: true`、MIT `LICENSE` + `README.md` 记录 bridge 契约与本地安装）。其中 `types.ts` 为有界 DTO/限制，`validation.ts` 为唯一的提问/答案校验器，`format.ts` 为答案文本渲染，`tool.ts` 为 `createAskUserToolDefinition`（`defineTool` + TypeBox schema），`bridge.ts` 为显式 host bridge 解析（`pi.ask-user.bridge:resolve-open:v1`，要求恰好一个同步 `register`）。缺失/多个 bridge、畸形问题、ack 缺少有界 `askId`/`askedAt`、ack 的 questions 与校验后的提问身份不一致（id/文本/选项/`multiple`/顺序），或 `superseded` 不是带 `unansweredIds` 的 `reason: "superseded"` 结果，全部 fail closed，不返回 `terminate: true`。安装验证必须用目录拷贝；指回本仓库 `node_modules` 的符号链接不算独立安装。`index.ts` 为包入口，把 bridge 注入共享工具。
-- `lib/ask-user/portable/view-controller.ts` — 共享表单状态 reducer/selectors（上节）。
-- `lib/ask-user/portable/react/` — 共享 React 视图：`AskUserView.tsx`（组件）、`copy.ts`（三语默认文案 + `AskUserViewLabels`）、`view-css.ts`（`--pi-ask-*` 样式表）、`keyboard.ts`（roving tabindex 纯数学）、`fixture/`（无宿主渲染探针）。
-- `lib/ask-user/types.ts` — 再导出 `./portable/types`，并保留 Pi Web 专有的 `ASK_USER_ANSWERS_CUSTOM_TYPE` 与 `AskUserCloseResponse`
-- `lib/ask-user/store.ts` — `PendingAskStore` 状态机与 outcome 计算；校验/渲染委托给 `./portable`（对外导出面不变）
-- `lib/ask-user/persist.ts` — open ask 磁盘镜像（读/写/替换/删除，损坏降级，无框架依赖）
-- `lib/ask-user/tool.ts` — 再导出 `./portable/tool`（Pi Web 内联适配器直接注入 `open`，不走 bridge）
-- `lib/rpc-manager.ts` — 注入、命令、事件、作废钩子、`get_state` 投影
-- `lib/ask-user-settings.ts` + `app/api/settings/ask-user/route.ts` — 开关持久化（`~/.pi/agent/pi-web-settings.json` 的 `askUser` 字段）+ GET/PUT；`PI_WEB_ASK_USER` env 优先于文件
-- `hooks/useAgentSession.ts` — `pendingAsk` 状态、`submitAsk`/`cancelAsk`、事件处理、重水合
-- `components/AskUserAppHost.tsx` — 唯一宿主适配器：取文案、映射 CSS 变量、转发命令（`data-ask-user-view="shared"`）
-- `components/SettingsPanel.tsx`（GeneralSettings）— ask_user 开关 + reload 提示/按钮
+- `lib/ask-user/{types,protocol,validation,format}.ts` — Web v1 DTO、host 解码、浏览器答案校验/格式。零 SDK runtime 依赖，客户端不导入系统工具/TUI。
+- `lib/ask-user/{extension,extension-policy}.ts` — bridge-only inline host 与工具级投影；无启用 preference/env。
+- `lib/ask-user/{store,persist,resolve-pending-ask}.ts` — 原状态、best-effort 镜像与迟到 close resolver。
+- `lib/ask-user/view-controller.ts` / `lib/ask-user/view/` — 纯表单 reducer、React view/copy/CSS/keyboard 与结构测试；原行为保持，没有 Pi 包 manifest。
+- `components/AskUserAppHost.tsx` — 文案、CSS 变量、命令薄适配器，固定 shared DOM 标记。
+- `lib/rpc-manager.ts` / `lib/subagent-runtime.ts` — 同 loader 身份、policy composition、子代理 deny；原 open/close/admission/hydrate 不改名。
+- `hooks/useAgentSession.ts` — 原 pendingAsk、submit/cancel、SSE、hydrate/轮询。
+- `lib/ask-user/fixtures/protocol-package/` — 仅测试的最小 peer，产品不 import/发现，不是备用工具。
+
+已删除：portable Pi 包入口/manifest/bridge resolver/tool schema/prompt/execute 与再导出；Web AskUser 设置 UI/API/helper/env。四个宿主 coding SDK pins 不变。旧设置字段作为共享设置的 unknown 保留。
 
 已删除（不要重新引入）：`lib/ask-user/mcp-view-html.ts`、`lib/ask-user/mcp-app-adapter.ts`、`lib/ask-user/theme-tokens.ts`、`lib/ask-user/view-fonts.ts`、`lib/ask-user/view-font-manifest.ts`、`components/AskUserAppFailure.tsx`、`app/api/agent/[id]/ask-view/route.ts`、`app/api/ask-user/font-faces/route.ts`，以及 `@modelcontextprotocol/*` 4 个包与 `zod`。历史证据保留在归档任务目录（`.trellis/tasks/archive/2026-09/09-26-ask-user-mcp-migration/research/fixture/`），其中仍 import 这些包，属历史记录，不再可运行，**不要编辑**。
 
 ## 陷阱
 
 - 官方 `question.ts` 扩展示例检查 `ctx.mode !== "tui"` 会拒绝运行；本功能不依赖 `ctx.ui`，与官方扩展互不干扰。
-- chatOnly 会话（空工具 allow-list）不会激活 `customTools`，无需特判工具可见性。
-- 扩展的 `open` 在工具执行时按 `sessionId` 从 `getRegistry()` 查 wrapper（注册先于扩展绑定，无时序问题）。
+- Chat-only 沿原 no-resource/empty-tool 边界；子代理额外撤销系统 ask_user。
+- host open 在调用时查 alive registry wrapper，并同时核验 loader 身份；不捕获旧 wrapper。
 - 工具注入代码在 server 端模块，旧 dev server 进程不会热加载（验证时需重启 dev server）。
-- 开关变更只影响 reload 后的会话；已存在会话的扩展绑定在 reload 时重建。
+- 系统安装/资源变更按 SDK reload 生效，Web host 订阅随真实 AgentSession 生命周期重建。
 
 ## UI 布局（ask 视图随消息流滚动）
 

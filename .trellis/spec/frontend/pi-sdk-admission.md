@@ -2,7 +2,7 @@
 
 ## 1. 适用范围
 
-历史起点是 Pi 0.99.1 的 disposition 迁移；当前四个 direct Pi pin 与 portable 的两个 Pi peer 均为 **1.0.0**（`package.json:63-66`、`lib/ask-user/portable/package.json:12-15`）。本契约仍约束 SDK -> RPC wrapper -> HTTP/SSE -> hook 的接收与完成边界，不因升版本改写历史。
+历史起点是 Pi 0.99.1 的 disposition 迁移；当前四个 direct Pi pin 均为 **1.0.0**（`package.json`）。AskUser portable Pi 包及其 peer 声明已退役；系统安装扩展由 SDK 原发现链加载，Web 仅拥有版本化 host 协议。本契约仍约束 SDK -> RPC wrapper -> HTTP/SSE -> hook 的接收与完成边界，不因升版本改写历史。
 结构适配归 `lib/pi-types.ts:167`，接收串行化与完成归 `lib/rpc-manager.ts` 的 `send()` prompt 分支。
 这不是新增浏览器响应格式；不能把 SDK 的 disposition 当作整个 agent run 已完成。
 
@@ -52,7 +52,7 @@ followUp(text: string, images?: ImageContent[]): Promise<"handled" | "queued">;
 `lib/rpc-manager-shutdown.test.mjs:59` 起的用例覆盖：接收前不确认、三种 disposition 均确认、接收前拒绝、接收后错误、重叠 prompt admission、completion 通知的 idle 门禁。
 mock 必须传 disposition 字符串；只修类型不更新 boolean mock，会让错误假设继续留在测试里。
 
-升级还须从 `package-lock.json` 的干净 `npm ci` 树检查四个 direct Pi pin、portable peer pin、真实 SDK 构造/资源加载、类型/lint/单测及隔离 e2e。真实构造冒烟不等于真实模型 completion；未发模型请求应明确记录。
+升级还须从 `package-lock.json` 的干净 `npm ci` 树检查四个 direct Pi pin、真实 SDK 构造/资源加载、类型/lint/单测及隔离 e2e。真实构造冒烟不等于真实模型 completion；未发模型请求应明确记录。
 
 ## 7. 错误与正确方式
 
