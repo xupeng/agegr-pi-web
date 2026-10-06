@@ -1745,3 +1745,40 @@ Implemented shared cross-project notifications, durable revision acknowledgment,
 
 - Create the single authorized PR targeting xupeng/agegr-pi-web personal; wait for remote CI, merge with the checked head, fast-forward personal, and safely remove only this task branch.
 - Keep user-requested LAN dev server 8505 running; do not publish or deploy the existing production service.
+
+
+## Session 40: Portable notification test fixtures for PR33 CI
+
+**Date**: 2026-10-06
+**Task**: Portable notification test fixtures for PR33 CI
+**Branch**: `feat/notification-center-sync`
+
+### Summary
+
+PR33 first CI passed lint, TypeScript, production build and browser e2e, but two new test modules required the developer-only temp variable. Replaced that requirement with scoped platform-temp fallback, independently checked, and updated the existing archive before merging.
+
+### Main Changes
+
+- Only two offline test setups changed; keep SDK import-before-isolation ordering, per-file offline/MCP flags, exclusive fixture ownership and exact cleanup. Product behavior, CI scripts, dependencies and pinned SDK are unchanged.
+- Captured executable optional PI_TASK_TMPDIR and platform-temp contracts; restored archived task to completed with actual PR33 URL and preserved initial failed CI plus follow-up evidence.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `780c693` | (see git log) |
+| `58a62af` | (see git log) |
+
+### Testing
+
+- [OK] Three temp modes and TMPDIR with spaces: 40/40 targeted tests each; setup probes confirm priority, environment isolation and cleanup.
+- [OK] Independent full npm test without PI_TASK_TMPDIR: 3005/3005, 13 suites, zero fail/skip; 733-file lint and complete TypeScript passed. 916 source hashes stable.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Update the same PR33, wait for fresh standard Node22 CI checks and e2e, then merge only the verified head and complete safe Git closeout.
+- Preserve the other task and user dev service8505; do not publish or deploy production.
