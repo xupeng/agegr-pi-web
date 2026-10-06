@@ -2,8 +2,8 @@
 
 import type { CSSProperties } from "react";
 import { useMemo } from "react";
-import { AskUserView } from "@/lib/ask-user/portable/react/AskUserView";
-import type { AskUserViewLabels } from "@/lib/ask-user/portable/react/copy";
+import { AskUserView } from "@/lib/ask-user/view/AskUserView";
+import type { AskUserViewLabels } from "@/lib/ask-user/view/copy";
 import { getLocalePlugin } from "@/lib/i18n/registry";
 import { useI18n } from "@/hooks/useI18n";
 import type { AskUserAnswer, PendingAskUser } from "@/lib/types";

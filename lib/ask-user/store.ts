@@ -8,7 +8,7 @@ import {
   type AskUserSubmission,
   type PendingAskOpenResult,
   type PendingAskUser,
-} from "./portable/types";
+} from "./types";
 import {
   cloneAsk,
   cloneQuestion,
@@ -19,11 +19,11 @@ import {
   validateQuestions,
   validateSubmission,
   type RecordedAnswers,
-} from "./portable/validation";
-import { renderAskUserAnswersText, renderSupersededAskText } from "./portable/format";
+} from "./validation";
+import { renderAskUserAnswersText, renderSupersededAskText } from "./format";
 
 // Re-exported so existing Pi Web imports from `./store` and `./index` keep
-// working while the definitions live in the portable package.
+// working while the definitions live in the Web protocol modules.
 export { PendingAskValidationError, renderAskUserAnswersText, renderSupersededAskText };
 export type { PendingAskOpenResult };
 
@@ -52,7 +52,7 @@ export type PendingAskCloseResult =
  * Server-owned open-ask state: one unanswered question set per session.
  *
  * The store is pure domain logic — no Next.js, no Pi session, no I/O, no
- * timers. It validates asks and answers (through the shared portable
+ * timers. It validates asks and answers (through the Web protocol
  * validator), owns the open/supersede/submit/cancel transitions, and computes
  * the answered-versus-unanswered outcome that both the model-facing message and
  * the browser record are rendered from. Callers publish the returned asks and

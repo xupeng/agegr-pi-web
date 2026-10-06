@@ -1,15 +1,17 @@
+> Current owner: Pi Web projection only. The former portable Pi package was retired; this view/controller is not an installable tool or a dependency on the external TUI host.
+
 # `AskUserView` — shared React view
 
 Host-neutral React rendering for the `ask_user` questions. One component and
-one accessibility implementation are shared by every host; a host only supplies
+one accessibility implementation belong to the Web host; a host only supplies
 the display copy and a palette mapping.
 
 ```
-lib/ask-user/portable/view-controller.ts   pure form state (no framework)
-lib/ask-user/portable/react/AskUserView.tsx React view (peer: react)
+lib/ask-user/view-controller.ts   pure form state (no framework)
+lib/ask-user/view/AskUserView.tsx React view (peer: react)
         ↑ consumes
 Pi Web  AskUserAppHost                     host adapter: copy + CSS vars + commands
-PA      its own host adapter               same, another repository
+External tool / TUI                       separate host; no React import
 ```
 
 The view never imports a host: no `@/` alias, no `lib/i18n`, no Next, no
@@ -119,8 +121,7 @@ Notes:
 - `--pi-ask-success` is `#16a34a` (the value the rest of Pi Web uses), not the
   retired native card's `#10b981`.
 - The stylesheet is rendered by the component itself as one `<style>` element;
-  the package is a `private: true` TS-direct-load Pi extension and cannot
-  assume a CSS loader.
+  the view is a pure Web-owned component and does not require a package CSS loader.
 
 Pi Web mapping example:
 

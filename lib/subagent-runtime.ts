@@ -1,3 +1,4 @@
+import { projectAskUserTools } from "./ask-user/extension-policy";
 import type { ThinkingLevel } from "@earendil-works/pi-agent-core";
 import {
   createAgentSessionFromServices,
@@ -264,6 +265,7 @@ export function createSubagentController(
         settingsManager,
         resourceLoaderOptions: {
           noExtensions: !profile.loadExtensions,
+          extensionsOverride: (base) => projectAskUserTools(base, false),
           noSkills: !profile.loadSkills,
           noPromptTemplates: true,
           noThemes: true,
@@ -334,7 +336,7 @@ export function createSubagentController(
         model: requestedModel ?? parentModel,
         ...(thinking ? { thinkingLevel: thinking as ThinkingLevel } : {}),
         tools: activeTools,
-        excludeTools: [...SUBAGENT_CONTROL_TOOL_NAMES],
+        excludeTools: [...SUBAGENT_CONTROL_TOOL_NAMES, "ask_user"],
       });
       dependencies.registerSession(inner, {
         ...(promptPlan.exactSystemPrompt !== undefined

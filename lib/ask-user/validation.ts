@@ -1,13 +1,4 @@
-/**
- * The single `ask_user` schema validator, shared by the local Pi package entry
- * and Pi Web's server-side store.
- *
- * `validateQuestions` is applied by the portable bridge before it emits a host
- * registration request, and again by any host that keeps its own open-ask
- * store, so a malformed ask can never be silently accepted. `validateSubmission`
- * and `normalizeSupplement` guard the other direction: answers a browser sends
- * back. Kept free of framework, SDK, Node, and host imports.
- */
+/** Host-owned v1 question/answer validation. No model parameter schema or tool implementation. */
 
 import {
   ASK_USER_ID_MAX_LENGTH,
@@ -34,7 +25,7 @@ export class PendingAskValidationError extends Error {
 export type RecordedAnswers = ReadonlyMap<string, AskUserAnswer>;
 
 /** Validate and clone a whole question set; the returned array is detached. */
-export function validateQuestions(questions: AskUserQuestion[]): AskUserQuestion[] {
+export function validateQuestions(questions: unknown): AskUserQuestion[] {
   if (!Array.isArray(questions) || questions.length === 0) {
     throw new PendingAskValidationError("An ask must contain at least one question");
   }
@@ -111,7 +102,7 @@ export function requireId(value: unknown, field: string): string {
 }
 
 function validateQuestion(
-  question: { question: unknown; detail?: unknown; options: unknown; multiple?: unknown },
+  question: Record<string, unknown>,
   id: string,
 ): AskUserQuestion {
   if (!Array.isArray(question.options)) {
@@ -128,6 +119,9 @@ function validateQuestion(
     seenValues.add(value);
     return validateOption(option, value, id);
   });
+  if (question.multiple !== undefined && typeof question.multiple !== "boolean") {
+    throw new PendingAskValidationError(`Question ${id} multiple must be a boolean`);
+  }
   const detail = question.detail;
   return {
     id,

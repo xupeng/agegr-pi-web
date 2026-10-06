@@ -1,9 +1,4 @@
-/**
- * Model-facing text for a closed `ask_user` set.
- *
- * Pure formatting shared by the portable package and Pi Web: the model reads
- * this, so it must name unanswered questions as plainly as answered ones.
- */
+/** Web answer follow-up formatting, shared by state and delivery. */
 
 import type { AskUserOutcome, AskUserQuestionRecord } from "./types";
 

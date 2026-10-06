@@ -6,7 +6,7 @@
 `light-dark()` / system-font fallbacks alone.
 
 ```bash
-node lib/ask-user/portable/react/fixture/render.mjs
+node lib/ask-user/view/fixture/render.mjs
 ```
 
 The script renders an ask with a single-choice question, a multiple-choice
