@@ -127,6 +127,28 @@ Stop、watchdog、公开 abort、ask pause、最终 error/aborted/length、无�
 - 布局回归：`components/NotificationCenter.test.mjs` 的纯几何矩阵与 ref/observer/CSS 合同；`e2e/notification-center-layout.mjs` 真实 Chromium 的667/800/1024/1280、641紧凑列、侧栏开关/拖宽、左右同时展开、open期间跨640断点往返、长列表滚动/关闭、390全屏44px。常规桌面要求中心误差≤2px、宽度≤460且≤列宽−24、左右各≥12px、工具栏下方；150px反例必须是126px面板，不能仅断言“280px在viewport可见”。
 - 真正 SDK/API 运行态验证隔离 HOME 与 PI_CODING_AGENT_DIR；验证依赖先 `npm ci --include=dev`，不调用真实付费 provider/MCP，不在开发 checkout 跑 `next build`。仅前端布局可复用已有用户 dev 服务，但须独立浏览器profile、block ServiceWorker、全部 `/api/**` 本地fixture兜底且非GET拒绝，不能写真实agent目录。这种浏览器证据不冒充后端/同步/ack验收；Safari/iOS/Windows 未运行就单独披露。
 
+### 6.1 标准 runner 的临时目录合同
+
+- 范围：`agent-run-observer.integration.test.mjs` 与 `rpc-manager.notifications.test.mjs`。
+  本机推荐pi-tmp-run，但标准 `npm test` / CI不依赖个人二进制或必须设置PI_TASK_TMPDIR。
+- 分配签名：`mkdtempSync(join(process.env.PI_TASK_TMPDIR ?? tmpdir(), prefix))`，
+  `tmpdir` 来自 `node:os`；有PI_TASK_TMPDIR优先，无则尊重TMPDIR/平台默认临时根。
+- 每文件创建独占小fixture；SDK/Jiti runtime import之前设独立HOME和PI_CODING_AGENT_DIR，
+  `after` 只移除自有随机子目录。不得把源码/依赖/worktree或大型browser产物放入/tmp。
+  offline/MCP flags仅在这两份测试文件的Node子进程设置，不能加到全局CI/npm script。
+- 验证矩阵：有PI_TASK_TMPDIR→优先该根；仅TMPDIR（包括空格）→平台API尊重该根；
+  两者均无→正常创建平台小fixture；根不存在→Node文件系统错误，不回退真实HOME/agentDir。
+  前三种必须真实跑40项SDK/runtime测试且自有scratch无残留，另核对setup顺序与完整npm test。
+- Good：个人wrapper可选且标准runner保持相同隔离；Base：CI未注入任何个人变量；
+  Bad：module初始化 `assert.ok(process.env.PI_TASK_TMPDIR)`，导致40项测试根本没有执行。
+
+```js
+// Wrong: only the developer's private wrapper can start these tests.
+assert.ok(process.env.PI_TASK_TMPDIR);
+// Correct: optional local root, otherwise standard platform temp behavior.
+const scratch = mkdtempSync(join(process.env.PI_TASK_TMPDIR ?? tmpdir(), prefix));
+```
+
 ## 7. Wrong vs Correct
 
 ```ts
