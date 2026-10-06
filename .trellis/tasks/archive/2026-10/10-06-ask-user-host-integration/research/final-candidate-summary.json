@@ -1,0 +1,50 @@
+{
+  "scope": "final reviewed validation snapshot; browser separate",
+  "ref": "8a4699c435eddc06ae3b3f23f088d0896d75cddb",
+  "tree": "c15f300519f7d6e8f557fa098ec44d25d64cee8e",
+  "sameBaselineInstall": true,
+  "manifestLockUnchanged": true,
+  "gates": {
+    "tscExit": 0,
+    "lintExit": 0,
+    "eslintExit": 0,
+    "testsExit": 0,
+    "installedSmokeExit": 0
+  },
+  "lint": {
+    "files": 703,
+    "errors": 0,
+    "warnings": 0
+  },
+  "tests": {
+    "tests": 2870,
+    "suites": 13,
+    "pass": 2870,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "testDeltaVsBaseline": 112,
+  "testDeltaVsPreliminary": 127,
+  "addedCaseBreakdown": {
+    "activationParity": 18,
+    "selectionParity": 108,
+    "frozenDefinitionNoMutation": 1
+  },
+  "installedSmoke": {
+    "externalHead": "59e0256c869e9ce04abffc1204537c7bf1501450",
+    "hostFourDirect": "1.0.0",
+    "sourceHashesAndHostIdentityMatchPreliminary": true,
+    "modelAskTurns": 4,
+    "directExecutes": 1,
+    "followUpTurns": 5,
+    "providerCalls": 9,
+    "opened": 5,
+    "closed": 5,
+    "realReloads": 3,
+    "terminate": true,
+    "uiCustom": 0,
+    "offline": "1"
+  }
+}

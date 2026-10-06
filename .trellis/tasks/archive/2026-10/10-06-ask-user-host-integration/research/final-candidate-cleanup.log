@@ -1,0 +1,4 @@
+Own final-validation process scan (no env; excludes main browser/services):
+verified uid=1000, inode=7138173, no inherited pi-tmp lock, formal failure logs present: /home/xupeng/.cache/pi-tmp/01a10fa1-d7ee-753b-a8de-d7aa28090808/ask-user-final-candidate-installed-apputxaz
+removed exact own redundant failure scratch: /home/xupeng/.cache/pi-tmp/01a10fa1-d7ee-753b-a8de-d7aa28090808/ask-user-final-candidate-installed-apputxaz
+No main browser artifact/process, other task, worktree or node_modules removed.

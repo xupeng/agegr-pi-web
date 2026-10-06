@@ -1,37 +1,40 @@
 import type { InlineExtension } from "@earendil-works/pi-coding-agent";
-import { isAskUserEnabled } from "../ask-user-settings";
-import type { PendingAskOpenResult } from "./store";
-import { createAskUserToolDefinition, type AskUserInvocation } from "./tool";
+import { ASK_USER_BRIDGE_CHANNEL, decodeAskUserOpenRequest } from "./protocol";
+import type { PendingAskOpenInput, PendingAskOpenResult } from "./store";
 
 export interface AskUserSessionHandle {
-  openAsk(input: AskUserInvocation): Promise<PendingAskOpenResult>;
+  readonly sessionId: string;
+  isAlive(): boolean;
+  openAsk(input: PendingAskOpenInput): Promise<PendingAskOpenResult>;
 }
 
-/**
- * Inline extension that registers the `ask_user` tool when enabled.
- *
- * As an extension rather than an SDK `customTools` entry, the tool is
- * re-registered on every session reload, so toggling the setting in the UI and
- * reloading the session applies the change — the same lifecycle as the
- * built-in subagents extension. Registration is skipped while disabled; a
- * session created before the toggle keeps its already-registered tool until it
- * is reloaded, matching the built-in subagents behavior.
- */
+/** Bridge-only Web host. The SDK-discovered extension owns the tool. */
 export function createAskUserExtension(
   getSession: (sessionId: string) => AskUserSessionHandle | undefined,
+  getLoaderSessionId: () => string,
 ): InlineExtension {
   return {
-    name: "pi-web-ask-user",
+    name: "pi-web-ask-user-host",
     hidden: true,
     factory: (pi) => {
-      if (!isAskUserEnabled()) return;
-      pi.registerTool(createAskUserToolDefinition({
-        open: async (input) => {
-          const session = getSession(input.sessionId);
-          if (!session) throw new Error("ask_user: no live session for this call");
-          return session.openAsk(input);
-        },
-      }));
+      // Registration must be synchronous; only opening the ask may await.
+      // pi.events belongs to this loader and the SDK tears it down on reload.
+      pi.events.on(ASK_USER_BRIDGE_CHANNEL, (resolution: unknown) => {
+        if (!resolution || typeof resolution !== "object" || !("register" in resolution)
+          || typeof resolution.register !== "function") return;
+        resolution.register(async (input: unknown) => {
+          const request = decodeAskUserOpenRequest(input);
+          const sessionId = getLoaderSessionId();
+          if (request.conversationId !== sessionId) {
+            throw new Error("ask_user: conversation identity does not match this loader");
+          }
+          const session = getSession(sessionId);
+          if (!session || !session.isAlive() || session.sessionId !== sessionId) {
+            throw new Error("ask_user: no live session for this call");
+          }
+          return session.openAsk({ sessionId, questions: request.questions });
+        });
+      });
     },
   };
 }

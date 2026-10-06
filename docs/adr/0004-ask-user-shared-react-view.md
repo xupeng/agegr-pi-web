@@ -1,3 +1,5 @@
+> 2026-10-06 follow-up: the portable Pi tool/package is retired. The unchanged Web view now lives in `lib/ask-user/view/`, controller in `lib/ask-user/view-controller.ts`. The system-installed extension owns the tool; Web and TUI hosts are parallel projections, not shared React package consumers. Details below record the original decision, not current installation instructions.
+
 # Render ask_user through a shared React view instead of MCP Apps
 
 Pi Web renders `ask_user` through `AskUserView`, a React component that lives

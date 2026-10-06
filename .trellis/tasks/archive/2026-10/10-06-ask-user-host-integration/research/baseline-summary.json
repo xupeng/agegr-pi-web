@@ -1,0 +1,48 @@
+{
+  "ref": "128fc3c7dd8cdf60aa4ebe12e7ec3c75c964f61f",
+  "worktree": "/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/ask-user-host-validation-20261006-01a10f47",
+  "installExit": 0,
+  "tscExit": 0,
+  "eslintExit": 0,
+  "lint": {
+    "files": 704,
+    "errors": 0,
+    "warnings": 0
+  },
+  "finalNpmTestExit": 1,
+  "counts": {
+    "tests": 2758,
+    "suites": 13,
+    "pass": 2754,
+    "fail": 4,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "probeExit": 0,
+  "dependencyChecks": {
+    "pi-agent-core": {
+      "version": "1.0.0",
+      "installedMetadataMatchesLock": true
+    },
+    "pi-ai": {
+      "version": "1.0.0",
+      "installedMetadataMatchesLock": true
+    },
+    "pi-coding-agent": {
+      "version": "1.0.0",
+      "installedMetadataMatchesLock": true
+    },
+    "pi-tui": {
+      "version": "1.0.0",
+      "installedMetadataMatchesLock": true
+    }
+  },
+  "versions": {
+    "typescript": "5.9.3",
+    "eslint": "9.39.4",
+    "eslint-config-next": "16.3.6",
+    "jiti": "2.7.0",
+    "eslint-config-next/node_modules/eslint-plugin-react-hooks": "7.0.1"
+  }
+}

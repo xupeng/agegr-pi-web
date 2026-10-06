@@ -8,8 +8,3 @@ export {
   type PendingAskOpenInput,
   type PendingAskStoreOptions,
 } from "./store";
-export {
-  createAskUserToolDefinition,
-  type AskUserInvocation,
-  type AskUserToolDeps,
-} from "./tool";

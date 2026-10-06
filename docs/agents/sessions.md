@@ -53,3 +53,6 @@ On mount `useAgentSession` loads the history, then `GET /api/sessions/[id]/state
 
 ## Exported session HTML
 - `/api/sessions/[id]/export` delegates to pi's export helper, then makes the generated HTML's recursive tree helpers iterative, so very deep linear sessions do not overflow the browser call stack.
+
+## AskUser Web bridge lifetime
+The bridge-only inline host uses the same SDK loader's `pi.events`, registers async open synchronously, validates the v1 payload and loader conversation identity, and looks up the alive registry wrapper at call time. It holds no wrapper across reload/shutdown. Missing/closing/mismatched wrappers fail closed. Pending hydrate, stale-close races, prompt admission and same-session fire-and-forget custom answers remain unchanged; persistence is still best-effort, not a durable outbox. See [AskUser protocol](../../.trellis/spec/frontend/ask-user-protocol.md).

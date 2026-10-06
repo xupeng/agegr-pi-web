@@ -34,6 +34,7 @@ import {
   preferPiWebSubagentExtension,
 } from "./subagent-extension";
 import { createAskUserExtension } from "./ask-user/extension";
+import { projectAskUserTools } from "./ask-user/extension-policy";
 import {
   listSubagentProfiles,
   readSubagentRun,
@@ -66,7 +67,7 @@ import {
   renderAskUserAnswersText,
   type AskUserAnswer,
   type AskUserCloseResponse,
-  type AskUserInvocation,
+  type PendingAskOpenInput,
   type AskUserOutcome,
   type AskUserSubmission,
   type PendingAskCloseResult,
@@ -587,7 +588,7 @@ export class AgentSessionWrapper {
    * Rejected question sets throw {@link PendingAskValidationError}, which the
    * agent loop reports to the model as an error tool result.
    */
-  openAsk(input: AskUserInvocation): Promise<PendingAskOpenResult> {
+  openAsk(input: PendingAskOpenInput): Promise<PendingAskOpenResult> {
     const result = getAskUserStore().open(input);
     // A supersede closes the earlier ask, so the browsers watching it must
     // hear that before they hear about its replacement.
@@ -2686,6 +2687,7 @@ export async function startRpcSession(
       resourceLoaderOptions: subagentResources
         ? {
             noExtensions: !subagentResources.loadExtensions,
+            extensionsOverride: (base) => projectAskUserTools(base, false),
             noSkills: !subagentResources.loadSkills,
             noPromptTemplates: true,
             noThemes: true,
@@ -2714,9 +2716,9 @@ export async function startRpcSession(
                 () => listSubagentProfiles(sessionCwd),
                 isBuiltInSubagentsEnabled,
               ),
-              createAskUserExtension((sessionId) => getRegistry().get(sessionId)),
+              createAskUserExtension((sessionId) => getRegistry().get(sessionId), () => sessionManager.getSessionId()),
             ],
-            extensionsOverride: (base) => preferUserBashExtension(preferPiWebSubagentExtension(base)),
+            extensionsOverride: (base) => projectAskUserTools(preferUserBashExtension(preferPiWebSubagentExtension(base))),
           },
       ...(trustReloadOptions ? { resourceLoaderReloadOptions: trustReloadOptions } : {}),
     });
@@ -2758,7 +2760,7 @@ export async function startRpcSession(
       ...(initial?.thinkingLevel ? { thinkingLevel: initial.thinkingLevel } : {}),
       ...(scope.scopedModels.length > 0 ? { scopedModels: [...scope.scopedModels] } : {}),
       ...(toolsOption !== undefined ? { tools: toolsOption } : {}),
-      ...(subagentResources ? { excludeTools: [...SUBAGENT_CONTROL_TOOL_NAMES] } : {}),
+      ...(subagentResources ? { excludeTools: [...SUBAGENT_CONTROL_TOOL_NAMES, "ask_user"] } : {}),
     });
 
     // A pinned selection replaces only the coding tools of the SDK's initial loadout, which

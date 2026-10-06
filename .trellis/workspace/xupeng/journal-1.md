@@ -1626,3 +1626,45 @@ Merged 47 frozen upstream commits through 6fcd7d4 in an isolated worktree, prese
 ### Next Steps
 
 - Task branch remains local. Push, PR creation, merging into personal and npm release require a separate user request; Safari/Windows and real external OAuth/model completion remain untested.
+
+
+## Session 37: System-installed AskUser Web host integration
+
+**Date**: 2026-10-06
+**Task**: System-installed AskUser Web host integration
+**Branch**: `ask-user-host-integration`
+
+### Summary
+
+Integrate the SDK-discovered system AskUser as the only tool source, retire duplicate tools and Web-specific settings, and deliver final logical commits with same-branch task archival.
+
+### Main Changes
+
+- Bind a loader-scoped bridge-only Web host; preserve installed execute/schema/prompt/source and native SDK activation while enforcing model-only and main-session admission.
+- Retire the portable executable tool package and dedicated UI/API/helper/env gate; preserve the Web view, pending lifecycle and existing best-effort persistence/follow-up semantics.
+- Keep code and regressions together, specs separately, then task evidence and archive; no exploratory/WIP/fixup history, push, PR or deployment.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `c275bf2` | (see git log) |
+| `2f54c1b` | (see git log) |
+| `ebebbe5` | (see git log) |
+| `03bfb00` | (see git log) |
+
+### Testing
+
+- [OK] Final clean npm-ci snapshot: TypeScript 0 diagnostics; ESLint 703 files, 0 errors/0 warnings; hermetic npm test 2870/2870, 13 suites.
+- [OK] Actual installed-source independent copy passed SDK/Web-wrapper smoke, same-session submit/cancel and three real reloads; protocol-peer and installed-source Chromium host-chain runs passed separately.
+- [OK] Full Chromium e2e passed on retry using the existing version-check skip in an offline namespace; initial environment failures and raw evidence retained under the archived task.
+- [OK] Committed source/test/spec tree matches validation ref 8a4699c435eddc06ae3b3f23f088d0896d75cddb; owned test processes, scratch and validation worktree cleaned.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Production bundle/distribution, real TUI UI/PTY, Safari/iOS and Windows remain unverified (AC6 not fully checked); task archive is not release validation.
+- Push, PR creation and live deployment/restart require separate authorization; the existing deployed service was not changed.

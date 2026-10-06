@@ -1,0 +1,22 @@
+pi-tmp: workspace /home/xupeng/.cache/pi-tmp/01a10fa1-d7ee-753b-a8de-d7aa28090808/ask-user-baseline-probe-3kwq3vui
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ undefined
+- '/home/xupeng/.cache/pi-tmp/01a10fa1-d7ee-753b-a8de-d7aa28090808/ask-user-baseline-probe-3kwq3vui/actual-system-package-copy/index.ts'
+
+    at file:///home/xupeng/dev/personal/forked/agegr-pi-web/.trellis/tasks/10-06-ask-user-host-integration/research/baseline-probe.mjs:119:10 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: undefined,
+  expected: '/home/xupeng/.cache/pi-tmp/01a10fa1-d7ee-753b-a8de-d7aa28090808/ask-user-baseline-probe-3kwq3vui/actual-system-package-copy/index.ts',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.21.0
+pi-tmp: retained failure workspace (7 idle days): /home/xupeng/.cache/pi-tmp/01a10fa1-d7ee-753b-a8de-d7aa28090808/ask-user-baseline-probe-3kwq3vui

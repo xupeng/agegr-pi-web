@@ -1,0 +1,33 @@
+parent_netns=net:[4026531833]
+{"stage":"namespace","offline":"1","netns":"net:[4026532898]","interfaces":["lo"],"routes":"Iface\tDestination\tGateway \tFlags\tRefCnt\tUse\tMetric\tMask\t\tMTU\tWindow\tIRTT                                                       \n"}
+loopback-connect=ok
+ISOLATION-AUDIT:{"argv":["/home/xupeng/.local/share/mise/installs/node/24.21.0/bin/node","/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/ask-user-host-validation-20261006-01a10f47/lib/ask-user/portable/bridge.test.mjs"],"offline":"1","testContext":"child-v8"}
+✔ shared validator rejects malformed question sets (1.353836ms)
+✔ shared validator rejects answers that do not fit the ask (0.400251ms)
+✔ missing host bridge fails closed and the host is never called (0.370612ms)
+✔ multiple host bridges fail closed (0.30166ms)
+✔ a bridge that registers after an await is treated as absent (0.259248ms)
+✔ a malformed ask is rejected before the bridge is emitted (0.218357ms)
+✔ a valid bridge receives the validated ask and its durable ack is returned (0.927962ms)
+✔ a host rejection propagates unchanged (0.217144ms)
+✔ invalid or missing durable acknowledgements fail closed (0.613229ms)
+✔ an empty conversation identity fails closed (0.242339ms)
+✔ acknowledgement questions must match the validated ask identity (0.321106ms)
+✔ a cloned acknowledgement with the same question identity succeeds (0.349695ms)
+✔ mutating the delivered questions cannot forge a matching acknowledgement (0.174131ms)
+✔ an invalid supersede acknowledgement fails closed and is not treated as success (0.414655ms)
+ISOLATION-AUDIT:{"argv":["/home/xupeng/.local/share/mise/installs/node/24.21.0/bin/node","/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/ask-user-host-validation-20261006-01a10f47/lib/plugin-updates.test.mjs"],"offline":"0","testContext":"child-v8"}
+✔ only exact npm versions and Git refs are pinned (0.981363ms)
+✔ a single-plugin check only runs that plugin's remote command (2.031376ms)
+✔ missing installs and failed commands return errors (0.725521ms)
+✔ npm checks compare the installed version with the selected range (3.17636ms)
+✔ Git checks compare local HEAD with the upstream remote ref (0.830152ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 866.534923
+worker-argv-and-offline-boundaries=ok

@@ -1,0 +1,14 @@
+Final ref/tree/full status:
+8a4699c435eddc06ae3b3f23f088d0896d75cddb
+c15f300519f7d6e8f557fa098ec44d25d64cee8e
+?? test-results
+Tracked diff check:
+tracked_diff_exit=0
+Manifest/lock/probe:
+8d6f804dcbc7118c979d6c0a1e88c211d543b254125000d5a34ad04e15ca8713  /home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/ask-user-host-validation-20261006-01a10f47/package.json
+18c40d7685f7501d46e66450e5470fd064124f9662b17ac310fce042491d322f  /home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/ask-user-host-validation-20261006-01a10f47/package-lock.json
+713320d745c76c7e7a0f355d530bdbe391a2b134dc29dbd2785006fde1b5857d  /home/xupeng/dev/personal/forked/agegr-pi-web/.trellis/tasks/10-06-ask-user-host-integration/research/candidate-installed-probe.mjs
+External full HEAD/status:
+59e0256c869e9ce04abffc1204537c7bf1501450
+Own final scratch remaining:
+Unique node_modules retained
