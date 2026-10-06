@@ -16,6 +16,7 @@ import {
 } from "@/lib/session-reader";
 import { sessionPathKey } from "@/lib/session-path";
 import { forgetPersistedAsk } from "@/lib/ask-user/persist";
+import { beginNotificationSessionDeletion, forgetNotificationSession } from "@/lib/notifications/store";
 import { abortSubagent, getRpcSession, getRpcSessionInfos } from "@/lib/rpc-manager";
 import { projectTreeForResponse, toSummaryTree } from "@/lib/project-tree";
 import { computeSessionTotalActiveMs } from "@/lib/session-timing";
@@ -205,6 +206,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  let releaseNotificationDeletion: (() => void) | undefined;
   try {
     const filePath = await resolveSessionPath(id);
     if (!filePath) {
@@ -279,6 +281,7 @@ export async function DELETE(
         pending.push(childId);
       }
     }
+    releaseNotificationDeletion = beginNotificationSessionDeletion([...deletedSessionIds]);
     // A previous abort may have persisted a cleanup failure and removed its
     // transient execution record. Refuse retries while that worktree still
     // exists; once the user removes it manually the session can be deleted.
@@ -332,6 +335,14 @@ export async function DELETE(
       if (!isInactiveSubagentError(error)) throw error;
     }
     await getRpcSession(id)?.shutdown();
+
+    // No-path transient descendants were actually removed by shutdown.
+    for (const deletedId of deletedSessionIds) {
+      if (deletedPaths.has(deletedId)) continue;
+      forgetPersistedAsk(deletedId);
+      forgetNotificationSession(deletedId);
+      invalidateSessionPathCache(deletedId);
+    }
 
     // Re-attach ordinary forks only after every deleted runtime has settled.
     // A cleanup failure must return 500 without rewriting survivor metadata.
@@ -391,14 +402,18 @@ export async function DELETE(
       }
       invalidateSessionPathCache(deletedId);
       invalidateSessionManagerCache(deletedPath);
-    }
-    for (const deletedId of deletedSessionIds) {
+      // Clean only successful unlinks (or confirmed ENOENT). A later failure
+      // must preserve the notifications for every file not actually deleted.
       forgetPersistedAsk(deletedId);
+      forgetNotificationSession(deletedId);
+      invalidateSessionListCache();
     }
     invalidateSessionPathCache(id);
     invalidateSessionListCache();
     return NextResponse.json({ ok: true });
   } catch (error) {
     return NextResponse.json({ error: String(error) }, { status: 500 });
+  } finally {
+    releaseNotificationDeletion?.();
   }
 }
