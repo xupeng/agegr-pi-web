@@ -511,16 +511,10 @@ try {
     const heading = page.getByRole("heading", { name: "E2E compacted heading", exact: true });
     await heading.waitFor({ state: "attached" });
     if (viewport.width > 600) {
-      // The preview opens from the rail itself, so which tick the pointer lands on does not
-      // matter: a tick only exists for an outline row, so the rail's node indices are the outline
-      // rows' indices (sparse) rather than a dense 0..n sequence.
-      const rail = page.locator(".chat-content .scrollbar-subtle + div");
-      await rail.waitFor();
-      const rect = await rail.boundingBox();
-      assert.ok(rect);
-      // Resting the pointer on the rail opens the preview panel; the click also covers the
-      // touch-device path, where a tap is the only way in.
-      await page.mouse.click(rect.x + rect.width / 2, rect.y + rect.height / 2);
+      // Only actual outline rows accept pointer hits; the full-height column's midpoint may
+      // be blank. Node indices are sparse, so locate a rendered tick instead of assuming index 0.
+      const tick = page.locator("[data-minimap-node-index]").first();
+      await tick.click();
       const preview = page.locator("[data-minimap-preview-box]");
       await preview.getByRole("button", { name: "E2E compaction anchor", exact: true }).waitFor();
       await preview.getByRole("button", { name: "E2E compacted heading", exact: true }).click();

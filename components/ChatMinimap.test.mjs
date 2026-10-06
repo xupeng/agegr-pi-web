@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { registerHooks } from "node:module";
 import test from "node:test";
 import React from "react";
@@ -21,6 +22,24 @@ const jiti = createJiti(import.meta.url, {
   tsconfigPaths: true,
 });
 const { AssistantOutline, countToolCalls, tickSpacing } = await jiti.import("./ChatMinimap.tsx");
+
+test("only tick rows and the preview accept pointer events, not the full-height rail", async () => {
+  const source = await readFile(new URL("./ChatMinimap.tsx", import.meta.url), "utf8");
+  const css = await readFile(new URL("./ChatMinimap.module.css", import.meta.url), "utf8");
+  const rail = source.match(/<div\s+ref=\{containerRef\}[\s\S]*?\n    >/)?.[0];
+  const tickRow = source.match(/<div\s+key=\{node.index\}[\s\S]*?\n          >/)?.[0];
+  assert.ok(rail, "the layout rail must retain its shared event handlers");
+  assert.match(rail, /onClick=\{togglePreview\}/);
+  assert.match(rail, /onMouseEnter=\{handleRailEnter\}/);
+  assert.match(rail, /onMouseLeave=\{handleRailLeave\}/);
+  assert.match(rail, /width: CHAT_MINIMAP_WIDTH/);
+  assert.match(rail, /pointerEvents: "none"/);
+  assert.ok(tickRow, "each outline tick must have an interactive row");
+  assert.match(tickRow, /data-minimap-node-index=\{node.index\}/);
+  assert.match(tickRow, /left: 0,\s+right: 0,\s+height: Math.max\(1, nodeGap\)/);
+  assert.match(tickRow, /pointerEvents: "auto"/);
+  assert.match(css, /\.preview\s*\{[^}]*pointer-events:\s*auto;/);
+});
 
 test("renders math in headings without disabling heading navigation", () => {
   const html = renderToStaticMarkup(
