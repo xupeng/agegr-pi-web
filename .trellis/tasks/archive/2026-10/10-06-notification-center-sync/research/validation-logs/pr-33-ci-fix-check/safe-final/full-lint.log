@@ -1,0 +1,7 @@
+$ "npm" "run" "lint" "--" "--format" "json" "--output-file" "/home/xupeng/dev/personal/forked/agegr-pi-web/.trellis/tasks/archive/2026-10/10-06-notification-center-sync/research/validation-logs/pr-33-ci-fix-check/safe-final/eslint.json"
+
+> @xup3ng/pi-web@0.12.0 lint
+> eslint . --format json --output-file /home/xupeng/dev/personal/forked/agegr-pi-web/.trellis/tasks/archive/2026-10/10-06-notification-center-sync/research/validation-logs/pr-33-ci-fix-check/safe-final/eslint.json
+
+
+exit=0; signal=null; error=none

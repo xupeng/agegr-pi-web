@@ -1,0 +1,75 @@
+$ "env" "-u" "PI_TASK_TMPDIR" "node" "--experimental-strip-types" "--test" "lib/agent-run-observer.integration.test.mjs" "lib/rpc-manager.notifications.test.mjs"
+[pi-web] session_start dispatched to extensions for session 01a111a1-7770-7034-95cf-91a322bd8ff5
+[pi-web] session_start dispatched to extensions for session 01a111a1-77a4-7034-95cf-91a50cca31ce
+✔ real normal run uses persisted turn entry, never latest leaf or message_end, with visible text only (52.288399ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-77b2-7034-95cf-91a75454f7ee
+✔ Chat-only keeps exact prompt, empty tools and no discovered resources with observer (13.690045ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-77c0-7034-95cf-91a9bff8d626
+✔ retry error then success shares one identity and one completion (14.161884ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-77ca-7034-95cf-91ab6a81727f
+✔ real final error produces no completion (9.933372ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-77d6-7034-95cf-91acd760e254
+✔ real final aborted produces no completion (11.468849ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-77e0-7034-95cf-91aefbe5c06f
+✔ real final length produces no completion (9.616342ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-77ec-7034-95cf-91b1f8ef509e
+✔ before-settle continuation and agent_end queued follow-up notify once after the final turn (12.201743ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-77f8-7034-95cf-91b2fabaa99e
+[pi-web] session_start dispatched to extensions for session 01a111a1-7801-7034-95cf-91b5195e6cff
+✔ settled deferred injection freezes separate identities and delivers in run order (12.443085ms)
+✔ ordinary extension injection without a wrapper prompt is collected (8.847575ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-781e-7034-95cf-91b7396d0c0f
+✔ handled command/input without actual runs cannot complete (28.350508ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-782a-7034-95cf-91b90f6630e1
+✔ openAsk pause survives a quick close before settled (12.208158ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-7832-7034-95cf-91bade580cf9
+✔ public ctx.abort before-settle marks Stop even after a successful model stop (8.005502ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-783a-7034-95cf-91bd0efc73ed
+✔ subagent suppression excludes completions and runtime pending snapshots (7.649153ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-7844-7034-95cf-91bef05b5110
+✔ real reload replaces observers rather than accumulating registrations (10.653033ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-784f-7034-95cf-91c1832717f0
+[pi-web] session_start dispatched to extensions for session 01a111a1-7855-7034-95cf-91c23230f05b
+✔ auto-compaction recovery continues the same run and completes only the successful retry (10.386984ms)
+✔ manual compaction without actual agent_start cannot create completion (6.396781ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-7864-7034-95cf-91c4363b8ddd
+✔ standalone real SDK bash execution creates no agent completion (14.582526ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-786c-7034-95cf-91c702314a50
+✔ Stop during held before-settle vetoes a normally stopped model result (7.772171ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-7874-7034-95cf-91c8f1adbdbd
+✔ direct SDK promise rejection after turn boundary and settled is vetoed (8.408345ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-788c-7034-95cf-91ca7b53c1c9
+[pi-web] session_start dispatched to extensions for session 01a111a1-788f-7034-95cf-91cdd8bb5fc1
+✔ a caught auxiliary extension handler error does not veto a successful model run (23.507408ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-789a-7034-95cf-91ce71525ef0
+[pi-web] session_start dispatched to extensions for session 01a111a1-78a1-7034-95cf-91d0b95cf107
+✔ native SDK and observed normal session have identical provider prompt and tool/resource loadout (14.601801ms)
+✔ real blocking extension command pending is projected, closes normally, and handled creates no run (6.465338ms)
+✔ exhausted retry final error cannot replace an earlier successful completion (11.207837ms)
+✔ collection maps only validated durable assistant text and does not redeliver external notifications (3.224527ms)
+✔ completion commit guard rejects missing-entry (0.381593ms)
+✔ completion commit guard rejects wrong-role (0.278653ms)
+✔ completion commit guard rejects suppressed (0.236386ms)
+✔ completion commit guard rejects deleting (0.489181ms)
+✔ completion commit guard rejects replacement (0.310102ms)
+✔ completion commit guard rejects closing (0.407394ms)
+✔ completion commit guard rejects destroyed (0.320305ms)
+✔ direct rejection veto runs before pending counts release and record (6.909424ms)
+✔ watchdog uses the Stop marking path before abort settles a successful witness (1.542576ms)
+✔ snapshots include alive negative ask state without construction or liveness side effects (0.881214ms)
+✔ ask open, replacement and actual close invalidate; reading leaves pending intact (1.750387ms)
+✔ blocking dialog open and close have first requestedAt, detached snapshots and invalidations (0.787559ms)
+✔ dialog timeout and signal cancellation invalidate without inventing a second request (1.139658ms)
+✔ custom redraw retains identity/first requestedAt; actual close invalidates and removes it (1.700619ms)
+✔ shutdown/destroy invalidate pending snapshot and do not retain an actionable request (0.316715ms)
+✔ factory wiring precedes SDK loader, is normal/Chat-only only, and leaves external owner untouched (0.677101ms)
+ℹ tests 40
+ℹ suites 0
+ℹ pass 40
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2374.463002
+
+exit=0; signal=null; error=none

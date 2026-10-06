@@ -4,6 +4,10 @@
 用户已确认并授权交付；工作 `1c0fde4`、规范 `c914947` 已提交，其余归档/日志/PR/合并
 按 `delivery.md` 的执行边界进行。历史候选记录仍保留其当时未提交身份。
 
+PR33已建立，首次远程lint/tsc/e2e通过而两份测试的本机temp变量前置assert失败；已完成
+test-only修复 `780c693` 与独立3005/3005复核。新补充证据见 `pr-ci-followup.md` / `pr-ci-review.md`，
+不覆盖或改写原始manifest；归档与journal跟随同一PR，不在base合并后补提交。
+
 ## 源码与依赖身份
 
 - 分支 `feat/notification-center-sync`，跟踪 `personal`；HEAD/baseline `e0ad63073c4c42987571d31b1a4cb61e48a1fcd4`。
