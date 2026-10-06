@@ -112,6 +112,7 @@ client不回显raw loader/auth message，未知/畸形DTO本地降级；目标ID
 - `lib/agent-event-stream.test.mjs`、`lib/agent-event-connection.test.mjs`及hook同文件：server真实bytes→connection→actualhook的startup拒绝三语/0POST/图片草稿/旧ask，unsafe/unacked/late/queued反例及lease cleanup；browser独立审计ready前SSE marker与0POST，不强迫失败一定先POST。
 - `e2e/subagent-model-selection.mjs`：真实Chromium API/SSE、new/warm/reload/cold、坏目标draft、明确picker与落盘、1280/390px、Kimi计数。未到达矩阵不算通过。
 - runtime验证隔离HOME/agentDir/XDG及祖先资源，依赖来自clean lock-consistent npm ci。只清理自己的PID/worktree/temp，日志/失败trace转存正式产物；不得next build污染dev。
+- native-search-hooks isolation也遵守[CI可移植临时根合同](notification-center.md)：`mkdtempSync(join(process.env.PI_TASK_TMPDIR ?? tmpdir(), prefix))`，不要求本机TMPDIR/个人wrapper存在，不禁止CI平台默认的小fixture根。HOME/agent/XDG隔离、owned-origin网络限制、13真实SDK cases及cleanup保持；wrapper与标准平台fallback都须执行，仅本机包装器下全绿不足以证明标准npm test/CI可运行。
 
 ## 7. 错误与正确方式
 
