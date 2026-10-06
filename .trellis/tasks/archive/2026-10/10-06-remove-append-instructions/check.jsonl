@@ -1,0 +1,4 @@
+{"file":".trellis/tasks/10-06-remove-append-instructions/research/provenance-and-scope.md","reason":"检查专属残留、旧导航回退、共享 reload/trust 与 SDK 原生保护"}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"三件套、基线归因、浏览器与源码证据区分"}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"桌面/移动设置、三语 key、挂载与焦点边界"}
+{"file":".trellis/spec/frontend/type-safety.md","reason":"退休 DTO 和 section 类型没有引用残留，历史 subagent 类型未改"}

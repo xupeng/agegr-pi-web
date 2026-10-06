@@ -1,0 +1,19 @@
+{
+  "http": [
+    {
+      "method": "GET",
+      "path": "/api/append-system",
+      "status": 404
+    },
+    {
+      "method": "PUT",
+      "path": "/api/append-system",
+      "status": 404
+    }
+  ],
+  "browser": [],
+  "errors": [
+    "AssertionError [ERR_ASSERTION]: Models made a real request\n    at file:///home/xupeng/dev/personal/forked/agegr-pi-web/.trellis/tasks/10-06-remove-append-instructions/research/browser-retirement.mjs:121:14"
+  ],
+  "serverStopped": true
+}

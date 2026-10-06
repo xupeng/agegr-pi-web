@@ -25,25 +25,20 @@ test("opens one settings panel from direct sidebar shortcuts", () => {
 });
 
 test("keeps every requested configuration surface inside the settings panel", () => {
-  for (const section of ["general", "models", "skills", "agents", "plugins", "append-system", "mcp"]) {
+  for (const section of ["general", "models", "skills", "agents", "plugins", "mcp"]) {
     assert.match(panelSource, new RegExp(`id: "${section}"`));
   }
-  for (const component of ["ModelsConfig", "SkillsConfig", "AgentsConfig", "PluginsConfig", "AppendSystemConfig", "McpConfig"]) {
+  for (const component of ["ModelsConfig", "SkillsConfig", "AgentsConfig", "PluginsConfig", "McpConfig"]) {
     assert.match(panelSource, new RegExp(`<${component} embedded`));
   }
 });
 
-test("a mounted Append instructions pane observes project trust without remounting its draft", () => {
-  assert.match(panelSource, /sectionHost\("append-system", <AppendSystemConfig embedded cwd=\{cwd\} sessionId=\{sessionId\} trust=\{projectTrust\}/);
-  assert.doesNotMatch(panelSource, /<AppendSystemConfig[^>]*key=/);
-});
-
-test("Append instructions and MCP both restore globally without changing project-only sections", async () => {
+test("Settings › MCP restores globally without changing project-only sections", async () => {
   const { createJiti } = await import("jiti");
   const { SETTINGS_SECTION_VALUES, getLastSettingsSection, setLastSettingsSection, settingsSectionRequiresProject } = await createJiti(import.meta.url).import("../lib/settings-navigation.ts");
   const values = new Map();
   const storage = { getItem: (key) => values.get(key) ?? null, setItem: (key, value) => values.set(key, value) };
-  for (const section of ["append-system", "mcp"]) {
+  for (const section of ["mcp"]) {
     assert.ok(SETTINGS_SECTION_VALUES.includes(section));
     assert.equal(settingsSectionRequiresProject(section), false);
     setLastSettingsSection(section, storage);

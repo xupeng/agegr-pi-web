@@ -1,0 +1,114 @@
+{
+  "http": [
+    {
+      "method": "GET",
+      "path": "/api/append-system",
+      "status": 404
+    },
+    {
+      "method": "PUT",
+      "path": "/api/append-system",
+      "status": 404
+    }
+  ],
+  "browser": [
+    {
+      "label": "desktop-global",
+      "width": 1280,
+      "height": 800,
+      "withProject": false,
+      "sections": 6,
+      "retiredRequests": 0,
+      "checks": [
+        "General fallback",
+        "selections retained",
+        "Models/MCP",
+        "visited pane mounted",
+        "Escape/close",
+        "MCP restored"
+      ],
+      "requests": [
+        "/api/projects",
+        "/api/open-in-explorer",
+        "/api/agent/running",
+        "/api/home",
+        "/api/web-auth",
+        "/api/extension-ui/settings",
+        "/api/tools/settings",
+        "/api/models/enabled",
+        "/api/models-config",
+        "/api/auth/providers",
+        "/api/mcp"
+      ]
+    },
+    {
+      "label": "mobile-global",
+      "width": 390,
+      "height": 844,
+      "withProject": false,
+      "sections": 6,
+      "retiredRequests": 0,
+      "checks": [
+        "General fallback",
+        "selections retained",
+        "Models/MCP",
+        "visited pane mounted",
+        "Escape/close",
+        "MCP restored"
+      ],
+      "requests": [
+        "/api/projects",
+        "/api/open-in-explorer",
+        "/api/agent/running",
+        "/api/home",
+        "/api/web-auth",
+        "/api/extension-ui/settings",
+        "/api/tools/settings",
+        "/api/models/enabled",
+        "/api/models-config",
+        "/api/auth/providers",
+        "/api/mcp"
+      ]
+    },
+    {
+      "label": "desktop-project",
+      "width": 1280,
+      "height": 800,
+      "withProject": true,
+      "sections": 6,
+      "retiredRequests": 0,
+      "checks": [
+        "General fallback",
+        "selections retained",
+        "Models/MCP",
+        "visited pane mounted",
+        "Escape/close",
+        "MCP restored"
+      ],
+      "requests": [
+        "/api/projects",
+        "/api/open-in-explorer",
+        "/api/agent/running",
+        "/api/home",
+        "/api/cwd/validate",
+        "/api/web-auth",
+        "/api/extension-ui/settings",
+        "/api/tools/settings",
+        "/api/files/var/tmp/append-retirement-browser-4RC68H/project",
+        "/api/git/status",
+        "/api/app-update",
+        "/api/models",
+        "/api/file-index",
+        "/api/project-trust",
+        "/api/worktrees",
+        "/api/sessions",
+        "/api/models/enabled",
+        "/api/models-config",
+        "/api/auth/providers",
+        "/api/mcp"
+      ]
+    }
+  ],
+  "errors": [],
+  "serverStopped": true
+}

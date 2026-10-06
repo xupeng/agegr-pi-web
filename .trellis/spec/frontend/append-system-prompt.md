@@ -1,99 +1,88 @@
-# 追加系统指令（APPEND_SYSTEM.md）编辑契约
+# 追加系统指令（APPEND_SYSTEM.md）：原生机制保留，Web 编辑器已退役
 
-> 设置面板里编辑 pi 原生全局追加提示的完整契约、边界与不变量。
-> 决策背景见 `docs/adr/0005-append-system-prompt-editor.md`。
+> **状态：Retired（2026-10-06）。** 本 fork 曾提供 Settings › Append instructions 编辑器与
+> `GET/PUT /api/append-system`。该 Web 编辑器链已按任务 `10-06-remove-append-instructions`
+> 移除；pi 原生文件机制**保持不变**。历史来源与决策见 `docs/adr/0005-append-system-prompt-editor.md`。
 
----
+## 1. 范围与退役边界
 
-## 它是什么
+本次只取消 fork 的 Web 编辑入口，不取消 SDK 原生文件加载。历史编辑器的 GET/PUT、DTO、
+字节计数和保存/reload 控件均不再属于现行接口；下文记录退役后的可执行边界。
 
-pi 有原生的「追加系统提示」文件机制：资源加载时把该文件内容并入**每一次**请求的系统提示。
-生效文件由 SDK 的 `discoverAppendSystemPromptFile()` 决定（`resource-loader.js:820-832`）：
-项目级 `<cwd>/.pi/APPEND_SYSTEM.md`（需项目受信 + 存在）→ 否则全局 `<agentDir>/APPEND_SYSTEM.md`
-→ 否则无。**只返回一个路径**：项目级是**覆盖**全局，不是叠加。
+## 2. 保留的原生能力与签名
 
-pi-web 只做「编辑全局那一个文件」的入口，不新造存储、不改注入链路。
+pi 原生「追加系统提示」文件机制不受本次退役影响，仍是唯一来源：
 
-| 落点 | 文件 |
+- 生效文件由 SDK 的 `DefaultResourceLoader.discoverAppendSystemPromptFile()` 决定：
+  项目级 `<cwd>/.pi/APPEND_SYSTEM.md`（需项目受信且存在）→ 否则全局
+  `<agentDir>/APPEND_SYSTEM.md` → 否则无。
+- **只返回一个路径**：受信项目级是**覆盖**全局，不是叠加；未受信项目级被忽略，全局文件仍然生效。
+- 普通会话生效；Chat only（`lib/chat-only.ts` 的 `appendSystemPromptOverride: () => []`）与内建
+  子代理（`lib/subagent-prompt.ts` 自建 `appendSystemPrompt`）不消费该全局文件。
+- 系统提示在 `AgentSession` 创建时构建，已在运行的会话需要既有 reload 才会应用。
+- `lib/project-trust.ts` 仍把 `APPEND_SYSTEM.md` 计入项目信任的原生文件枚举。
+
+需要修改追加指令时，直接编辑磁盘上的全局或项目级文件；本 fork 不再提供 Web 写入入口。
+
+现行 owner 是 SDK `DefaultResourceLoader` 及 `lib/project-trust.ts`，不是 Web writer：
+`loader.reload(projectTrustReloadOptions(cwd, agentDir))` 后，使用
+`getAppendSystemPrompt(): string[]` 与 `getAppendSystemPromptSources()` 检查内容及来源。
+导航仍通过 `getLastSettingsSection(cwd, storage): SettingsSection` 校验持久化值。
+
+## 3. 已移除的 Web 编辑器链（不得恢复为伪兼容）
+
+| 曾存在的落点 | 现状 |
 |---|---|
-| 读写与探测 | `lib/append-system.ts` |
-| HTTP 契约 | `app/api/append-system/route.ts`（`GET`/`PUT`，`export const dynamic = "force-dynamic"`） |
-| 面板 section | `components/AppendSystemConfig.tsx`（挂载于 `components/SettingsPanel.tsx` 的 `append-system`） |
-| section 枚举 | `lib/settings-navigation.ts` 的 `SETTINGS_SECTION_VALUES`（**不在** `PROJECT_SECTIONS`：这是全局设置） |
+| `lib/append-system.ts`（读写、字节上限、项目覆盖探测） | 已删除 |
+| `app/api/append-system/route.ts`（GET/PUT，固定写入路径 + 允许表闸门） | 已删除；旧路径为 404 |
+| `components/AppendSystemConfig.tsx`（设置面板编辑器） | 已删除 |
+| `lib/settings-navigation.ts` 的 `append-system` section | 已退出枚举；旧持久化值安全回退 General |
+| `lib/api-types.ts` 的 `AppendSystemProjectOverride` / `AppendSystemPromptResponse` | 已删除 |
+| `app/settings.css` 的 `.append-system-*` 区块 + 三语各 21 个 `settings.appendSystem*` key | 已删除 |
 
-## 接口契约
+对应单测随文件删除；原生加载回归迁入 `lib/append-system-retirement.test.mjs`，用隔离 agent HOME
+与直接 fixture 写盘断言全局发现、未受信项目读全局、受信项目覆盖四态，并断言专属文件与生产引用
+不再存在。
 
-`GET /api/append-system[?cwd=<session cwd>]` 与 `PUT /api/append-system[?cwd=…]` 返回**同一形状**：
+## 4. 验证与错误矩阵
 
-```jsonc
-{
-  "path": "<agentDir>/APPEND_SYSTEM.md",   // 绝对路径，前端只显示，不自己拼
-  "content": "……",                          // 文件缺失时为 ""
-  "exists": true,
-  "maxBytes": 65536,
-  "projectOverride": { "path": "<cwd>/.pi/APPEND_SYSTEM.md", "trusted": false }  // 仅当文件存在
-}
-```
-
-- `PUT` body 严格是 `{ content: string }`；错误码 403（来源校验）/ 415（Content-Type）/
-  400（非字符串、超 `maxBytes` 且**不落盘**）/ 500。
-- `cwd` 可选，仅用于项目级覆盖的只读提示。
-
-## 不变量（改动时必须保住）
-
-1. **写入路径服务端固定**：`getAppendSystemPromptPath(agentDir)`，`agentDir` 默认来自
-   `getAgentDir()`。任何「让客户端传路径」的改动都会把这个端点变成任意文件写入原语。
-2. **探测前先过文件根允许表**：`getAllowedFileRoots()` + `isFilePathAllowed(cwd, roots)`；
-   未授权时返回 `projectOverride: null` 而**不是**去 `existsSync` 一个任意路径 ——
-   否则该端点变成路径存在性探测器。注意 `getAllowedFileRoots()` 是 `async`。
-3. **项目级覆盖只是提示**：`trusted: false` 时 pi 仍读全局文件，文案必须说清；不要把
-   `projectOverride` 做成可写入口。
-4. **逐字节往返**：不追加、不裁剪换行；缺失读作 `""`；写空字符串创建空文件而**不删除**文件。
-   > 前端注意：`<textarea>` 的 API value 按 HTML 规范把 CRLF 归一化为 LF，所以一个 CRLF 文件
-   > **一旦被编辑并保存**就会变成 LF（纯查看不动文件：`dirty=false` 不落盘）。服务端 `PUT`
-   > 本身是逐字节的，这条限制只属于编辑控件。
-5. **原子私有写**：`lib/atomic-file.ts` 的 `writePrivateFileAtomicSync`（临时文件 + rename，0600）。
-6. **上限是字节不是字符**：65536 按 UTF-8 字节计（`Buffer.byteLength` 服务端、
-   `new TextEncoder().encode(x).length` 前端）。用 `content.length` 会让中文草稿在 60000 字节附近
-   错判 —— 服务端会拒，前端却以为可以保存。
-7. **派生提示失败不得升级为整体失败**：项目级探测抛错时 `projectOverride` 退化为 `null`，
-   不能把一次成功的保存变成 500（同 `quality-guidelines.md` 的「派生指标算不出来 ≠ 整个响应失败」）。
-8. **已挂载页面的信任提示随项目状态刷新，但不覆盖草稿**：`SettingsPanel.tsx` 将
-   `trust={projectTrust}` 传入 AppendSystem；`AppendSystemConfig.tsx` 的 effect 依赖
-   `[cwd, projectTrustReloadKey(trust)]`。同 cwd 已成功加载后，只替换 `projectOverride`，
-   不改全局 `state.content` 或独立 `draft`。首次加载/切 cwd 仍初始化编辑器；cleanup 同时
-   abort 请求并标记取消，即使 fetch 忽略 abort，旧 trust/cwd/卸载响应也不能提交到当前页面。
-   不要按 trust key remount 或直接复用会 `setDraft` 的完整加载来刷新派生提示。
-
-## 生效范围（用户可见文案是硬要求）
-
-| 场景 | 是否生效 |
+| 输入或条件 | 现行结果 |
 |---|---|
-| 普通会话 | 生效（由 loader 自行发现全局文件） |
-| Chat only 模式 | **不生效**：`lib/chat-only.ts` 的 `appendSystemPromptOverride: () => []` |
-| 内建子代理 | **不生效**：`lib/subagent-prompt.ts` 自行构造 `appendSystemPrompt` |
-| 已在运行的会话 | 需重载：系统提示在 `AgentSession` 创建时构建（`lib/rpc-manager.ts:2366-2379`） |
+| GET 或 PUT `/api/append-system` | 路由缺失，404；没有响应 DTO 或写盘行为 |
+| 全局与项目文件都缺失 | append prompt/source 数组为空 |
+| 只有全局文件 | 加载全局内容，source 为全局文件路径 |
+| 项目未受信且两文件存在 | 忽略项目文件，仅加载全局；两文件内容均不变 |
+| 项目受信且两文件存在 | 只加载项目内容，不与全局叠加；全局内容不变 |
+| 旧 storage section 为 `append-system` | 有无 cwd 均回退 General；其他 selections 保留 |
 
-改文件**不会**影响已存在的 wrapper。面板只提示并提供既有的
-`sendAgentCommand(sessionId, { type: "reload" })` 入口（与 `AgentsConfig`、`PluginsConfig`、
-ask_user 开关同一路径），不引入自动重启。
+## 5. 正常、基础与错误案例
 
-## 禁止的模式
+- 正常：用户在 Web 外编辑原生文件，由既有创建/reload 生命周期读取。
+- 基础：没有追加文件时普通会话继续使用原本的系统提示；设置只有现行六个 section。
+- 错误：旧页面请求退休 API 不会保存成功；刷新后编辑入口消失，不提供伪兼容协议。
 
-- 在路由或组件里接受/拼接文件路径（必须用响应里的 `path`）。
-- 在前端用 `content.length` 判断上限。
-- 把 `cwd` 直接交给 `existsSync` 而不先过允许表。
-- 修改 `lib/chat-only.ts` / `lib/subagent-prompt.ts` / `lib/rpc-manager.ts` 来「让子代理也生效」：
-  那会改变既有提示语义，不在本契约范围内。
-- 在设置面板里使用 `--chat-font-size-offset`（那是对话区的规则）。
+## 6. 必需测试与隔离条件
 
-## 验证
+- `lib/append-system-retirement.test.mjs`：真实 SDK 四态、trust resolver 与来源路径、文件不变、
+  六个专属文件缺失、生产引用缺失；禁止用自写加载器替代 SDK。
+- `lib/settings-navigation.test.mjs`：旧值有无 cwd 回退及后续写入保留其他 selections。
+- `components/SettingsPanel*.test.mjs`：周边 General/MCP、reload/trust、挂载、Escape/focus 保留。
+- 真实 HTTP/Chromium：GET/PUT 404，桌面 tabs/移动 picker 无入口，设置操作无旧请求。
+- fixture 的 `HOME`、`PI_CODING_AGENT_DIR` 必须隔离；TMPDIR 不得处于真实用户 HOME 的祖先技能树下。
+  SDK 扫描全部祖先 `.agents/skills`，单改 HOME 并不能隔离位于真实 HOME 内的缓存 fixture。
+  本任务显式以磁盘 `/var/tmp` 的唯一自有目录为测试 TMPDIR，保存证据后清理，不使用 `/tmp`。
+  全量 mock 更新测试不设全局 `PI_OFFLINE=1`，否则会提前绕过其 mock runner；原生 fixture
+  与离线浏览器服务可单独设置。源码/SDK 单测不等于浏览器验收。
 
-- 单测：`lib/append-system.test.mjs`（含用 pi 自己的 `DefaultResourceLoader` 断言
-  「写进去的就是 pi 加载的追加提示」与「项目级覆盖而非叠加」两态）、
-  `app/api/append-system/route.test.mjs`（403/415/400 与允许表闸门）、
-  `components/AppendSystemConfig.test.mjs`（R3 三条范围文案与 R4 两态、字节口径、路径来源；
-  实际 effect 的 trust false→true、草稿/基线保留、初始化、迟到/失败响应），
-  `components/SettingsPanel.test.mjs`（信任 prop 必须传入且不得 remount）。
-- 浏览器：见任务 `09-19-append-system-editor` 的 `research/browser-verification.md`。
-- i18n：新增文案三语齐全，`lib/i18n/registry.test.mjs` 强制 key 与占位符一致。
+## 7. 错误做法与正确边界
+
+错误：为了退役编辑器而全文删除 `APPEND_SYSTEM.md` 或 `appendSystemPrompt`，清空用户文件或
+localStorage。正确：仅移除 Web 编辑链，保留 SDK/trust/历史 snapshot，让旧 section 经已有守卫回退。
+
+其余禁止：
+
+- 不新增固定成功/固定启用的兼容端点；旧 GET/PUT 不暴露编辑协议。
+- 不删除、迁移或改写用户已有的全局/项目 `APPEND_SYSTEM.md`；不读取真实用户文件内容。
+- 不为了「让子代理也生效」修改 `lib/chat-only.ts` / `lib/subagent-prompt.ts` / `lib/rpc-manager.ts`。
+- 不把编辑器曾用的 64 KiB Web 写入上限新加到 SDK 读取链。
+- 不按 `0005-*` 批量删除 ADR：`docs/adr/0005-built-in-subagent-disable.md` 是另一主题。

@@ -1,5 +1,10 @@
 # Edit pi's native append-system prompt from settings
 
+> **Status: Retired (2026-10-06).** The Web editor and its `GET/PUT /api/append-system` endpoint
+> described below were removed in task `10-06-remove-append-instructions`. pi's native
+> `APPEND_SYSTEM.md` mechanism (discovery, trusted-project override, Chat only / sub-agent
+> boundaries) is retained; edit the file directly. The original decision is kept as history.
+
 Pi Web exposes `~/.pi/agent/APPEND_SYSTEM.md` through a settings section instead
 of introducing a Pi Web-owned store for extra instructions. The file is pi's own
 first-class mechanism (`ResourceLoader.getAppendSystemPrompt()`), so the TUI and
@@ -27,3 +32,13 @@ are established elsewhere. Editing the file does not touch an existing
 AgentSession either: new sessions pick it up, running sessions need the existing
 reload, and the panel says so and offers that reload instead of restarting
 sessions behind the user's back.
+
+## Retirement
+
+The fork's editor chain — `components/AppendSystemConfig.tsx`,
+`app/api/append-system/route.ts`, `lib/append-system.ts`, their DTOs, the
+`append-system` settings section, its CSS and the three locales' copy — was
+removed on 2026-10-06. The reasoning above about path safety, byte caps and
+prompt scope no longer describes a shipped surface; it records why the endpoint
+was constrained while it existed, so a future re-introduction would have to meet
+the same bar. What remains is pi's own file discovery, which the TUI also uses.
