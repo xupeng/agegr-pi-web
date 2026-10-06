@@ -716,6 +716,9 @@ export function ChatMinimap({
         position: "relative",
         cursor: "pointer",
         userSelect: "none",
+        // Keep the full-height layout slot and shared handlers, but let blank space pass through.
+        // Only tick rows and the preview opt back in; their events still reach this parent.
+        pointerEvents: "none",
         // No rail, no background: Notion's outline is a floating column of ticks. A bordered,
         // filled strip down the whole chat reads as a second column of UI with nothing in it.
         overflow: "visible",
@@ -739,7 +742,8 @@ export function ChatMinimap({
               height: Math.max(1, nodeGap),
               display: "flex",
               alignItems: "center",
-              pointerEvents: "none",
+              // The 24px-wide row and its tick pitch are the hit area, not just the 2px line.
+              pointerEvents: "auto",
               zIndex: 2,
             }}
           >

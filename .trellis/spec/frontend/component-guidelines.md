@@ -239,10 +239,14 @@ h1 与正文 12px、h2 / h3 11px、序号与 `.toolBadge` 10px 都是固定 `px`
   铺满，`fillsHeight` 随之决定悬停命中半径。只有轨道本身比锚点还短时锚点才让位，绝不裁掉刻度
   ——看不见的刻度等于点不到的标题。改布局先改它并补 `components/ChatMinimap.test.mjs`。
 - 面板的开关在鼠标与触摸上是两套：`useHoverCapable()`（`hooks/useIsMobile.ts`，`(hover: hover)`）
-  为真时鼠标**停在轨道上即展开**（`HOVER_OPEN_DELAY_MS = 120`，避免只是路过右边缘就闪出 240px
-  面板），离开即收起（面板是轨道的子节点，所以移进面板不算离开，行点击不会误关）；此时点击轨道
-  不再切换（`togglePreview` 直接返回），否则展开状态下一点就关。触摸设备保持点按切换，`mouseenter`
-  在触摸上只是点按的一部分，不能当作悬停。
+  为真时鼠标**停在实际刻度行区域才展开**（`HOVER_OPEN_DELAY_MS = 120`，避免只是路过右边缘就闪出
+  240px 面板），快速离开会取消计时。全高父容器保留布局和事件处理，但设 `pointerEvents: "none"`，
+  上下空白区域穿透、不触发展开；每个 `data-minimap-node-index` 行设 `pointerEvents: "auto"`，
+  以 24px 列宽、`nodeGap` 行高提供合理命中区域，而不是只命中 2px 横线。预览 CSS 保持
+  `pointer-events: auto`，刻度行和预览的事件仍由父容器处理；面板是其子节点，所以从刻度移进面板
+  不算离开、保持打开，行点击不会误关，离开到空白区域才收起。此时点击刻度不再切换（`togglePreview`
+  直接返回），否则展开状态下一点就关。触摸设备保持刻度点按切换，`mouseenter` 在触摸上只是点按的
+  一部分，不能当作悬停。
 - 加载窗口从半途开始（首个条目是 assistant，提问在上方未加载）时，`measureNodes()` 会为这段
   回答合成一个轮次（`userMessage: null`，面板标题行显示 `…`），否则长会话的窗口一旦错过提问，
   轨道与面板都会整段空掉。

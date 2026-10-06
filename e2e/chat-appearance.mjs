@@ -44,16 +44,26 @@ export async function checkMinimapTypography(page, label, sidebarTitle) {
   // scrollable, which lags the first paint of a freshly navigated session.
   await page.waitForFunction(() => {
     const rail = document.querySelector(".chat-content .scrollbar-subtle")?.nextElementSibling;
-    return !!rail && getComputedStyle(rail).visibility === "visible";
+    return !!rail && getComputedStyle(rail).visibility === "visible"
+      && !!rail.querySelector("[data-minimap-node-index]");
   });
   const rail = await page.evaluate(() => {
     const scroll = document.querySelector(".chat-content .scrollbar-subtle");
     const element = scroll?.nextElementSibling;
     if (!element) return null;
     const rect = element.getBoundingClientRect();
+    const rows = [...element.querySelectorAll("[data-minimap-node-index]")];
+    if (rows.length === 0) return null;
+    const tick = rows[Math.floor(rows.length / 2)].getBoundingClientRect();
+    const first = rows[0].getBoundingClientRect();
+    const last = rows[rows.length - 1].getBoundingClientRect();
     return {
-      x: rect.left + rect.width / 2,
-      y: rect.top + rect.height / 2,
+      x: tick.left + tick.width / 2,
+      y: tick.top + tick.height / 2,
+      blankTopY: (rect.top + first.top) / 2,
+      blankBottomY: (last.bottom + rect.bottom) / 2,
+      blankTopHeight: first.top - rect.top,
+      blankBottomHeight: rect.bottom - last.bottom,
       width: rect.width,
       visibility: getComputedStyle(element).visibility,
     };
@@ -61,15 +71,39 @@ export async function checkMinimapTypography(page, label, sidebarTitle) {
   assert.ok(rail, `${label}: minimap rail must sit beside the scroll container`);
   assert.equal(rail.visibility, "visible", `${label}: minimap rail must be visible on a scrollable session`);
   assert.ok(rail.width >= 24, `${label}: minimap rail must keep its 24px tick column`);
-  // A mouse opens the panel by resting on the rail, with no click at all (`HOVER_OPEN_DELAY_MS`
+  assert.ok(rail.blankTopHeight > 2 && rail.blankBottomHeight > 2,
+    `${label}: this fixture must leave blank space above and below the outline ticks`);
+  const preview = page.locator("[data-minimap-preview-box]");
+  // Blank space in the full-height layout slot must never start the 120ms hover timer.
+  for (const [name, y] of [["top", rail.blankTopY], ["bottom", rail.blankBottomY]]) {
+    await page.mouse.move(rail.x, y);
+    await page.waitForTimeout(240);
+    assert.equal(await preview.count(), 0, `${label}: ${name} blank space must not open the preview`);
+  }
+  // Cross a real tick and leave immediately, without inserting an assertion or sleep between
+  // the two moves. Wait well beyond the open delay to detect an uncancelled timer.
+  await page.mouse.move(rail.x, rail.y);
+  await page.mouse.move(rail.x, rail.blankTopY);
+  await page.waitForTimeout(240);
+  assert.equal(await preview.count(), 0, `${label}: leaving a tick promptly must cancel hover-open`);
+
+  // A mouse opens the panel by resting on an actual tick row, with no click (`HOVER_OPEN_DELAY_MS`
   // delays it; asserting the delay itself would race the assertion against the timer).
   await page.mouse.move(rail.x, rail.y);
-  await page.locator("[data-minimap-preview-box]").waitFor();
+  await preview.waitFor();
   // Clicking the rail while it is open must not toggle the panel shut under the pointer.
   await page.mouse.click(rail.x, rail.y);
-  await page.waitForTimeout(100);
-  assert.equal(await page.locator("[data-minimap-preview-box]").count(), 1,
+  await page.waitForTimeout(240);
+  assert.equal(await preview.count(), 1,
     `${label}: clicking the open minimap rail must keep the preview open`);
+
+  const panel = await preview.boundingBox();
+  assert.ok(panel, `${label}: minimap preview must have a pointer target`);
+  // Stay just inside the right edge: moving over its content must not change the visible
+  // typography targets or let rail mousemove reposition the preview's scroll offset.
+  await page.mouse.move(panel.x + panel.width - 2, panel.y + panel.height / 2);
+  await page.waitForTimeout(240);
+  assert.equal(await preview.count(), 1, `${label}: moving from a tick into the panel must keep it open`);
 
   // Read every target in one frame so a repaint cannot land between reads.
   const observed = await page.evaluate(() => {
@@ -159,6 +193,10 @@ export async function checkMinimapTypography(page, label, sidebarTitle) {
     assert.equal(observed.heading2.fontSize, sidebar.meta, `${label}: preview secondary must match the sidebar meta size`);
     console.log(`TYPO ${label} sidebar: ${JSON.stringify(sidebar)}`);
   }
+
+  await page.mouse.move(rail.x, rail.blankBottomY);
+  await page.waitForTimeout(240);
+  assert.equal(await preview.count(), 0, `${label}: leaving the panel for blank rail space must close it`);
 
   return observed;
 }
