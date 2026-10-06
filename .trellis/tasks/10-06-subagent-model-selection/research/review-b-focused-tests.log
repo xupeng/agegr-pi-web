@@ -1,0 +1,65 @@
+[pi-web] session_start dispatched to extensions for session 01a111f5-a288-77c4-8fe0-65637851c731
+[pi-web] session_start dispatched to extensions for session 01a111f5-a288-77c4-8fe0-65637851c731
+[pi-web] session_start dispatched to extensions for session 01a111f5-a288-77c4-8fe0-65637851c731
+✔ real RPC warm resume, idle reopen and browser startup restore latest explicit GPT after physical Kimi (407.308883ms)
+✔ fresh process cold restore and actual idle-timer reopen use GPT without parent or source snapshot (2452.099893ms)
+[pi-web] session_start dispatched to extensions for session 01a111f5-adb3-77c4-8fe0-6567a6b5b80d
+[pi-web] session_start dispatched to extensions for session 01a111f5-adb3-77c4-8fe0-6567a6b5b80d
+✔ cold set_model prepares new target despite unavailable history, persists via SDK and concurrent intents all apply (168.990228ms)
+[pi-web] session_start dispatched to extensions for session 01a111f5-ae5c-77c4-8fe0-656857ae9058
+[pi-web] session_start dispatched to extensions for session 01a111f5-aedd-77c4-8fe0-656b51f29bf8
+✔ new controller child owns runtime, obeys explicit model, and warm Agent resume stays GPT (188.523765ms)
+[pi-web] session_start dispatched to extensions for session 01a111f5-af19-77c4-8fe0-656de792edce
+[pi-web] session_start dispatched to extensions for session 01a111f5-af33-77c4-8fe0-656f6aa7852c
+[pi-web] session_start dispatched to extensions for session 01a111f5-af33-77c4-8fe0-656f6aa7852c
+✔ provider-only alive parent补全 and saved refs replay one necessary file, no search/lifecycle/tools (127.336676ms)
+✔ saved source disabled, missing, forged, unknown version and swapped symlink refuse before any request (47.233795ms)
+[pi-web] session_start dispatched to extensions for session 01a111f5-afc7-77c4-8fe0-657df2c64ac8
+✔ child wrapper reload withdraws extension-manually-off Map entries and does not activate new hidden/inactive tools (66.893847ms)
+[pi-web] session_start dispatched to extensions for session 01a111f5-b00a-77c4-8fe0-657f8704b396
+[pi-web] session_start dispatched to extensions for session 01a111f5-b05d-77c4-8fe0-6580b1ca5448
+[pi-web] session_start dispatched to extensions for session 01a111f5-b05d-77c4-8fe0-6580b1ca5448
+✔ legacy v1 exact tools and explicit false stay narrow; legal virtual choice survives physical response (178.265066ms)
+[pi-web] session_start dispatched to extensions for session 01a111f5-b0bd-77c4-8fe0-65826cf5a0bb
+✔ active branch latest explicit model, not abandoned branch or physical response, controls cold startup (55.684579ms)
+[pi-web] session_start dispatched to extensions for session 01a111f5-b0f5-77c4-8fe0-6585a24c9f20
+✔ cold target intent survives single-flight competitor failure and each successful command persists (101.781777ms)
+[pi-web] session_start dispatched to extensions for session 01a111f5-b15a-77c4-8fe0-6586856672c5
+✔ actual HTTP route returns typed 409 prompt refusal and permits cold standard set_model recovery (198.335372ms)
+✔ native override captures effective getter identity, not the first or failed last contributor (456.370424ms)
+✔ single-file legacy is replayable; legacy multiple contributions and virtual context-dependent sources have no lead (273.693753ms)
+✔ reload binds provenance to a new generation and dynamic provider registration invalidates even same identity (55.267689ms)
+✔ current project trust revocation and changed source identity reject before any provider factory is replayed (100.30796ms)
+✔ linked package root canonical containment accepts valid provider and rejects swapped root or escaped file (101.124481ms)
+✔ source metadata URLs are stored only as opaque identity, never credentials/config (30.871777ms)
+✔ current installed npm version mismatch refuses saved source without installation or factory execution (36.049737ms)
+[pi-web] session_start dispatched to extensions for session 01a111f5-a2f2-74d3-b4ad-81434a45d947
+[pi-web] session_start dispatched to extensions for session 01a111f5-a332-74d3-b4ad-814408b5c449
+✔ DEFAULT inherited absolute configured file admits without refs, and ignores legacy true-snapshot leads (203.018334ms)
+[pi-web] session_start dispatched to extensions for session 01a111f5-a37e-74d3-b4ad-81460ef00740
+✔ SDK false provider-only absolute configured file succeeds with zero session hooks/tools/search (57.810783ms)
+✔ configured absolute source rejects forged/symlink-escape/swapped/missing/disabled/version leads before factory (17.012591ms)
+[pi-web] session_start dispatched to extensions for session 01a111f5-a3ba-74d3-b4ad-81482d35d74b
+[pi-web] session_start dispatched to extensions for session 01a111f5-a3e2-74d3-b4ad-814bf125cc4c
+[pi-web] session_start dispatched to extensions for session 01a111f5-a3fb-74d3-b4ad-814c022a6e24
+✔ cold native coding pins, explicit empty pins and legacy hard permissions remain separate from licence (89.378553ms)
+[pi-web] session_start dispatched to extensions for session 01a111f5-a413-74d3-b4ad-814f91aca4ef
+[pi-web] session_start dispatched to extensions for session 01a111f5-a413-74d3-b4ad-814f91aca4ef
+[pi-web] session_start dispatched to extensions for session 01a111f5-a413-74d3-b4ad-814f91aca4ef
+✔ cold constructor is not persistence; HTTP target commits exactly once with exact colon/nested ids (108.970027ms)
+[pi-web] session_start dispatched to extensions for session 01a111f5-a480-74d3-b4ad-815026638e03
+[pi-web] session_start dispatched to extensions for session 01a111f5-a480-74d3-b4ad-815026638e03
+✔ scope passes but SDK setModel auth fails: no published target/history/lock orphan; retry commits (83.468985ms)
+[pi-web] session_start dispatched to extensions for session 01a111f5-a4d4-74d3-b4ad-8152c60dd3df
+[pi-web] session_start dispatched to extensions for session 01a111f5-a4d4-74d3-b4ad-8152c60dd3df
+✔ failed cold intent cannot clean a competing successful winner and no concurrent valid intent is lost (101.228285ms)
+[pi-web] session_start dispatched to extensions for session 01a111f5-a539-74d3-b4ad-8155db457134
+✔ failed waiting intent leaves an already committed winner alive, without retry or duplicate record (58.930558ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6401.89628

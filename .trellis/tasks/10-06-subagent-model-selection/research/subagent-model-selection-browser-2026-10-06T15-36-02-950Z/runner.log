@@ -1,0 +1,10 @@
+START warm: pid=1209812 pgid=1209812 port=32813 spawnCwd=/var/tmp/pi-subagent-browser-home.eFVD34n2/.cache/pi-tmp/shared/subagent-model-browser-k0iul5rr/project app=/var/tmp/pi-subagent-browser-home.eFVD34n2/.cache/pi-tmp/shared/subagent-model-browser-k0iul5rr/app source=/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection log=/var/tmp/pi-subagent-browser-home.eFVD34n2/.cache/pi-tmp/shared/subagent-model-browser-k0iul5rr/results/next-warm.log
+AssertionError [ERR_ASSERTION]: Next exited; see /var/tmp/pi-subagent-browser-home.eFVD34n2/.cache/pi-tmp/shared/subagent-model-browser-k0iul5rr/results/next-warm.log
+
+1 !== null
+
+    at file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/e2e/subagent-model-selection.mjs:164:12
+    at until (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/e2e/subagent-model-selection.mjs:81:25)
+    at async startService (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/e2e/subagent-model-selection.mjs:162:3)
+    at async file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/e2e/subagent-model-selection.mjs:283:3
+STOP warm: pid=1209812

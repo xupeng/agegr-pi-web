@@ -1,0 +1,40 @@
+{
+  "id": "subagent-model-selection",
+  "name": "subagent-model-selection",
+  "title": "修复子代理恢复时丢失 provider 与静默换模",
+  "description": "子代理独立runtime、inherit_trusted与严格选模修复验收完成；用户已授权提交/PR/合并收尾。通知中心基线合流后3150tests/763lintfiles/type/browser全绿，待归档并提交PR；不含部署。",
+  "status": "in_progress",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "xupeng",
+  "assignee": "xupeng",
+  "createdAt": "2026-10-06",
+  "completedAt": null,
+  "branch": "feat/subagent-model-selection",
+  "base_branch": "main",
+  "worktree_path": "/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection",
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [
+    "lib/subagent-runtime.ts",
+    "lib/rpc-manager.ts",
+    "lib/model-scope.ts",
+    "lib/subagent-extension.ts",
+    "lib/subagents.ts",
+    "components/AgentsConfig.tsx",
+    "app/api/subagents/profiles/route.ts",
+    "app/api/agent/[id]/route.ts"
+  ],
+  "notes": "2026-10-06已批准实现且AC1–10受控验收闭合，acceptance.md映射证据；final tsc0/lint728files0/npm2997pass、18-04-41 Chromium完整matrix通过、latest focused readonlyguard复审无新P级。真实plugins/搜索服务/paidproviders/Safari/Windows未测单列。原通知中心WIP与真实配置历史未改；无commit/push/archive/deploy，in_progress保留待提交/PR交付。ownedbaseline/temp/processes已清，candidate源码/正式证据保留。",
+  "meta": {
+    "implementation_base": "e0ad63073c4c42987571d31b1a4cb61e48a1fcd4",
+    "implementation_approved": "true",
+    "acceptance_verified": "true",
+    "delivery_status": "authorized_pr_merge_closeout"
+  }
+}

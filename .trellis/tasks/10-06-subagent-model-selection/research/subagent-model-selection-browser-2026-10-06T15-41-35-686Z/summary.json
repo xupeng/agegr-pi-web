@@ -1,0 +1,19 @@
+{
+  "passed": false,
+  "executablePath": "/home/xupeng/.cache/assistant-check-browser/manual/chrome-linux/headless_shell",
+  "browserErrors": [],
+  "blockedBrowserRequests": [],
+  "home": "/var/tmp/pi-subagent-browser-home.joMYJKCe/.cache/pi-tmp/shared/subagent-model-browser-b0wln0ag/home",
+  "agent": "/var/tmp/pi-subagent-browser-home.joMYJKCe/.cache/pi-tmp/shared/subagent-model-browser-b0wln0ag/home/.pi/agent",
+  "project": "/var/tmp/pi-subagent-browser-home.joMYJKCe/.cache/pi-tmp/shared/subagent-model-browser-b0wln0ag/project",
+  "source": "/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection",
+  "results": "/var/tmp/pi-subagent-browser-home.joMYJKCe/.cache/pi-tmp/shared/subagent-model-browser-b0wln0ag/results",
+  "evidence": "/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/.trellis/tasks/10-06-subagent-model-selection/research/subagent-model-selection-browser-2026-10-06T15-41-35-686Z",
+  "untested": [
+    "Safari",
+    "Windows",
+    "real pi-sub2api extension",
+    "live/paid providers",
+    "native search request hooks"
+  ]
+}

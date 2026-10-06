@@ -1,0 +1,60 @@
+▲ Next.js 16.3.6 (Turbopack)
+- Local:         http://127.0.0.1:34471
+- Network:       http://127.0.0.1:34471
+✓ Ready in 950ms
+✓ Running next.config.ts took 31ms
+- Experiments (use with caution):
+  · proxyClientMaxBodySize: "128mb"
+
+ GET /api/sessions 200 in 532ms (next.js: 300ms, proxy.ts: 131ms, application-code: 102ms)
+[pi-web] session_start dispatched to extensions for session 01a111de-749f-70dd-81f5-8ecfe592a665
+ POST /api/agent/new 200 in 1135ms (next.js: 132ms, proxy.ts: 5ms, application-code: 999ms)
+ POST /api/agent/01a111de-749f-70dd-81f5-8ecfe592a665 200 in 1376ms (next.js: 1344ms, proxy.ts: 3ms, application-code: 29ms)
+ GET /api/agent/01a111de-749f-70dd-81f5-8ecfe592a665 200 in 23ms (next.js: 18ms, proxy.ts: 2ms, application-code: 3ms)
+○ Compiling / ...
+ GET /?session=01a111de-749f-70dd-81f5-8ecfe592a665 200 in 6.8s (next.js: 6.0s, proxy.ts: 3ms, application-code: 785ms)
+ GET /api/sessions?sessionId=01a111de-749f-70dd-81f5-8ecfe592a665 200 in 27ms (next.js: 8ms, proxy.ts: 11ms, application-code: 8ms)
+ GET /api/home 200 in 154ms (next.js: 139ms, proxy.ts: 10ms, application-code: 4ms)
+ GET /api/home 200 in 9ms (next.js: 2ms, proxy.ts: 3ms, application-code: 3ms)
+ GET /api/open-in-explorer 200 in 265ms (next.js: 254ms, proxy.ts: 8ms, application-code: 3ms)
+ GET /api/agent/running 200 in 263ms (next.js: 257ms, proxy.ts: 2ms, application-code: 3ms)
+ GET /api/open-in-explorer 200 in 285ms (next.js: 273ms, proxy.ts: 10ms, application-code: 3ms)
+ GET /api/projects?force=1 200 in 318ms (next.js: 210ms, proxy.ts: 11ms, application-code: 97ms)
+ GET /api/projects 200 in 321ms (next.js: 222ms, proxy.ts: 8ms, application-code: 91ms)
+ GET /api/sessions?projectKey=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.sApeRsmK%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-k2zuszri%2Fproject 200 in 32ms (next.js: 12ms, proxy.ts: 10ms, application-code: 10ms)
+ GET /api/worktrees?cwd=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.sApeRsmK%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-k2zuszri%2Fproject 200 in 452ms (next.js: 166ms, proxy.ts: 8ms, application-code: 278ms)
+ GET /api/project-trust?cwd=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.sApeRsmK%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-k2zuszri%2Fproject 200 in 622ms (next.js: 597ms, proxy.ts: 6ms, application-code: 19ms)
+ GET /api/file-index?cwd=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.sApeRsmK%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-k2zuszri%2Fproject 200 in 645ms (next.js: 321ms, proxy.ts: 17ms, application-code: 307ms)
+ GET /api/git/status?cwd=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.sApeRsmK%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-k2zuszri%2Fproject 200 in 674ms (next.js: 251ms, proxy.ts: 9ms, application-code: 414ms)
+ GET /api/git/status?cwd=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.sApeRsmK%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-k2zuszri%2Fproject 200 in 94ms (next.js: 9ms, proxy.ts: 12ms, application-code: 73ms)
+ GET /api/models?cwd=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.sApeRsmK%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-k2zuszri%2Fproject 200 in 510ms (next.js: 199ms, proxy.ts: 13ms, application-code: 298ms)
+ GET /api/sessions?projectKey=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.sApeRsmK%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-k2zuszri%2Fproject 200 in 7ms (next.js: 1.6ms, proxy.ts: 2ms, application-code: 3ms)
+ GET /api/sessions/01a111de-749f-70dd-81f5-8ecfe592a665?deferThinking=1&deferMedia=1&tree=summary&force=1 200 in 1456ms (next.js: 1431ms, proxy.ts: 12ms, application-code: 12ms)
+ GET /api/sessions/01a111de-749f-70dd-81f5-8ecfe592a665?deferThinking=1&deferMedia=1&tree=summary&force=1 200 in 2.1s (next.js: 2.1s, proxy.ts: 15ms, application-code: 13ms)
+ GET /api/files/var/tmp/pi-subagent-browser-home.sApeRsmK/.cache/pi-tmp/shared/subagent-model-browser-k2zuszri/project?type=list 200 in 1700ms (next.js: 1678ms, proxy.ts: 11ms, application-code: 11ms)
+ GET /api/files/var/tmp/pi-subagent-browser-home.sApeRsmK/.cache/pi-tmp/shared/subagent-model-browser-k2zuszri/project?type=list 200 in 2.4s (next.js: 2.4s, proxy.ts: 9ms, application-code: 11ms)
+ GET /api/web-auth 200 in 99ms (next.js: 92ms, proxy.ts: 3ms, application-code: 4ms)
+ GET /api/web-auth 200 in 145ms (next.js: 139ms, proxy.ts: 4ms, application-code: 1.8ms)
+ GET /api/extension-ui/settings 200 in 170ms (next.js: 163ms, proxy.ts: 5ms, application-code: 3ms)
+[pi-web] session_start dispatched to extensions for session 01a111de-749f-70dd-81f5-8ecfe592a665
+ GET /api/extension-ui/settings 200 in 11ms (next.js: 4ms, proxy.ts: 5ms, application-code: 2.0ms)
+ GET /api/agent/running 200 in 16ms (next.js: 9ms, proxy.ts: 5ms, application-code: 1.8ms)
+ GET /api/tools/settings 200 in 192ms (next.js: 132ms, proxy.ts: 5ms, application-code: 55ms)
+ GET /api/tools/settings 200 in 21ms (next.js: 7ms, proxy.ts: 5ms, application-code: 10ms)
+ GET /api/sessions/01a111de-749f-70dd-81f5-8ecfe592a665/state 200 in 1531ms (next.js: 1525ms, proxy.ts: 3ms, application-code: 3ms)
+ POST /api/agent/01a111de-749f-70dd-81f5-8ecfe592a665 200 in 62ms (next.js: 57ms, proxy.ts: 3ms, application-code: 3ms)
+ GET /api/agent/running 200 in 5ms (next.js: 1.5ms, proxy.ts: 1.8ms, application-code: 1.9ms)
+ GET /api/agent/running 200 in 5ms (next.js: 1.5ms, proxy.ts: 1.7ms, application-code: 2ms)
+ GET /api/agent/running 200 in 76ms (next.js: 72ms, proxy.ts: 2.0ms, application-code: 1.8ms)
+ GET /api/agent/running 200 in 6ms (next.js: 1.6ms, proxy.ts: 2.0ms, application-code: 2ms)
+ GET /api/agent/running 200 in 5ms (next.js: 1.4ms, proxy.ts: 1.9ms, application-code: 1.9ms)
+ GET /api/agent/running 200 in 6ms (next.js: 2ms, proxy.ts: 1.9ms, application-code: 1.7ms)
+ GET /api/file-index?cwd=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.sApeRsmK%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-k2zuszri%2Fproject 200 in 41ms (next.js: 1.9ms, proxy.ts: 1.7ms, application-code: 37ms)
+ GET /api/agent/running 200 in 5ms (next.js: 1.5ms, proxy.ts: 1.9ms, application-code: 1.8ms)
+ GET /api/agent/running 200 in 9ms (next.js: 2ms, proxy.ts: 3ms, application-code: 4ms)
+ GET /api/agent/running 200 in 6ms (next.js: 3ms, proxy.ts: 1.8ms, application-code: 1.8ms)
+ GET /api/agent/running 200 in 6ms (next.js: 1.4ms, proxy.ts: 3ms, application-code: 1.6ms)
+ GET /api/agent/running 200 in 6ms (next.js: 1.7ms, proxy.ts: 2ms, application-code: 2ms)
+ POST /api/agent/01a111de-749f-70dd-81f5-8ecfe592a665/lease 200 in 1359ms (next.js: 1352ms, proxy.ts: 2ms, application-code: 5ms)
+ GET /api/agent/01a111de-749f-70dd-81f5-8ecfe592a665/events 200 in 32.0s (next.js: 1694ms, proxy.ts: 4ms, application-code: 30.3s)
+[?25h

@@ -1,0 +1,143 @@
+✔ the safe DTO accepts only known reasons and never requires auth fields (1.028287ms)
+✔ toSafeDTO never echoes a raw loader/auth message (0.369075ms)
+✔ resolveConcreteModel distinguishes a missing provider from a missing model (1.067792ms)
+✔ selection priority is request > profile > parent, all re-resolved in the child runtime (0.586078ms)
+✔ an empty configured scope resolves to no execution scope, not the whole catalog (2.293212ms)
+✔ a target outside the resolved scope and a missing auth both refuse (0.715717ms)
+✔ an alive wrapper must match its branch's newest explicit selection (0.297622ms)
+✔ built-in profiles inherit extensions by default and keep skills off (2.556961ms)
+✔ a present non-boolean or unknown extension flag never widens permissions (10.27843ms)
+✔ legacy v1 snapshots without a tool policy keep the exact tool list and stay disabled (0.556199ms)
+✔ a versioned tool policy round-trips and carries the ext allow/deny selectors (0.230052ms)
+✔ a malformed child snapshot is rejected, not decoded as a normal session (0.302553ms)
+✔ no subagent metadata decodes as none, but a broken marker is invalid (0.140708ms)
+✔ a valid provider source reference decodes through its versioned envelope (0.193155ms)
+✔ saving rejects a non-boolean resource flag and preserves an omitted one (7.780398ms)
+✔ provider source envelope limit counts UTF-8 bytes and never accepts raw credential-bearing URLs (0.393474ms)
+✔ parseMissing: file profiles without extension fields/selectors inherit by default (2.223574ms)
+✔ saveNewMissing: omitted new profile fields inherit extensions, not skills (2.402581ms)
+✔ saveExistingFalse: omitted fields preserve existing explicit false and authored aliases (5.938932ms)
+✖ real memory runtime: retired :free / invalid suffix exact references never downshift to gpt (58.691487ms)
+✖ exact full :free and @ suffix ids beat thinking parsing, including exact parent (4.831344ms)
+✖ inherit pending legacy valid then invalid registration refuses stale target and not an unrelated provider (26.954921ms)
+✖ inherit session_start public registration failure remains sticky until a new loader generation (30.961693ms)
+✔ inherit pending native registration failure does not let a retained model pass admission (9.981846ms)
+✖ failed extension factory is not masked by existing builtin/old provider context (9.960053ms)
+✖ real SDK explore/general-purpose initialized coding tools are active and declared (15.141257ms)
+✔ cold builtin pins activate only registered licensed coding tools and preserve extension/manual-off/overrides (7.433372ms)
+✖ win32 shell mapping snapshot round-trip licenses powershell (mapping execution on Linux, not Windows) (0.817876ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 21
+ℹ fail 7
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1597.35861
+
+✖ failing tests:
+
+test at lib/subagent-review-fixes.integration.test.mjs:30:1
+✖ real memory runtime: retired :free / invalid suffix exact references never downshift to gpt (58.691487ms)
+  Error [ModelSelectionError]: The selected model is no longer available. Choose another model.
+      at resolveConcreteModel (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-model-selection.ts:189:11)
+      at async TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-review-fixes.integration.test.mjs:41:17)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    reason: 'model-unavailable',
+    provider: 'review-fixture',
+    modelId: 'gp'
+  }
+
+test at lib/subagent-review-fixes.integration.test.mjs:45:1
+✖ exact full :free and @ suffix ids beat thinking parsing, including exact parent (4.831344ms)
+  Error [ModelSelectionError]: No configured authentication for the selected model's provider.
+      at resolveConcreteModel (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-model-selection.ts:168:11)
+      at selectSubagentModel (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-model-selection.ts:264:69)
+      at resolveSubagentModelSelection (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-model-selection.ts:246:21)
+      at select (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-review-fixes.integration.test.mjs:27:41)
+      at TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-review-fixes.integration.test.mjs:48:26)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    reason: 'auth-unavailable',
+    provider: 'review-fixture',
+    modelId: 'gpt:free'
+  }
+
+test at lib/subagent-review-fixes.integration.test.mjs:68:1
+✖ inherit pending legacy valid then invalid registration refuses stale target and not an unrelated provider (26.954921ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-review-fixes.integration.test.mjs:76:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at lib/subagent-review-fixes.integration.test.mjs:85:1
+✖ inherit session_start public registration failure remains sticky until a new loader generation (30.961693ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-review-fixes.integration.test.mjs:96:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at lib/subagent-review-fixes.integration.test.mjs:114:1
+✖ failed extension factory is not masked by existing builtin/old provider context (9.960053ms)
+  AssertionError [ERR_ASSERTION]: The validation function is expected to return "true". Received false
+  
+  Caught error:
+  
+  ModelSelectionError: No configured authentication for the selected model's provider.
+      at async TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-review-fixes.integration.test.mjs:118:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: ModelSelectionError: No configured authentication for the selected model's provider.
+        at resolveConcreteModel (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-model-selection.ts:168:11)
+        at selectSubagentModel (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-model-selection.ts:264:69)
+        at resolveSubagentModelSelection (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-model-selection.ts:246:21)
+        at select (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-review-fixes.integration.test.mjs:27:41)
+        at TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-review-fixes.integration.test.mjs:118:17)
+        at async Test.run (node:internal/test_runner/test:1409:7)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:974:7),
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at lib/subagent-review-fixes.integration.test.mjs:130:1
+✖ real SDK explore/general-purpose initialized coding tools are active and declared (15.141257ms)
+  TypeError: Cannot read properties of undefined (reading 'map')
+      at TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-review-fixes.integration.test.mjs:140:38)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at lib/subagent-review-fixes.integration.test.mjs:165:1
+✖ win32 shell mapping snapshot round-trip licenses powershell (mapping execution on Linux, not Windows) (0.817876ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  'invalid' !== 'valid'
+  
+      at TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-review-fixes.integration.test.mjs:171:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'invalid',
+    expected: 'valid',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

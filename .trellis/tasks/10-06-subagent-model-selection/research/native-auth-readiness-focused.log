@@ -1,0 +1,108 @@
+pi-tmp: workspace /var/tmp/pi-native-auth-home.4mnda0ge/.cache/pi-tmp/shared/native-auth-focused-p239qgn3
+TMPDIR=/var/tmp/pi-native-auth-home.4mnda0ge/.cache/pi-tmp/shared/native-auth-focused-p239qgn3 HOME=/var/tmp/pi-native-auth-home.4mnda0ge/.cache/pi-tmp/shared/native-auth-focused-p239qgn3/home
+[pi-web] session_start dispatched to extensions for session 01a11226-8078-7470-a2fb-80f847389ebe
+[pi-web] session_start dispatched to extensions for session 01a11226-8078-7470-a2fb-80f847389ebe
+[pi-web] session_start dispatched to extensions for session 01a11226-8078-7470-a2fb-80f847389ebe
+✔ real RPC warm resume, idle reopen and browser startup restore latest explicit GPT after physical Kimi (432.677735ms)
+✔ fresh process cold restore and actual idle-timer reopen use GPT without parent or source snapshot (2508.175415ms)
+[pi-web] session_start dispatched to extensions for session 01a11226-8bf5-7470-a2fb-80fd2e74f5d2
+[pi-web] session_start dispatched to extensions for session 01a11226-8bf5-7470-a2fb-80fd2e74f5d2
+✔ cold set_model prepares new target despite unavailable history, persists via SDK and concurrent intents all apply (177.178198ms)
+[pi-web] session_start dispatched to extensions for session 01a11226-8ca6-7470-a2fb-80fe4de18ea6
+[pi-web] session_start dispatched to extensions for session 01a11226-8d4c-7470-a2fb-8100e48a0337
+✔ new controller child owns runtime, obeys explicit model, and warm Agent resume stays GPT (210.09915ms)
+[pi-web] session_start dispatched to extensions for session 01a11226-8d78-7470-a2fb-810263fea8e7
+[pi-web] session_start dispatched to extensions for session 01a11226-8d93-7470-a2fb-8104d751c03c
+[pi-web] session_start dispatched to extensions for session 01a11226-8d93-7470-a2fb-8104d751c03c
+✔ provider-only alive parent补全 and saved refs replay one necessary file, no search/lifecycle/tools (152.414266ms)
+✔ saved source disabled, missing, forged, unknown version and swapped symlink refuse before any request (33.670809ms)
+[pi-web] session_start dispatched to extensions for session 01a11226-8e32-7470-a2fb-8112d3e73d79
+✔ child wrapper reload withdraws extension-manually-off Map entries and does not activate new hidden/inactive tools (110.375533ms)
+[pi-web] session_start dispatched to extensions for session 01a11226-8ea1-7470-a2fb-8114e9fdf7b5
+[pi-web] session_start dispatched to extensions for session 01a11226-8ecc-7470-a2fb-8116b780302e
+[pi-web] session_start dispatched to extensions for session 01a11226-8ecc-7470-a2fb-8116b780302e
+✔ legacy v1 exact tools and explicit false stay narrow; legal virtual choice survives physical response (138.161959ms)
+[pi-web] session_start dispatched to extensions for session 01a11226-8f2b-7470-a2fb-81190dffca24
+✔ active branch latest explicit model, not abandoned branch or physical response, controls cold startup (50.807722ms)
+[pi-web] session_start dispatched to extensions for session 01a11226-8f5e-7470-a2fb-811b4df60544
+✔ cold target intent survives single-flight competitor failure and each successful command persists (105.092853ms)
+[pi-web] session_start dispatched to extensions for session 01a11226-8fc7-7470-a2fb-811cdc5ca5be
+✔ actual HTTP route returns typed 409 prompt refusal and permits cold standard set_model recovery (208.025054ms)
+✔ the safe DTO accepts only known reasons and never requires auth fields (1.628646ms)
+✔ toSafeDTO never echoes a raw loader/auth message (0.699829ms)
+✔ resolveConcreteModel distinguishes a missing provider from a missing model (1.901093ms)
+✔ selection priority is request > profile > parent, all re-resolved in the child runtime (1.026123ms)
+✔ an empty configured scope resolves to no execution scope, not the whole catalog (4.054129ms)
+✔ a target outside the resolved scope and a missing auth both refuse (1.140011ms)
+✔ an alive wrapper must match its branch's newest explicit selection (0.490606ms)
+✔ SDK public barrier proves awaited offline refresh may return before auth snapshot commits (121.022803ms)
+✔ owned child services serialize registration and explicit offline refreshes (78.142454ms)
+✔ fresh owned native keyless services loops keep exact parent reference, independent runtime and Kimi zero (1373.085195ms)
+✔ already-bound gate drains native re-registration and simultaneous scope/catalog queries instead of stale auth (80.614774ms)
+✔ scope remains strict for outside/zero-match/partial patterns with keyless native auth (54.523343ms)
+✔ real missing native auth remains typed refusal with no session_start or requests (39.339407ms)
+✔ binding registration failure cannot borrow the now-ready old native catalog; only a new generation clears it (67.900352ms)
+✔ false provider-only replay has offline auth readiness without lifecycle/tool widening or parent mutation (108.24374ms)
+✔ a bound session runs one target-provider turn through the delayed search tool (86.697738ms)
+✔ native override captures effective getter identity, not the first or failed last contributor (655.042634ms)
+✔ single-file legacy is replayable; legacy multiple contributions and virtual context-dependent sources have no lead (316.248589ms)
+✔ reload binds provenance to a new generation and dynamic provider registration invalidates even same identity (44.937791ms)
+✔ current project trust revocation and changed source identity reject before any provider factory is replayed (135.015896ms)
+✔ linked package root canonical containment accepts valid provider and rejects swapped root or escaped file (81.416777ms)
+✔ source metadata URLs are stored only as opaque identity, never credentials/config (19.267812ms)
+✔ current installed npm version mismatch refuses saved source without installation or factory execution (52.257337ms)
+✔ no-install adapter matches the default loader for an installed local package (33.569933ms)
+✔ a missing package is skipped with a diagnostic and no install (4.099827ms)
+✔ onMissingSource 'error' refuses the reload (1.368047ms)
+✔ an installed npm package with a mismatched version is skipped without installing (5.03605ms)
+✔ provider-only host loads one concrete file, flushes its native provider, and binds no session (69.249225ms)
+✔ explicit provider files reject directories, globs, package specs, and outside roots (10.945104ms)
+✔ a delayed web_search registration becomes active with an allow-all extension policy and zero model requests (31.516891ms)
+✔ child services flush native, legacy, and virtual registrations onto a fresh runtime without touching the parent (64.264579ms)
+✔ reload resolves project trust afresh through resolveProjectTrust instead of a construction snapshot (131.683013ms)
+✔ package settings and enablement changes take effect on reload (52.844597ms)
+✔ loadSkills:true loads only preflight-authorized skills and restores their sourceInfo (11.18882ms)
+✔ explicit authorization rejects symlink escapes and accepts a canonicalized root (18.963226ms)
+[pi-web] session_start dispatched to extensions for session 01a11226-80d6-72a0-ab73-813e7793a92f
+[pi-web] session_start dispatched to extensions for session 01a11226-813e-72a0-ab73-8140e3f60a6a
+✔ DEFAULT inherited absolute configured file admits without refs, and ignores legacy true-snapshot leads (212.45618ms)
+[pi-web] session_start dispatched to extensions for session 01a11226-8180-72a0-ab73-8142d002dfe4
+✔ SDK false provider-only absolute configured file succeeds with zero session hooks/tools/search (92.691903ms)
+✔ configured absolute source rejects forged/symlink-escape/swapped/missing/disabled/version leads before factory (17.73841ms)
+[pi-web] session_start dispatched to extensions for session 01a11226-81da-72a0-ab73-814571f96db3
+[pi-web] session_start dispatched to extensions for session 01a11226-81f7-72a0-ab73-81473bbea580
+[pi-web] session_start dispatched to extensions for session 01a11226-8213-72a0-ab73-8148ec2b3c48
+[pi-web] session_start dispatched to extensions for session 01a11226-824e-72a0-ab73-814bc2660152
+✔ cold native coding pins, explicit empty pins and legacy hard permissions remain separate from licence (151.130947ms)
+[pi-web] session_start dispatched to extensions for session 01a11226-8271-72a0-ab73-814d6c45767d
+[pi-web] session_start dispatched to extensions for session 01a11226-8271-72a0-ab73-814d6c45767d
+[pi-web] session_start dispatched to extensions for session 01a11226-8271-72a0-ab73-814d6c45767d
+✔ cold constructor is not persistence; HTTP target commits exactly once with exact colon/nested ids (125.484649ms)
+[pi-web] session_start dispatched to extensions for session 01a11226-82ef-72a0-ab73-814e84423245
+[pi-web] session_start dispatched to extensions for session 01a11226-82ef-72a0-ab73-814e84423245
+✔ scope passes but SDK setModel auth fails: no published target/history/lock orphan; retry commits (94.622229ms)
+[pi-web] session_start dispatched to extensions for session 01a11226-834e-72a0-ab73-8151a3477138
+[pi-web] session_start dispatched to extensions for session 01a11226-834e-72a0-ab73-8151a3477138
+✔ failed cold intent cannot clean a competing successful winner and no concurrent valid intent is lost (107.765357ms)
+[pi-web] session_start dispatched to extensions for session 01a11226-83ba-72a0-ab73-8153ae3cea20
+✔ failed waiting intent leaves an already committed winner alive, without retry or duplicate record (62.534964ms)
+✔ real memory runtime: retired :free / invalid suffix exact references never downshift to gpt (119.57543ms)
+✔ exact full :free and @ suffix ids beat thinking parsing, including exact parent (129.880315ms)
+✔ inherit pending legacy valid then invalid registration refuses stale target and not an unrelated provider (56.780002ms)
+✔ inherit session_start public registration failure remains sticky until a new loader generation (79.468032ms)
+✔ inherit pending native registration failure does not let a retained model pass admission (68.496293ms)
+✔ failed extension factory is not masked by existing builtin/old provider context (29.937632ms)
+✔ real SDK explore/general-purpose initialized coding tools are active and declared (62.718638ms)
+✔ cold builtin pins activate only registered licensed coding tools and preserve extension/manual-off/overrides (26.700854ms)
+✔ win32 shell mapping snapshot round-trip licenses powershell (mapping execution on Linux, not Windows) (24.681494ms)
+✔ real inherited Agent start valid-then-invalid legacy registration rejects before wrapper/queue/request (185.529813ms)
+✔ real controller new explore/general-purpose await ready and declare initialized builtins plus late extension (137.346128ms)
+✔ shell permission mapping uses independent child cwd settings after final trust reload (32.445867ms)
+ℹ tests 66
+ℹ suites 0
+ℹ pass 66
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7701.866084

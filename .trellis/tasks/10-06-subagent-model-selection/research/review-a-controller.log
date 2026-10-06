@@ -1,0 +1,19 @@
+✔ real memory runtime: retired :free / invalid suffix exact references never downshift to gpt (58.874145ms)
+✔ exact full :free and @ suffix ids beat thinking parsing, including exact parent (70.246344ms)
+✔ inherit pending legacy valid then invalid registration refuses stale target and not an unrelated provider (27.782867ms)
+✔ inherit session_start public registration failure remains sticky until a new loader generation (36.863013ms)
+✔ inherit pending native registration failure does not let a retained model pass admission (35.269531ms)
+✔ failed extension factory is not masked by existing builtin/old provider context (13.4219ms)
+✔ real SDK explore/general-purpose initialized coding tools are active and declared (31.207181ms)
+✔ cold builtin pins activate only registered licensed coding tools and preserve extension/manual-off/overrides (12.021146ms)
+✔ win32 shell mapping snapshot round-trip licenses powershell (mapping execution on Linux, not Windows) (11.225439ms)
+✔ real inherited Agent start valid-then-invalid legacy registration rejects before wrapper/queue/request (144.469374ms)
+✔ real controller new explore/general-purpose await ready and declare initialized builtins plus late extension (83.928215ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1879.409953

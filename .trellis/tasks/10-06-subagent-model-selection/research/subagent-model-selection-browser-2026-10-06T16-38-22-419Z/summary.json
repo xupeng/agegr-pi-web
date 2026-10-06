@@ -1,0 +1,30 @@
+{
+  "passed": false,
+  "passedChecks": [
+    "parent label 1280",
+    "new profile defaults 1280"
+  ],
+  "counts": {
+    "modelCalls": 5,
+    "searches": 1,
+    "kimi": 0,
+    "externalTcpAttempts": 1,
+    "devOnlyUpdateSuppressed": 0
+  },
+  "executablePath": "/home/xupeng/.cache/assistant-check-browser/manual/chrome-linux/headless_shell",
+  "browserErrors": [],
+  "blockedBrowserRequests": [],
+  "home": "/var/tmp/pi-subagent-browser-home.ttrMNSN8/.cache/pi-tmp/shared/subagent-model-browser-7vany4kj/home",
+  "agent": "/var/tmp/pi-subagent-browser-home.ttrMNSN8/.cache/pi-tmp/shared/subagent-model-browser-7vany4kj/home/.pi/agent",
+  "project": "/var/tmp/pi-subagent-browser-home.ttrMNSN8/.cache/pi-tmp/shared/subagent-model-browser-7vany4kj/project",
+  "source": "/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection",
+  "results": "/var/tmp/pi-subagent-browser-home.ttrMNSN8/.cache/pi-tmp/shared/subagent-model-browser-7vany4kj/results",
+  "evidence": "/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/.trellis/tasks/10-06-subagent-model-selection/research/subagent-model-selection-browser-2026-10-06T16-38-22-419Z",
+  "untested": [
+    "Safari",
+    "Windows",
+    "real pi-sub2api extension",
+    "live/paid providers",
+    "native search request hooks"
+  ]
+}

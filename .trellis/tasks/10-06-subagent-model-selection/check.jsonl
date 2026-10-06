@@ -1,0 +1,9 @@
+{"file":".trellis/spec/frontend/model-default-settings.md","reason":"不得在恢复或改模型时持久化全局默认"}
+{"file":".trellis/spec/frontend/subagent-model-selection.md","reason":"审查explicit tuple/注册失败/默认缺省/coding activation/C授权与cold持久化发布的跨层反例"}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"锁一致验证树与源码／runtime／浏览器证据分离"}
+{"file":".trellis/spec/frontend/pi-sdk-admission.md","reason":"恢复失败必须在 prompt admission 前拒绝并保留原交互"}
+{"file":"docs/agents/tools.md","reason":"新默认加载合法扩展，但旧快照/控制工具/hidden/defaultActive/精确提示词不扩大"}
+{"file":"docs/agents/subagents.md","reason":"内置/profile/form 默认一致、明确false/alias保持与资源政策 decoder"}
+{"file":".trellis/tasks/10-06-subagent-model-selection/research/inherit-trusted-review.md","reason":"持续工具许可、延迟注册、无安装预检及实际 SDK 技术门禁不得用源码断言替代"}
+{"file":"docs/agents/sessions.md","reason":"wrapper 回收、closing/start locks、branch 与文件所有权"}
+{"file":".trellis/tasks/10-06-subagent-model-selection/research/investigation.md","reason":"错误 Kimi 响应不代表授权；改用独立 runtime 不刷新或注销父 provider"}

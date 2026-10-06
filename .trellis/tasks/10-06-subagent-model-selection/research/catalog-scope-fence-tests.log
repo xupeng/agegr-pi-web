@@ -1,0 +1,35 @@
+✔ SDK public barrier proves awaited offline refresh may return before auth snapshot commits (68.373947ms)
+✔ owned child services serialize registration and explicit offline refreshes (43.681553ms)
+✔ fresh owned native keyless services loops keep exact parent reference, independent runtime and Kimi zero (1024.031271ms)
+✔ already-bound gate drains native re-registration and simultaneous scope/catalog queries instead of stale auth (57.891007ms)
+✔ public mutation during the final availability query cannot authorize a superseded model or clear failure (74.167241ms)
+✖ same-id catalog change during final query cannot return stale scope, thinking pin or endpoint (18.0579ms)
+✔ offline readiness never refreshes OAuth or logs in, even for expired isolated stored credentials (29.768001ms)
+✔ scope remains strict for outside/zero-match/partial patterns with keyless native auth (76.408111ms)
+✔ real missing native auth remains typed refusal with no session_start or requests (20.537472ms)
+✔ binding registration failure cannot borrow the now-ready old native catalog; only a new generation clears it (80.835435ms)
+✔ false provider-only replay has offline auth readiness without lifecycle/tool widening or parent mutation (93.269599ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 10
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2659.754806
+
+✖ failing tests:
+
+test at lib/subagent-native-auth-readiness.integration.test.mjs:267:1
+✖ same-id catalog change during final query cannot return stale scope, thinking pin or endpoint (18.0579ms)
+  Error [ModelSelectionError]: The selected model's provider is not available for this project.
+      at resolveConcreteModel (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-model-selection.ts:200:11)
+      at async selectSubagentModel (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-model-selection.ts:311:63)
+      at async resolveSubagentModelSelection (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-model-selection.ts:287:15)
+      at async TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-native-auth-readiness.integration.test.mjs:292:17)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    reason: 'provider-context-unavailable',
+    provider: 'gateway',
+    modelId: 'fixture-gpt'
+  }

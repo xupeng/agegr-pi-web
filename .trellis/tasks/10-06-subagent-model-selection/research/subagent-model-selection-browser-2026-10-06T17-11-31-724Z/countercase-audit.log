@@ -1,0 +1,21 @@
+MODEL 0 gateway fixture-gpt phase=E2E_PARENT_HELLO
+MODEL 1 gateway fixture-gpt phase=E2E_DELEGATE_NEW
+MODEL 2 gateway fixture-gpt phase=E2E_SEARCH:new
+MODEL 3 gateway fixture-gpt phase=E2E_SEARCH:new
+MODEL 4 gateway fixture-gpt phase=E2E_DELEGATE_NEW
+MODEL 5 gateway fixture-gpt phase=parent warm resume
+MODEL 6 gateway fixture-gpt phase=E2E_SEARCH:warm
+MODEL 7 gateway fixture-gpt phase=E2E_SEARCH:warm
+MODEL 8 gateway fixture-gpt phase=parent warm resume
+MODEL 9 gateway fixture-gpt phase=E2E_SEARCH:reload
+MODEL 10 gateway fixture-gpt phase=E2E_SEARCH:reload
+MODEL 11 gateway fixture-gpt phase=E2E_SEARCH:cold
+MODEL 12 gateway fixture-gpt phase=E2E_SEARCH:cold
+ACTUAL MODEL COUNTS PER PHASE {'E2E_PARENT_HELLO': 1, 'E2E_DELEGATE_NEW': 2, 'E2E_SEARCH:new': 2, 'parent warm resume': 2, 'E2E_SEARCH:warm': 2, 'E2E_SEARCH:reload': 2, 'E2E_SEARCH:cold': 2}
+ACTUAL SEARCHES [{'query': 'new', 'marker': 'LOCAL-SEARCH-RESULT:new'}, {'query': 'warm', 'marker': 'LOCAL-SEARCH-RESULT:warm'}, {'query': 'reload', 'marker': 'LOCAL-SEARCH-RESULT:reload'}, {'query': 'cold', 'marker': 'LOCAL-SEARCH-RESULT:cold'}]
+ACTUAL SSE BODY ':\n\ndata: {"type":"startup_error","errorMessage":"Failed to start agent: The selected model is no longer available. Choose another model."}\n\n'
+ACTUAL UNAVAILABLE SESSION BROWSER REQUESTS [{"method": "GET", "url": "http://127.0.0.1:38635/api/agent/01a11232-f715-7270-bdff-877f3397121b/events", "status": 200}, {"method": "GET", "url": "http://127.0.0.1:38635/api/agent/01a11232-f715-7270-bdff-877f3397121b/events", "status": 200}, {"method": "GET", "url": "http://127.0.0.1:38635/api/agent/01a11232-f715-7270-bdff-877f3397121b", "status": 200}, {"method": "POST", "url": "http://127.0.0.1:38635/api/agent/01a11232-f715-7270-bdff-877f3397121b/lease", "status": -1}]
+PROMPT POST COUNT 0
+TRACE FRAME extracted unavailable-startup-notice-390.jpeg: timestamp 48538.725; original screencast/page@556e8451c829f3cbe89454bb82db5497-1791306740008.jpeg
+NOT EXECUTED: rejected-response/draft/history-equality assertion group; picker/model_change/retry/refresh; legacy false; global settings byte equality/final safety assertion group.
+Draft retention and old answer are actual screenshot observations, NOT completed history equality checks.

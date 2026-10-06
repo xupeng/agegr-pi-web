@@ -1,0 +1,8 @@
+START warm: pid=1210737 pgid=1210737 port=34471 spawnCwd=/var/tmp/pi-subagent-browser-home.sApeRsmK/.cache/pi-tmp/shared/subagent-model-browser-k2zuszri/project app=/var/tmp/pi-subagent-browser-home.sApeRsmK/.cache/pi-tmp/shared/subagent-model-browser-k2zuszri/app source=/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection log=/var/tmp/pi-subagent-browser-home.sApeRsmK/.cache/pi-tmp/shared/subagent-model-browser-k2zuszri/results/next-warm.log
+locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByRole('dialog').filter({ has: locator('.settings-dialog-surface') }).getByRole('navigation', { name: 'Settings', exact: true }).getByRole('button', { name: 'Agents', exact: true })
+
+    at checkForm (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/e2e/subagent-model-selection.mjs:269:59)
+    at async file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/e2e/subagent-model-selection.mjs:310:3
+STOP warm: pid=1210737

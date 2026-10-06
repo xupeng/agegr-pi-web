@@ -1,0 +1,288 @@
+✔ Stop unwinds a command waiting on select and closes its UI (47.456654ms)
+✔ Stop unwinds a command waiting on confirm and closes its UI (6.330758ms)
+✔ Stop unwinds a command waiting on input and closes its UI (6.30954ms)
+✔ Stop unwinds a command waiting on editor and closes its UI (2.437701ms)
+✔ Stop unwinds a command waiting on custom and closes its UI (3.618079ms)
+✔ normal cancel and caller abort keep UI defaults and notify all subscribers (2.092104ms)
+✔ Stop cancels a custom UI factory that has not mounted yet (2.047424ms)
+✔ Stop before custom UI initialization does not invoke the factory (0.721316ms)
+✔ defaults to the 10-minute idle timeout when the env var is unset or blank (1.48727ms)
+✔ treats zero as disabling idle shutdown (0.215662ms)
+✔ uses a positive value as the timeout in milliseconds (0.168718ms)
+✔ falls back to the 10-minute default and warns for invalid or out-of-range values (0.698605ms)
+✔ PI_WEB_IDLE_TIMEOUT_MS=0 still reaps a run that Stop cannot unwind (198.079155ms)
+✔ PI_WEB_IDLE_TIMEOUT_MS=0 keeps a session alive after Stop unwinds its run (136.99897ms)
+✔ PI_WEB_IDLE_TIMEOUT_MS="": pressing Stop again does not postpone the forced cleanup (96.857093ms)
+✔ PI_WEB_IDLE_TIMEOUT_MS="0": pressing Stop again does not postpone the forced cleanup (173.479515ms)
+✔ PI_WEB_IDLE_TIMEOUT_MS=0 reaps a bash command that abort_bash cannot stop (95.579123ms)
+✔ PI_WEB_IDLE_TIMEOUT_MS=0 applies to an idle session (94.846991ms)
+[pi-web] invalid PI_WEB_IDLE_TIMEOUT_MS "2592000000", falling back to 10 minutes
+✔ PI_WEB_IDLE_TIMEOUT_MS=1800000 applies to an idle session (74.081881ms)
+✔ PI_WEB_IDLE_TIMEOUT_MS=2592000000 applies to an idle session (83.670596ms)
+✔ defaults the shutdown deadline to 5 seconds when the env var is unset or blank (1.723791ms)
+✔ uses a positive shutdown deadline in milliseconds (0.30937ms)
+✔ falls back to the 5-second deadline and warns for zero, invalid or out-of-range values (1.722425ms)
+✔ a wrapper reports itself dead as soon as shutdown starts (12.105052ms)
+✔ shutdown disposes the session once the deadline passes even if session_shutdown never settles (3.292355ms)
+✔ direct destruction also disposes the session at the deadline (1.190496ms)
+✔ a session_shutdown failure after the deadline is not an unhandled rejection (2.090203ms)
+✔ the shutdown deadline timer does not keep the process alive (3.373469ms)
+✔ PI_WEB_SHUTDOWN_DEADLINE_MS sets the deadline (153.005642ms)
+✔ startRpcSession waits for a closing wrapper to dispose before it opens the session again (630.052139ms)
+[pi-web] session_start dispatched to extensions for session 01a111f8-61e6-7057-9114-21a6a1dfeffa
+✔ a tool change made while the session closes applies to the wrapper a concurrent start brings up (186.095356ms)
+[pi-web] session 01a111f8-62a0-7057-9114-21a984d7da11 is still shutting down; starting it again anyway
+✔ startRpcSession replaces a shutting-down wrapper, which then cannot unregister its replacement (36.778003ms)
+[pi-web] session 01a111f8-62c5-7057-9114-21aafef6ccdd is still shutting down; starting it again anyway
+✔ a wrapper evicted for a newer file on disk cannot unregister the wrapper that reloaded it (66.407327ms)
+[pi-web] session 01a111f8-6308-7057-9114-21ac5b86d99d is still shutting down; starting it again anyway
+✔ a wrapper registered before a hot reload cannot unregister its replacement either (36.64303ms)
+[pi-web] session_start dispatched to extensions for session session-1
+✔ get_state waits for extension resources before returning the system prompt (12.59934ms)
+✔ get_state reports the prompt of a session that has not run anything yet (2.752254ms)
+✔ get_state keeps reporting the replayed prompt once the transcript has one (1.430816ms)
+✔ prompt commands wait for SDK preflight acceptance before acknowledging (3.331549ms)
+✔ every SDK acceptance disposition acknowledges before the prompt promise settles (2.359804ms)
+✔ completion notification waits for an accepted agent run to become idle (3.128895ms)
+✔ completion notification covers extension-injected runs without an SSE client (0.808816ms)
+✔ new event listeners receive the latest active tool update (0.777743ms)
+✔ does not replay the nested calls of a running codemode script (0.775539ms)
+✔ a tool call's end also forgets calls recorded under its id (0.514524ms)
+✔ tolerates a nested end after its parent ended (0.404692ms)
+✔ replays no tool call once the run has ended (0.404658ms)
+✔ suppressed sessions do not emit completion notifications (0.577906ms)
+✔ prompt commands reject when the SDK rejects before preflight acceptance (1.242055ms)
+✔ accepted prompt failures still finish through the event stream (3.763442ms)
+✔ queued prompt commands forward their streaming behavior and acknowledge acceptance (1.12465ms)
+✔ an exact system prompt is reported by get_state without touching the SDK prompt state (1.248125ms)
+✔ prompt admission waits for the preceding preflight and keeps overlapping runs counted (1.618085ms)
+✔ prompt admission continues after the preceding preflight rejects (1.958115ms)
+[pi-web] failed to deliver session_shutdown event: listener failed
+✔ a failing event listener cannot reject prompt completion (2.529417ms)
+✔ session shutdown notifies extensions before disposing the SDK session (1.120956ms)
+✔ session shutdown still disposes the SDK session when an extension fails (0.433462ms)
+✔ destroy notifies event listeners so attached SSE streams can close (0.243317ms)
+✔ a listener that unsubscribes while handling an event does not hide it from the next one (2.161978ms)
+✔ direct destruction disposes the SDK session before unregistering the wrapper (0.453204ms)
+✔ direct destruction emits session_shutdown before dispose when extensions are present (5.062362ms)
+✔ direct destruction still disposes when session_shutdown throws synchronously (49.096206ms)
+✔ idle timer preserves extension-owned session work until it becomes inactive (11.437699ms)
+✔ idle timer preserves active work but reaps a run stuck after Stop (3.584704ms)
+✔ direct bash commands use sanitized project operations with current shell settings (2.357881ms)
+✔ late old-wrapper cleanup keeps a replacement wrapper's rehydrated ask (4.234038ms)
+✔ defaults to a 15-minute main timeout and the default tool budgets (2.867835ms)
+✔ the environment variable wins over the persisted value (0.272428ms)
+✔ the persisted value applies when the environment variable is unset or blank (0.216413ms)
+✔ zero disables the watchdog through either source (0.200848ms)
+✔ invalid or out-of-range values fall back to the default and warn (0.640136ms)
+✔ tool budgets merge over the defaults and can be removed with zero (0.28765ms)
+✔ invalid tool budgets are dropped with a warning (0.258895ms)
+✔ a malformed settings file falls back to defaults without throwing (2.389578ms)
+✔ the config file is read from disk when no stored object is injected (0.644634ms)
+[pi-web] aborting stalled session session-1: 60s without events (tool=read, toolElapsed=60s, turnElapsed=60s, timeout=60s, source=env)
+[pi-web] aborting stalled session session-1: 60s without events (tool=read, toolElapsed=60s, turnElapsed=60s, timeout=60s, source=env)
+✔ AC1: aborts a stalled turn and reports the in-flight tool and elapsed time (2183.417287ms)
+[pi-web] aborting stalled session session-1: 60s without events (tool=none, toolElapsed=n/a, turnElapsed=60s, timeout=60s, source=env)
+✔ AC7: a failed transcript write is logged and does not block the abort (131.049981ms)
+✔ AC1: reports a stall with no active tool as a null tool name (134.316162ms)
+[pi-web] aborting stalled session session-1: 120s without events (tool=bash, toolElapsed=120s, turnElapsed=120s, timeout=120s, source=env, toolOverride=true)
+✔ AC1/R3: a tool with a longer configured budget survives the main threshold (115.025329ms)
+✔ AC2: never fires while events keep arriving (154.893918ms)
+✔ AC2: a model delta also resets the clock (69.963378ms)
+✔ AC4: a settled turn stops the clock and never fires (66.240007ms)
+✔ AC4: a user abort disarms the watchdog and it does not fire a second time (83.738662ms)
+✔ AC4: destroy releases the timer and never fires (92.036831ms)
+✔ AC4: a zero threshold disables the watchdog entirely (96.344501ms)
+✔ AC4: disarm and dispose clear the pending timer so a later tick cannot fire (0.652789ms)
+✔ AC1: a stall callback cannot reenter and fire twice (1.175683ms)
+✔ AC4: calling start twice disposes the previous watchdog before arming a new one (93.65435ms)
+[pi-web] aborting stalled session session-1: 120s without events (tool=bash, toolElapsed=120s, turnElapsed=120s, timeout=120s, source=env, toolOverride=true)
+✔ nested bash keeps its silence budget without being replayed as a top-level card (92.18476ms)
+✔ a pinned preset neither activates codemode nor drops the one defaultTools adds (163.488349ms)
+✔ get_tools reports codemode's description as declared, with the tools scripts can call (36.558279ms)
+✔ get_tools marks the active tools codemode's only mode leaves out of requests (42.26855ms)
+✔ navigating to an older branch keeps the Read-only pin and codemode (42.628073ms)
+[pi-web] session_start dispatched to extensions for session 01a111f8-5fe4-70fe-a27b-697408c64b24
+✔ reload keeps the pinned coding tools and what extensions chose while they restarted (26.235523ms)
+✔ a tool selection replaces only the coding tools and keeps the active extension tools (17.229311ms)
+✔ a tool selection does not activate tools registered with defaultActive: false (1.18357ms)
+✔ withdrawn and unregistered tools are never carried (0.655492ms)
+✔ an empty selection is Chat only (1.994722ms)
+✔ startup keeps what defaultTools activates and never what pi leaves inactive (19.423268ms)
+✔ reload keeps the tools that were active and those an extension activated while it restarted (1.934107ms)
+✔ reload keeps the coding selection but not a tool an extension switched off while it restarted (1.063491ms)
+✔ reload does not activate tools registered with defaultActive: false (1.554969ms)
+✔ a direct or model-only tool an extension switched off stays off after reload and set_tools (0.917073ms)
+✔ navigating the tree re-applies the pinned selection over the branch's restored tools (1.66088ms)
+✔ navigating an unpinned session keeps the branch's restored tools (0.799368ms)
+✔ navigation keeps an extension tool off when the branch's loadout leaves it out (0.78232ms)
+✔ navigation keeps pi-web's subagent tools, which the session switched on after the branch was recorded (0.986621ms)
+✔ navigation preserves already-active fork ask_user across a branch recorded without it (2.555962ms)
+✔ navigation never activates registered ask_user that was not active (0.787198ms)
+✔ navigation filters an already-active ask_user if its registration is now hidden (0.925616ms)
+✔ ask_user carry does not repopulate Chat-only or an empty pinned selection (1.044894ms)
+✔ navigation from an extension command re-applies the selection too (0.822743ms)
+✔ cancelled navigation, Chat only, and subagents keep the tools pi restored (1.719544ms)
+✔ get_tools reports the descriptions declared to the model (0.837364ms)
+✔ get_tools leaves out withdrawn tools and reports each tool's exposure (0.693637ms)
+✔ suppresses default powerline widgets before invoking factories (5.397999ms)
+✔ applies configured widget and status rules and clears stale state (2.852471ms)
+✔ keeps array widgets compatible while maintaining the state snapshot (1.07803ms)
+✔ renders a factory widget immediately with the fixed headless facade (1.269355ms)
+✔ requestRender replaces the browser event and server snapshot (2.452439ms)
+✔ clearing and replacing widgets disposes components and invalidates old callbacks (0.810408ms)
+✔ isolates factory and render failures with a clear and extension_error (6.815251ms)
+✔ reload and destroy dispose factory components and invalidate callbacks (12.552468ms)
+✔ command-context reload also clears factory widgets (1.370399ms)
+✔ dispose-time reentrant updates remain authoritative (0.992917ms)
+✔ render failure does not clear a dispose-time recovery widget (3.177641ms)
+✔ ignores factory registrations after the wrapper is destroyed (0.243769ms)
+✔ reload ignores widget registrations triggered by component disposal (2.95829ms)
+✔ get_tools preserves the SDK tool definition fields (10.266275ms)
+✔ closeAsk delivers answers fire-and-forget so ask_submit answers promptly (1.516904ms)
+✔ RPC session startup preloads extension-registered providers before restoring models (1.437089ms)
+✔ only normal sessions load the codemode, tool-search, and mcp built-ins (1.535514ms)
+✔ built-in subagents persist their selected resource policy (2.059328ms)
+✔ running snapshots expose sessions with suppressed completion notifications (2.022391ms)
+✔ RPC session startup resolves and passes the SDK-native enabled model scope (1.347602ms)
+✔ RPC session startup treats only sessions with messages as continuing (1.249199ms)
+✔ RPC session startup opens an existing session file only once and trusts its cwd (2.071176ms)
+✔ RPC wrapper avoids per-chunk idle maintenance (1.195231ms)
+✔ normal session teardown paths use graceful extension shutdown (2.464278ms)
+✔ clone copies the requested leaf into a child session (1.266165ms)
+✔ fork_branch copies the selected assistant entry without replacing the source session (15.122353ms)
+✔ fork before the first message persists a reopenable message-free child session (8.769858ms)
+✔ fork and fork_branch copy finished entries while the source keeps running (11.147305ms)
+✔ fork refuses a running shell command and a source not yet written to disk (3.747934ms)
+✔ session replacement rejects active work and clone writes one reopenable child (6.61338ms)
+✔ cancelled session replacement releases its lock (0.678507ms)
+✔ clone cancels an assistant-free branch without creating a new session file (2.396147ms)
+✔ new-session route applies model scope during construction instead of follow-up commands (0.754482ms)
+✔ prompt routes mark only preflight failures as rejected (1.256377ms)
+✔ exact prompts are sent through before_agent_start instead of the SDK prompt state (2.198672ms)
+✔ RPC session startup never writes the global model defaults (1.393365ms)
+✔ custom extension UI receives the fixed headless terminal facade (1.214613ms)
+✔ reloading a session invalidates the models cache (1.723815ms)
+✔ normal sessions restore persisted tool selections before loading resources (1.502122ms)
+✔ crossing the Chat-only boundary persists and rebuilds the wrapper (1.624156ms)
+✔ get_state reports an unknown context usage instead of failing the whole response (3.979278ms)
+[pi-web] session_start dispatched to extensions for session 01a111f8-62c9-7192-830f-24e90a3d6e1b
+[pi-web] session_start dispatched to extensions for session 01a111f8-62c9-7192-830f-24e90a3d6e1b
+[pi-web] session_start dispatched to extensions for session 01a111f8-62c9-7192-830f-24e90a3d6e1b
+✔ real RPC warm resume, idle reopen and browser startup restore latest explicit GPT after physical Kimi (555.598248ms)
+✔ fresh process cold restore and actual idle-timer reopen use GPT without parent or source snapshot (2652.79307ms)
+[pi-web] session_start dispatched to extensions for session 01a111f8-6f51-7192-830f-24ecb29ba1e2
+[pi-web] session_start dispatched to extensions for session 01a111f8-6f51-7192-830f-24ecb29ba1e2
+✔ cold set_model prepares new target despite unavailable history, persists via SDK and concurrent intents all apply (171.403533ms)
+[pi-web] session_start dispatched to extensions for session 01a111f8-6ffd-7192-830f-24ee810a8f32
+[pi-web] session_start dispatched to extensions for session 01a111f8-707b-7192-830f-24f004236c42
+✔ new controller child owns runtime, obeys explicit model, and warm Agent resume stays GPT (185.826344ms)
+[pi-web] session_start dispatched to extensions for session 01a111f8-70b6-7192-830f-24f2c5453f11
+[pi-web] session_start dispatched to extensions for session 01a111f8-70d3-7192-830f-24f44f8daf5f
+[pi-web] session_start dispatched to extensions for session 01a111f8-70d3-7192-830f-24f44f8daf5f
+✔ provider-only alive parent补全 and saved refs replay one necessary file, no search/lifecycle/tools (134.652251ms)
+✔ saved source disabled, missing, forged, unknown version and swapped symlink refuse before any request (81.962214ms)
+[pi-web] session_start dispatched to extensions for session 01a111f8-718f-7192-830f-25039f16a728
+✔ child wrapper reload withdraws extension-manually-off Map entries and does not activate new hidden/inactive tools (81.684387ms)
+[pi-web] session_start dispatched to extensions for session 01a111f8-71e1-7192-830f-250533a36231
+[pi-web] session_start dispatched to extensions for session 01a111f8-720a-7192-830f-25071338c038
+[pi-web] session_start dispatched to extensions for session 01a111f8-720a-7192-830f-25071338c038
+✔ legacy v1 exact tools and explicit false stay narrow; legal virtual choice survives physical response (138.118195ms)
+[pi-web] session_start dispatched to extensions for session 01a111f8-726b-7192-830f-2508d296f2eb
+✔ active branch latest explicit model, not abandoned branch or physical response, controls cold startup (49.899699ms)
+[pi-web] session_start dispatched to extensions for session 01a111f8-729d-7192-830f-250a35b1b053
+✔ cold target intent survives single-flight competitor failure and each successful command persists (98.330862ms)
+[pi-web] session_start dispatched to extensions for session 01a111f8-7300-7192-830f-250c018797a6
+✔ actual HTTP route returns typed 409 prompt refusal and permits cold standard set_model recovery (199.617614ms)
+✔ the safe DTO accepts only known reasons and never requires auth fields (1.727808ms)
+✔ toSafeDTO never echoes a raw loader/auth message (0.649823ms)
+✔ resolveConcreteModel distinguishes a missing provider from a missing model (1.863433ms)
+✔ selection priority is request > profile > parent, all re-resolved in the child runtime (0.958538ms)
+✔ an empty configured scope resolves to no execution scope, not the whole catalog (4.040485ms)
+✔ a target outside the resolved scope and a missing auth both refuse (1.361221ms)
+✔ an alive wrapper must match its branch's newest explicit selection (0.628579ms)
+✔ a bound session runs one target-provider turn through the delayed search tool (74.777218ms)
+✔ native override captures effective getter identity, not the first or failed last contributor (594.257097ms)
+✔ single-file legacy is replayable; legacy multiple contributions and virtual context-dependent sources have no lead (268.12782ms)
+✔ reload binds provenance to a new generation and dynamic provider registration invalidates even same identity (56.786565ms)
+✔ current project trust revocation and changed source identity reject before any provider factory is replayed (78.290013ms)
+✔ linked package root canonical containment accepts valid provider and rejects swapped root or escaped file (89.238515ms)
+✔ source metadata URLs are stored only as opaque identity, never credentials/config (31.10515ms)
+✔ current installed npm version mismatch refuses saved source without installation or factory execution (40.217829ms)
+✔ no-install adapter matches the default loader for an installed local package (26.947112ms)
+✔ a missing package is skipped with a diagnostic and no install (3.68854ms)
+✔ onMissingSource 'error' refuses the reload (1.360499ms)
+✔ an installed npm package with a mismatched version is skipped without installing (3.930518ms)
+✔ provider-only host loads one concrete file, flushes its native provider, and binds no session (83.922097ms)
+✔ explicit provider files reject directories, globs, package specs, and outside roots (8.581093ms)
+✔ a delayed web_search registration becomes active with an allow-all extension policy and zero model requests (25.807609ms)
+✔ child services flush native, legacy, and virtual registrations onto a fresh runtime without touching the parent (48.345494ms)
+✔ reload resolves project trust afresh through resolveProjectTrust instead of a construction snapshot (108.40219ms)
+✔ package settings and enablement changes take effect on reload (22.016682ms)
+✔ loadSkills:true loads only preflight-authorized skills and restores their sourceInfo (8.860413ms)
+✔ explicit authorization rejects symlink escapes and accepts a canonicalized root (29.064095ms)
+[pi-web] session_start dispatched to extensions for session 01a111f8-6b0c-7251-bfc2-583b27263a64
+[pi-web] session_start dispatched to extensions for session 01a111f8-6b51-7251-bfc2-583d88a50272
+✔ DEFAULT inherited absolute configured file admits without refs, and ignores legacy true-snapshot leads (209.104214ms)
+[pi-web] session_start dispatched to extensions for session 01a111f8-6b99-7251-bfc2-583ebd6296f1
+✔ SDK false provider-only absolute configured file succeeds with zero session hooks/tools/search (59.813025ms)
+✔ configured absolute source rejects forged/symlink-escape/swapped/missing/disabled/version leads before factory (34.334429ms)
+[pi-web] session_start dispatched to extensions for session 01a111f8-6bea-7251-bfc2-5840b7054b5d
+[pi-web] session_start dispatched to extensions for session 01a111f8-6c03-7251-bfc2-584233c7f7af
+[pi-web] session_start dispatched to extensions for session 01a111f8-6c1d-7251-bfc2-5844bf1db9bb
+[pi-web] session_start dispatched to extensions for session 01a111f8-6c53-7251-bfc2-5846cd82a026
+✔ cold native coding pins, explicit empty pins and legacy hard permissions remain separate from licence (136.796605ms)
+[pi-web] session_start dispatched to extensions for session 01a111f8-6c73-7251-bfc2-584968bd7006
+[pi-web] session_start dispatched to extensions for session 01a111f8-6c73-7251-bfc2-584968bd7006
+[pi-web] session_start dispatched to extensions for session 01a111f8-6c73-7251-bfc2-584968bd7006
+✔ cold constructor is not persistence; HTTP target commits exactly once with exact colon/nested ids (116.100299ms)
+[pi-web] session_start dispatched to extensions for session 01a111f8-6ce7-7251-bfc2-584bced51bcf
+✖ scope passes but SDK setModel auth fails: no published target/history/lock orphan; retry commits (34.739771ms)
+[pi-web] session_start dispatched to extensions for session 01a111f8-6d0a-7251-bfc2-584df25f08ae
+[pi-web] session_start dispatched to extensions for session 01a111f8-6d0a-7251-bfc2-584df25f08ae
+✔ failed cold intent cannot clean a competing successful winner and no concurrent valid intent is lost (103.031812ms)
+[pi-web] session_start dispatched to extensions for session 01a111f8-6d71-7251-bfc2-584e617baf44
+✔ failed waiting intent leaves an already committed winner alive, without retry or duplicate record (59.174278ms)
+✔ projection filters load-time and session_start tools without copying the Extension (36.269562ms)
+✔ ask_user withdrawal composes with the same live Map (13.904223ms)
+✔ a specific allow selector also governs late registrations (15.829517ms)
+✔ the same tool name from two owners is not addressable by name (1.162071ms)
+✔ a deny on a shared package short name withdraws every owner and stays live (1.432242ms)
+✔ a turn_start registration and a re-registration both pass the live filter (15.280839ms)
+✔ reserved control tools stay withdrawn even when a tool is registered late (14.439612ms)
+✔ reload re-projects the newly loaded extensions with the live policy (15.69614ms)
+✔ a tool the extension actively deactivated is not revived by turn or host activation (38.640077ms)
+ℹ tests 210
+ℹ suites 0
+ℹ pass 209
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9048.612945
+
+✖ failing tests:
+
+test at lib/subagent-review-b.integration.test.mjs:158:1
+✖ scope passes but SDK setModel auth fails: no published target/history/lock orphan; retry commits (34.739771ms)
+  AssertionError [ERR_ASSERTION]: failed SDK checkAuth appended nothing
+  + actual - expected
+  
+    '{"type":"session","version":3,"id":"01a111f8-6ce7-7251-bfc2-584bced51bcf","timestamp":"2026-10-06T16:07:35.911Z","cwd":"/var/tmp/pi-review-b-validation.kfnzFr5e/.cache/pi-tmp/shared/review-b-final-focused-9luagn1a/pi-web-subagent-gate-w5KfBQ/review-b-project"}\n' +
+      '{"type":"custom","customType":"pi-web:subagent","data":{"version":1,"parentSessionId":"absent","parentSessionPath":"fixture-only","parentToolCallId":"fixture","profile":"explore","description":"review b","task":"local only","runInBackground":false,"createdAt":"2026-10-06T16:07:35.911Z","resourceSnapshot":{"version":1,"appendSystemPrompt":[],"tools":["read","grep","find","ls"],"loadSkills":false,"loadExtensions":true,"toolPolicy":{"version":1,"builtinTools":["read","grep","find","ls"],"extensionAllow":["ext:*"],"extensionDeny":[]}}},"id":"6e259c1b","parentId":null,"timestamp":"2026-10-06T16:07:35.911Z"}\n' +
+      '{"type":"model_change","id":"8ffabec3","parentId":"6e259c1b","timestamp":"2026-10-06T16:07:35.911Z","provider":"review-b","modelId":"gpt"}\n' +
+      '{"type":"message","id":"4bfa4ee8","parentId":"8ffabec3","timestamp":"2026-10-06T16:07:35.912Z","message":{"role":"user","content":"history","timestamp":1791302855912}}\n' +
+  +   '{"type":"message","id":"cc659db5","parentId":"4bfa4ee8","timestamp":"2026-10-06T16:07:35.912Z","message":{"role":"assistant","content":[{"type":"text","text":"history"}],"api":"faux","provider":"review-b","model":"gpt","usage":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0,"totalTokens":0,"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0,"total":0}},"stopReason":"stop","timestamp":1791302855912}}\n' +
+  +   '{"type":"thinking_level_change","id":"d7e76e50","parentId":"cc659db5","timestamp":"2026-10-06T16:07:35.936Z","thinkingLevel":"off"}\n'
+  -   '{"type":"message","id":"cc659db5","parentId":"4bfa4ee8","timestamp":"2026-10-06T16:07:35.912Z","message":{"role":"assistant","content":[{"type":"text","text":"history"}],"api":"faux","provider":"review-b","model":"gpt","usage":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0,"totalTokens":0,"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0,"total":0}},"stopReason":"stop","timestamp":1791302855912}}\n'
+  
+      at TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-review-b.integration.test.mjs:187:9)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '{"type":"session","version":3,"id":"01a111f8-6ce7-7251-bfc2-584bced51bcf","timestamp":"2026-10-06T16:07:35.911Z","cwd":"/var/tmp/pi-review-b-validation.kfnzFr5e/.cache/pi-tmp/shared/review-b-final-focused-9luagn1a/pi-web-subagent-gate-w5KfBQ/review-b-project"}\n{"type":"custom","customType":"pi-web:subagent","data":{"version":1,"parentSessionId":"absent","parentSessionPath":"fixture-only","parentToolCallId":"fixture","profile":"explore","description":"review b","task":"local only","runInBackground":false,"createdAt":"2026-10-06T16:07:35.911Z","resourceSnapshot":{"version":1,"appendSystemPrompt":[],"tools":["read","grep","find","ls"],"loadSkills":false,"loadExtensions":true,"toolPolicy":{"version":1,"builtinTools":["read","grep","find","ls"],"extensionAllow":["ext:*"],"extensionDeny":[]}}},"id":"6e259c1b","parentId":null,"timestamp":"2026-10-06T16:07:35.911Z"}\n{"type":"model_change","id":"8ffabec3","parentId":"6e259c1b","timestamp":"2026-10-06T16:07:35.911Z","provider":"review-b","modelId":"gpt"}\n{"type":"message","id":"4bfa4ee8","parentId":"8ffabec3","timestamp":"2026-10-06T16:07:35.912Z","message":{"role":"user","content":"history","timestamp":1791302855912}}\n{"type":"message","id":"cc659db5","parentId":"4bfa4ee8","timestamp":"2026-10-06T16:07:35.912Z","message":{"role":"assistant","content":[{"type":"text","text":"history"}],"api":"faux","provider":"review-b","model":"gpt","usage":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0,"totalTokens":0,"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0,"total":0}},"stopReason":"stop","timestamp":1791302855912}}\n{"type":"thinking_level_change","id":"d7e76e50","parentId":"cc659db5","timestamp":"2026-10-06T16:07:35.936Z","thinkingLevel":"off"}\n',
+    expected: '{"type":"session","version":3,"id":"01a111f8-6ce7-7251-bfc2-584bced51bcf","timestamp":"2026-10-06T16:07:35.911Z","cwd":"/var/tmp/pi-review-b-validation.kfnzFr5e/.cache/pi-tmp/shared/review-b-final-focused-9luagn1a/pi-web-subagent-gate-w5KfBQ/review-b-project"}\n{"type":"custom","customType":"pi-web:subagent","data":{"version":1,"parentSessionId":"absent","parentSessionPath":"fixture-only","parentToolCallId":"fixture","profile":"explore","description":"review b","task":"local only","runInBackground":false,"createdAt":"2026-10-06T16:07:35.911Z","resourceSnapshot":{"version":1,"appendSystemPrompt":[],"tools":["read","grep","find","ls"],"loadSkills":false,"loadExtensions":true,"toolPolicy":{"version":1,"builtinTools":["read","grep","find","ls"],"extensionAllow":["ext:*"],"extensionDeny":[]}}},"id":"6e259c1b","parentId":null,"timestamp":"2026-10-06T16:07:35.911Z"}\n{"type":"model_change","id":"8ffabec3","parentId":"6e259c1b","timestamp":"2026-10-06T16:07:35.911Z","provider":"review-b","modelId":"gpt"}\n{"type":"message","id":"4bfa4ee8","parentId":"8ffabec3","timestamp":"2026-10-06T16:07:35.912Z","message":{"role":"user","content":"history","timestamp":1791302855912}}\n{"type":"message","id":"cc659db5","parentId":"4bfa4ee8","timestamp":"2026-10-06T16:07:35.912Z","message":{"role":"assistant","content":[{"type":"text","text":"history"}],"api":"faux","provider":"review-b","model":"gpt","usage":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0,"totalTokens":0,"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0,"total":0}},"stopReason":"stop","timestamp":1791302855912}}\n',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

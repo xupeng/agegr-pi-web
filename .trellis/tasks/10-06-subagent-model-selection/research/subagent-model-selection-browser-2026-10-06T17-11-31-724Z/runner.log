@@ -1,0 +1,9 @@
+START warm: pid=1246074 pgid=1246074 port=37345 spawnCwd=/var/tmp/pi-subagent-browser-home.UxIa4YuA/.cache/pi-tmp/shared/subagent-model-browser-v9w3haom/project app=/var/tmp/pi-subagent-browser-home.UxIa4YuA/.cache/pi-tmp/shared/subagent-model-browser-v9w3haom/app source=/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection log=/var/tmp/pi-subagent-browser-home.UxIa4YuA/.cache/pi-tmp/shared/subagent-model-browser-v9w3haom/results/next-warm.log
+PASS new real child 01a11233-399f-7106-91fb-4167b9472a57: native gateway/fixture-gpt, delayed local search, model label
+PASS same-id Agent resume after idle + extension reload + browser refresh: 01a11233-399f-7106-91fb-4167b9472a57
+STOP warm: pid=1246074
+START cold: pid=1246594 pgid=1246594 port=38635 spawnCwd=/var/tmp/pi-subagent-browser-home.UxIa4YuA/.cache/pi-tmp/shared/subagent-model-browser-v9w3haom/project app=/var/tmp/pi-subagent-browser-home.UxIa4YuA/.cache/pi-tmp/shared/subagent-model-browser-v9w3haom/app source=/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection log=/var/tmp/pi-subagent-browser-home.UxIa4YuA/.cache/pi-tmp/shared/subagent-model-browser-v9w3haom/results/next-cold.log
+PASS cold process, no parent runtime, historical Kimi ignored, 390px GPT label + search
+page.waitForResponse: Timeout 30000ms exceeded while waiting for event "response"
+    at /home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/e2e/subagent-model-selection.mjs:392:26
+STOP cold: pid=1246594

@@ -1,0 +1,32 @@
+pi-tmp: workspace /var/tmp/pi-native-auth-home.02Wo2Q8X/.cache/pi-tmp/shared/native-auth-before-2j7e2hyk
+TMPDIR=/var/tmp/pi-native-auth-home.02Wo2Q8X/.cache/pi-tmp/shared/native-auth-before-2j7e2hyk HOME=/var/tmp/pi-native-auth-home.02Wo2Q8X/.cache/pi-tmp/shared/native-auth-before-2j7e2hyk/home
+✔ SDK public barrier proves awaited offline refresh may return before auth snapshot commits (57.117221ms)
+✖ owned child services serialize registration and explicit offline refreshes (23.447017ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 1
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1140.358404
+
+✖ failing tests:
+
+test at lib/subagent-native-auth-readiness.integration.test.mjs:95:1
+✖ owned child services serialize registration and explicit offline refreshes (23.447017ms)
+  AssertionError [ERR_ASSERTION]: SDK background registration refreshes must not overlap the awaited child readiness pass
+  
+  3 !== 1
+  
+      at TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-native-auth-readiness.integration.test.mjs:122:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 3,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+pi-tmp: retained failure workspace (7 idle days): /var/tmp/pi-native-auth-home.02Wo2Q8X/.cache/pi-tmp/shared/native-auth-before-2j7e2hyk

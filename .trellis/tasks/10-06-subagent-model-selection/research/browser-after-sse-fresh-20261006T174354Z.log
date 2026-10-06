@@ -1,0 +1,16 @@
+START_UTC=2026-10-06T17:43:54Z OUTER_PID=1260008 OUTER_HOME=/var/tmp/pi-subagent-browser-home.aD5Jm4XL
+WRAPPER_PID=1260011
+pi-tmp: workspace /var/tmp/pi-subagent-browser-home.aD5Jm4XL/.cache/pi-tmp/shared/subagent-model-browser-7ssksrn2
+INNER PID=1260016 PGID=1260016 TMPDIR=/var/tmp/pi-subagent-browser-home.aD5Jm4XL/.cache/pi-tmp/shared/subagent-model-browser-7ssksrn2 PI_TASK_TMPDIR=/var/tmp/pi-subagent-browser-home.aD5Jm4XL/.cache/pi-tmp/shared/subagent-model-browser-7ssksrn2 HOME=/var/tmp/pi-subagent-browser-home.aD5Jm4XL/.cache/pi-tmp/shared/subagent-model-browser-7ssksrn2/home AGENT=/var/tmp/pi-subagent-browser-home.aD5Jm4XL/.cache/pi-tmp/shared/subagent-model-browser-7ssksrn2/home/.pi/agent
+START warm: pid=1260025 pgid=1260025 port=38465 spawnCwd=/var/tmp/pi-subagent-browser-home.aD5Jm4XL/.cache/pi-tmp/shared/subagent-model-browser-7ssksrn2/project app=/var/tmp/pi-subagent-browser-home.aD5Jm4XL/.cache/pi-tmp/shared/subagent-model-browser-7ssksrn2/app source=/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection log=/var/tmp/pi-subagent-browser-home.aD5Jm4XL/.cache/pi-tmp/shared/subagent-model-browser-7ssksrn2/results/next-warm.log
+PASS new real child 01a11250-de2b-77e5-bdf8-d869075e126e: native gateway/fixture-gpt, delayed local search, model label
+PASS same-id Agent resume after idle + extension reload + browser refresh: 01a11250-de2b-77e5-bdf8-d869075e126e
+STOP warm: pid=1260025
+START cold: pid=1260690 pgid=1260690 port=36449 spawnCwd=/var/tmp/pi-subagent-browser-home.aD5Jm4XL/.cache/pi-tmp/shared/subagent-model-browser-7ssksrn2/project app=/var/tmp/pi-subagent-browser-home.aD5Jm4XL/.cache/pi-tmp/shared/subagent-model-browser-7ssksrn2/app source=/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection log=/var/tmp/pi-subagent-browser-home.aD5Jm4XL/.cache/pi-tmp/shared/subagent-model-browser-7ssksrn2/results/next-cold.log
+PASS cold process, no parent runtime, historical Kimi ignored, 390px GPT label + search
+PASS unavailable original target: real browser refusal/draft preserved; explicit set_model persisted; send/reload successful
+PASS legacy false fail-closed, global defaults unchanged, zero OpenRouter/Kimi/external requests
+STOP cold: pid=1260690
+Evidence: .trellis/tasks/10-06-subagent-model-selection/research/subagent-model-selection-browser-2026-10-06T17-43-54-390Z
+RUN_EXIT=0 END_UTC=2026-10-06T17:44:46Z
+OUTER_HOME_REMOVED=/var/tmp/pi-subagent-browser-home.aD5Jm4XL exists=no

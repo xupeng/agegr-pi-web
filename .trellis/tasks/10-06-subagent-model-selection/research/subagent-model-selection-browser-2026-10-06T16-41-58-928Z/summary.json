@@ -1,0 +1,34 @@
+{
+  "passed": false,
+  "passedChecks": [
+    "parent label 1280",
+    "new profile defaults 1280",
+    "new child: inherited resources, GPT, search, coding declarations, label",
+    "warm same-id resume after idle",
+    "extension reload",
+    "browser refresh label"
+  ],
+  "counts": {
+    "modelCalls": 13,
+    "searches": 4,
+    "kimi": 0,
+    "externalTcpAttempts": 0,
+    "devOnlyUpdateSuppressed": 2
+  },
+  "executablePath": "/home/xupeng/.cache/assistant-check-browser/manual/chrome-linux/headless_shell",
+  "browserErrors": [],
+  "blockedBrowserRequests": [],
+  "home": "/var/tmp/pi-subagent-browser-home.E1qvAP74/.cache/pi-tmp/shared/subagent-model-browser-l8hum8og/home",
+  "agent": "/var/tmp/pi-subagent-browser-home.E1qvAP74/.cache/pi-tmp/shared/subagent-model-browser-l8hum8og/home/.pi/agent",
+  "project": "/var/tmp/pi-subagent-browser-home.E1qvAP74/.cache/pi-tmp/shared/subagent-model-browser-l8hum8og/project",
+  "source": "/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection",
+  "results": "/var/tmp/pi-subagent-browser-home.E1qvAP74/.cache/pi-tmp/shared/subagent-model-browser-l8hum8og/results",
+  "evidence": "/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/.trellis/tasks/10-06-subagent-model-selection/research/subagent-model-selection-browser-2026-10-06T16-41-58-928Z",
+  "untested": [
+    "Safari",
+    "Windows",
+    "real pi-sub2api extension",
+    "live/paid providers",
+    "native search request hooks"
+  ]
+}

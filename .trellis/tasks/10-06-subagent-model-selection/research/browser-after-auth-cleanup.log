@@ -1,0 +1,15 @@
+
+CLEANUP SURVEY UTC=2026-10-06T17:15:03Z
+1005816 1005786 1005786 next-server (v16.3.6)
+1118376 1118376     884 /home/xupeng/.local/share/mise/installs/node/24.21.0/bin/node /home/xupeng/dev/personal/forked/agegr-pi-web/node_modules/next/dist/bin/next dev -H 192.168.11.233 -p 8505
+1118396 1118376 1118376 next-server (v16.3.6)
+12a79f21f45d79117e8b1472ba4a18def40d60a07a185264ccf6e7452542e6e5  e2e/subagent-model-selection.mjs
+ef74886adf7703dbfa2a0c2ae805200f2880d06db1164694a88c22a5fd5ce4e2  e2e/fixtures/subagent-model-selection.mjs
+fc0c132974e2111b23b71cfe81744bf61abde67d56935c9a0d304c86976bef40  AGENTS.md
+bc8c9eb951562b35c078fb4c76c55cd2a8d0f46ad8bea005e5d4f8332f01cb1a  tsconfig.json
+8d6f804dcbc7118c979d6c0a1e88c211d543b254125000d5a34ad04e15ca8713  package.json
+18c40d7685f7501d46e66450e5470fd064124f9662b17ac310fce042491d322f  package-lock.json
+next-env.d.ts remains absent
+worktree .next/dev/lock absent
+FINAL UTC=2026-10-06T17:16:41Z; no rerun after P2 notification
+Owned outerHOME UxIa4YuA absent

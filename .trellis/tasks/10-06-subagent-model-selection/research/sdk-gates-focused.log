@@ -1,0 +1,29 @@
+pi-tmp: workspace /var/tmp/pi-web-gate-home-zcUpEH/.cache/pi-tmp/shared/stage1b-focused-s6hgkioi
+✔ a bound session runs one target-provider turn through the delayed search tool (53.552293ms)
+✔ no-install adapter matches the default loader for an installed local package (19.998403ms)
+✔ a missing package is skipped with a diagnostic and no install (2.792723ms)
+✔ onMissingSource 'error' refuses the reload (0.808013ms)
+✔ an installed npm package with a mismatched version is skipped without installing (3.064919ms)
+✔ provider-only host loads one concrete file, flushes its native provider, and binds no session (60.130491ms)
+✔ explicit provider files reject directories, globs, package specs, and outside roots (5.555923ms)
+✔ a delayed web_search registration becomes active with an allow-all extension policy and zero model requests (19.515372ms)
+✔ child services flush native, legacy, and virtual registrations onto a fresh runtime without touching the parent (44.862657ms)
+✔ reload resolves project trust afresh through resolveProjectTrust instead of a construction snapshot (95.86669ms)
+✔ package settings and enablement changes take effect on reload (34.385004ms)
+✔ loadSkills:true loads only preflight-authorized skills and restores their sourceInfo (8.117683ms)
+✔ explicit authorization rejects symlink escapes and accepts a canonicalized root (12.612923ms)
+✔ projection filters load-time and session_start tools without copying the Extension (26.094045ms)
+✔ ask_user withdrawal composes with the same live Map (12.097761ms)
+✔ a specific allow selector also governs late registrations (12.192619ms)
+✔ the same tool name from two owners is not addressable by name (0.839181ms)
+✔ a turn_start registration and a re-registration both pass the live filter (12.093528ms)
+✔ reserved control tools stay withdrawn even when a tool is registered late (11.059287ms)
+✔ reload re-projects the newly loaded extensions with the live policy (12.467545ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1491.989172

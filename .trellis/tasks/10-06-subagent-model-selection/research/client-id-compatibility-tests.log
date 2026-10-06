@@ -1,0 +1,20 @@
+✔ agent command HTTP rejections are distinguishable from transport failures (19.41263ms)
+✔ only an explicit negative prompt acknowledgement is definitive (0.133805ms)
+✔ en: every canonical reason has local actionable copy, safe target and no raw message (2.952974ms)
+✔ en: unsafe/unknown DTO falls back locally, never echoes raw loader/auth text or URL (2.30613ms)
+✔ zh-CN: every canonical reason has local actionable copy, safe target and no raw message (0.227045ms)
+✔ zh-CN: unsafe/unknown DTO falls back locally, never echoes raw loader/auth text or URL (0.16683ms)
+✔ zh-TW: every canonical reason has local actionable copy, safe target and no raw message (0.214037ms)
+✔ zh-TW: unsafe/unknown DTO falls back locally, never echoes raw loader/auth text or URL (0.131856ms)
+✔ DTO without a target and nested safe model IDs render without a fabricated target (0.18769ms)
+✔ canonical colon suffixes and at-version model IDs remain displayable without admitting URLs (0.19649ms)
+✔ generic network errors remain ambiguous, while selection code without DTO gets local fallback (0.231953ms)
+✔ HTTP decoder projects the DTO and strips extra fields and raw diagnostic messages (0.780562ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 370.936572

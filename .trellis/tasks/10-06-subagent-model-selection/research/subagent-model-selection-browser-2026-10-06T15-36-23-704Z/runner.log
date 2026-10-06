@@ -1,0 +1,6 @@
+START warm: pid=1209904 pgid=1209904 port=33041 spawnCwd=/var/tmp/pi-subagent-browser-home.g4B9vc0u/.cache/pi-tmp/shared/subagent-model-browser-rcoxt3k2/project app=/var/tmp/pi-subagent-browser-home.g4B9vc0u/.cache/pi-tmp/shared/subagent-model-browser-rcoxt3k2/app source=/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection log=/var/tmp/pi-subagent-browser-home.g4B9vc0u/.cache/pi-tmp/shared/subagent-model-browser-rcoxt3k2/results/next-warm.log
+Error: Timed out: Next warm readiness
+    at until (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/e2e/subagent-model-selection.mjs:85:9)
+    at async startService (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/e2e/subagent-model-selection.mjs:162:3)
+    at async file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/e2e/subagent-model-selection.mjs:283:3
+STOP warm: pid=1209904

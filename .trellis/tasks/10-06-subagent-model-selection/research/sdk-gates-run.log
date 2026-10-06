@@ -1,0 +1,68 @@
+pi-tmp: workspace /var/tmp/pi-web-evidence-home-hmnV0H/.cache/pi-tmp/shared/stage1-evidence-2kwtv8s9
+TSC_EXIT=0
+LINT_EXIT=0
+✔ no-install adapter matches the default loader for an installed local package (19.799426ms)
+✔ a missing package is skipped with a diagnostic and no install (2.46158ms)
+✔ onMissingSource 'error' refuses the reload (0.83501ms)
+✔ an installed npm package with a mismatched version is skipped without installing (3.137434ms)
+✔ provider-only host loads one concrete file, flushes its native provider, and binds no session (59.830523ms)
+✔ explicit provider files reject directories, globs, package specs, and outside roots (5.663076ms)
+✔ a delayed web_search registration becomes active with an allow-all extension policy and zero model requests (17.670861ms)
+✔ child services flush an inline native provider onto a fresh runtime without touching the parent (20.402221ms)
+✔ projection filters load-time and session_start tools without copying the Extension (26.350719ms)
+✔ ask_user withdrawal composes with the same live Map (11.497ms)
+✔ a specific allow selector also governs late registrations (12.549286ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1228.857121
+GATE_TESTS_EXIT=0
+✔ projection preserves definition metadata/references, source and defaultActive without mutating the input (1.690615ms)
+✔ hidden remains withdrawn; deny only removes AskUser from the Map (0.27303ms)
+✔ codemode/deferred projection preserves native inactivity, even explicit true, without mutating definition or source (0.466048ms)
+✔ built-in profile IDs use lowercase kebab-case and read-only profiles cannot execute shell commands (2.604771ms)
+✔ override detection follows scope precedence case-insensitively (0.180968ms)
+✔ project profiles override built-ins and round-trip their runtime settings (12.633298ms)
+✔ tintinweb extension selectors stay scoped to the selected extension tools (2.761755ms)
+✔ extension selectors resolve scoped npm names and unambiguous short names (0.833904ms)
+✔ a pinned npm source contributes its package name, not the pin (0.217755ms)
+✔ one package shipping several extension files stays addressable as a unit (0.187197ms)
+✔ extension selectors keep wildcard, trailing-slash and name/* semantics (0.473711ms)
+✔ a shared basename or unscoped name stays unaddressable (0.272548ms)
+✔ a longer name wins over a shorter unrelated one (0.247764ms)
+✔ auto-discovered and settings-listed extensions are never one unit (0.238224ms)
+✔ a denied extension covers selectors scoped below it (6.75593ms)
+✔ deny selectors are resolved against the same aliases as the grant (0.305581ms)
+✔ an uppercase EXT: selector round-trips and a denied extension blocks its star spelling (11.380771ms)
+✔ tool names stay case-sensitive while extension names do not (0.408416ms)
+✔ reads tintinweb profile aliases and frontmatter identity (3.125022ms)
+✔ persisted subagent metadata reconstructs the final run (0.590225ms)
+✔ persisted subagent resources restore the exact isolated prompt and tools (0.280194ms)
+✔ legacy subagent resource snapshots keep skills and extensions disabled (0.150552ms)
+✔ extension tools are merged while subagent control tools stay excluded (0.135792ms)
+✔ an empty tool selection round-trips without restoring default tools (7.346254ms)
+✔ saved profiles normalize runtime values and reject invalid settings (2.372102ms)
+✔ project profiles override workspace profiles and deletion restores the workspace version (2.352467ms)
+✔ global and project sources with the same name stay visible while project wins at runtime (2.788001ms)
+✔ global profiles round-trip and deleting an override restores the built-in (1.486506ms)
+✔ a built-in is switched off through settings.json, not a copied-out file (2.159258ms)
+✔ disabled profiles cannot be resolved for execution (2.944221ms)
+✔ persisted runs distinguish interrupted, failed, aborted, and latest results (0.203272ms)
+✔ project profile directories cannot escape cwd through symbolic links (2.910543ms)
+✔ a save keeps frontmatter keys this app does not manage (2.257003ms)
+✔ a save refuses to overwrite malformed existing frontmatter (1.886565ms)
+✔ the pi-subagents flag aliases are seeded, kept in step, and never overwrite a whitelist (2.889913ms)
+✔ profile flags fall back to the pi-subagents spellings (1.535239ms)
+ℹ tests 36
+ℹ suites 0
+ℹ pass 36
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 937.0941
+OWNER_TESTS_EXIT=0

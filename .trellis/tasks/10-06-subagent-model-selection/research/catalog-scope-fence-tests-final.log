@@ -1,0 +1,19 @@
+✔ SDK public barrier proves awaited offline refresh may return before auth snapshot commits (59.567849ms)
+✔ owned child services serialize registration and explicit offline refreshes (46.054495ms)
+✔ fresh owned native keyless services loops keep exact parent reference, independent runtime and Kimi zero (987.764116ms)
+✔ already-bound gate drains native re-registration and simultaneous scope/catalog queries instead of stale auth (55.69039ms)
+✔ public mutation during the final availability query cannot authorize a superseded model or clear failure (68.45159ms)
+✔ same-id catalog change during final query cannot return stale scope, thinking pin or endpoint (46.421529ms)
+✔ offline readiness never refreshes OAuth or logs in, even for expired isolated stored credentials (42.430427ms)
+✔ scope remains strict for outside/zero-match/partial patterns with keyless native auth (57.169823ms)
+✔ real missing native auth remains typed refusal with no session_start or requests (36.860568ms)
+✔ binding registration failure cannot borrow the now-ready old native catalog; only a new generation clears it (58.560651ms)
+✔ false provider-only replay has offline auth readiness without lifecycle/tool widening or parent mutation (72.836632ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2585.06121

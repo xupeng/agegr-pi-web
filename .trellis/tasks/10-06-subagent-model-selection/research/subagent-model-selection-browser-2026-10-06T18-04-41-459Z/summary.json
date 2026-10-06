@@ -1,0 +1,43 @@
+{
+  "passed": true,
+  "passedChecks": [
+    "parent label 1280",
+    "new profile defaults 1280",
+    "new child: inherited resources, GPT, search, coding declarations, label",
+    "warm same-id resume after idle",
+    "extension reload",
+    "browser refresh label",
+    "cold process without parent: historical Kimi ignored",
+    "cold search + label 390",
+    "new profile defaults 390",
+    "unavailable model: explicit not-sent, draft/history retained, zero provider calls",
+    "real picker: standard model_change then successful retry and refresh",
+    "legacy false: fail-closed without permission widening",
+    "global defaults unchanged",
+    "zero Kimi/external model/search/TCP",
+    "no page exceptions"
+  ],
+  "counts": {
+    "modelCalls": 15,
+    "searches": 5,
+    "kimi": 0,
+    "externalTcpAttempts": 0,
+    "devOnlyUpdateSuppressed": 2
+  },
+  "executablePath": "/home/xupeng/.cache/assistant-check-browser/manual/chrome-linux/headless_shell",
+  "browserErrors": [],
+  "blockedBrowserRequests": [],
+  "home": "/var/tmp/pi-subagent-final-browser.onPfqfiA/.cache/pi-tmp/shared/final-browser-06z18b47/home",
+  "agent": "/var/tmp/pi-subagent-final-browser.onPfqfiA/.cache/pi-tmp/shared/final-browser-06z18b47/home/.pi/agent",
+  "project": "/var/tmp/pi-subagent-final-browser.onPfqfiA/.cache/pi-tmp/shared/final-browser-06z18b47/project",
+  "source": "/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection",
+  "results": "/var/tmp/pi-subagent-final-browser.onPfqfiA/.cache/pi-tmp/shared/final-browser-06z18b47/results",
+  "evidence": "/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/.trellis/tasks/10-06-subagent-model-selection/research/subagent-model-selection-browser-2026-10-06T18-04-41-459Z",
+  "untested": [
+    "Safari",
+    "Windows",
+    "real pi-sub2api extension",
+    "live/paid providers",
+    "native search request hooks"
+  ]
+}

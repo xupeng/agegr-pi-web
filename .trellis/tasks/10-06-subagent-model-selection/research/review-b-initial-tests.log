@@ -1,0 +1,78 @@
+[pi-web] session_start dispatched to extensions for session 01a111f4-f7e3-734c-9602-6d3a259a25f3
+[pi-web] session_start dispatched to extensions for session 01a111f4-f824-734c-9602-6d3ce16efb66
+✔ DEFAULT inherited absolute configured file admits without refs, and ignores legacy true-snapshot leads (193.471877ms)
+[pi-web] session_start dispatched to extensions for session 01a111f4-f86a-734c-9602-6d3eab22531d
+✔ SDK false provider-only absolute configured file succeeds with zero session hooks/tools/search (53.719958ms)
+✖ configured absolute source rejects forged/symlink-escape/swapped/missing/disabled/version leads before factory (28.233584ms)
+[pi-web] session_start dispatched to extensions for session 01a111f4-f8b0-734c-9602-6d40910597cf
+[pi-web] session_start dispatched to extensions for session 01a111f4-f8c8-734c-9602-6d43398fee27
+[pi-web] session_start dispatched to extensions for session 01a111f4-f8df-734c-9602-6d45b9a02b63
+✔ cold native coding pins, explicit empty pins and legacy hard permissions remain separate from licence (85.373417ms)
+[pi-web] session_start dispatched to extensions for session 01a111f4-f905-734c-9602-6d47027a0165
+[pi-web] session_start dispatched to extensions for session 01a111f4-f905-734c-9602-6d47027a0165
+✖ cold constructor is not persistence; HTTP target commits exactly once with exact colon/nested ids (79.829064ms)
+[pi-web] session_start dispatched to extensions for session 01a111f4-f955-734c-9602-6d498204e675
+[pi-web] session_start dispatched to extensions for session 01a111f4-f955-734c-9602-6d498204e675
+✔ scope passes but SDK setModel auth fails: no published target/history/lock orphan; retry commits (79.95567ms)
+[pi-web] session_start dispatched to extensions for session 01a111f4-f9a5-734c-9602-6d4b38b2f8df
+[pi-web] session_start dispatched to extensions for session 01a111f4-f9a5-734c-9602-6d4b38b2f8df
+✖ failed cold intent cannot clean a competing successful winner and no concurrent valid intent is lost (89.260996ms)
+[pi-web] session_start dispatched to extensions for session 01a111f4-f9fe-734c-9602-6d4cdac5eb7a
+✔ failed waiting intent leaves an already committed winner alive, without retry or duplicate record (53.3803ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 5
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2704.372489
+
+✖ failing tests:
+
+test at lib/subagent-review-b.integration.test.mjs:100:1
+✖ configured absolute source rejects forged/symlink-escape/swapped/missing/disabled/version leads before factory (28.233584ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-review-b.integration.test.mjs:107:2)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at lib/subagent-review-b.integration.test.mjs:133:1
+✖ cold constructor is not persistence; HTTP target commits exactly once with exact colon/nested ids (79.829064ms)
+  AssertionError [ERR_ASSERTION]: {"error":"The selected model is outside the enabled model scope for this project.","modelSelection":{"code":"model_selection_failed","reason":"outside-scope","message":"The selected model is outside the enabled model scope for this project.","provider":"review-b","modelId":"nested/gpt"}}
+  
+  409 !== 200
+  
+      at TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-review-b.integration.test.mjs:141:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 409,
+    expected: 200,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at lib/subagent-review-b.integration.test.mjs:165:1
+✖ failed cold intent cannot clean a competing successful winner and no concurrent valid intent is lost (89.260996ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  409 !== 200
+  
+      at TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-review-b.integration.test.mjs:183:37)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 409,
+    expected: 200,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

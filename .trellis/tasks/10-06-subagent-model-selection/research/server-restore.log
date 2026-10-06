@@ -1,0 +1,64 @@
+[pi-web] session_start dispatched to extensions for session 01a111ce-a82e-70bc-9e6c-1bc961f10cbe
+[pi-web] session_start dispatched to extensions for session 01a111ce-a82e-70bc-9e6c-1bc961f10cbe
+[pi-web] session_start dispatched to extensions for session 01a111ce-a82e-70bc-9e6c-1bc961f10cbe
+✔ real RPC warm resume, idle reopen and browser startup restore latest explicit GPT after physical Kimi (381.270329ms)
+✔ fresh process cold restore and actual idle-timer reopen use GPT without parent or source snapshot (2327.541996ms)
+[pi-web] session_start dispatched to extensions for session 01a111ce-b2c3-70bc-9e6c-1bcd3e422935
+[pi-web] session_start dispatched to extensions for session 01a111ce-b2c3-70bc-9e6c-1bcd3e422935
+✔ cold set_model prepares new target despite unavailable history, persists via SDK and concurrent intents all apply (192.526684ms)
+[pi-web] session_start dispatched to extensions for session 01a111ce-b384-70bc-9e6c-1bce6e95ae48
+[pi-web] session_start dispatched to extensions for session 01a111ce-b41c-70bc-9e6c-1bd0dcccbee4
+✔ new controller child owns runtime, obeys explicit model, and warm Agent resume stays GPT (200.216907ms)
+[pi-web] session_start dispatched to extensions for session 01a111ce-b44c-70bc-9e6c-1bd2e29dfe86
+[pi-web] session_start dispatched to extensions for session 01a111ce-b47a-70bc-9e6c-1bd5c3e4c1c5
+[pi-web] session_start dispatched to extensions for session 01a111ce-b47a-70bc-9e6c-1bd5c3e4c1c5
+✔ provider-only alive parent补全 and saved refs replay one necessary file, no search/lifecycle/tools (185.696625ms)
+✔ saved source disabled, missing, forged, unknown version and swapped symlink refuse before any request (32.385638ms)
+[pi-web] session_start dispatched to extensions for session 01a111ce-b526-70bc-9e6c-1be32a22a81d
+✔ child wrapper reload withdraws extension-manually-off Map entries and does not activate new hidden/inactive tools (90.703991ms)
+[pi-web] session_start dispatched to extensions for session 01a111ce-b581-70bc-9e6c-1be5c8597aaa
+[pi-web] session_start dispatched to extensions for session 01a111ce-b5c4-70bc-9e6c-1be69afcdd1f
+[pi-web] session_start dispatched to extensions for session 01a111ce-b5c4-70bc-9e6c-1be69afcdd1f
+✔ legacy v1 exact tools and explicit false stay narrow; legal virtual choice survives physical response (166.708243ms)
+[pi-web] session_start dispatched to extensions for session 01a111ce-b628-70bc-9e6c-1be868e91c08
+✔ active branch latest explicit model, not abandoned branch or physical response, controls cold startup (43.206483ms)
+[pi-web] session_start dispatched to extensions for session 01a111ce-b653-70bc-9e6c-1beb5c3e7683
+✔ cold target intent survives single-flight competitor failure and each successful command persists (132.755569ms)
+[pi-web] session_start dispatched to extensions for session 01a111ce-b6d8-70bc-9e6c-1bedcee8a58b
+✖ actual HTTP route returns typed 409 prompt refusal and permits cold standard set_model recovery (133.335294ms)
+✔ native override captures effective getter identity, not the first or failed last contributor (399.534527ms)
+✔ single-file legacy is replayable; legacy multiple contributions and virtual context-dependent sources have no lead (234.814809ms)
+✔ reload binds provenance to a new generation and dynamic provider registration invalidates even same identity (54.744662ms)
+✔ current project trust revocation and changed source identity reject before any provider factory is replayed (85.949057ms)
+✔ linked package root canonical containment accepts valid provider and rejects swapped root or escaped file (81.530218ms)
+✔ source metadata URLs are stored only as opaque identity, never credentials/config (38.07412ms)
+✔ current installed npm version mismatch refuses saved source without installation or factory execution (38.840524ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 17
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6008.166898
+
+✖ failing tests:
+
+test at lib/subagent-model-restore.integration.test.mjs:255:1
+✖ actual HTTP route returns typed 409 prompt refusal and permits cold standard set_model recovery (133.335294ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'model-unavailable'
+  - 'auth-unavailable'
+  
+      at TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-model-restore.integration.test.mjs:277:44)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'model-unavailable',
+    expected: 'auth-unavailable',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,57 @@
+[pi-web] session_start dispatched to extensions for session 01a11332-6f1a-771c-ad8c-6ae329453ab1
+[pi-web] session_start dispatched to extensions for session 01a11332-6f4c-771c-ad8c-6ae5426c519d
+✔ real normal run uses persisted turn entry, never latest leaf or message_end, with visible text only (49.436502ms)
+[pi-web] session_start dispatched to extensions for session 01a11332-6f57-771c-ad8c-6ae626b348d1
+✔ Chat-only keeps exact prompt, empty tools and no discovered resources with observer (11.718256ms)
+[pi-web] session_start dispatched to extensions for session 01a11332-6f64-771c-ad8c-6ae863883af9
+✔ retry error then success shares one identity and one completion (12.147026ms)
+[pi-web] session_start dispatched to extensions for session 01a11332-6f6d-771c-ad8c-6aeb28ef7756
+✔ real final error produces no completion (9.134879ms)
+[pi-web] session_start dispatched to extensions for session 01a11332-6f78-771c-ad8c-6aec3a572800
+✔ real final aborted produces no completion (10.743097ms)
+[pi-web] session_start dispatched to extensions for session 01a11332-6f81-771c-ad8c-6aefd202dea1
+✔ real final length produces no completion (9.044644ms)
+[pi-web] session_start dispatched to extensions for session 01a11332-6f8c-771c-ad8c-6af0008b787d
+✔ before-settle continuation and agent_end queued follow-up notify once after the final turn (11.495711ms)
+[pi-web] session_start dispatched to extensions for session 01a11332-6f99-771c-ad8c-6af3dcefe9c1
+[pi-web] session_start dispatched to extensions for session 01a11332-6fa2-771c-ad8c-6af4187b1c64
+✔ settled deferred injection freezes separate identities and delivers in run order (12.332357ms)
+✔ ordinary extension injection without a wrapper prompt is collected (8.765285ms)
+[pi-web] session_start dispatched to extensions for session 01a11332-6fbd-771c-ad8c-6af6b98d9e81
+✔ handled command/input without actual runs cannot complete (27.772353ms)
+[pi-web] session_start dispatched to extensions for session 01a11332-6fca-771c-ad8c-6af988476be8
+✔ openAsk pause survives a quick close before settled (12.455405ms)
+✔ public ctx.abort before-settle marks Stop even after a successful model stop (8.204709ms)
+[pi-web] session_start dispatched to extensions for session 01a11332-6fd2-771c-ad8c-6afb7696e8e9
+✔ subagent suppression excludes completions and runtime pending snapshots (24.218538ms)
+[pi-web] session_start dispatched to extensions for session 01a11332-6fea-771c-ad8c-6afd337370d8
+[pi-web] session_start dispatched to extensions for session 01a11332-6ff5-771c-ad8c-6afeaa7fb9e5
+✔ invalid child policy rejects before tracking or notification and preserves the old ask and history (10.600462ms)
+[pi-web] session_start dispatched to extensions for session 01a11332-7001-771c-ad8c-6b00fd142373
+✔ real reload replaces observers rather than accumulating registrations (11.410974ms)
+[pi-web] session_start dispatched to extensions for session 01a11332-700b-771c-ad8c-6b03d4d75f08
+[pi-web] session_start dispatched to extensions for session 01a11332-7012-771c-ad8c-6b059e5eeb43
+✔ auto-compaction recovery continues the same run and completes only the successful retry (10.760293ms)
+✔ manual compaction without actual agent_start cannot create completion (6.744597ms)
+[pi-web] session_start dispatched to extensions for session 01a11332-7021-771c-ad8c-6b06345187b3
+✔ standalone real SDK bash execution creates no agent completion (14.787797ms)
+[pi-web] session_start dispatched to extensions for session 01a11332-702a-771c-ad8c-6b09b2bec7d9
+✔ Stop during held before-settle vetoes a normally stopped model result (8.58062ms)
+[pi-web] session_start dispatched to extensions for session 01a11332-7046-771c-ad8c-6b0bba241777
+✔ direct SDK promise rejection after turn boundary and settled is vetoed (28.635576ms)
+[pi-web] session_start dispatched to extensions for session 01a11332-704f-771c-ad8c-6b0c517abcf1
+[pi-web] session_start dispatched to extensions for session 01a11332-7052-771c-ad8c-6b0ed37f4b7a
+✔ a caught auxiliary extension handler error does not veto a successful model run (8.236016ms)
+[pi-web] session_start dispatched to extensions for session 01a11332-705d-771c-ad8c-6b113c5c54a5
+[pi-web] session_start dispatched to extensions for session 01a11332-7065-771c-ad8c-6b12e8775c61
+✔ native SDK and observed normal session have identical provider prompt and tool/resource loadout (14.629496ms)
+✔ real blocking extension command pending is projected, closes normally, and handled creates no run (7.311147ms)
+✔ exhausted retry final error cannot replace an earlier successful completion (10.616487ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2477.982241

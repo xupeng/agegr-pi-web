@@ -1,0 +1,46 @@
+node:internal/test_runner/harness:124
+      throw err;
+      ^
+
+Error: Cannot find module '@/lib/ask-user/persist'
+Require stack:
+- /home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/app/api/agent/[id]/route.ts
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1564:15)
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)
+    at require.resolve (node:internal/modules/helpers:175:31)
+    at jitiResolve (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/node_modules/jiti/dist/jiti.cjs:1:176713)
+    at jitiRequire (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/node_modules/jiti/dist/jiti.cjs:1:178658)
+    at import (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/node_modules/jiti/dist/jiti.cjs:1:187724)
+    at /home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/app/api/agent/[id]/route.ts:2:22
+    at async Function.import (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/node_modules/jiti/dist/jiti.cjs:1:187718)
+    at async file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-model-restore.integration.test.mjs:20:18 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/app/api/agent/[id]/route.ts'
+  ]
+}
+
+Node.js v24.21.0
+✖ lib/subagent-model-restore.integration.test.mjs (2247.529101ms)
+✔ native override captures effective getter identity, not the first or failed last contributor (401.500063ms)
+✔ single-file legacy is replayable; legacy multiple contributions and virtual context-dependent sources have no lead (246.306563ms)
+✔ reload binds provenance to a new generation and dynamic provider registration invalidates even same identity (38.561221ms)
+✔ current project trust revocation and changed source identity reject before any provider factory is replayed (102.731026ms)
+✔ linked package root canonical containment accepts valid provider and rejects swapped root or escaped file (70.39112ms)
+✔ source metadata URLs are stored only as opaque identity, never credentials/config (36.813627ms)
+✔ current installed npm version mismatch refuses saved source without installation or factory execution (35.311661ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 7
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2254.582599
+
+✖ failing tests:
+
+test at lib/subagent-model-restore.integration.test.mjs:1:1
+✖ lib/subagent-model-restore.integration.test.mjs (2247.529101ms)
+  'test failed'

@@ -1,0 +1,3689 @@
+▲ Next.js 16.3.6 (Turbopack)
+- Local:         http://127.0.0.1:33041
+- Network:       http://127.0.0.1:33041
+✓ Ready in 911ms
+✓ Running next.config.ts took 27ms
+- Experiments (use with caution):
+  · proxyClientMaxBodySize: "128mb"
+
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 703ms (next.js: 489ms, proxy.ts: 130ms, application-code: 83ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 14ms (next.js: 6ms, proxy.ts: 3ms, application-code: 6ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 12ms (next.js: 4ms, proxy.ts: 2ms, application-code: 6ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 12ms (next.js: 4ms, proxy.ts: 2ms, application-code: 6ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 11ms (next.js: 4ms, proxy.ts: 2ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 12ms (next.js: 4ms, proxy.ts: 2ms, application-code: 6ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 11ms (next.js: 4ms, proxy.ts: 2ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 11ms (next.js: 4ms, proxy.ts: 2ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 22ms (next.js: 5ms, proxy.ts: 11ms, application-code: 6ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 12ms (next.js: 4ms, proxy.ts: 2ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 11ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 6ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 10ms (next.js: 4ms, proxy.ts: 1.8ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.8ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.8ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.9ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.8ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.8ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 4ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 4ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.8ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 4ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.8ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 15ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 10ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 4ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.8ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 11ms (next.js: 4ms, proxy.ts: 1.9ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.8ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 2ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.8ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 10ms (next.js: 4ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 16ms (next.js: 10ms, proxy.ts: 1.5ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 11ms (next.js: 4ms, proxy.ts: 1.9ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 10ms (next.js: 4ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 10ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 15ms (next.js: 10ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.8ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.8ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 4ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 15ms (next.js: 10ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 10ms (next.js: 4ms, proxy.ts: 3ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 4ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 12ms (next.js: 4ms, proxy.ts: 2ms, application-code: 6ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 10ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.8ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 15ms (next.js: 9ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 4ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.8ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 4ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.8ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 12ms (next.js: 3ms, proxy.ts: 2ms, application-code: 7ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 15ms (next.js: 9ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 2ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 11ms (next.js: 4ms, proxy.ts: 1.7ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 4ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 2.0ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 10ms (next.js: 4ms, proxy.ts: 1.9ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 2.0ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 15ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 11ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 13ms (next.js: 5ms, proxy.ts: 2ms, application-code: 6ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.9ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 4ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 10ms (next.js: 4ms, proxy.ts: 1.5ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 10ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.8ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 4ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 10ms (next.js: 4ms, proxy.ts: 1.8ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 10ms (next.js: 4ms, proxy.ts: 2ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.8ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 4ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 15ms (next.js: 3ms, proxy.ts: 8ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 10ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 4ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 4ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 4ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 16ms (next.js: 10ms, proxy.ts: 2ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.8ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 4ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 10ms (next.js: 4ms, proxy.ts: 1.8ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 10ms (next.js: 5ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 10ms (next.js: 4ms, proxy.ts: 2ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 15ms (next.js: 10ms, proxy.ts: 2ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 2ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 4ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 16ms (next.js: 10ms, proxy.ts: 1.3ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 11ms (next.js: 4ms, proxy.ts: 1.8ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 4ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 10ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 11ms (next.js: 4ms, proxy.ts: 1.6ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 15ms (next.js: 3ms, proxy.ts: 2ms, application-code: 10ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 9ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.7ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.1ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 14ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 10ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.1ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.1ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.1ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 10ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 5ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 15ms (next.js: 1.9ms, proxy.ts: 2ms, application-code: 10ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.8ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.8ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.5ms, application-code: 4ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.2ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 7ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.3ms, application-code: 3ms)
+⨯ Error [PageNotFoundError]: Cannot find module for page: route not found /_not-found/page
+    at ignore-listed frames {
+  code: 'ENOENT'
+}
+ GET /api/sessions 500 in 8ms (next.js: 3ms, proxy.ts: 1.4ms, application-code: 3ms)
+[?25h

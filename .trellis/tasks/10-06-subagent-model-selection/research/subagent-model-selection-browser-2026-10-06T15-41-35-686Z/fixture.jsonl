@@ -1,0 +1,14 @@
+{"kind":"factory","pid":1211576,"cwd":"/var/tmp/pi-subagent-browser-home.joMYJKCe/.cache/pi-tmp/shared/subagent-model-browser-b0wln0ag/project"}
+{"kind":"session-start","pid":1211576,"sessionId":"01a111e0-ad94-77f3-97f2-c2b7e33f6028","cwd":"/var/tmp/pi-subagent-browser-home.joMYJKCe/.cache/pi-tmp/shared/subagent-model-browser-b0wln0ag/project","processCwd":"/var/tmp/pi-subagent-browser-home.joMYJKCe/.cache/pi-tmp/shared/subagent-model-browser-b0wln0ag/project"}
+{"kind":"session-ready","pid":1211576,"sessionId":"01a111e0-ad94-77f3-97f2-c2b7e33f6028"}
+{"kind":"model-request","pid":1211576,"provider":"gateway","modelId":"fixture-gpt"}
+{"kind":"blocked-network","pid":1211576,"host":"registry.npmjs.org"}
+{"kind":"factory","pid":1211576,"cwd":"/var/tmp/pi-subagent-browser-home.joMYJKCe/.cache/pi-tmp/shared/subagent-model-browser-b0wln0ag/project"}
+{"kind":"factory","pid":1211576,"cwd":"/var/tmp/pi-subagent-browser-home.joMYJKCe/.cache/pi-tmp/shared/subagent-model-browser-b0wln0ag/project"}
+{"kind":"session-start","pid":1211576,"sessionId":"01a111e0-ad94-77f3-97f2-c2b7e33f6028","cwd":"/var/tmp/pi-subagent-browser-home.joMYJKCe/.cache/pi-tmp/shared/subagent-model-browser-b0wln0ag/project","processCwd":"/var/tmp/pi-subagent-browser-home.joMYJKCe/.cache/pi-tmp/shared/subagent-model-browser-b0wln0ag/project"}
+{"kind":"session-ready","pid":1211576,"sessionId":"01a111e0-ad94-77f3-97f2-c2b7e33f6028"}
+{"kind":"model-request","pid":1211576,"provider":"gateway","modelId":"fixture-gpt"}
+{"kind":"factory","pid":1211576,"cwd":"/var/tmp/pi-subagent-browser-home.joMYJKCe/.cache/pi-tmp/shared/subagent-model-browser-b0wln0ag/project"}
+{"kind":"session-start","pid":1211576,"sessionId":"01a111e0-e2b1-77f3-97f2-c2b982346087","cwd":"/var/tmp/pi-subagent-browser-home.joMYJKCe/.cache/pi-tmp/shared/subagent-model-browser-b0wln0ag/project","processCwd":"/var/tmp/pi-subagent-browser-home.joMYJKCe/.cache/pi-tmp/shared/subagent-model-browser-b0wln0ag/project"}
+{"kind":"session-ready","pid":1211576,"sessionId":"01a111e0-e2b1-77f3-97f2-c2b982346087"}
+{"kind":"model-request","pid":1211576,"provider":"gateway","modelId":"fixture-gpt"}

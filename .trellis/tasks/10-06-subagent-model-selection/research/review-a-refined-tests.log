@@ -1,0 +1,57 @@
+✔ the safe DTO accepts only known reasons and never requires auth fields (1.208229ms)
+✔ toSafeDTO never echoes a raw loader/auth message (0.380068ms)
+✔ resolveConcreteModel distinguishes a missing provider from a missing model (1.094847ms)
+✔ selection priority is request > profile > parent, all re-resolved in the child runtime (0.5735ms)
+✔ an empty configured scope resolves to no execution scope, not the whole catalog (2.515489ms)
+✔ a target outside the resolved scope and a missing auth both refuse (0.95664ms)
+✔ an alive wrapper must match its branch's newest explicit selection (0.303261ms)
+✔ built-in profiles inherit extensions by default and keep skills off (2.333646ms)
+✔ a present non-boolean or unknown extension flag never widens permissions (10.453594ms)
+✔ legacy v1 snapshots without a tool policy keep the exact tool list and stay disabled (0.551892ms)
+✔ a versioned tool policy round-trips and carries the ext allow/deny selectors (0.268062ms)
+✔ a malformed child snapshot is rejected, not decoded as a normal session (0.308741ms)
+✔ no subagent metadata decodes as none, but a broken marker is invalid (0.136962ms)
+✔ a valid provider source reference decodes through its versioned envelope (0.189772ms)
+✔ saving rejects a non-boolean resource flag and preserves an omitted one (7.376349ms)
+✔ provider source envelope limit counts UTF-8 bytes and never accepts raw credential-bearing URLs (0.407473ms)
+✔ parseMissing: file profiles without extension fields/selectors inherit by default (2.095128ms)
+✔ saveNewMissing: omitted new profile fields inherit extensions, not skills (2.077227ms)
+✔ saveExistingFalse: omitted fields preserve existing explicit false and authored aliases (5.583861ms)
+✖ real memory runtime: retired :free / invalid suffix exact references never downshift to gpt (59.239514ms)
+✔ exact full :free and @ suffix ids beat thinking parsing, including exact parent (68.506399ms)
+✔ inherit pending legacy valid then invalid registration refuses stale target and not an unrelated provider (28.457085ms)
+✔ inherit session_start public registration failure remains sticky until a new loader generation (63.839944ms)
+✔ inherit pending native registration failure does not let a retained model pass admission (13.290687ms)
+✔ failed extension factory is not masked by existing builtin/old provider context (15.403544ms)
+✔ real SDK explore/general-purpose initialized coding tools are active and declared (31.477956ms)
+✔ cold builtin pins activate only registered licensed coding tools and preserve extension/manual-off/overrides (11.91283ms)
+✔ win32 shell mapping snapshot round-trip licenses powershell (mapping execution on Linux, not Windows) (33.417931ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 27
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1566.066114
+
+✖ failing tests:
+
+test at lib/subagent-review-fixes.integration.test.mjs:31:1
+✖ real memory runtime: retired :free / invalid suffix exact references never downshift to gpt (59.239514ms)
+  AssertionError [ERR_ASSERTION]: SDK alias/fuzzy pattern still supported
+  + actual - expected
+  
+  + 'openai/gpt-oss-20b'
+  - 'gpt'
+  
+      at TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-review-fixes.integration.test.mjs:42:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'openai/gpt-oss-20b',
+    expected: 'gpt',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

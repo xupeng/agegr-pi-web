@@ -1,0 +1,22 @@
+[
+  {
+    "pid": 1228306,
+    "pgid": 1228306,
+    "port": 40029,
+    "phase": "warm",
+    "cwd": "/var/tmp/pi-subagent-browser-home.XU38hn7v/.cache/pi-tmp/shared/subagent-model-browser-fkwtoxzz/project",
+    "app": "/var/tmp/pi-subagent-browser-home.XU38hn7v/.cache/pi-tmp/shared/subagent-model-browser-fkwtoxzz/app",
+    "source": "/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection",
+    "logPath": "/var/tmp/pi-subagent-browser-home.XU38hn7v/.cache/pi-tmp/shared/subagent-model-browser-fkwtoxzz/results/next-warm.log"
+  },
+  {
+    "pid": 1228903,
+    "pgid": 1228903,
+    "port": 35691,
+    "phase": "cold",
+    "cwd": "/var/tmp/pi-subagent-browser-home.XU38hn7v/.cache/pi-tmp/shared/subagent-model-browser-fkwtoxzz/project",
+    "app": "/var/tmp/pi-subagent-browser-home.XU38hn7v/.cache/pi-tmp/shared/subagent-model-browser-fkwtoxzz/app",
+    "source": "/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection",
+    "logPath": "/var/tmp/pi-subagent-browser-home.XU38hn7v/.cache/pi-tmp/shared/subagent-model-browser-fkwtoxzz/results/next-cold.log"
+  }
+]

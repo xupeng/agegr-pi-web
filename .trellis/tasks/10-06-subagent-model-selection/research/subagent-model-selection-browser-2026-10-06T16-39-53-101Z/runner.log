@@ -1,0 +1,12 @@
+START warm: pid=1228306 pgid=1228306 port=40029 spawnCwd=/var/tmp/pi-subagent-browser-home.XU38hn7v/.cache/pi-tmp/shared/subagent-model-browser-fkwtoxzz/project app=/var/tmp/pi-subagent-browser-home.XU38hn7v/.cache/pi-tmp/shared/subagent-model-browser-fkwtoxzz/app source=/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection log=/var/tmp/pi-subagent-browser-home.XU38hn7v/.cache/pi-tmp/shared/subagent-model-browser-fkwtoxzz/results/next-warm.log
+PASS new real child 01a11216-4212-705a-9b65-64ab36f1f976: native gateway/fixture-gpt, delayed local search, model label
+PASS same-id Agent resume after idle + extension reload + browser refresh: 01a11216-4212-705a-9b65-64ab36f1f976
+STOP warm: pid=1228306
+START cold: pid=1228903 pgid=1228903 port=35691 spawnCwd=/var/tmp/pi-subagent-browser-home.XU38hn7v/.cache/pi-tmp/shared/subagent-model-browser-fkwtoxzz/project app=/var/tmp/pi-subagent-browser-home.XU38hn7v/.cache/pi-tmp/shared/subagent-model-browser-fkwtoxzz/app source=/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection log=/var/tmp/pi-subagent-browser-home.XU38hn7v/.cache/pi-tmp/shared/subagent-model-browser-fkwtoxzz/results/next-cold.log
+locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByRole('dialog').filter({ has: locator('.settings-dialog-surface') }).getByRole('navigation', { name: 'Settings', exact: true }).getByRole('button', { name: 'Sub-agents', exact: true })
+
+    at checkForm (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/e2e/subagent-model-selection.mjs:281:63)
+    at async file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/e2e/subagent-model-selection.mjs:377:3
+STOP cold: pid=1228903

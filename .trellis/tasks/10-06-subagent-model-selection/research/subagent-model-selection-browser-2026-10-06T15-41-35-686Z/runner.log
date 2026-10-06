@@ -1,0 +1,8 @@
+START warm: pid=1211556 pgid=1211556 port=45159 spawnCwd=/var/tmp/pi-subagent-browser-home.joMYJKCe/.cache/pi-tmp/shared/subagent-model-browser-b0wln0ag/project app=/var/tmp/pi-subagent-browser-home.joMYJKCe/.cache/pi-tmp/shared/subagent-model-browser-b0wln0ag/app source=/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection log=/var/tmp/pi-subagent-browser-home.joMYJKCe/.cache/pi-tmp/shared/subagent-model-browser-b0wln0ag/results/next-warm.log
+locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByText(/FIXTURE-ANSWER:.*LOCAL-SEARCH-RESULT:new/).last() to be visible
+
+    at sendBrowser (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/e2e/subagent-model-selection.mjs:243:81)
+    at async file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/e2e/subagent-model-selection.mjs:311:3
+STOP warm: pid=1211556

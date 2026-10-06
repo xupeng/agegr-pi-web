@@ -1,0 +1,9 @@
+{"kind":"factory","pid":1210753,"cwd":"/var/tmp/pi-subagent-browser-home.sApeRsmK/.cache/pi-tmp/shared/subagent-model-browser-k2zuszri/project"}
+{"kind":"session-start","pid":1210753,"sessionId":"01a111de-749f-70dd-81f5-8ecfe592a665","cwd":"/var/tmp/pi-subagent-browser-home.sApeRsmK/.cache/pi-tmp/shared/subagent-model-browser-k2zuszri/project","processCwd":"/var/tmp/pi-subagent-browser-home.sApeRsmK/.cache/pi-tmp/shared/subagent-model-browser-k2zuszri/project"}
+{"kind":"session-ready","pid":1210753,"sessionId":"01a111de-749f-70dd-81f5-8ecfe592a665"}
+{"kind":"model-request","pid":1210753,"provider":"gateway","modelId":"fixture-gpt"}
+{"kind":"blocked-network","pid":1210753,"host":"registry.npmjs.org"}
+{"kind":"factory","pid":1210753,"cwd":"/var/tmp/pi-subagent-browser-home.sApeRsmK/.cache/pi-tmp/shared/subagent-model-browser-k2zuszri/project"}
+{"kind":"factory","pid":1210753,"cwd":"/var/tmp/pi-subagent-browser-home.sApeRsmK/.cache/pi-tmp/shared/subagent-model-browser-k2zuszri/project"}
+{"kind":"session-start","pid":1210753,"sessionId":"01a111de-749f-70dd-81f5-8ecfe592a665","cwd":"/var/tmp/pi-subagent-browser-home.sApeRsmK/.cache/pi-tmp/shared/subagent-model-browser-k2zuszri/project","processCwd":"/var/tmp/pi-subagent-browser-home.sApeRsmK/.cache/pi-tmp/shared/subagent-model-browser-k2zuszri/project"}
+{"kind":"session-ready","pid":1210753,"sessionId":"01a111de-749f-70dd-81f5-8ecfe592a665"}

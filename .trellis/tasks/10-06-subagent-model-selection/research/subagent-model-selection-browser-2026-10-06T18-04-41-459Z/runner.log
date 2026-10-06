@@ -1,0 +1,9 @@
+START warm: pid=1273199 pgid=1273199 port=43537 spawnCwd=/var/tmp/pi-subagent-final-browser.onPfqfiA/.cache/pi-tmp/shared/final-browser-06z18b47/project app=/var/tmp/pi-subagent-final-browser.onPfqfiA/.cache/pi-tmp/shared/final-browser-06z18b47/app source=/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection log=/var/tmp/pi-subagent-final-browser.onPfqfiA/.cache/pi-tmp/shared/final-browser-06z18b47/results/next-warm.log
+PASS new real child 01a11263-e4d8-772d-b1ee-7191ef0cb5b7: native gateway/fixture-gpt, delayed local search, model label
+PASS same-id Agent resume after idle + extension reload + browser refresh: 01a11263-e4d8-772d-b1ee-7191ef0cb5b7
+STOP warm: pid=1273199
+START cold: pid=1273758 pgid=1273758 port=38135 spawnCwd=/var/tmp/pi-subagent-final-browser.onPfqfiA/.cache/pi-tmp/shared/final-browser-06z18b47/project app=/var/tmp/pi-subagent-final-browser.onPfqfiA/.cache/pi-tmp/shared/final-browser-06z18b47/app source=/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection log=/var/tmp/pi-subagent-final-browser.onPfqfiA/.cache/pi-tmp/shared/final-browser-06z18b47/results/next-cold.log
+PASS cold process, no parent runtime, historical Kimi ignored, 390px GPT label + search
+PASS unavailable original target: real browser refusal/draft preserved; explicit set_model persisted; send/reload successful
+PASS legacy false fail-closed, global defaults unchanged, zero OpenRouter/Kimi/external requests
+STOP cold: pid=1273758

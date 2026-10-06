@@ -1,0 +1,4 @@
+START warm: pid=1227551 pgid=1227551 port=38909 spawnCwd=/var/tmp/pi-subagent-browser-home.ttrMNSN8/.cache/pi-tmp/shared/subagent-model-browser-7vany4kj/project app=/var/tmp/pi-subagent-browser-home.ttrMNSN8/.cache/pi-tmp/shared/subagent-model-browser-7vany4kj/app source=/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection log=/var/tmp/pi-subagent-browser-home.ttrMNSN8/.cache/pi-tmp/shared/subagent-model-browser-7vany4kj/results/next-warm.log
+AssertionError [ERR_ASSERTION]: A real Agent tool run must create the child
+    at file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/e2e/subagent-model-selection.mjs:329:10
+STOP warm: pid=1227551

@@ -1,0 +1,117 @@
+[
+  {
+    "path": "/api/agent/new",
+    "command": {
+      "type": "ensure_session",
+      "cwd": "/var/tmp/pi-subagent-browser-home.ttrMNSN8/.cache/pi-tmp/shared/subagent-model-browser-7vany4kj/project",
+      "provider": "gateway",
+      "modelId": "fixture-gpt",
+      "thinkingLevel": "off"
+    },
+    "status": 200,
+    "data": {
+      "success": true,
+      "sessionId": "01a11214-a8c4-706d-a4c4-398abfa71b62",
+      "data": null,
+      "model": {
+        "provider": "gateway",
+        "modelId": "fixture-gpt"
+      },
+      "thinkingLevel": "off"
+    }
+  },
+  {
+    "path": "/api/agent/01a11214-a8c4-706d-a4c4-398abfa71b62",
+    "command": {
+      "type": "prompt",
+      "message": "E2E_PARENT_HELLO"
+    },
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": null
+    }
+  },
+  {
+    "path": "/api/agent/01a11214-a8c4-706d-a4c4-398abfa71b62",
+    "status": 200,
+    "data": {
+      "running": true,
+      "state": {
+        "sessionId": "01a11214-a8c4-706d-a4c4-398abfa71b62",
+        "sessionFile": "/var/tmp/pi-subagent-browser-home.ttrMNSN8/.cache/pi-tmp/shared/subagent-model-browser-7vany4kj/home/.pi/agent/sessions/--var-tmp-pi-subagent-browser-home.ttrMNSN8-.cache-pi-tmp-shared-subagent-model-browser-7vany4kj-project--/2026-10-06T16-38-26-246Z_01a11214-a8c4-706d-a4c4-398abfa71b62.jsonl",
+        "isStreaming": false,
+        "isPromptRunning": false,
+        "isBashRunning": false,
+        "isCompacting": false,
+        "autoCompactionEnabled": false,
+        "autoRetryEnabled": false,
+        "model": {
+          "id": "fixture-gpt",
+          "provider": "gateway"
+        },
+        "messageCount": 0,
+        "pendingMessageCount": 0,
+        "queuedMessages": {
+          "steering": [],
+          "followUp": []
+        },
+        "contextUsage": {
+          "percent": 3.5171875,
+          "contextWindow": 128000,
+          "tokens": 4502
+        },
+        "systemPrompt": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\n<tools>\n- read: Read file contents\n- bash: Execute bash commands (ls, grep, find, etc.)\n- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call\n- write: Create or overwrite files\n- Agent: Delegate a focused task to an inspectable subagent session\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n</tools>\n\n<rules>\n- Use bash for file operations like ls, rg, find\n- Use read to examine files instead of cat or sed.\n- You can inspect PI_* environment variables for current model and session details.\n- Use edit for precise changes (edits[].oldText must match exactly)\n- When changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls\n- Each edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.\n- Keep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.\n- Use write only for new files or complete rewrites.\n- Use Agent for a focused task that benefits from an isolated context.\n- Use multiple background Agent calls in the same response for independent parallel work.\n- Do not duplicate work already delegated to a running subagent.\n- Be concise in your responses\n- Show file paths clearly when working with files\n</rules>\n\n<docs>\nPi documentation (read only when the user asks about pi itself, its SDK, extensions, themes, skills, or TUI):\n- Main documentation: /home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/node_modules/@earendil-works/pi-coding-agent/README.md\n- Additional docs: /home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/node_modules/@earendil-works/pi-coding-agent/docs\n- Examples: /home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/node_modules/@earendil-works/pi-coding-agent/examples (extensions, custom tools, SDK)\n- When reading pi docs or examples, resolve docs/... under Additional docs and examples/... under Examples, not the current working directory\n- When asked about: extensions (docs/extensions.md, examples/extensions/), themes (docs/themes.md), skills (docs/skills.md), prompt templates (docs/prompt-templates.md), TUI components (docs/tui.md), keybindings (docs/keybindings.md), SDK integrations (docs/sdk.md), custom providers (docs/custom-provider.md), adding models (docs/models.md), pi packages (docs/packages.md), environment variables (docs/environment-variables.md), MCP servers (docs/mcp.md), codemode scripts and non-LLM models such as classifiers and image models (docs/codemode.md)\n- When working on pi topics, read the docs and examples, and follow .md cross-references before implementing\n- Always read pi .md files completely and follow links to related docs (e.g., tui.md for TUI API details)\n</docs>\n\n<cwd>\n/var/tmp/pi-subagent-browser-home.ttrMNSN8/.cache/pi-tmp/shared/subagent-model-browser-7vany4kj/project\n</cwd>",
+        "thinkingLevel": "off",
+        "extensionStatuses": [],
+        "extensionWidgets": []
+      }
+    }
+  },
+  {
+    "browser": true,
+    "id": "01a11214-a8c4-706d-a4c4-398abfa71b62",
+    "message": "E2E_DELEGATE_NEW",
+    "status": 200,
+    "data": {
+      "success": true,
+      "data": null
+    }
+  },
+  {
+    "path": "/api/agent/01a11214-a8c4-706d-a4c4-398abfa71b62",
+    "status": 200,
+    "data": {
+      "running": true,
+      "state": {
+        "sessionId": "01a11214-a8c4-706d-a4c4-398abfa71b62",
+        "sessionFile": "/var/tmp/pi-subagent-browser-home.ttrMNSN8/.cache/pi-tmp/shared/subagent-model-browser-7vany4kj/home/.pi/agent/sessions/--var-tmp-pi-subagent-browser-home.ttrMNSN8-.cache-pi-tmp-shared-subagent-model-browser-7vany4kj-project--/2026-10-06T16-38-26-246Z_01a11214-a8c4-706d-a4c4-398abfa71b62.jsonl",
+        "isStreaming": false,
+        "isPromptRunning": false,
+        "isBashRunning": false,
+        "isCompacting": false,
+        "autoCompactionEnabled": false,
+        "autoRetryEnabled": false,
+        "model": {
+          "id": "fixture-gpt",
+          "provider": "gateway"
+        },
+        "messageCount": 0,
+        "pendingMessageCount": 0,
+        "queuedMessages": {
+          "steering": [],
+          "followUp": []
+        },
+        "contextUsage": {
+          "percent": 1.9234375000000001,
+          "contextWindow": 128000,
+          "tokens": 2462
+        },
+        "systemPrompt": "You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.\n\n<tools>\n- read: Read file contents\n- bash: Execute bash commands (ls, grep, find, etc.)\n- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call\n- write: Create or overwrite files\n- Agent: Delegate a focused task to an inspectable subagent session\n\nIn addition to the tools above, you may have access to other custom tools depending on the project.\n</tools>\n\n<rules>\n- Use bash for file operations like ls, rg, find\n- Use read to examine files instead of cat or sed.\n- You can inspect PI_* environment variables for current model and session details.\n- Use edit for precise changes (edits[].oldText must match exactly)\n- When changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls\n- Each edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.\n- Keep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.\n- Use write only for new files or complete rewrites.\n- Use Agent for a focused task that benefits from an isolated context.\n- Use multiple background Agent calls in the same response for independent parallel work.\n- Do not duplicate work already delegated to a running subagent.\n- Be concise in your responses\n- Show file paths clearly when working with files\n</rules>\n\n<docs>\nPi documentation (read only when the user asks about pi itself, its SDK, extensions, themes, skills, or TUI):\n- Main documentation: /home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/node_modules/@earendil-works/pi-coding-agent/README.md\n- Additional docs: /home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/node_modules/@earendil-works/pi-coding-agent/docs\n- Examples: /home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/node_modules/@earendil-works/pi-coding-agent/examples (extensions, custom tools, SDK)\n- When reading pi docs or examples, resolve docs/... under Additional docs and examples/... under Examples, not the current working directory\n- When asked about: extensions (docs/extensions.md, examples/extensions/), themes (docs/themes.md), skills (docs/skills.md), prompt templates (docs/prompt-templates.md), TUI components (docs/tui.md), keybindings (docs/keybindings.md), SDK integrations (docs/sdk.md), custom providers (docs/custom-provider.md), adding models (docs/models.md), pi packages (docs/packages.md), environment variables (docs/environment-variables.md), MCP servers (docs/mcp.md), codemode scripts and non-LLM models such as classifiers and image models (docs/codemode.md)\n- When working on pi topics, read the docs and examples, and follow .md cross-references before implementing\n- Always read pi .md files completely and follow links to related docs (e.g., tui.md for TUI API details)\n</docs>\n\n<cwd>\n/var/tmp/pi-subagent-browser-home.ttrMNSN8/.cache/pi-tmp/shared/subagent-model-browser-7vany4kj/project\n</cwd>",
+        "thinkingLevel": "off",
+        "extensionStatuses": [],
+        "extensionWidgets": []
+      }
+    }
+  }
+]

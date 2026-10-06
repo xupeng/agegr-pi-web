@@ -1,0 +1,67 @@
+pi-tmp: workspace /var/tmp/pi-native-auth-home.p9IyMuMF/.cache/pi-tmp/shared/native-auth-repeat-2puu9tl3
+TMPDIR=/var/tmp/pi-native-auth-home.p9IyMuMF/.cache/pi-tmp/shared/native-auth-repeat-2puu9tl3 HOME=/var/tmp/pi-native-auth-home.p9IyMuMF/.cache/pi-tmp/shared/native-auth-repeat-2puu9tl3/home
+
+FRESH WORKER 1
+✔ SDK public barrier proves awaited offline refresh may return before auth snapshot commits (56.349953ms)
+✔ owned child services serialize registration and explicit offline refreshes (33.544217ms)
+✔ fresh owned native keyless services loops keep exact parent reference, independent runtime and Kimi zero (806.573638ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1933.791406
+
+FRESH WORKER 2
+✔ SDK public barrier proves awaited offline refresh may return before auth snapshot commits (56.981082ms)
+✔ owned child services serialize registration and explicit offline refreshes (33.216866ms)
+✔ fresh owned native keyless services loops keep exact parent reference, independent runtime and Kimi zero (856.694672ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1993.620866
+
+FRESH WORKER 3
+✔ SDK public barrier proves awaited offline refresh may return before auth snapshot commits (48.780424ms)
+✔ owned child services serialize registration and explicit offline refreshes (40.649763ms)
+✔ fresh owned native keyless services loops keep exact parent reference, independent runtime and Kimi zero (794.396728ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1909.272048
+
+FRESH WORKER 4
+✔ SDK public barrier proves awaited offline refresh may return before auth snapshot commits (55.290707ms)
+✔ owned child services serialize registration and explicit offline refreshes (33.556007ms)
+✔ fresh owned native keyless services loops keep exact parent reference, independent runtime and Kimi zero (793.778497ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1904.061145
+
+FRESH WORKER 5
+✔ SDK public barrier proves awaited offline refresh may return before auth snapshot commits (56.173042ms)
+✔ owned child services serialize registration and explicit offline refreshes (33.150111ms)
+✔ fresh owned native keyless services loops keep exact parent reference, independent runtime and Kimi zero (803.778594ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1917.432801

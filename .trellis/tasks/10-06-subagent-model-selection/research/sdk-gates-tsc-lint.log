@@ -1,0 +1,3 @@
+# tsc / eslint evidence (stage 1, worktree feat/subagent-model-selection)
+TSC_EXIT=0
+LINT_EXIT=0

@@ -1,0 +1,592 @@
+✔ Stop unwinds a command waiting on select and closes its UI (50.374846ms)
+✔ Stop unwinds a command waiting on confirm and closes its UI (2.552027ms)
+✔ Stop unwinds a command waiting on input and closes its UI (2.117653ms)
+✔ Stop unwinds a command waiting on editor and closes its UI (1.691052ms)
+✔ Stop unwinds a command waiting on custom and closes its UI (2.49139ms)
+✔ normal cancel and caller abort keep UI defaults and notify all subscribers (2.792508ms)
+✔ Stop cancels a custom UI factory that has not mounted yet (2.174048ms)
+✔ Stop before custom UI initialization does not invoke the factory (0.806737ms)
+✔ defaults to the 10-minute idle timeout when the env var is unset or blank (1.403726ms)
+✔ treats zero as disabling idle shutdown (0.229763ms)
+✔ uses a positive value as the timeout in milliseconds (0.173748ms)
+✔ falls back to the 10-minute default and warns for invalid or out-of-range values (0.700631ms)
+✔ PI_WEB_IDLE_TIMEOUT_MS=0 still reaps a run that Stop cannot unwind (173.7611ms)
+✔ PI_WEB_IDLE_TIMEOUT_MS=0 keeps a session alive after Stop unwinds its run (137.382798ms)
+✔ PI_WEB_IDLE_TIMEOUT_MS="": pressing Stop again does not postpone the forced cleanup (102.732982ms)
+✔ PI_WEB_IDLE_TIMEOUT_MS="0": pressing Stop again does not postpone the forced cleanup (106.368875ms)
+✔ PI_WEB_IDLE_TIMEOUT_MS=0 reaps a bash command that abort_bash cannot stop (85.322591ms)
+✔ PI_WEB_IDLE_TIMEOUT_MS=0 applies to an idle session (106.550467ms)
+[pi-web] invalid PI_WEB_IDLE_TIMEOUT_MS "2592000000", falling back to 10 minutes
+✔ PI_WEB_IDLE_TIMEOUT_MS=1800000 applies to an idle session (104.318249ms)
+✔ PI_WEB_IDLE_TIMEOUT_MS=2592000000 applies to an idle session (101.669892ms)
+✔ defaults the shutdown deadline to 5 seconds when the env var is unset or blank (1.570112ms)
+✔ uses a positive shutdown deadline in milliseconds (0.256803ms)
+✔ falls back to the 5-second deadline and warns for zero, invalid or out-of-range values (0.733876ms)
+✔ a wrapper reports itself dead as soon as shutdown starts (10.205327ms)
+✔ shutdown disposes the session once the deadline passes even if session_shutdown never settles (4.745572ms)
+✔ direct destruction also disposes the session at the deadline (2.971782ms)
+✔ a session_shutdown failure after the deadline is not an unhandled rejection (3.792844ms)
+✔ the shutdown deadline timer does not keep the process alive (2.992128ms)
+✔ PI_WEB_SHUTDOWN_DEADLINE_MS sets the deadline (157.911485ms)
+✔ startRpcSession waits for a closing wrapper to dispose before it opens the session again (632.595978ms)
+[pi-web] session_start dispatched to extensions for session 01a111f6-c8e9-7193-a9e7-80ae6e9d92fe
+✔ a tool change made while the session closes applies to the wrapper a concurrent start brings up (266.264579ms)
+[pi-web] session 01a111f6-c9f2-7193-a9e7-80b09a74a40c is still shutting down; starting it again anyway
+✔ startRpcSession replaces a shutting-down wrapper, which then cannot unregister its replacement (46.692ms)
+[pi-web] session 01a111f6-ca20-7193-a9e7-80b3cc4f7881 is still shutting down; starting it again anyway
+✔ a wrapper evicted for a newer file on disk cannot unregister the wrapper that reloaded it (82.42002ms)
+[pi-web] session 01a111f6-ca73-7193-a9e7-80b5ee2fe0f4 is still shutting down; starting it again anyway
+✔ a wrapper registered before a hot reload cannot unregister its replacement either (49.622236ms)
+[pi-web] session_start dispatched to extensions for session session-1
+✔ get_state waits for extension resources before returning the system prompt (22.053227ms)
+✔ get_state reports the prompt of a session that has not run anything yet (2.86995ms)
+✔ get_state keeps reporting the replayed prompt once the transcript has one (0.600276ms)
+✔ prompt commands wait for SDK preflight acceptance before acknowledging (12.291984ms)
+✔ every SDK acceptance disposition acknowledges before the prompt promise settles (7.416695ms)
+✔ completion notification waits for an accepted agent run to become idle (16.216857ms)
+✔ completion notification covers extension-injected runs without an SSE client (3.699257ms)
+✔ new event listeners receive the latest active tool update (0.869846ms)
+✔ does not replay the nested calls of a running codemode script (2.447684ms)
+✔ a tool call's end also forgets calls recorded under its id (0.686898ms)
+✔ tolerates a nested end after its parent ended (0.450059ms)
+✔ replays no tool call once the run has ended (0.494448ms)
+✔ suppressed sessions do not emit completion notifications (0.612204ms)
+✔ prompt commands reject when the SDK rejects before preflight acceptance (1.178394ms)
+✔ accepted prompt failures still finish through the event stream (37.362704ms)
+✔ queued prompt commands forward their streaming behavior and acknowledge acceptance (1.352711ms)
+✔ an exact system prompt is reported by get_state without touching the SDK prompt state (1.514438ms)
+✔ prompt admission waits for the preceding preflight and keeps overlapping runs counted (1.773527ms)
+✔ prompt admission continues after the preceding preflight rejects (3.140963ms)
+✔ a failing event listener cannot reject prompt completion (1.331005ms)
+✔ session shutdown notifies extensions before disposing the SDK session (0.765963ms)
+✔ session shutdown still disposes the SDK session when an extension fails (0.359486ms)
+[pi-web] failed to deliver session_shutdown event: listener failed
+✔ destroy notifies event listeners so attached SSE streams can close (0.210549ms)
+✔ a listener that unsubscribes while handling an event does not hide it from the next one (0.199676ms)
+✔ direct destruction disposes the SDK session before unregistering the wrapper (0.156476ms)
+✔ direct destruction emits session_shutdown before dispose when extensions are present (2.066825ms)
+✔ direct destruction still disposes when session_shutdown throws synchronously (1.170211ms)
+✔ idle timer preserves extension-owned session work until it becomes inactive (2.239824ms)
+✔ idle timer preserves active work but reaps a run stuck after Stop (2.322626ms)
+✔ direct bash commands use sanitized project operations with current shell settings (1.254139ms)
+✔ late old-wrapper cleanup keeps a replacement wrapper's rehydrated ask (1.661776ms)
+✔ defaults to a 15-minute main timeout and the default tool budgets (2.688021ms)
+✔ the environment variable wins over the persisted value (0.272452ms)
+✔ the persisted value applies when the environment variable is unset or blank (0.314343ms)
+✔ zero disables the watchdog through either source (0.203767ms)
+✔ invalid or out-of-range values fall back to the default and warn (0.48221ms)
+✔ tool budgets merge over the defaults and can be removed with zero (0.285996ms)
+✔ invalid tool budgets are dropped with a warning (0.229422ms)
+✔ a malformed settings file falls back to defaults without throwing (0.675198ms)
+✔ the config file is read from disk when no stored object is injected (0.565658ms)
+[pi-web] aborting stalled session session-1: 60s without events (tool=read, toolElapsed=60s, turnElapsed=60s, timeout=60s, source=env)
+[pi-web] aborting stalled session session-1: 60s without events (tool=read, toolElapsed=60s, turnElapsed=60s, timeout=60s, source=env)
+✔ AC1: aborts a stalled turn and reports the in-flight tool and elapsed time (2052.431427ms)
+[pi-web] aborting stalled session session-1: 60s without events (tool=none, toolElapsed=n/a, turnElapsed=60s, timeout=60s, source=env)
+✔ AC7: a failed transcript write is logged and does not block the abort (176.533483ms)
+✔ AC1: reports a stall with no active tool as a null tool name (98.803993ms)
+[pi-web] aborting stalled session session-1: 120s without events (tool=bash, toolElapsed=120s, turnElapsed=120s, timeout=120s, source=env, toolOverride=true)
+✔ AC1/R3: a tool with a longer configured budget survives the main threshold (97.953449ms)
+✔ AC2: never fires while events keep arriving (92.459456ms)
+✔ AC2: a model delta also resets the clock (96.68553ms)
+✔ AC4: a settled turn stops the clock and never fires (100.771986ms)
+✔ AC4: a user abort disarms the watchdog and it does not fire a second time (104.261207ms)
+✔ AC4: destroy releases the timer and never fires (100.040233ms)
+✔ AC4: a zero threshold disables the watchdog entirely (107.170172ms)
+✔ AC4: disarm and dispose clear the pending timer so a later tick cannot fire (0.705783ms)
+✔ AC1: a stall callback cannot reenter and fire twice (1.21167ms)
+✔ AC4: calling start twice disposes the previous watchdog before arming a new one (108.398623ms)
+[pi-web] aborting stalled session session-1: 120s without events (tool=bash, toolElapsed=120s, turnElapsed=120s, timeout=120s, source=env, toolOverride=true)
+✔ nested bash keeps its silence budget without being replayed as a top-level card (89.595187ms)
+✔ a pinned preset neither activates codemode nor drops the one defaultTools adds (144.259187ms)
+✔ get_tools reports codemode's description as declared, with the tools scripts can call (43.119378ms)
+✔ get_tools marks the active tools codemode's only mode leaves out of requests (45.201329ms)
+✔ navigating to an older branch keeps the Read-only pin and codemode (36.211955ms)
+[pi-web] session_start dispatched to extensions for session 01a111f6-c6e3-73f5-8e3a-1bb54f865932
+✔ reload keeps the pinned coding tools and what extensions chose while they restarted (23.995235ms)
+✔ a tool selection replaces only the coding tools and keeps the active extension tools (6.5376ms)
+✔ a tool selection does not activate tools registered with defaultActive: false (0.963257ms)
+✔ withdrawn and unregistered tools are never carried (0.620882ms)
+✔ an empty selection is Chat only (1.437685ms)
+✔ startup keeps what defaultTools activates and never what pi leaves inactive (21.403912ms)
+✔ reload keeps the tools that were active and those an extension activated while it restarted (3.868102ms)
+✔ reload keeps the coding selection but not a tool an extension switched off while it restarted (2.328671ms)
+✔ reload does not activate tools registered with defaultActive: false (0.909443ms)
+✔ a direct or model-only tool an extension switched off stays off after reload and set_tools (3.53287ms)
+✔ navigating the tree re-applies the pinned selection over the branch's restored tools (3.400948ms)
+✔ navigating an unpinned session keeps the branch's restored tools (2.553231ms)
+✔ navigation keeps an extension tool off when the branch's loadout leaves it out (0.684743ms)
+✔ navigation keeps pi-web's subagent tools, which the session switched on after the branch was recorded (2.488929ms)
+✔ navigation preserves already-active fork ask_user across a branch recorded without it (0.903366ms)
+✔ navigation never activates registered ask_user that was not active (0.676875ms)
+✔ navigation filters an already-active ask_user if its registration is now hidden (2.393594ms)
+✔ ask_user carry does not repopulate Chat-only or an empty pinned selection (0.862137ms)
+✔ navigation from an extension command re-applies the selection too (0.648839ms)
+✔ cancelled navigation, Chat only, and subagents keep the tools pi restored (2.551682ms)
+✔ get_tools reports the descriptions declared to the model (0.699977ms)
+✔ get_tools leaves out withdrawn tools and reports each tool's exposure (0.577334ms)
+✔ suppresses default powerline widgets before invoking factories (5.26331ms)
+✔ applies configured widget and status rules and clears stale state (2.644677ms)
+✔ keeps array widgets compatible while maintaining the state snapshot (1.056446ms)
+✔ renders a factory widget immediately with the fixed headless facade (1.253903ms)
+✔ requestRender replaces the browser event and server snapshot (0.778549ms)
+✔ clearing and replacing widgets disposes components and invalidates old callbacks (0.859215ms)
+✔ isolates factory and render failures with a clear and extension_error (3.503469ms)
+✔ reload and destroy dispose factory components and invalidate callbacks (8.887121ms)
+✔ command-context reload also clears factory widgets (3.026083ms)
+✔ dispose-time reentrant updates remain authoritative (2.667708ms)
+✔ render failure does not clear a dispose-time recovery widget (0.825565ms)
+✔ ignores factory registrations after the wrapper is destroyed (0.29073ms)
+✔ reload ignores widget registrations triggered by component disposal (3.055601ms)
+✔ get_tools preserves the SDK tool definition fields (15.634165ms)
+✔ closeAsk delivers answers fire-and-forget so ask_submit answers promptly (3.724818ms)
+✔ RPC session startup preloads extension-registered providers before restoring models (5.10009ms)
+✔ only normal sessions load the codemode, tool-search, and mcp built-ins (4.350685ms)
+✔ built-in subagents persist their selected resource policy (4.237654ms)
+✔ running snapshots expose sessions with suppressed completion notifications (6.099905ms)
+✔ RPC session startup resolves and passes the SDK-native enabled model scope (4.659345ms)
+✖ RPC session startup treats only sessions with messages as continuing (7.729957ms)
+✔ RPC session startup opens an existing session file only once and trusts its cwd (11.243972ms)
+✔ RPC wrapper avoids per-chunk idle maintenance (1.804841ms)
+✔ normal session teardown paths use graceful extension shutdown (3.030366ms)
+✔ clone copies the requested leaf into a child session (1.867626ms)
+✔ fork_branch copies the selected assistant entry without replacing the source session (17.083451ms)
+✔ fork before the first message persists a reopenable message-free child session (7.954869ms)
+✔ fork and fork_branch copy finished entries while the source keeps running (7.96828ms)
+✔ fork refuses a running shell command and a source not yet written to disk (3.667165ms)
+✔ session replacement rejects active work and clone writes one reopenable child (9.319359ms)
+✔ cancelled session replacement releases its lock (0.758213ms)
+✔ clone cancels an assistant-free branch without creating a new session file (3.576225ms)
+✔ new-session route applies model scope during construction instead of follow-up commands (1.401224ms)
+✔ prompt routes mark only preflight failures as rejected (1.564019ms)
+✔ exact prompts are sent through before_agent_start instead of the SDK prompt state (2.185455ms)
+✔ RPC session startup never writes the global model defaults (1.414971ms)
+✔ custom extension UI receives the fixed headless terminal facade (1.464475ms)
+✔ reloading a session invalidates the models cache (1.523148ms)
+✔ normal sessions restore persisted tool selections before loading resources (2.297209ms)
+✔ crossing the Chat-only boundary persists and rebuilds the wrapper (1.668697ms)
+✔ get_state reports an unknown context usage instead of failing the whole response (2.705895ms)
+✔ subagent control tools are declared to the model but cannot be called from another tool (127.071854ms)
+✔ a session with the subagent feature switched off registers no control tools (33.997752ms)
+✔ integrated extension exposes the legacy-compatible tool names (4.753901ms)
+✔ control tools are model-only and activated on registration (0.906152ms)
+✔ integrated extension registers no tools while its feature is disabled (0.718762ms)
+✔ Agent tool description lists enabled effective profiles and refreshes when its factory reloads (1.404346ms)
+✔ integrated extension removes a legacy extension that owns the same tools (0.746431ms)
+✔ integrated extension removes recognized legacy extensions with any reserved tool (0.425356ms)
+✔ foreground Agent streams updates and returns the completed result (1.096875ms)
+✔ only the background notification text marks itself as not a user message (0.24968ms)
+✔ a resumed run's notification says it supersedes the earlier report (#985) (0.336684ms)
+✔ foreground Agent reports startup and execution failures as tool errors (1.284661ms)
+✔ Agent resume routes the prompt to the existing-session runtime (0.716791ms)
+✔ background Agent returns immediately and delegates one completion notification (0.654444ms)
+✔ get_subagent_result covers missing, running, completed, failed, and aborted runs (0.707409ms)
+✔ get_subagent_result wait honors abort signals (0.967424ms)
+✔ steer_subagent returns success and runtime failures (0.674059ms)
+✔ legacy preference leaves unrelated and partial-overlap extensions intact (0.170565ms)
+✔ collecting a finished background result marks it consumed so the completion notification is skipped (0.60532ms)
+✔ a background result that is still running is not marked consumed (0.338434ms)
+✔ a foreground result is not marked consumed because it never notifies the parent (0.347934ms)
+✔ loads cwd-relative UTF-8 files and formats them as delegated user input (16.039337ms)
+✔ rejects files outside cwd, including symlink targets (11.542999ms)
+✔ rejects invalid UTF-8 and bounded input sets (9.599634ms)
+✔ isolated worktrees are unique, write-safe, and cleaned without deleting dirty work (155.8778ms)
+✔ worktree isolation rejects non-git directories (7.142634ms)
+[pi-web] session_start dispatched to extensions for session 01a111f6-d1fa-7568-aefc-7ae218e5471c
+[pi-web] session_start dispatched to extensions for session 01a111f6-d1fa-7568-aefc-7ae218e5471c
+[pi-web] session_start dispatched to extensions for session 01a111f6-d1fa-7568-aefc-7ae218e5471c
+✔ real RPC warm resume, idle reopen and browser startup restore latest explicit GPT after physical Kimi (452.787138ms)
+✔ fresh process cold restore and actual idle-timer reopen use GPT without parent or source snapshot (2461.295149ms)
+[pi-web] session_start dispatched to extensions for session 01a111f6-dd5c-7568-aefc-7ae7e56d45c4
+[pi-web] session_start dispatched to extensions for session 01a111f6-dd5c-7568-aefc-7ae7e56d45c4
+✔ cold set_model prepares new target despite unavailable history, persists via SDK and concurrent intents all apply (168.923226ms)
+[pi-web] session_start dispatched to extensions for session 01a111f6-de05-7568-aefc-7ae88848cd2e
+[pi-web] session_start dispatched to extensions for session 01a111f6-de89-7568-aefc-7aea9ff314cc
+✔ new controller child owns runtime, obeys explicit model, and warm Agent resume stays GPT (191.158557ms)
+[pi-web] session_start dispatched to extensions for session 01a111f6-dec4-7568-aefc-7aecbf877c86
+[pi-web] session_start dispatched to extensions for session 01a111f6-dedf-7568-aefc-7aef61ee4692
+[pi-web] session_start dispatched to extensions for session 01a111f6-dedf-7568-aefc-7aef61ee4692
+✔ provider-only alive parent补全 and saved refs replay one necessary file, no search/lifecycle/tools (125.150295ms)
+✔ saved source disabled, missing, forged, unknown version and swapped symlink refuse before any request (47.383586ms)
+[pi-web] session_start dispatched to extensions for session 01a111f6-df71-7568-aefc-7afd1c465523
+✔ child wrapper reload withdraws extension-manually-off Map entries and does not activate new hidden/inactive tools (75.341392ms)
+[pi-web] session_start dispatched to extensions for session 01a111f6-dfbc-7568-aefc-7afe9e038628
+[pi-web] session_start dispatched to extensions for session 01a111f6-dfe3-7568-aefc-7b00b3bb26e1
+[pi-web] session_start dispatched to extensions for session 01a111f6-dfe3-7568-aefc-7b00b3bb26e1
+✔ legacy v1 exact tools and explicit false stay narrow; legal virtual choice survives physical response (134.427719ms)
+[pi-web] session_start dispatched to extensions for session 01a111f6-e043-7568-aefc-7b038b25bd65
+✔ active branch latest explicit model, not abandoned branch or physical response, controls cold startup (51.567763ms)
+[pi-web] session_start dispatched to extensions for session 01a111f6-e076-7568-aefc-7b05cce9da56
+✔ cold target intent survives single-flight competitor failure and each successful command persists (95.235324ms)
+[pi-web] session_start dispatched to extensions for session 01a111f6-e0d6-7568-aefc-7b06399bff57
+✔ actual HTTP route returns typed 409 prompt refusal and permits cold standard set_model recovery (237.450131ms)
+✔ the safe DTO accepts only known reasons and never requires auth fields (1.560987ms)
+✔ toSafeDTO never echoes a raw loader/auth message (0.610072ms)
+✔ resolveConcreteModel distinguishes a missing provider from a missing model (2.072248ms)
+✔ selection priority is request > profile > parent, all re-resolved in the child runtime (1.058971ms)
+✔ an empty configured scope resolves to no execution scope, not the whole catalog (5.419009ms)
+✔ a target outside the resolved scope and a missing auth both refuse (1.132772ms)
+✔ an alive wrapper must match its branch's newest explicit selection (0.573148ms)
+✔ a tool-free subagent uses only its profile as the exact system prompt (1.428261ms)
+✔ a tool-enabled subagent retains inherited context in its appended system prompt (0.240239ms)
+✔ a resource-enabled tool-free subagent keeps the normal system prompt pipeline (0.24443ms)
+✔ replace prompt mode makes the profile body the exact system prompt (0.15606ms)
+✔ a bound session runs one target-provider turn through the delayed search tool (96.709394ms)
+✔ native override captures effective getter identity, not the first or failed last contributor (741.676461ms)
+✔ single-file legacy is replayable; legacy multiple contributions and virtual context-dependent sources have no lead (389.554692ms)
+✔ reload binds provenance to a new generation and dynamic provider registration invalidates even same identity (68.089113ms)
+✔ current project trust revocation and changed source identity reject before any provider factory is replayed (107.45243ms)
+✔ linked package root canonical containment accepts valid provider and rejects swapped root or escaped file (83.797009ms)
+✔ source metadata URLs are stored only as opaque identity, never credentials/config (34.442178ms)
+✔ current installed npm version mismatch refuses saved source without installation or factory execution (41.170777ms)
+✔ runs FIFO with a per-parent concurrency limit and drains after completion (2.588947ms)
+✔ cancels queued work without starting it (0.50791ms)
+✔ no-install adapter matches the default loader for an installed local package (33.06275ms)
+✔ a missing package is skipped with a diagnostic and no install (4.233814ms)
+✔ onMissingSource 'error' refuses the reload (1.386949ms)
+✔ an installed npm package with a mismatched version is skipped without installing (5.12535ms)
+✔ provider-only host loads one concrete file, flushes its native provider, and binds no session (100.234543ms)
+✔ explicit provider files reject directories, globs, package specs, and outside roots (13.533545ms)
+✔ a delayed web_search registration becomes active with an allow-all extension policy and zero model requests (25.600502ms)
+✔ child services flush native, legacy, and virtual registrations onto a fresh runtime without touching the parent (66.653626ms)
+✔ reload resolves project trust afresh through resolveProjectTrust instead of a construction snapshot (132.592836ms)
+✔ package settings and enablement changes take effect on reload (45.827451ms)
+✔ loadSkills:true loads only preflight-authorized skills and restores their sourceInfo (10.748989ms)
+✔ explicit authorization rejects symlink escapes and accepts a canonicalized root (18.440845ms)
+✔ built-in profiles inherit extensions by default and keep skills off (3.913627ms)
+✔ a present non-boolean or unknown extension flag never widens permissions (31.102304ms)
+✔ legacy v1 snapshots without a tool policy keep the exact tool list and stay disabled (1.123731ms)
+✔ a versioned tool policy round-trips and carries the ext allow/deny selectors (0.555333ms)
+✔ a malformed child snapshot is rejected, not decoded as a normal session (0.663596ms)
+✔ no subagent metadata decodes as none, but a broken marker is invalid (0.24256ms)
+✔ a valid provider source reference decodes through its versioned envelope (0.41459ms)
+✔ saving rejects a non-boolean resource flag and preserves an omitted one (16.647596ms)
+✔ provider source envelope limit counts UTF-8 bytes and never accepts raw credential-bearing URLs (0.662013ms)
+✔ parseMissing: file profiles without extension fields/selectors inherit by default (5.458172ms)
+✔ saveNewMissing: omitted new profile fields inherit extensions, not skills (5.386843ms)
+✔ saveExistingFalse: omitted fields preserve existing explicit false and authored aliases (12.420429ms)
+[pi-web] session_start dispatched to extensions for session 01a111f6-d567-710e-a6f5-f678fbfdf7d1
+[pi-web] session_start dispatched to extensions for session 01a111f6-d5b0-710e-a6f5-f67b58a96103
+✔ DEFAULT inherited absolute configured file admits without refs, and ignores legacy true-snapshot leads (226.060204ms)
+[pi-web] session_start dispatched to extensions for session 01a111f6-d600-710e-a6f5-f67cfe496a97
+✔ SDK false provider-only absolute configured file succeeds with zero session hooks/tools/search (63.943274ms)
+✔ configured absolute source rejects forged/symlink-escape/swapped/missing/disabled/version leads before factory (34.402696ms)
+[pi-web] session_start dispatched to extensions for session 01a111f6-d654-710e-a6f5-f67e5de378ea
+[pi-web] session_start dispatched to extensions for session 01a111f6-d66f-710e-a6f5-f681a5191cd2
+[pi-web] session_start dispatched to extensions for session 01a111f6-d689-710e-a6f5-f683011fbc97
+✔ cold native coding pins, explicit empty pins and legacy hard permissions remain separate from licence (79.939371ms)
+[pi-web] session_start dispatched to extensions for session 01a111f6-d6a4-710e-a6f5-f685de14a9d2
+[pi-web] session_start dispatched to extensions for session 01a111f6-d6a4-710e-a6f5-f685de14a9d2
+[pi-web] session_start dispatched to extensions for session 01a111f6-d6a4-710e-a6f5-f685de14a9d2
+✔ cold constructor is not persistence; HTTP target commits exactly once with exact colon/nested ids (139.764957ms)
+[pi-web] session_start dispatched to extensions for session 01a111f6-d730-710e-a6f5-f686503e2dfd
+[pi-web] session_start dispatched to extensions for session 01a111f6-d730-710e-a6f5-f686503e2dfd
+✔ scope passes but SDK setModel auth fails: no published target/history/lock orphan; retry commits (85.177978ms)
+[pi-web] session_start dispatched to extensions for session 01a111f6-d786-710e-a6f5-f689f63d73b4
+[pi-web] session_start dispatched to extensions for session 01a111f6-d786-710e-a6f5-f689f63d73b4
+✔ failed cold intent cannot clean a competing successful winner and no concurrent valid intent is lost (97.814511ms)
+[pi-web] session_start dispatched to extensions for session 01a111f6-d7e7-710e-a6f5-f68a06821d62
+✔ failed waiting intent leaves an already committed winner alive, without retry or duplicate record (55.629258ms)
+✔ real memory runtime: retired :free / invalid suffix exact references never downshift to gpt (115.785891ms)
+✔ exact full :free and @ suffix ids beat thinking parsing, including exact parent (131.365499ms)
+✔ inherit pending legacy valid then invalid registration refuses stale target and not an unrelated provider (60.922301ms)
+✔ inherit session_start public registration failure remains sticky until a new loader generation (109.249625ms)
+✔ inherit pending native registration failure does not let a retained model pass admission (21.514642ms)
+✔ failed extension factory is not masked by existing builtin/old provider context (24.360472ms)
+✔ real SDK explore/general-purpose initialized coding tools are active and declared (49.518273ms)
+✔ cold builtin pins activate only registered licensed coding tools and preserve extension/manual-off/overrides (19.553524ms)
+✔ win32 shell mapping snapshot round-trip licenses powershell (mapping execution on Linux, not Windows) (55.281448ms)
+✔ completion notification reopens an idle parent and uses its current session (3.29576ms)
+✔ disabled built-in subagents reject stale Agent calls before starting (1.417357ms)
+✔ resume reuses the persisted child session and keeps its session id (1.839073ms)
+✔ a run collected and resumed in the same turn keeps its held notification suppressed (401.416006ms)
+✔ a resumed run that fails right away still notifies after the parent inspected the earlier failure (#987) (1.186867ms)
+✔ resume rejects a child owned by another parent (0.3633ms)
+✔ abort waits for queued finalization before returning (21.472888ms)
+✖ queued abort waits for a real isolated subagent worktree to disappear (88.755663ms)
+✔ abort waits for a resumed running child to persist its result (1.947682ms)
+✖ new child completion snapshots use trusted-result policy without contacting a provider (3.620559ms)
+✔ a reopened resumed child snapshots only trusted result paths (2.760138ms)
+✔ a run whose last assistant message ended with a provider error is reported as failed, not completed (0.549447ms)
+✔ a live child left with a running status but no active run reads as interrupted (0.379276ms)
+✔ a child whose wrapper is still running keeps reporting running (0.152342ms)
+✔ a child session read back from disk after a restart mid-run reads as interrupted (2.459569ms)
+✔ a result already collected with get_subagent_result is never delivered again (0.272687ms)
+✔ a mark left by an earlier run never swallows the next run's notification (#987) (0.135183ms)
+✔ a notification waits for a busy parent and is dropped when that turn collects the result (400.432475ms)
+✔ a notification held for a busy parent is delivered once that parent goes idle (400.159718ms)
+✔ subagent settings default the built-in extension to disabled (17.853152ms)
+✔ subagent settings persist both states and preserve unrelated fields (10.997289ms)
+✔ disabling a built-in is a minimal edit of the stored name list (10.296938ms)
+✔ a name no built-in claims is kept, and a damaged list is ignored (7.13322ms)
+✔ damaged settings fail closed and are not overwritten (3.437949ms)
+✔ projection filters load-time and session_start tools without copying the Extension (32.012911ms)
+✔ ask_user withdrawal composes with the same live Map (15.495904ms)
+✔ a specific allow selector also governs late registrations (13.912115ms)
+✔ the same tool name from two owners is not addressable by name (1.027151ms)
+✔ a deny on a shared package short name withdraws every owner and stays live (1.036971ms)
+✔ a turn_start registration and a re-registration both pass the live filter (11.787854ms)
+✔ reserved control tools stay withdrawn even when a tool is registered late (15.123401ms)
+✔ reload re-projects the newly loaded extensions with the live policy (30.57974ms)
+✔ a tool the extension actively deactivated is not revived by turn or host activation (18.498527ms)
+✔ built-in profile IDs use lowercase kebab-case and read-only profiles cannot execute shell commands (3.992529ms)
+✔ override detection follows scope precedence case-insensitively (0.337671ms)
+✔ project profiles override built-ins and round-trip their runtime settings (24.034192ms)
+✔ tintinweb extension selectors stay scoped to the selected extension tools (5.266822ms)
+✔ extension selectors resolve scoped npm names and unambiguous short names (2.006936ms)
+✔ a pinned npm source contributes its package name, not the pin (0.460411ms)
+✔ one package shipping several extension files stays addressable as a unit (0.369249ms)
+✔ extension selectors keep wildcard, trailing-slash and name/* semantics (1.266322ms)
+✔ a shared basename or unscoped name stays unaddressable (0.845995ms)
+✔ a longer name wins over a shorter unrelated one (0.49867ms)
+✔ auto-discovered and settings-listed extensions are never one unit (0.732477ms)
+✔ a denied extension covers selectors scoped below it (14.081321ms)
+✔ deny selectors are resolved against the same aliases as the grant (0.615651ms)
+✔ an uppercase EXT: selector round-trips and a denied extension blocks its star spelling (7.759647ms)
+✔ tool names stay case-sensitive while extension names do not (0.442724ms)
+✔ reads tintinweb profile aliases and frontmatter identity (2.69117ms)
+✔ persisted subagent metadata reconstructs the final run (0.650975ms)
+✔ persisted subagent resources restore the exact isolated prompt and tools (0.631276ms)
+✔ legacy subagent resource snapshots keep skills and extensions disabled (0.217133ms)
+✔ extension tools are merged while subagent control tools stay excluded (0.185129ms)
+✔ an empty tool selection round-trips without restoring default tools (9.971662ms)
+✔ saved profiles normalize runtime values and reject invalid settings (3.900867ms)
+✔ project profiles override workspace profiles and deletion restores the workspace version (4.495978ms)
+✔ global and project sources with the same name stay visible while project wins at runtime (10.630158ms)
+✔ global profiles round-trip and deleting an override restores the built-in (2.658291ms)
+✔ a built-in is switched off through settings.json, not a copied-out file (3.429147ms)
+✔ disabled profiles cannot be resolved for execution (4.441167ms)
+✔ persisted runs distinguish interrupted, failed, aborted, and latest results (0.427393ms)
+✔ project profile directories cannot escape cwd through symbolic links (5.593492ms)
+✔ a save keeps frontmatter keys this app does not manage (2.932131ms)
+✔ a save refuses to overwrite malformed existing frontmatter (2.439769ms)
+✔ the pi-subagents flag aliases are seeded, kept in step, and never overwrite a whitelist (3.884313ms)
+✔ profile flags fall back to the pi-subagents spellings (1.837591ms)
+ℹ tests 320
+ℹ suites 0
+ℹ pass 317
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10747.304208
+
+✖ failing tests:
+
+test at lib/rpc-manager.test.mjs:129:1
+✖ RPC session startup treats only sessions with messages as continuing (7.729957ms)
+  AssertionError [ERR_ASSERTION]: The input was expected to not match the regular expression /sessionManager\.buildSessionContext\(\)/. Input:
+  
+  'export async function startRpcSession(\n' +
+    '  sessionId: string,\n' +
+    '  sessionFile: string,\n' +
+    '  cwd: string | undefined,\n' +
+    '  options: RpcSessionStartOptions = {},\n' +
+    '): Promise<{ session: AgentSessionWrapper; realSessionId: string }> {\n' +
+    '  const { initialModel, allowInitialModelFallback, thinkingLevel } = options;\n' +
+    '  const userModelIntent = options.modelSelectionIntent === "user-command" ? initialModel : undefined;\n' +
+    '  const applyWaitingIntent = async (started: { session: AgentSessionWrapper; realSessionId: string }) => {\n' +
+    '    if (userModelIntent) await started.session.send({ type: "set_model", ...userModelIntent });\n' +
+    '    return started;\n' +
+    '  };\n' +
+    '  const requestedToolNames = options.toolNames === undefined\n' +
+    '    ? undefined\n' +
+    '    : validateSessionToolSelection(options.toolNames);\n' +
+    '  const registry = getRegistry();\n' +
+    '  const locks = getLocks();\n' +
+    '\n' +
+    '  const existing = registry.get(sessionId);\n' +
+    '  if (existing?.isAlive()) return applyWaitingIntent({ session: existing, realSessionId: sessionId });\n' +
+    '\n' +
+    '  const inflight = locks.get(sessionId);\n' +
+    '  if (inflight) {\n' +
+    '    let started: { session: AgentSessionWrapper; realSessionId: string };\n' +
+    '    try { started = await inflight; }\n' +
+    '    catch (error) {\n' +
+    '      // A target intent must survive a competing stale-history startup failure.\n' +
+    '      if (initialModel) return startRpcSession(sessionId, sessionFile, cwd, options);\n' +
+    '      throw error;\n' +
+    '    }\n' +
+    '    // Do not retry a failed SDK switch on an already committed winner. Each request keeps its\n' +
+    "    // own intent and shares the winner's selection/admission lock, not its startup target.\n" +
+    '    return applyWaitingIntent(started);\n' +
+    '  }\n' +
+    '\n' +
+    '  const closingWait = closingRpcSessionWait(sessionId);\n' +
+    '  if (closingWait) {\n' +
+    '    // Concurrent starts share this lock, then the one start that follows it.\n' +
+    '    const waiting: Promise<{ session: AgentSessionWrapper; realSessionId: string }> = closingWait.then(() => {\n' +
+    '      if (locks.get(sessionId) === waiting) locks.delete(sessionId);\n' +
+    '      return startRpcSession(sessionId, sessionFile, cwd, options);\n' +
+    '    });\n' +
+    '    locks.set(sessionId, waiting);\n' +
+    '    return waiting;\n' +
+    '  }\n' +
+    '\n' +
+    '  let sessionManager: SessionManager;\n' +
+    '  if (sessionFile) {\n' +
+    '    sessionManager = SessionManager.open(sessionFile, undefined);\n' +
+    '  } else {\n' +
+    '    if (!cwd) throw new Error("cwd is required for a new session");\n' +
+    '    sessionManager = SessionManager.create(cwd, undefined);\n' +
+    '  }\n' +
+    '  const sessionCwd = sessionManager.getCwd();\n' +
+    '  const subagentDecode = sessionFile\n' +
+    '    ? decodeSubagentSessionResources(sessionManager.getBranch() as unknown as SessionEntry[])\n' +
+    '    : { kind: "none" as const };\n' +
+    '  if (subagentDecode.kind === "invalid" || (subagentDecode.kind === "none" && hasSubagentMetadata(sessionManager.getEntries() as unknown as SessionEntry[]))) {\n' +
+    '    // A child marker with an unreadable snapshot must not fall through to the normal,\n' +
+    '    // fully-resourced startup path. HTTP history reads still browse it via `readSubagentRun`.\n' +
+    '    throw new ModelSelectionError("resource-policy-invalid", "Invalid child policy");\n' +
+    '  }\n' +
+    '  const subagentResources = subagentDecode.kind === "valid" ? subagentDecode.resources : null;\n' +
+    '  const persistedToolNames = subagentResources\n' +
+    '    ? undefined\n' +
+    '    : readSessionToolSelection(sessionManager.getEntries() as unknown as SessionEntry[]);\n' +
+    '  const selectedToolNames = subagentResources?.tools ?? persistedToolNames ?? requestedToolNames;\n' +
+    '  if (!subagentResources && persistedToolNames === undefined && requestedToolNames !== undefined) {\n' +
+    '    appendSessionToolSelection(sessionManager, requestedToolNames);\n' +
+    '  }\n' +
+    '  const subagentLoadsResources = Boolean(\n' +
+    '    subagentResources?.loadExtensions || subagentResources?.loadSkills,\n' +
+    '  );\n' +
+    '  const chatOnly = selectedToolNames?.length === 0 && !subagentLoadsResources;\n' +
+    '  const finishStartingSession = trackStartingSession(sessionCwd);\n' +
+    '  const starting = (async () => {\n' +
+    "    // Some extensions access the SDK's global theme even outside the terminal UI.\n" +
+    '    if (!chatOnly) initTheme();\n' +
+    '    const agentDir = getAgentDir();\n' +
+    '\n' +
+    '    // Determine which tools to pass based on requested toolNames.\n' +
+    '    // Since v0.68.0, session creation expects string[] tool names instead of Tool[] instances.\n' +
+    '    // A versioned child policy governs built-ins through `excludeTools` and extensions through\n' +
+    '    // the registration-aware projection, so it passes no hard `tools` list. A legacy snapshot\n' +
+    '    // keeps its exact `tools` list, which is the only licence old readers understand.\n' +
+    '    const useVersionedToolPolicy = subagentResources?.toolPolicy !== undefined;\n' +
+    '    let toolsOption: string[] | undefined = subagentResources && !useVersionedToolPolicy\n' +
+    '      ? subagentResources.tools\n' +
+    '      : undefined;\n' +
+    '    if (!subagentResources && selectedToolNames !== undefined) {\n' +
+    '      // toolNames === [] -> "all off" (an empty allow-list disables every tool).\n' +
+    '      // Otherwise DO NOT pass a builtin-only allow-list: passing CODING_TOOL_NAMES\n' +
+    '      // set allowedToolNames to coding builtins only, which filtered every\n' +
+    '      // extension/package-provided tool (e.g. subagents, web access) out of the\n' +
+    '      // tool registry — so they were unavailable in Pi Web sessions even though the\n' +
+    '      // `pi` CLI keeps them. Leaving the allow-list unset lets the SDK register all\n' +
+    '      // tools (and activate extension tools); we narrow the ACTIVE set below.\n' +
+    '      toolsOption = selectedToolNames.length === 0 ? [] : undefined;\n' +
+    '    }\n' +
+    '\n' +
+    '    // Build services first so extension-registered providers are available\n' +
+    '    // before the SDK restores the saved model from the session file.\n' +
+    '    // Gate untrusted project extensions so opening a repository does not run\n' +
+    '    // its .pi/extensions code automatically (see lib/project-trust.ts, #236).\n' +
+    '    const trustReloadOptions = subagentResources\n' +
+    '      ? subagentLoadsResources\n' +
+    '        ? projectTrustReloadOptions(sessionCwd, agentDir)\n' +
+    '        : undefined\n' +
+    '      : chatOnly\n' +
+    '        ? undefined\n' +
+    '        : projectTrustReloadOptions(sessionCwd, agentDir);\n' +
+    '    const settingsManager = SettingsManager.create(sessionCwd, agentDir);\n' +
+    "    // Chat-only sessions and subagents that replace Pi's prompt send an exact\n" +
+    '    // system prompt. The prompt is resolved at prompt time through this inline\n' +
+    "    // extension: it may read the session's context files, which exist only\n" +
+    '    // after the session is created, so the getter is filled in below.\n' +
+    '    const exactSystemPromptRef: { current?: () => string } = {};\n' +
+    '    const exactSystemPromptExtension = createExactSystemPromptExtension(() => exactSystemPromptRef.current?.());\n' +
+    '    const usesExactSystemPrompt = chatOnly || subagentResources?.exactSystemPrompt !== undefined;\n' +
+    '    // codemode, tool-search, and mcp, as the pi CLI loads them, and the host that decides\n' +
+    '    // which MCP servers the session connects (ADR 0006).\n' +
+    '    const builtins = subagentResources || chatOnly\n' +
+    '      ? undefined\n' +
+    '      : await createPiWebBuiltinExtensions({ agentDir });\n' +
+    '    const explicitSavedModel = getLatestModelChange(sessionManager.getBranch() as unknown as SessionEntry[]);\n' +
+    '    const providerTarget = initialModel?.provider ?? explicitSavedModel?.provider;\n' +
+    '    const parentId = subagentResources ? readSubagentRun(sessionManager.getBranch() as unknown as SessionEntry[], sessionId, sessionFile)?.parentSessionId : undefined;\n' +
+    '    const sourceParent = parentId ? registry.get(parentId) : undefined;\n' +
+    '    const providerSources = (subagentResources?.providerSources?.refs.some((ref) => ref.providerId === providerTarget) ? subagentResources.providerSources : undefined) ?? (sourceParent?.isAlive() && providerTarget\n' +
+    '      ? readCapturedProviderSources(sourceParent.inner.resourceLoader.getExtensions?.(), providerTarget) : undefined);\n' +
+    '    if (subagentResources && !subagentResources.loadExtensions && !providerSources && providerTarget && sourceParent?.isAlive()\n' +
+    '      && hasUnreplayableProviderSource(sourceParent.inner.resourceLoader.getExtensions?.(), providerTarget)) {\n' +
+    '      throw new ModelSelectionError("provider-replay-unsupported", "Unconfirmed parent provider contribution");\n' +
+    '    }\n' +
+    '    const normalModelRuntime = !subagentResources ? await ModelRuntime.create({ authPath: join(agentDir, "auth.json"),\n' +
+    '      modelsPath: join(agentDir, "models.json"), refreshOnCreate: false, allowModelNetwork: false }) : undefined;\n' +
+    '    let finalizeNormalSources: ReturnType<typeof captureProviderSources> | undefined;\n' +
+    '    const services = subagentResources\n' +
+    '      ? await createSubagentSessionServices({\n' +
+    '          cwd: sessionCwd,\n' +
+    '          agentDir,\n' +
+    '          settingsManager,\n' +
+    '          resourceLoader: subagentResourceLoaderConfig(subagentResources, {\n' +
+    '            chatOnly,\n' +
+    '            exactSystemPromptExtension,\n' +
+    '            usesExactSystemPrompt,\n' +
+    '          }),\n' +
+    '          resourceLoaderReloadOptions: projectTrustReloadOptions(sessionCwd, agentDir),\n' +
+    '          ...(!subagentResources.loadExtensions && providerTarget ? { providerOnly: { providerId: providerTarget, sources: providerSources } } : {}),\n' +
+    '        })\n' +
+    '      : await createAgentSessionServices({\n' +
+    '      cwd: sessionCwd,\n' +
+    '      agentDir,\n' +
+    '      modelRuntime: normalModelRuntime,\n' +
+    '      settingsManager,\n' +
+    '      resourceLoaderOptions: chatOnly\n' +
+    '        ? { ...CHAT_ONLY_RESOURCE_LOADER_OPTIONS, extensionFactories: [exactSystemPromptExtension] }\n' +
+    '        : {\n' +
+    '            extensionFactories: [\n' +
+    '              ...(builtins?.extensions ?? []),\n' +
+    '              createReadOnlyMcpPolicyExtension(),\n' +
+    '              createProjectCommandBashExtension({\n' +
+    '                cwd: sessionCwd,\n' +
+    '                settings: settingsManager,\n' +
+    '              }),\n' +
+    '              createSubagentExtension(\n' +
+    '                SUBAGENT_CONTROLLER.extensionRuntime,\n' +
+    '                () => listSubagentProfiles(sessionCwd),\n' +
+    '                isBuiltInSubagentsEnabled,\n' +
+    '              ),\n' +
+    '              createAskUserExtension((sessionId) => getRegistry().get(sessionId), () => sessionManager.getSessionId()),\n' +
+    '            ],\n' +
+    '            extensionsOverride: (base) => {\n' +
+    '              const projected = projectAskUserTools(preferUserBashExtension(preferPiWebSubagentExtension(base)));\n' +
+    '              finalizeNormalSources = captureProviderSources(projected, sessionCwd, normalMo'... 7843 more characters
+  
+      at TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/rpc-manager.test.mjs:141:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'export async function startRpcSession(\n  sessionId: string,\n  sessionFile: string,\n  cwd: string | undefined,\n  options: RpcSessionStartOptions = {},\n): Promise<{ session: AgentSessionWrapper; realSessionId: string }> {\n  const { initialModel, allowInitialModelFallback, thinkingLevel } = options;\n  const userModelIntent = options.modelSelectionIntent === "user-command" ? initialModel : undefined;\n  const applyWaitingIntent = async (started: { session: AgentSessionWrapper; realSessionId: string }) => {\n    if (userModelIntent) await started.session.send({ type: "set_model", ...userModelIntent });\n    return started;\n  };\n  const requestedToolNames = options.toolNames === undefined\n    ? undefined\n    : validateSessionToolSelection(options.toolNames);\n  const registry = getRegistry();\n  const locks = getLocks();\n\n  const existing = registry.get(sessionId);\n  if (existing?.isAlive()) return applyWaitingIntent({ session: existing, realSessionId: sessionId });\n\n  const inflight = locks.get(sessionId);\n  if (inflight) {\n    let started: { session: AgentSessionWrapper; realSessionId: string };\n    try { started = await inflight; }\n    catch (error) {\n      // A target intent must survive a competing stale-history startup failure.\n      if (initialModel) return startRpcSession(sessionId, sessionFile, cwd, options);\n      throw error;\n    }\n    // Do not retry a failed SDK switch on an already committed winner. Each request keeps its\n    // own intent and shares the winner\'s selection/admission lock, not its startup target.\n    return applyWaitingIntent(started);\n  }\n\n  const closingWait = closingRpcSessionWait(sessionId);\n  if (closingWait) {\n    // Concurrent starts share this lock, then the one start that follows it.\n    const waiting: Promise<{ session: AgentSessionWrapper; realSessionId: string }> = closingWait.then(() => {\n      if (locks.get(sessionId) === waiting) locks.delete(sessionId);\n      return startRpcSession(sessionId, sessionFile, cwd, options);\n    });\n    locks.set(sessionId, waiting);\n    return waiting;\n  }\n\n  let sessionManager: SessionManager;\n  if (sessionFile) {\n    sessionManager = SessionManager.open(sessionFile, undefined);\n  } else {\n    if (!cwd) throw new Error("cwd is required for a new session");\n    sessionManager = SessionManager.create(cwd, undefined);\n  }\n  const sessionCwd = sessionManager.getCwd();\n  const subagentDecode = sessionFile\n    ? decodeSubagentSessionResources(sessionManager.getBranch() as unknown as SessionEntry[])\n    : { kind: "none" as const };\n  if (subagentDecode.kind === "invalid" || (subagentDecode.kind === "none" && hasSubagentMetadata(sessionManager.getEntries() as unknown as SessionEntry[]))) {\n    // A child marker with an unreadable snapshot must not fall through to the normal,\n    // fully-resourced startup path. HTTP history reads still browse it via `readSubagentRun`.\n    throw new ModelSelectionError("resource-policy-invalid", "Invalid child policy");\n  }\n  const subagentResources = subagentDecode.kind === "valid" ? subagentDecode.resources : null;\n  const persistedToolNames = subagentResources\n    ? undefined\n    : readSessionToolSelection(sessionManager.getEntries() as unknown as SessionEntry[]);\n  const selectedToolNames = subagentResources?.tools ?? persistedToolNames ?? requestedToolNames;\n  if (!subagentResources && persistedToolNames === undefined && requestedToolNames !== undefined) {\n    appendSessionToolSelection(sessionManager, requestedToolNames);\n  }\n  const subagentLoadsResources = Boolean(\n    subagentResources?.loadExtensions || subagentResources?.loadSkills,\n  );\n  const chatOnly = selectedToolNames?.length === 0 && !subagentLoadsResources;\n  const finishStartingSession = trackStartingSession(sessionCwd);\n  const starting = (async () => {\n    // Some extensions access the SDK\'s global theme even outside the terminal UI.\n    if (!chatOnly) initTheme();\n    const agentDir = getAgentDir();\n\n    // Determine which tools to pass based on requested toolNames.\n    // Since v0.68.0, session creation expects string[] tool names instead of Tool[] instances.\n    // A versioned child policy governs built-ins through `excludeTools` and extensions through\n    // the registration-aware projection, so it passes no hard `tools` list. A legacy snapshot\n    // keeps its exact `tools` list, which is the only licence old readers understand.\n    const useVersionedToolPolicy = subagentResources?.toolPolicy !== undefined;\n    let toolsOption: string[] | undefined = subagentResources && !useVersionedToolPolicy\n      ? subagentResources.tools\n      : undefined;\n    if (!subagentResources && selectedToolNames !== undefined) {\n      // toolNames === [] -> "all off" (an empty allow-list disables every tool).\n      // Otherwise DO NOT pass a builtin-only allow-list: passing CODING_TOOL_NAMES\n      // set allowedToolNames to coding builtins only, which filtered every\n      // extension/package-provided tool (e.g. subagents, web access) out of the\n      // tool registry — so they were unavailable in Pi Web sessions even though the\n      // `pi` CLI keeps them. Leaving the allow-list unset lets the SDK register all\n      // tools (and activate extension tools); we narrow the ACTIVE set below.\n      toolsOption = selectedToolNames.length === 0 ? [] : undefined;\n    }\n\n    // Build services first so extension-registered providers are available\n    // before the SDK restores the saved model from the session file.\n    // Gate untrusted project extensions so opening a repository does not run\n    // its .pi/extensions code automatically (see lib/project-trust.ts, #236).\n    const trustReloadOptions = subagentResources\n      ? subagentLoadsResources\n        ? projectTrustReloadOptions(sessionCwd, agentDir)\n        : undefined\n      : chatOnly\n        ? undefined\n        : projectTrustReloadOptions(sessionCwd, agentDir);\n    const settingsManager = SettingsManager.create(sessionCwd, agentDir);\n    // Chat-only sessions and subagents that replace Pi\'s prompt send an exact\n    // system prompt. The prompt is resolved at prompt time through this inline\n    // extension: it may read the session\'s context files, which exist only\n    // after the session is created, so the getter is filled in below.\n    const exactSystemPromptRef: { current?: () => string } = {};\n    const exactSystemPromptExtension = createExactSystemPromptExtension(() => exactSystemPromptRef.current?.());\n    const usesExactSystemPrompt = chatOnly || subagentResources?.exactSystemPrompt !== undefined;\n    // codemode, tool-search, and mcp, as the pi CLI loads them, and the host that decides\n    // which MCP servers the session connects (ADR 0006).\n    const builtins = subagentResources || chatOnly\n      ? undefined\n      : await createPiWebBuiltinExtensions({ agentDir });\n    const explicitSavedModel = getLatestModelChange(sessionManager.getBranch() as unknown as SessionEntry[]);\n    const providerTarget = initialModel?.provider ?? explicitSavedModel?.provider;\n    const parentId = subagentResources ? readSubagentRun(sessionManager.getBranch() as unknown as SessionEntry[], sessionId, sessionFile)?.parentSessionId : undefined;\n    const sourceParent = parentId ? registry.get(parentId) : undefined;\n    const providerSources = (subagentResources?.providerSources?.refs.some((ref) => ref.providerId === providerTarget) ? subagentResources.providerSources : undefined) ?? (sourceParent?.isAlive() && providerTarget\n      ? readCapturedProviderSources(sourceParent.inner.resourceLoader.getExtensions?.(), providerTarget) : undefined);\n    if (subagentResources && !subagentResources.loadExtensions && !providerSources && providerTarget && sourceParent?.isAlive()\n      && hasUnreplayableProviderSource(sourceParent.inner.resourceLoader.getExtensions?.(), providerTarget)) {\n      throw new ModelSelectionError("provider-replay-unsupported", "Unconfirmed parent provider contribution");\n    }\n    const normalModelRuntime = !subagentResources ? await ModelRuntime.create({ authPath: join(agentDir, "auth.json"),\n      modelsPath: join(agentDir, "models.json"), refreshOnCreate: false, allowModelNetwork: false }) : undefined;\n    let finalizeNormalSources: ReturnType<typeof captureProviderSources> | undefined;\n    const services = subagentResources\n      ? await createSubagentSessionServices({\n          cwd: sessionCwd,\n          agentDir,\n          settingsManager,\n          resourceLoader: subagentResourceLoaderConfig(subagentResources, {\n            chatOnly,\n            exactSystemPromptExtension,\n            usesExactSystemPrompt,\n          }),\n          resourceLoaderReloadOptions: projectTrustReloadOptions(sessionCwd, agentDir),\n          ...(!subagentResources.loadExtensions && providerTarget ? { providerOnly: { providerId: providerTarget, sources: providerSources } } : {}),\n        })\n      : await createAgentSessionServices({\n      cwd: sessionCwd,\n      agentDir,\n      modelRuntime: normalModelRuntime,\n      settingsManager,\n      resourceLoaderOptions: chatOnly\n        ? { ...CHAT_ONLY_RESOURCE_LOADER_OPTIONS, extensionFactories: [exactSystemPromptExtension] }\n        : {\n            extensionFactories: [\n              ...(builtins?.extensions ?? []),\n              createReadOnlyMcpPolicyExtension(),\n              createProjectCommandBashExtension({\n                cwd: sessionCwd,\n                settings: settingsManager,\n              }),\n              createSubagentExtension(\n                SUBAGENT_CONTROLLER.extensionRuntime,\n                () => listSubagentProfiles(sessionCwd),\n                isBuiltInSubagentsEnabled,\n              ),\n              createAskUserExtension((sessionId) => getRegistry().get(sessionId), () => sessionManager.getSessionId()),\n            ],\n            extensionsOverride: (base) => {\n              const projected = projectAskUserTools(preferUserBashExtension(preferPiWebSubagentExtension(base)));\n              finalizeNormalSources = captureProviderSources(projected, sessionCwd, normalMo'... 7843 more characters,
+    expected: /sessionManager\.buildSessionContext\(\)/,
+    operator: 'doesNotMatch',
+    diff: 'simple'
+  }
+
+test at lib/subagent-runtime.test.mjs:365:1
+✖ queued abort waits for a real isolated subagent worktree to disappear (88.755663ms)
+  Error [ModelSelectionError]: The selected model's provider is not available for this project.
+      at createSubagentSessionServices (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-session-services.ts:124:11)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Object.start (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-runtime.ts:289:24)
+      at async TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-runtime.test.mjs:473:21)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    reason: 'provider-context-unavailable',
+    provider: undefined,
+    modelId: undefined
+  }
+
+test at lib/subagent-runtime.test.mjs:601:1
+✖ new child completion snapshots use trusted-result policy without contacting a provider (3.620559ms)
+  Error [ModelSelectionError]: The selected model's provider is not available for this project.
+      at createSubagentSessionServices (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-session-services.ts:124:11)
+      at async Object.start (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-runtime.ts:289:24)
+      at async TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/lib/subagent-runtime.test.mjs:644:21)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    reason: 'provider-context-unavailable',
+    provider: undefined,
+    modelId: undefined
+  }

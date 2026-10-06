@@ -1,0 +1,35 @@
+START warm: pid=1229984 pgid=1229984 port=35331 spawnCwd=/var/tmp/pi-subagent-browser-home.E1qvAP74/.cache/pi-tmp/shared/subagent-model-browser-l8hum8og/project app=/var/tmp/pi-subagent-browser-home.E1qvAP74/.cache/pi-tmp/shared/subagent-model-browser-l8hum8og/app source=/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection log=/var/tmp/pi-subagent-browser-home.E1qvAP74/.cache/pi-tmp/shared/subagent-model-browser-l8hum8og/results/next-warm.log
+PASS new real child 01a11218-3054-7472-8dd1-372027f354a1: native gateway/fixture-gpt, delayed local search, model label
+PASS same-id Agent resume after idle + extension reload + browser refresh: 01a11218-3054-7472-8dd1-372027f354a1
+STOP warm: pid=1229984
+START cold: pid=1230684 pgid=1230684 port=45945 spawnCwd=/var/tmp/pi-subagent-browser-home.E1qvAP74/.cache/pi-tmp/shared/subagent-model-browser-l8hum8og/project app=/var/tmp/pi-subagent-browser-home.E1qvAP74/.cache/pi-tmp/shared/subagent-model-browser-l8hum8og/app source=/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection log=/var/tmp/pi-subagent-browser-home.E1qvAP74/.cache/pi-tmp/shared/subagent-model-browser-l8hum8og/results/next-cold.log
+locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByRole('button', { name: 'Hide sidebar', exact: true })
+    - locator resolved to <button title="Hide sidebar" aria-label="Hide sidebar">…</button>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <button>Pi Web</button> from <div id="session-sidebar" class="sidebar-container sidebar-open">…</div> subtree intercepts pointer events
+    - retrying click action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <button>Pi Web</button> from <div id="session-sidebar" class="sidebar-container sidebar-open">…</div> subtree intercepts pointer events
+    - retrying click action
+      - waiting 100ms
+    58 × waiting for element to be visible, enabled and stable
+       - element is visible, enabled and stable
+       - scrolling into view if needed
+       - done scrolling
+       - <button>Pi Web</button> from <div id="session-sidebar" class="sidebar-container sidebar-open">…</div> subtree intercepts pointer events
+     - retrying click action
+       - waiting 500ms
+
+    at checkForm (/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/e2e/subagent-model-selection.mjs:296:75)
+    at async file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/e2e/subagent-model-selection.mjs:379:3
+STOP cold: pid=1230684

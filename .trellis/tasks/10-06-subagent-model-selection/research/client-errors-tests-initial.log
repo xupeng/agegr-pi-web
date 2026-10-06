@@ -1,0 +1,97 @@
+✖ en: real HTTP typed rejection keeps draft/images, old ask/branch/result and never completes (25.978345ms)
+✖ zh-CN: real HTTP typed rejection keeps draft/images, old ask/branch/result and never completes (2.301739ms)
+✖ zh-TW: real HTTP typed rejection keeps draft/images, old ask/branch/result and never completes (1.471869ms)
+✔ new-session selection failure uses the same decoder/formatter and does not promote (1.166911ms)
+✔ pre-admission rejection does not settle another tab's actual run (1.532773ms)
+✔ cold/warm set_model 409 preserves original selection, does not reload branch or send draft (1.029663ms)
+✔ provisional set_model failure rolls back the local selection; newer explicit picks are not lost (0.617682ms)
+✔ failed set_model while sending a provisional draft never falls through to prompt (1.333764ms)
+✔ queued typed rejection restores input without affecting an existing run or ask (0.713447ms)
+✔ an ambiguous transport error is not treated as pre-admission rejection (0.408892ms)
+✔ a legal explicit model pick completes without automatically resending the rejected draft (0.552076ms)
+✔ agent command HTTP rejections are distinguishable from transport failures (29.108872ms)
+✔ only an explicit negative prompt acknowledgement is definitive (0.252448ms)
+✔ uses the first supported browser language and falls back to English (0.818495ms)
+✔ returns only registered locales (0.671773ms)
+✔ built-in locale packages have the complete English key and required placeholder sets (10.181171ms)
+✔ en: every canonical reason has local actionable copy, safe target and no raw message (4.973644ms)
+✔ en: unsafe/unknown DTO falls back locally, never echoes raw loader/auth text or URL (0.40437ms)
+✔ zh-CN: every canonical reason has local actionable copy, safe target and no raw message (0.215503ms)
+✔ zh-CN: unsafe/unknown DTO falls back locally, never echoes raw loader/auth text or URL (0.200717ms)
+✔ zh-TW: every canonical reason has local actionable copy, safe target and no raw message (0.203076ms)
+✔ zh-TW: unsafe/unknown DTO falls back locally, never echoes raw loader/auth text or URL (0.146391ms)
+✔ DTO without a target and nested safe model IDs render without a fabricated target (0.182122ms)
+✔ generic network errors remain ambiguous, while selection code without DTO gets local fallback (0.143947ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 21
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 624.857534
+
+✖ failing tests:
+
+test at hooks/useAgentSession.model-errors.test.mjs:96:3
+✖ en: real HTTP typed rejection keeps draft/images, old ask/branch/result and never completes (25.978345ms)
+  AssertionError [ERR_ASSERTION]: Values have same structure but are not reference-equal:
+  
+  {
+    askId: 'old-ask',
+    askedAt: '2026-10-06T00:00:00Z',
+    questions: []
+  }
+  
+      at TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/hooks/useAgentSession.model-errors.test.mjs:102:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { askId: 'old-ask', questions: [], askedAt: '2026-10-06T00:00:00Z' },
+    expected: { askId: 'old-ask', questions: [], askedAt: '2026-10-06T00:00:00Z' },
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at hooks/useAgentSession.model-errors.test.mjs:96:3
+✖ zh-CN: real HTTP typed rejection keeps draft/images, old ask/branch/result and never completes (2.301739ms)
+  AssertionError [ERR_ASSERTION]: Values have same structure but are not reference-equal:
+  
+  {
+    askId: 'old-ask',
+    askedAt: '2026-10-06T00:00:00Z',
+    questions: []
+  }
+  
+      at TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/hooks/useAgentSession.model-errors.test.mjs:102:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { askId: 'old-ask', questions: [], askedAt: '2026-10-06T00:00:00Z' },
+    expected: { askId: 'old-ask', questions: [], askedAt: '2026-10-06T00:00:00Z' },
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at hooks/useAgentSession.model-errors.test.mjs:96:3
+✖ zh-TW: real HTTP typed rejection keeps draft/images, old ask/branch/result and never completes (1.471869ms)
+  AssertionError [ERR_ASSERTION]: Values have same structure but are not reference-equal:
+  
+  {
+    askId: 'old-ask',
+    askedAt: '2026-10-06T00:00:00Z',
+    questions: []
+  }
+  
+      at TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection/hooks/useAgentSession.model-errors.test.mjs:102:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { askId: 'old-ask', questions: [], askedAt: '2026-10-06T00:00:00Z' },
+    expected: { askId: 'old-ask', questions: [], askedAt: '2026-10-06T00:00:00Z' },
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

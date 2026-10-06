@@ -1,0 +1,23 @@
+▲ Next.js 16.3.6 (Turbopack)
+- Local:         http://127.0.0.1:32813
+- Network:       http://127.0.0.1:32813
+✓ Ready in 917ms
+⚠ Both `outputFileTracingRoot` and `turbopack.root` are set, but they must have the same value.
+Using `outputFileTracingRoot` value: /home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection.
+✓ Running next.config.ts took 27ms
+
+-----
+[1m[31mFATAL[39m[0m: An unexpected Turbopack error occurred. A panic log has been written to /var/tmp/pi-subagent-browser-home.eFVD34n2/.cache/pi-tmp/shared/subagent-model-browser-k0iul5rr/next-panic-5fd42987a75448b461fe3bfe8b25315e.log.
+
+To help make Turbopack better, report this error by clicking here: https://bugs.nextjs.org/search?category=turbopack-error-report&title=Turbopack%20Error%3A%20Invalid%20distDirRoot%3A%20%22.next%22.%20distDirRoot%20should%20not%20navigate%20out%20of%20the%20projectPath.&body=Turbopack%20version%3A%20%60a758ffcf%60%0ANext.js%20version%3A%20%600.0.0%60%0A%0AError%20message%3A%0A%60%60%60%0AInvalid%20distDirRoot%3A%20%22.next%22.%20distDirRoot%20should%20not%20navigate%20out%20of%20the%20projectPath.%0A%0ADebug%20info%3A%0A-%20Execution%20of%20Project%3A%3Aproject_fs%20failed%0A-%20Invalid%20distDirRoot%3A%20%22.next%22.%20distDirRoot%20should%20not%20navigate%20out%20of%20the%20projectPath.%0A%60%60%60&labels=Turbopack,Turbopack%20Panic%20Backtrace
+-----
+
+Error [TurbopackInternalError]: Invalid distDirRoot: ".next". distDirRoot should not navigate out of the projectPath.
+
+Debug info:
+- Execution of Project::project_fs failed
+- Invalid distDirRoot: ".next". distDirRoot should not navigate out of the projectPath.
+    at <unknown> (TurbopackInternalError: Invalid distDirRoot: ".next". distDirRoot should not navigate out of the projectPath.) {
+  location: undefined
+}
+[?25h

@@ -1,0 +1,43 @@
+[pi-web] session_start dispatched to extensions for session 01a111fe-5ece-77f0-b446-74b4ea6f3a7c
+[pi-web] session_start dispatched to extensions for session 01a111fe-5ece-77f0-b446-74b4ea6f3a7c
+[pi-web] session_start dispatched to extensions for session 01a111fe-5ece-77f0-b446-74b4ea6f3a7c
+✔ real RPC warm resume, idle reopen and browser startup restore latest explicit GPT after physical Kimi (370.742974ms)
+✔ fresh process cold restore and actual idle-timer reopen use GPT without parent or source snapshot (2375.627921ms)
+[pi-web] session_start dispatched to extensions for session 01a111fe-6988-77f0-b446-74b92a161893
+[pi-web] session_start dispatched to extensions for session 01a111fe-6988-77f0-b446-74b92a161893
+✔ cold set_model prepares new target despite unavailable history, persists via SDK and concurrent intents all apply (168.689855ms)
+[pi-web] session_start dispatched to extensions for session 01a111fe-6a31-77f0-b446-74bb411ea91b
+[pi-web] session_start dispatched to extensions for session 01a111fe-6ab4-77f0-b446-74bd5f10ead6
+✔ new controller child owns runtime, obeys explicit model, and warm Agent resume stays GPT (190.054105ms)
+[pi-web] session_start dispatched to extensions for session 01a111fe-6aef-77f0-b446-74bf8f41e8fa
+[pi-web] session_start dispatched to extensions for session 01a111fe-6b0a-77f0-b446-74c0f783ed7b
+[pi-web] session_start dispatched to extensions for session 01a111fe-6b0a-77f0-b446-74c0f783ed7b
+✔ provider-only alive parent补全 and saved refs replay one necessary file, no search/lifecycle/tools (130.709203ms)
+✔ saved source disabled, missing, forged, unknown version and swapped symlink refuse before any request (48.58798ms)
+[pi-web] session_start dispatched to extensions for session 01a111fe-6ba3-77f0-b446-74ce317f884d
+✔ child wrapper reload withdraws extension-manually-off Map entries and does not activate new hidden/inactive tools (77.041244ms)
+[pi-web] session_start dispatched to extensions for session 01a111fe-6bf0-77f0-b446-74d0ce56acff
+[pi-web] session_start dispatched to extensions for session 01a111fe-6c19-77f0-b446-74d303a68b92
+[pi-web] session_start dispatched to extensions for session 01a111fe-6c19-77f0-b446-74d303a68b92
+✔ legacy v1 exact tools and explicit false stay narrow; legal virtual choice survives physical response (178.013123ms)
+[pi-web] session_start dispatched to extensions for session 01a111fe-6ca2-77f0-b446-74d4f0c00762
+✔ active branch latest explicit model, not abandoned branch or physical response, controls cold startup (39.030975ms)
+[pi-web] session_start dispatched to extensions for session 01a111fe-6cc9-77f0-b446-74d684080cc0
+✔ cold target intent survives single-flight competitor failure and each successful command persists (103.387216ms)
+[pi-web] session_start dispatched to extensions for session 01a111fe-6d31-77f0-b446-74d8d1c8aeb9
+✔ actual HTTP route returns typed 409 prompt refusal and permits cold standard set_model recovery (198.430674ms)
+✔ native override captures effective getter identity, not the first or failed last contributor (411.280384ms)
+✔ single-file legacy is replayable; legacy multiple contributions and virtual context-dependent sources have no lead (239.80135ms)
+✔ reload binds provenance to a new generation and dynamic provider registration invalidates even same identity (38.983498ms)
+✔ current project trust revocation and changed source identity reject before any provider factory is replayed (102.898293ms)
+✔ linked package root canonical containment accepts valid provider and rejects swapped root or escaped file (75.160266ms)
+✔ source metadata URLs are stored only as opaque identity, never credentials/config (33.663116ms)
+✔ current installed npm version mismatch refuses saved source without installation or factory execution (37.820264ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6042.199357

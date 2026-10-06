@@ -1,0 +1,60 @@
+▲ Next.js 16.3.6 (Turbopack)
+- Local:         http://127.0.0.1:38909
+- Network:       http://127.0.0.1:38909
+✓ Ready in 921ms
+✓ Running next.config.ts took 27ms
+- Experiments (use with caution):
+  · proxyClientMaxBodySize: "128mb"
+
+ GET /api/sessions 200 in 532ms (next.js: 300ms, proxy.ts: 130ms, application-code: 103ms)
+[pi-web] session_start dispatched to extensions for session 01a11214-a8c4-706d-a4c4-398abfa71b62
+ POST /api/agent/new 200 in 1116ms (next.js: 131ms, proxy.ts: 5ms, application-code: 980ms)
+ POST /api/agent/01a11214-a8c4-706d-a4c4-398abfa71b62 200 in 1348ms (next.js: 1322ms, proxy.ts: 3ms, application-code: 22ms)
+ GET /api/agent/01a11214-a8c4-706d-a4c4-398abfa71b62 200 in 22ms (next.js: 17ms, proxy.ts: 2ms, application-code: 3ms)
+○ Compiling / ...
+ GET /?session=01a11214-a8c4-706d-a4c4-398abfa71b62 200 in 6.6s (next.js: 5.9s, proxy.ts: 3ms, application-code: 763ms)
+ GET /api/sessions?sessionId=01a11214-a8c4-706d-a4c4-398abfa71b62 200 in 31ms (next.js: 8ms, proxy.ts: 15ms, application-code: 8ms)
+ GET /api/home 200 in 158ms (next.js: 141ms, proxy.ts: 14ms, application-code: 3ms)
+ GET /api/open-in-explorer 200 in 254ms (next.js: 240ms, proxy.ts: 11ms, application-code: 3ms)
+ GET /api/agent/running 200 in 252ms (next.js: 246ms, proxy.ts: 3ms, application-code: 4ms)
+ GET /api/open-in-explorer 200 in 272ms (next.js: 260ms, proxy.ts: 9ms, application-code: 2ms)
+ GET /api/projects?force=1 200 in 307ms (next.js: 196ms, proxy.ts: 16ms, application-code: 95ms)
+ GET /api/projects 200 in 312ms (next.js: 248ms, proxy.ts: 10ms, application-code: 54ms)
+ GET /api/home 200 in 24ms (next.js: 13ms, proxy.ts: 8ms, application-code: 3ms)
+ GET /api/sessions?projectKey=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.ttrMNSN8%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-7vany4kj%2Fproject 200 in 24ms (next.js: 7ms, proxy.ts: 10ms, application-code: 6ms)
+ GET /api/worktrees?cwd=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.ttrMNSN8%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-7vany4kj%2Fproject 200 in 409ms (next.js: 147ms, proxy.ts: 8ms, application-code: 253ms)
+ GET /api/git/status?cwd=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.ttrMNSN8%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-7vany4kj%2Fproject 200 in 526ms (next.js: 235ms, proxy.ts: 9ms, application-code: 282ms)
+ GET /api/project-trust?cwd=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.ttrMNSN8%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-7vany4kj%2Fproject 200 in 571ms (next.js: 554ms, proxy.ts: 4ms, application-code: 13ms)
+ GET /api/file-index?cwd=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.ttrMNSN8%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-7vany4kj%2Fproject 200 in 606ms (next.js: 304ms, proxy.ts: 9ms, application-code: 293ms)
+ GET /api/git/status?cwd=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.ttrMNSN8%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-7vany4kj%2Fproject 200 in 77ms (next.js: 8ms, proxy.ts: 10ms, application-code: 59ms)
+ GET /api/models?cwd=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.ttrMNSN8%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-7vany4kj%2Fproject 200 in 415ms (next.js: 265ms, proxy.ts: 66ms, application-code: 85ms)
+ GET /api/sessions?projectKey=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.ttrMNSN8%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-7vany4kj%2Fproject 200 in 8ms (next.js: 1.9ms, proxy.ts: 3ms, application-code: 4ms)
+ GET /api/sessions/01a11214-a8c4-706d-a4c4-398abfa71b62?deferThinking=1&deferMedia=1&tree=summary&force=1 200 in 1371ms (next.js: 1350ms, proxy.ts: 11ms, application-code: 11ms)
+ GET /api/sessions/01a11214-a8c4-706d-a4c4-398abfa71b62?deferThinking=1&deferMedia=1&tree=summary&force=1 200 in 1987ms (next.js: 1965ms, proxy.ts: 10ms, application-code: 12ms)
+ GET /api/files/var/tmp/pi-subagent-browser-home.ttrMNSN8/.cache/pi-tmp/shared/subagent-model-browser-7vany4kj/project?type=list 200 in 2.2s (next.js: 2.2s, proxy.ts: 8ms, application-code: 11ms)
+ GET /api/files/var/tmp/pi-subagent-browser-home.ttrMNSN8/.cache/pi-tmp/shared/subagent-model-browser-7vany4kj/project?type=list 200 in 1609ms (next.js: 1589ms, proxy.ts: 9ms, application-code: 11ms)
+[pi-web] session_start dispatched to extensions for session 01a11214-a8c4-706d-a4c4-398abfa71b62
+ GET /api/web-auth 200 in 128ms (next.js: 120ms, proxy.ts: 2ms, application-code: 5ms)
+ GET /api/web-auth 200 in 145ms (next.js: 136ms, proxy.ts: 6ms, application-code: 3ms)
+ GET /api/extension-ui/settings 200 in 175ms (next.js: 165ms, proxy.ts: 6ms, application-code: 3ms)
+ GET /api/extension-ui/settings 200 in 13ms (next.js: 5ms, proxy.ts: 6ms, application-code: 2ms)
+ GET /api/agent/running 200 in 20ms (next.js: 10ms, proxy.ts: 7ms, application-code: 3ms)
+ GET /api/tools/settings 200 in 238ms (next.js: 196ms, proxy.ts: 6ms, application-code: 35ms)
+ GET /api/subagents/settings 200 in 96ms (next.js: 87ms, proxy.ts: 6ms, application-code: 3ms)
+ GET /api/subagents/profiles?cwd=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.ttrMNSN8%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-7vany4kj%2Fproject 200 in 143ms (next.js: 130ms, proxy.ts: 7ms, application-code: 5ms)
+ GET /api/subagents/profiles?cwd=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.ttrMNSN8%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-7vany4kj%2Fproject 200 in 146ms (next.js: 136ms, proxy.ts: 6ms, application-code: 3ms)
+ GET /api/models?cwd=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.ttrMNSN8%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-7vany4kj%2Fproject 200 in 9ms (next.js: 1.8ms, proxy.ts: 3ms, application-code: 4ms)
+ GET /api/models?cwd=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.ttrMNSN8%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-7vany4kj%2Fproject 200 in 6ms (next.js: 1.6ms, proxy.ts: 1.9ms, application-code: 2ms)
+ POST /api/agent/01a11214-a8c4-706d-a4c4-398abfa71b62 200 in 46ms (next.js: 35ms, proxy.ts: 3ms, application-code: 8ms)
+[pi-web] session_start dispatched to extensions for session 01a11214-dd36-706d-a4c4-398d36eb6071
+ GET /api/sessions?sessionId=01a11214-a8c4-706d-a4c4-398abfa71b62 200 in 55ms (next.js: 3ms, proxy.ts: 5ms, application-code: 47ms)
+ GET /api/agent/01a11214-a8c4-706d-a4c4-398abfa71b62 200 in 60ms (next.js: 52ms, proxy.ts: 5ms, application-code: 3ms)
+ GET /api/sessions/01a11214-a8c4-706d-a4c4-398abfa71b62?deferThinking=1&deferMedia=1&tree=summary 200 in 62ms (next.js: 47ms, proxy.ts: 4ms, application-code: 11ms)
+ GET /api/sessions?sessionId=01a11214-a8c4-706d-a4c4-398abfa71b62 200 in 14ms (next.js: 3ms, proxy.ts: 3ms, application-code: 8ms)
+ GET /api/sessions/01a11214-a8c4-706d-a4c4-398abfa71b62/state 200 in 1720ms (next.js: 1713ms, proxy.ts: 3ms, application-code: 3ms)
+ GET /api/git/status?cwd=%2Fvar%2Ftmp%2Fpi-subagent-browser-home.ttrMNSN8%2F.cache%2Fpi-tmp%2Fshared%2Fsubagent-model-browser-7vany4kj%2Fproject 200 in 63ms (next.js: 4ms, proxy.ts: 7ms, application-code: 52ms)
+ GET /api/files/var/tmp/pi-subagent-browser-home.ttrMNSN8/.cache/pi-tmp/shared/subagent-model-browser-7vany4kj/project?type=list 200 in 103ms (next.js: 93ms, proxy.ts: 7ms, application-code: 3ms)
+ GET /api/agent/01a11214-a8c4-706d-a4c4-398abfa71b62 200 in 103ms (next.js: 96ms, proxy.ts: 5ms, application-code: 2ms)
+ GET /api/tools/settings 200 in 1028ms (next.js: 7ms, proxy.ts: 6ms, application-code: 1015ms)
+ GET /api/agent/01a11214-a8c4-706d-a4c4-398abfa71b62/events 200 in 3.3s (next.js: 1572ms, proxy.ts: 4ms, application-code: 1759ms)
+[?25h

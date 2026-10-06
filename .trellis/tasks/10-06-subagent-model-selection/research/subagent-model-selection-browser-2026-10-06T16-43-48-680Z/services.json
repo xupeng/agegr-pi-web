@@ -1,0 +1,12 @@
+[
+  {
+    "pid": 1232168,
+    "pgid": 1232168,
+    "port": 42109,
+    "phase": "warm",
+    "cwd": "/var/tmp/pi-subagent-browser-home.HpCTp1up/.cache/pi-tmp/shared/subagent-model-browser-hgvc7jy4/project",
+    "app": "/var/tmp/pi-subagent-browser-home.HpCTp1up/.cache/pi-tmp/shared/subagent-model-browser-hgvc7jy4/app",
+    "source": "/home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/subagent-model-selection",
+    "logPath": "/var/tmp/pi-subagent-browser-home.HpCTp1up/.cache/pi-tmp/shared/subagent-model-browser-hgvc7jy4/results/next-warm.log"
+  }
+]
