@@ -1,0 +1,254 @@
+{
+  "startedAt": "2026-10-06T10:52:25.210Z",
+  "sourceRoot": "/home/xupeng/dev/personal/forked/agegr-pi-web",
+  "taskTmp": "/home/xupeng/.cache/pi-tmp/01a110c1-d062-7540-97bf-c3f9b7303d87/notification-center-m1q229tp",
+  "fixture": "/var/tmp/notification-browser.eLs9T3bX",
+  "evidence": "/home/xupeng/dev/personal/forked/agegr-pi-web/.trellis/tasks/10-06-notification-center-sync/research/validation-logs/browser-2026-10-06T10-52-25-209Z",
+  "node": "v24.21.0",
+  "sourceRef": "e0ad63073c4c42987571d31b1a4cb61e48a1fcd4",
+  "candidateStatus": " M app/api/sessions/[id]/route.ts\n M app/globals.css\n M components/AppShell.tsx\n M components/AppShell.workspace-memory.test.mjs\n M components/ChatWindow.tsx\n M components/MermaidBlock.tsx\n M components/SessionSidebar.test.mjs\n M components/SessionSidebar.tsx\n M hooks/useAgentSession.ts\n M lib/i18n/messages/en.ts\n M lib/i18n/messages/zh-CN.ts\n M lib/i18n/messages/zh-TW.ts\n M lib/rpc-manager-shutdown.test.mjs\n M lib/rpc-manager-stall-watchdog.test.mjs\n M lib/rpc-manager.test.mjs\n M lib/rpc-manager.ts\n M lib/session-view-cache.ts\n?? .trellis/tasks/10-06-notification-center-sync/\n?? app/api/notifications/\n?? app/api/sessions/notification-delete.test.mjs\n?? components/AppShell.notifications.test.mjs\n?? components/ChatWindow.notifications.test.mjs\n?? components/NotificationCenter.test.mjs\n?? components/NotificationCenter.tsx\n?? components/SessionSidebar.notifications.test.mjs\n?? e2e/fixtures/notification-faux-provider.ts\n?? e2e/notification-center.mjs\n?? hooks/useNotifications.test.mjs\n?? hooks/useNotifications.ts\n?? lib/agent-run-observer.integration.test.mjs\n?? lib/agent-run-observer.test.mjs\n?? lib/agent-run-observer.ts\n?? lib/agent-run-tracker.test.mjs\n?? lib/agent-run-tracker.ts\n?? lib/notifications/\n?? lib/rpc-manager.notifications.test.mjs\n",
+  "scenarios": [
+    {
+      "name": "global-aggregation",
+      "ac": "AC1/10/13",
+      "description": "No project selected; two projects; completion plus real ask/extension; pending first; summaries never ack; denied permission",
+      "status": "pass",
+      "startedAt": "2026-10-06T10:52:36.788Z",
+      "finishedAt": "2026-10-06T10:52:39.931Z"
+    },
+    {
+      "name": "revision-bulk-fallback",
+      "ac": "AC2/3/7/8",
+      "description": "Two independent contexts; delayed frozen R1 bulk with SDK R2; stale individual R1 ack; pending survives; <=3s remote synchronization with global SSE blocked",
+      "status": "pass",
+      "startedAt": "2026-10-06T10:52:39.931Z",
+      "finishedAt": "2026-10-06T10:52:42.816Z"
+    },
+    {
+      "name": "new-run-preserves-old",
+      "ac": "AC8",
+      "description": "Public SDK gated actual run does not remove its previous completion",
+      "status": "pass",
+      "startedAt": "2026-10-06T10:52:42.817Z",
+      "finishedAt": "2026-10-06T10:52:45.219Z"
+    },
+    {
+      "name": "result-center-gate",
+      "ac": "AC2/6",
+      "description": "Selected session/history response delayed: no ack; modal center covers actual marked markdown: no ack; sidebar and center share status; closing permits actual final-body ack",
+      "status": "pass",
+      "startedAt": "2026-10-06T10:52:45.314Z",
+      "finishedAt": "2026-10-06T10:52:53.047Z"
+    },
+    {
+      "name": "result-settings-long",
+      "ac": "AC6",
+      "description": "Settings covers actual final body; no ack; long body partially visible after closing can ack",
+      "status": "pass",
+      "startedAt": "2026-10-06T10:52:53.048Z",
+      "finishedAt": "2026-10-06T10:52:59.891Z"
+    },
+    {
+      "name": "result-focus-gate",
+      "ac": "AC6",
+      "description": "Actual browser focus loss while final body loaded; remains unviewed until focused",
+      "status": "fail",
+      "startedAt": "2026-10-06T10:52:59.891Z",
+      "error": "Error: Timed out: Real browser document loses focus\n    at until (file:///home/xupeng/dev/personal/forked/agegr-pi-web/e2e/notification-center.mjs:126:9)\n    at async file:///home/xupeng/dev/personal/forked/agegr-pi-web/e2e/notification-center.mjs:461:7\n    at async scenario (file:///home/xupeng/dev/personal/forked/agegr-pi-web/e2e/notification-center.mjs:313:9)\n    at async file:///home/xupeng/dev/personal/forked/agegr-pi-web/e2e/notification-center.mjs:450:3",
+      "finishedAt": "2026-10-06T10:53:05.457Z"
+    },
+    {
+      "name": "pagination",
+      "ac": "AC6",
+      "description": "Public SDK adds >50 display messages; unloaded result not acked; notification selection loads earlier context then actual markdown ack",
+      "status": "not-run"
+    },
+    {
+      "name": "process-final-target",
+      "ac": "AC5/6",
+      "description": "Same-entry long process prelude and thinking are not actual answer; process-only visibility does not ack; notification navigates/scrolls to final split answer",
+      "status": "not-run"
+    },
+    {
+      "name": "code-only-body",
+      "ac": "AC6",
+      "description": "Code-only result: visible language/Copy header never acks; first actual code text line entering viewport does",
+      "status": "not-run"
+    },
+    {
+      "name": "mermaid-loading-error",
+      "ac": "AC6",
+      "description": "Delay real Mermaid module fetch to witness loading; invalid real Mermaid preview error is not result-body viewing",
+      "status": "not-run"
+    },
+    {
+      "name": "metadata-navigation-retired",
+      "ac": "AC5/11",
+      "description": "Real metadata response delayed across CtrlAltN/center reopen cannot resurrect old session selection or URL",
+      "status": "not-run"
+    },
+    {
+      "name": "sibling-busy-mobile",
+      "ac": "AC5/6/13",
+      "description": "Actual API tree navigation creates sibling; busy selection does not navigate_tree; hint and unread retained; 390px fullscreen center, 44px close, Escape not Stop, focus return",
+      "status": "not-run"
+    },
+    {
+      "name": "browser-close-restart",
+      "ac": "AC4/7",
+      "description": "Close browser, actual SDK completion while offline, exact graceful own-server restart, same revision/instance and ask identity, obsolete extension absent, refresh persistence",
+      "status": "not-run"
+    }
+  ],
+  "notAutomated": [
+    "AC4: system-notification dedup across restart (permission deliberately denied)",
+    "AC6: true document-hidden/background gate; headless focus test alone is not hidden-state evidence",
+    "AC6: fullscreen file overlay gate",
+    "AC6: independently windowed/unmounted/restoring-scroll result and child-branch inclusion",
+    "AC5: full session-restore regression in existing e2e/session-restore.mjs (this script separately seeds stale memory for busy cross-project notification click/reload)",
+    "AC7/11: all extension confirm/select/editor/custom, custom redraw/supersede/late close and ask wrapper negative-state races",
+    "AC9: multi-turn/retry/compaction/queued/deferred/handled classification and special finish errors (runtime SDK suites own these)",
+    "AC9: Stop/watchdog/independent bash classification (Escape no-Stop regression is narrower)",
+    "AC10/11: subagent/Trellis suppression, deletion/partial-delete/late-wrapper guards",
+    "AC3/11: offline/online and half-open SSE recovery, late cross-epoch response ordering",
+    "AC12: legacy migration multi-device invalid IDs/watermarks, atomic-write corruption/retry, untrusted requests and size bounds",
+    "AC13: full three-language/theme/font/tool-pin/ask/tail-follow regression matrix",
+    "AC13: Safari 16.2, iOS real device/safe-area, Windows (Chromium/Linux cannot prove these)"
+  ],
+  "servers": [
+    {
+      "pid": 1065592,
+      "port": 38173,
+      "log": "/home/xupeng/.cache/pi-tmp/01a110c1-d062-7540-97bf-c3f9b7303d87/notification-center-m1q229tp/results/server-1.log",
+      "startedAt": "2026-10-06T10:52:25.229Z",
+      "argv": [
+        "/home/xupeng/.local/share/mise/installs/node/24.21.0/bin/node",
+        "/home/xupeng/dev/personal/forked/agegr-pi-web/node_modules/next/dist/bin/next",
+        "dev",
+        "-H",
+        "127.0.0.1",
+        "-p",
+        "38173"
+      ],
+      "stoppedAt": "2026-10-06T10:53:07.405Z",
+      "exitCode": 0,
+      "signal": null,
+      "forced": false
+    }
+  ],
+  "timings": [
+    {
+      "scenarioName": "revision-bulk-fallback",
+      "globalSSE": "aborted for device b",
+      "localMs": 64.24505599999975,
+      "remoteMs": 744.2095700000009
+    },
+    {
+      "scenarioName": "fallback-poll",
+      "requestTimes": [
+        11797.96564,
+        11801.122744,
+        13779.643994,
+        15779.899143,
+        17781.407492
+      ],
+      "gapsMs": [
+        3.15710399999989,
+        1978.5212499999998,
+        2000.2551490000005,
+        2001.508348999998
+      ]
+    }
+  ],
+  "browserErrors": [],
+  "observerEvidence": [
+    {
+      "label": "a",
+      "scenarioName": "result-center-gate",
+      "at": "2026-10-06T10:52:52.988Z",
+      "body": {
+        "type": "ack",
+        "id": "completion:01a110d8-2d2d-7269-85b4-55df1b4ad0a5",
+        "revision": "86ce7891-6501-48c0-8f17-c33fc7abe642"
+      },
+      "proof": {
+        "markerCount": 1,
+        "markdown": true,
+        "bodyText": "NC FINAL NC COMPLETE COVER\nThis is the genuine final result body, not a notification summary.",
+        "bodyHeight": 61.40625,
+        "scrollerHeight": 760.5,
+        "intersectionHeight": 61.40625,
+        "codeFirstLineIntersection": 0,
+        "focused": true,
+        "visibility": "visible",
+        "covered": false
+      }
+    },
+    {
+      "label": "a",
+      "scenarioName": "result-settings-long",
+      "at": "2026-10-06T10:52:59.718Z",
+      "body": {
+        "type": "ack",
+        "id": "completion:01a110d8-2d2d-7269-85b4-55df1b4ad0a5",
+        "revision": "52d0fc47-33d6-4389-b35b-e600624ee880"
+      },
+      "proof": {
+        "markerCount": 1,
+        "markdown": true,
+        "bodyText": "NC LONG final answer\nNC paragraph 1: a genuine markdown final result with enough text to extend beyond the viewport.\nNC paragraph 2: a genuine markdown final result with enough text to extend beyond t",
+        "bodyHeight": 3278.90625,
+        "scrollerHeight": 760.5,
+        "intersectionHeight": 719.3125,
+        "codeFirstLineIntersection": 0,
+        "focused": true,
+        "visibility": "visible",
+        "covered": false
+      }
+    }
+  ],
+  "sdkFixtureScope": "Public SDK faux provider + existing minimal protocol peer; not the installed ask_user source",
+  "productHashesStart": {
+    "components/AppShell.tsx": "4a65456aed91efecb1e307f6db3acb40018ff0ab2b5cf3b5707c2b809612ce55",
+    "components/ChatWindow.tsx": "3cd3e7e3b0dc2c3c955526d0985ddc4ea000ecac30e46f7014846cd13b1fd5ef",
+    "components/NotificationCenter.tsx": "3109fd432d939d7c0c804cdf9b8e1611a00df104eab0c7f5a9f70f218cb5cbf8",
+    "components/SessionSidebar.tsx": "d84385677e722d2b363a99815ccccbc3b693ebc8a2065125213712bd2f14d226",
+    "components/MermaidBlock.tsx": "efda19b25bb6bc78a28aeb230dd759325507b0ac38c69d5242e36c0435b305fe",
+    "components/MarkdownBody.tsx": "cceec4c401ee923e0ab9462dc425a2069069df7645b45fbe171d119162ae95b9",
+    "hooks/useAgentSession.ts": "34bf40d78f789491e4116972f2dfdfdba121e5132e52e56b8676f1eec6f45956",
+    "lib/notifications/viewed-result.ts": "4b3c7c73263781240683069c01ad89be0b164ee559c337d70aa7b423e782d6d7",
+    "lib/notifications/client.ts": "45e401140fe0aeef6f53fd6301ab7caf9e8597ab236837cf4f58847430450034",
+    "lib/notifications/runtime.ts": "768be11eb33a85dd1794475155a197ab74b4ebeb68a2ed7ad4bcc0ce71950e73",
+    "lib/notifications/store.ts": "bad2e7261a56c2cee85fd035b5f6cff5e32b1b896d01ebff61fd50495c5c2a93",
+    "lib/notifications/persist.ts": "6c1f0859e856e0ab0a7a64bca3a9a3b87ce5a18cf8ff45b8e40cc53aab762f96",
+    "lib/rpc-manager.ts": "16f7209a342997612a4c5db6340943fe03c13009caeb30f8567eefd37d9e3a6c",
+    "lib/agent-run-observer.ts": "18636791565400e2c2b7bcbac61f0963be07573287d53d4a25c1233d1621c666",
+    "lib/agent-run-tracker.ts": "c54d59f38a5f1058e39e54818d2674b0b163f3dcb5d0f254f546564f65402efe",
+    "app/api/notifications/route.ts": "2a64b46a8d8651cd08386771670cfe5088415d99312fe23c2601579cd9f81249",
+    "app/api/notifications/events/route.ts": "11555f112feaeca67d6826f6dc34b7ea8bbe765cc10f56d92a9b63ade2683f3c"
+  },
+  "chromium": "153.0.8010.12",
+  "status": "fail",
+  "error": "Error: Timed out: Real browser document loses focus\n    at until (file:///home/xupeng/dev/personal/forked/agegr-pi-web/e2e/notification-center.mjs:126:9)\n    at async file:///home/xupeng/dev/personal/forked/agegr-pi-web/e2e/notification-center.mjs:461:7\n    at async scenario (file:///home/xupeng/dev/personal/forked/agegr-pi-web/e2e/notification-center.mjs:313:9)\n    at async file:///home/xupeng/dev/personal/forked/agegr-pi-web/e2e/notification-center.mjs:450:3",
+  "finishedAt": "2026-10-06T10:53:07.405Z",
+  "productHashesEnd": {
+    "components/AppShell.tsx": "4a65456aed91efecb1e307f6db3acb40018ff0ab2b5cf3b5707c2b809612ce55",
+    "components/ChatWindow.tsx": "3cd3e7e3b0dc2c3c955526d0985ddc4ea000ecac30e46f7014846cd13b1fd5ef",
+    "components/NotificationCenter.tsx": "3109fd432d939d7c0c804cdf9b8e1611a00df104eab0c7f5a9f70f218cb5cbf8",
+    "components/SessionSidebar.tsx": "d84385677e722d2b363a99815ccccbc3b693ebc8a2065125213712bd2f14d226",
+    "components/MermaidBlock.tsx": "efda19b25bb6bc78a28aeb230dd759325507b0ac38c69d5242e36c0435b305fe",
+    "components/MarkdownBody.tsx": "cceec4c401ee923e0ab9462dc425a2069069df7645b45fbe171d119162ae95b9",
+    "hooks/useAgentSession.ts": "34bf40d78f789491e4116972f2dfdfdba121e5132e52e56b8676f1eec6f45956",
+    "lib/notifications/viewed-result.ts": "4b3c7c73263781240683069c01ad89be0b164ee559c337d70aa7b423e782d6d7",
+    "lib/notifications/client.ts": "45e401140fe0aeef6f53fd6301ab7caf9e8597ab236837cf4f58847430450034",
+    "lib/notifications/runtime.ts": "768be11eb33a85dd1794475155a197ab74b4ebeb68a2ed7ad4bcc0ce71950e73",
+    "lib/notifications/store.ts": "bad2e7261a56c2cee85fd035b5f6cff5e32b1b896d01ebff61fd50495c5c2a93",
+    "lib/notifications/persist.ts": "6c1f0859e856e0ab0a7a64bca3a9a3b87ce5a18cf8ff45b8e40cc53aab762f96",
+    "lib/rpc-manager.ts": "16f7209a342997612a4c5db6340943fe03c13009caeb30f8567eefd37d9e3a6c",
+    "lib/agent-run-observer.ts": "18636791565400e2c2b7bcbac61f0963be07573287d53d4a25c1233d1621c666",
+    "lib/agent-run-tracker.ts": "c54d59f38a5f1058e39e54818d2674b0b163f3dcb5d0f254f546564f65402efe",
+    "app/api/notifications/route.ts": "2a64b46a8d8651cd08386771670cfe5088415d99312fe23c2601579cd9f81249",
+    "app/api/notifications/events/route.ts": "11555f112feaeca67d6826f6dc34b7ea8bbe765cc10f56d92a9b63ade2683f3c"
+  },
+  "sourceChangedDuringRun": []
+}

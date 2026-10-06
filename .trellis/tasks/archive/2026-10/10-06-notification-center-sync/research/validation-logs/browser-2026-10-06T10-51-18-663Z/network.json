@@ -1,0 +1,1422 @@
+{
+  "a": [
+    {
+      "at": 10360.878907,
+      "path": "/api/projects",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 10361.71402,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 10362.61566,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 10362.847821,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 10364.840116,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 10365.20832,
+      "path": "/api/projects",
+      "search": "?force=1",
+      "method": "GET"
+    },
+    {
+      "at": 10365.480539,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 10365.893242,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 10368.607105,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 10369.015513,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 10373.155291,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 10729.941196,
+      "path": "/api/projects",
+      "search": "?force=1",
+      "method": "GET"
+    },
+    {
+      "at": 10946.076751,
+      "path": "/api/worktrees",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 10946.432431,
+      "path": "/api/files/var/tmp/notification-browser.0skwatPe/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 10946.690589,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 10946.966799,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 10947.179338,
+      "path": "/api/files/var/tmp/notification-browser.0skwatPe/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 10949.514437,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 10949.977885,
+      "path": "/api/app-update",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 10951.844261,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 10952.219352,
+      "path": "/api/file-index",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 10952.527307,
+      "path": "/api/project-trust",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 10952.758343,
+      "path": "/api/app-update",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 10954.363794,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 11068.951296,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 11093.096769,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 11945.691288,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 12338.320487,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 13221.983395,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 14338.98307,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 14859.735777,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "POST"
+    },
+    {
+      "at": 14970.364072,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 15731.907238,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 15777.729148,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 15849.698112,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "POST"
+    },
+    {
+      "at": 15900.073472,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 16339.196992,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 17768.265221,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 18247.541757,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 18339.706316,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 20062.651972,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 20117.155575,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 20195.642854,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 20250.193136,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 21155.769702,
+      "path": "/api/projects",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 21156.819524,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 21157.984146,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 21158.32017,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 21159.800439,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110d7-287f-77c5-b6e1-787c8285902e",
+      "method": "GET"
+    },
+    {
+      "at": 21160.102113,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 21162.039549,
+      "path": "/api/projects",
+      "search": "?force=1",
+      "method": "GET"
+    },
+    {
+      "at": 21162.334723,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 21162.565878,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 21162.76402,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 21162.960786,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 21165.716421,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 21286.465169,
+      "path": "/api/worktrees",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 21288.101611,
+      "path": "/api/files/var/tmp/notification-browser.0skwatPe/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 21289.305836,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 21290.612102,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 21292.119263,
+      "path": "/api/sessions/01a110d7-287f-77c5-b6e1-787c8285902e",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary&force=1",
+      "method": "GET"
+    },
+    {
+      "at": 21292.337187,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 21292.607036,
+      "path": "/api/file-index",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 21294.816715,
+      "path": "/api/project-trust",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 21295.184071,
+      "path": "/api/files/var/tmp/notification-browser.0skwatPe/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 21295.442398,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 21295.692386,
+      "path": "/api/sessions/01a110d7-287f-77c5-b6e1-787c8285902e",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary&force=1",
+      "method": "GET"
+    },
+    {
+      "at": 21295.85212,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 21298.444412,
+      "path": "/api/agent/01a110d7-287f-77c5-b6e1-787c8285902e/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 21316.325913,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 21339.778634,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 23138.80932,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 23816.148877,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25139.170882,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25289.331211,
+      "path": "/api/sessions/01a110d7-287f-77c5-b6e1-787c8285902e/state",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 26329.154114,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 26791.603314,
+      "path": "/api/agent/01a110d7-287f-77c5-b6e1-787c8285902e",
+      "search": "",
+      "method": "POST"
+    },
+    {
+      "at": 27139.569053,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 27934.112306,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "POST"
+    },
+    {
+      "at": 27992.508843,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 28026.419537,
+      "path": "/api/sessions/01a110d7-287f-77c5-b6e1-787c8285902e",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary",
+      "method": "GET"
+    },
+    {
+      "at": 28026.923915,
+      "path": "/api/agent/01a110d7-287f-77c5-b6e1-787c8285902e",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 28027.173176,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110d7-287f-77c5-b6e1-787c8285902e",
+      "method": "GET"
+    },
+    {
+      "at": 28027.336394,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110d7-287f-77c5-b6e1-787c8285902e",
+      "method": "GET"
+    },
+    {
+      "at": 28151.901686,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29032.06696,
+      "path": "/api/projects",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29032.94634,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29033.935813,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29035.304043,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29035.574219,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110d7-287f-77c5-b6e1-787c8285902e",
+      "method": "GET"
+    },
+    {
+      "at": 29035.790927,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29037.709603,
+      "path": "/api/projects",
+      "search": "?force=1",
+      "method": "GET"
+    },
+    {
+      "at": 29038.02402,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29038.205409,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29038.41712,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29041.63931,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29042.320502,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29262.461484,
+      "path": "/api/worktrees",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 29263.253478,
+      "path": "/api/files/var/tmp/notification-browser.0skwatPe/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 29264.068409,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 29265.51427,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 29265.79482,
+      "path": "/api/files/var/tmp/notification-browser.0skwatPe/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 29266.040214,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 29266.410531,
+      "path": "/api/app-update",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29268.81577,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 29269.117138,
+      "path": "/api/file-index",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 29269.345416,
+      "path": "/api/project-trust",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 29269.502645,
+      "path": "/api/app-update",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29269.647578,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 29271.975858,
+      "path": "/api/web-auth",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29272.231781,
+      "path": "/api/extension-ui/settings",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29272.378348,
+      "path": "/api/tools/settings",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29272.513368,
+      "path": "/api/web-auth",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29274.474966,
+      "path": "/api/extension-ui/settings",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29274.726997,
+      "path": "/api/tools/settings",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29349.981644,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 29390.359125,
+      "path": "/api/sessions/01a110d7-287f-77c5-b6e1-787c8285902e",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary&force=1",
+      "method": "GET"
+    },
+    {
+      "at": 29391.177792,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 29391.505228,
+      "path": "/api/sessions/01a110d7-287f-77c5-b6e1-787c8285902e",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary&force=1",
+      "method": "GET"
+    },
+    {
+      "at": 29392.840418,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 29393.150929,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29489.746661,
+      "path": "/api/agent/01a110d7-287f-77c5-b6e1-787c8285902e/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 31014.899864,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 31569.022683,
+      "path": "/api/sessions/01a110d7-287f-77c5-b6e1-787c8285902e/state",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 31780.911748,
+      "path": "/api/agent/01a110d7-287f-77c5-b6e1-787c8285902e",
+      "search": "",
+      "method": "POST"
+    },
+    {
+      "at": 31952.325479,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 33015.172021,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 34483.052181,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 34492.513323,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "POST"
+    },
+    {
+      "at": 34562.989492,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 34626.95533,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 34800.177441,
+      "path": "/api/sessions/01a110d7-287f-77c5-b6e1-787c8285902e",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary",
+      "method": "GET"
+    },
+    {
+      "at": 34800.483269,
+      "path": "/api/agent/01a110d7-287f-77c5-b6e1-787c8285902e",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 34801.568822,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110d7-287f-77c5-b6e1-787c8285902e",
+      "method": "GET"
+    },
+    {
+      "at": 34801.867094,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110d7-287f-77c5-b6e1-787c8285902e",
+      "method": "GET"
+    },
+    {
+      "at": 34914.805344,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 35798.211319,
+      "path": "/api/projects",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 35799.209859,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 35800.271309,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 35801.746219,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 35802.064025,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110d7-287f-77c5-b6e1-787c8285902e",
+      "method": "GET"
+    },
+    {
+      "at": 35802.303096,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 35804.084148,
+      "path": "/api/projects",
+      "search": "?force=1",
+      "method": "GET"
+    },
+    {
+      "at": 35804.372156,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 35804.577045,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 35804.754746,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 35804.928924,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 35806.976358,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 35908.639894,
+      "path": "/api/worktrees",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 35909.979073,
+      "path": "/api/files/var/tmp/notification-browser.0skwatPe/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 35910.642914,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 35911.168346,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 35911.742596,
+      "path": "/api/sessions/01a110d7-287f-77c5-b6e1-787c8285902e",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary&force=1",
+      "method": "GET"
+    },
+    {
+      "at": 35912.113841,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 35912.791432,
+      "path": "/api/file-index",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 35913.553946,
+      "path": "/api/project-trust",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 35914.379552,
+      "path": "/api/files/var/tmp/notification-browser.0skwatPe/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 35914.536026,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 35914.704791,
+      "path": "/api/sessions/01a110d7-287f-77c5-b6e1-787c8285902e",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary&force=1",
+      "method": "GET"
+    },
+    {
+      "at": 35916.118701,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 35945.119759,
+      "path": "/api/agent/01a110d7-287f-77c5-b6e1-787c8285902e/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 35956.273173,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 35972.019939,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 37783.128953,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 38444.707252,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 39783.719464,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 40954.000725,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 41047.30097,
+      "path": "/api/sessions/01a110d7-287f-77c5-b6e1-787c8285902e/state",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 41193.917287,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "POST"
+    },
+    {
+      "at": 41309.557188,
+      "path": "/api/agent/01a110d7-287f-77c5-b6e1-787c8285902e",
+      "search": "",
+      "method": "POST"
+    },
+    {
+      "at": 41310.446361,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 41783.916583,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    }
+  ],
+  "b": [
+    {
+      "at": 11654.44667,
+      "path": "/api/projects",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 11655.186605,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 11655.848124,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 11656.612643,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 11657.663787,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 11659.032221,
+      "path": "/api/projects",
+      "search": "?force=1",
+      "method": "GET"
+    },
+    {
+      "at": 11659.274418,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 11659.419119,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 11661.025806,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 11661.269927,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 11662.148688,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 12042.261419,
+      "path": "/api/worktrees",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 12044.412164,
+      "path": "/api/files/var/tmp/notification-browser.0skwatPe/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 12044.748031,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 12046.665831,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 12047.078448,
+      "path": "/api/files/var/tmp/notification-browser.0skwatPe/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 12047.309569,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 12049.568633,
+      "path": "/api/app-update",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 12049.867173,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 12050.094786,
+      "path": "/api/file-index",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 12050.307435,
+      "path": "/api/project-trust",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 12052.867511,
+      "path": "/api/app-update",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 12053.255112,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 12072.53995,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 13635.495769,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 14572.697509,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 14670.328422,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 15635.886421,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 17083.021242,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 17636.603696,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 17687.93785,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 19594.884395,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 19653.791669,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 20690.781658,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 21654.492779,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 22108.233576,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 22170.619419,
+      "path": "/api/projects",
+      "search": "?force=1",
+      "method": "GET"
+    },
+    {
+      "at": 22209.54815,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 23654.4778,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 23692.479523,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 24619.142219,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25654.807472,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 26694.33792,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 27129.547131,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 27655.251899,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29644.840868,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29655.507405,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29696.141865,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 31655.736497,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 32005.890778,
+      "path": "/api/file-index",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.0skwatPe%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 32236.830481,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 32698.073075,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 33656.646548,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 34747.806948,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 35657.356722,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 35709.920898,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 37302.666511,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 37657.063443,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 38712.3751,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 39657.445271,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 39812.803478,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 41657.790465,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 41714.226933,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 42321.77479,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    }
+  ]
+}

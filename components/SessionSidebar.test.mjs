@@ -127,7 +127,9 @@ test("subagent completion stays silent and aggregates into its owner row", () =>
     source,
     /completedWithNotifications = completedInBackground\.filter\([\s\S]*?!previousSuppressedCompletionSessionIdsRef\.current\.has\(id\)[\s\S]*?!knownSubagentIds\.has\(id\)/,
   );
-  assert.match(source, /completedWithNotifications\.forEach\(\(id\) => next\.add\(id\)\)/);
+  assert.match(source, /if \(completedWithNotifications\.length > 0\) \{\s*onBackgroundTaskDone\?\.\(\)/);
+  assert.match(source, /notificationSnapshot\.items\.filter\(\(item\) => !suppressed\.has\(item\.sessionId\) && !knownSubagents\.has\(item\.sessionId\)/);
+  assert.doesNotMatch(source, /setUnreadSessionIds|loadUnreadSessionIds|saveUnreadSessionIds/);
   assert.match(source, /listSessionFamilies\(sessions\)/);
   assert.match(source, /familySessions\.some\(\(session\) => runningSessionIds\.has\(session\.id\)\)/);
 });

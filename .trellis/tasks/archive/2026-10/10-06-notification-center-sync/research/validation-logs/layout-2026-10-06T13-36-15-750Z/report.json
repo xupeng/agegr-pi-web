@@ -1,0 +1,742 @@
+{
+  "kind": "frontend-layout-only",
+  "base": "http://192.168.11.233:8505",
+  "executablePath": "/sbin/chromium",
+  "runId": "2026-10-06T13-36-15-750Z",
+  "sourceRoot": "/home/xupeng/dev/personal/forked/agegr-pi-web",
+  "taskTmp": "/home/xupeng/.cache/pi-tmp/01a1116a-5e60-7540-97bf-c44a5eb273a7/n-vbzbu7m3",
+  "results": "/home/xupeng/.cache/pi-tmp/01a1116a-5e60-7540-97bf-c44a5eb273a7/n-vbzbu7m3/results",
+  "evidence": "/home/xupeng/dev/personal/forked/agegr-pi-web/.trellis/tasks/10-06-notification-center-sync/research/validation-logs/layout-2026-10-06T13-36-15-750Z",
+  "browserTmp": "/home/xupeng/.cache/pi-ncl/oc8cmuwq2b9j",
+  "sourceHashes": {
+    "components/AppShell.tsx": "d09b28b91349be032f42238f401c814369afb3dee9d243d2bd13e50ef157fe76",
+    "components/NotificationCenter.tsx": "3f18163a42c6ca0f3f8a4c7850c0aa251aec2ad5a915d0868e56bbd38d234884",
+    "components/NotificationCenter.test.mjs": "35e09e0a98729772554ab69ee64060931553133814442e78e488e9787b52cceb",
+    "app/globals.css": "dd8c686f9a779e7f2d7be63d1a56043235646e4237e8bae82d3e526e36704da9",
+    "e2e/notification-center-layout.mjs": "6496673bbfb4a9931f671b1f21786eea6f25ca6739ed794fa0cb18124694e359",
+    "package.json": "8d6f804dcbc7118c979d6c0a1e88c211d543b254125000d5a34ad04e15ca8713",
+    "package-lock.json": "18c40d7685f7501d46e66450e5470fd064124f9662b17ac310fce042491d322f"
+  },
+  "startedAt": "2026-10-06T13:36:15.753Z",
+  "scenarios": [
+    {
+      "name": "desktop-column-anchor",
+      "ac": "AC14",
+      "description": "667/800/1024/1280: overlay centered in the real chat column within 12px gaps, below toolbar",
+      "status": "pass"
+    },
+    {
+      "name": "viewport-resize",
+      "ac": "AC14",
+      "description": "Resize the window while the overlay is open and re-measure",
+      "status": "pass"
+    },
+    {
+      "name": "sidebar-toggle",
+      "ac": "AC14",
+      "description": "Collapse/expand the sidebar and re-measure",
+      "status": "pass"
+    },
+    {
+      "name": "sidebar-drag",
+      "ac": "AC14",
+      "description": "Drag the sidebar resize handle and re-measure",
+      "status": "pass"
+    },
+    {
+      "name": "right-file-panel",
+      "ac": "AC14",
+      "description": "Open the real right file panel and re-measure",
+      "status": "pass"
+    },
+    {
+      "name": "mobile-fullscreen",
+      "ac": "AC14",
+      "description": "390px: overlay fullscreen with a >=44px close target",
+      "status": "not-run"
+    },
+    {
+      "name": "both-panels-narrow-column",
+      "ac": "AC14",
+      "description": "Both panels expanded, large sidebar and right-panel drag, real narrow column",
+      "status": "not-run"
+    },
+    {
+      "name": "breakpoint-roundtrip",
+      "ac": "AC14",
+      "description": "Keep dialog open through 641/640/390/641/1024px",
+      "status": "not-run"
+    },
+    {
+      "name": "long-list-scroll-close",
+      "ac": "AC14",
+      "description": "Many fixture items scroll within the constrained list, header and buttons remain reachable",
+      "status": "not-run"
+    }
+  ],
+  "apiRequests": [
+    {
+      "method": "GET",
+      "path": "/api/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/open-in-explorer",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/home",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/open-in-explorer",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/home",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/open-in-explorer",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/home",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/open-in-explorer",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/home",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    }
+  ],
+  "measurements": [
+    {
+      "viewport": {
+        "width": 667,
+        "height": 900
+      },
+      "step": "baseline",
+      "sample": {
+        "column": {
+          "left": 260,
+          "right": 667,
+          "top": 36,
+          "width": 407
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 272,
+          "right": 655,
+          "top": 36,
+          "bottom": 501.5,
+          "width": 383,
+          "height": 465.5
+        },
+        "close": {
+          "left": 598,
+          "right": 642,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 285,
+            "right": 493.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 501.5,
+            "right": 570.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 316,
+          "scrollHeight": 316,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 667,
+        "height": 900
+      },
+      "step": "viewport-resized",
+      "sample": {
+        "column": {
+          "left": 260,
+          "right": 727,
+          "top": 36,
+          "width": 467
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 272,
+          "right": 715,
+          "top": 36,
+          "bottom": 482,
+          "width": 443,
+          "height": 446
+        },
+        "close": {
+          "left": 658,
+          "right": 702,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 285,
+            "right": 493.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 501.5,
+            "right": 570.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 296,
+          "scrollHeight": 296,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 667,
+        "height": 900
+      },
+      "step": "sidebar-collapsed",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 667,
+          "top": 36,
+          "width": 667
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 103.5,
+          "right": 563.5,
+          "top": 36,
+          "bottom": 482,
+          "width": 460,
+          "height": 446
+        },
+        "close": {
+          "left": 506.5,
+          "right": 550.5,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 116.5,
+            "right": 325,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 333,
+            "right": 402.140625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 296,
+          "scrollHeight": 296,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": false,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 667,
+        "height": 900
+      },
+      "step": "sidebar-expanded",
+      "sample": {
+        "column": {
+          "left": 260,
+          "right": 667,
+          "top": 36,
+          "width": 407
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 272,
+          "right": 655,
+          "top": 36,
+          "bottom": 501.5,
+          "width": 383,
+          "height": 465.5
+        },
+        "close": {
+          "left": 598,
+          "right": 642,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 285,
+            "right": 493.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 501.5,
+            "right": 570.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 316,
+          "scrollHeight": 316,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 667,
+        "height": 900
+      },
+      "step": "sidebar-dragged",
+      "sample": {
+        "column": {
+          "left": 320,
+          "right": 667,
+          "top": 36,
+          "width": 347
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 332,
+          "right": 655,
+          "top": 36,
+          "bottom": 521,
+          "width": 323,
+          "height": 485
+        },
+        "close": {
+          "left": 598,
+          "right": 642,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 345,
+            "right": 553.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 561.5,
+            "right": 630.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 335,
+          "scrollHeight": 335,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 667,
+        "height": 900
+      },
+      "step": "right-panel-closed",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 667,
+          "top": 36,
+          "width": 667
+        },
+        "toolbarBottom": 36,
+        "open": false,
+        "dialog": null,
+        "close": null
+      }
+    },
+    {
+      "viewport": {
+        "width": 667,
+        "height": 900
+      },
+      "step": "right-panel-open",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 667,
+          "top": 36,
+          "width": 667
+        },
+        "toolbarBottom": 36,
+        "open": false,
+        "dialog": null,
+        "close": null
+      }
+    }
+  ],
+  "failures": [
+    "locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('dialog.notification-center[open]') to be visible\n\n    at openCenter (/home/xupeng/dev/personal/forked/agegr-pi-web/e2e/notification-center-layout.mjs:198:58)\n    at async desktopScenarios (/home/xupeng/dev/personal/forked/agegr-pi-web/e2e/notification-center-layout.mjs:252:3)\n    at async runScenario (/home/xupeng/dev/personal/forked/agegr-pi-web/e2e/notification-center-layout.mjs:232:5)\n    at async file:///home/xupeng/dev/personal/forked/agegr-pi-web/e2e/notification-center-layout.mjs:384:5"
+  ],
+  "screenshots": [
+    ".trellis/tasks/10-06-notification-center-sync/research/validation-logs/layout-2026-10-06T13-36-15-750Z/baseline-667.png",
+    ".trellis/tasks/10-06-notification-center-sync/research/validation-logs/layout-2026-10-06T13-36-15-750Z/failure-2.png"
+  ],
+  "cssResponses": [
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/components_ChatMinimap_module_08l8srm.css",
+      "sha256": "45897aa8d98eb656aae2609166072eb1519ee872ab6cbd75214ecd81d4848dad",
+      "anchored": false,
+      "narrowWrapping": false
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/_1pj7b4_._.css",
+      "sha256": "edb06d75e75aa7cc6998820ad01b72b61cbe9f18479ef98e921adc6647e7047d",
+      "anchored": true,
+      "narrowWrapping": true
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/components_ChatMinimap_module_08l8srm.css",
+      "sha256": "45897aa8d98eb656aae2609166072eb1519ee872ab6cbd75214ecd81d4848dad",
+      "anchored": false,
+      "narrowWrapping": false
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/_1pj7b4_._.css",
+      "sha256": "edb06d75e75aa7cc6998820ad01b72b61cbe9f18479ef98e921adc6647e7047d",
+      "anchored": true,
+      "narrowWrapping": true
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/components_ChatMinimap_module_08l8srm.css",
+      "sha256": "45897aa8d98eb656aae2609166072eb1519ee872ab6cbd75214ecd81d4848dad",
+      "anchored": false,
+      "narrowWrapping": false
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/_1pj7b4_._.css",
+      "sha256": "edb06d75e75aa7cc6998820ad01b72b61cbe9f18479ef98e921adc6647e7047d",
+      "anchored": true,
+      "narrowWrapping": true
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/components_ChatMinimap_module_08l8srm.css",
+      "sha256": "45897aa8d98eb656aae2609166072eb1519ee872ab6cbd75214ecd81d4848dad",
+      "anchored": false,
+      "narrowWrapping": false
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/_1pj7b4_._.css",
+      "sha256": "edb06d75e75aa7cc6998820ad01b72b61cbe9f18479ef98e921adc6647e7047d",
+      "anchored": true,
+      "narrowWrapping": true
+    }
+  ],
+  "notAutomated": [
+    "real iOS safe-area and hardware rotation",
+    "server-side/API acceptance",
+    "notification state, ack, navigation or SDK behavior"
+  ],
+  "compactRightPanelOverlay": [
+    667
+  ],
+  "browserTmpCleaned": true,
+  "sourceHashesAfter": {
+    "components/AppShell.tsx": "d09b28b91349be032f42238f401c814369afb3dee9d243d2bd13e50ef157fe76",
+    "components/NotificationCenter.tsx": "3f18163a42c6ca0f3f8a4c7850c0aa251aec2ad5a915d0868e56bbd38d234884",
+    "components/NotificationCenter.test.mjs": "35e09e0a98729772554ab69ee64060931553133814442e78e488e9787b52cceb",
+    "app/globals.css": "dd8c686f9a779e7f2d7be63d1a56043235646e4237e8bae82d3e526e36704da9",
+    "e2e/notification-center-layout.mjs": "6496673bbfb4a9931f671b1f21786eea6f25ca6739ed794fa0cb18124694e359",
+    "package.json": "8d6f804dcbc7118c979d6c0a1e88c211d543b254125000d5a34ad04e15ca8713",
+    "package-lock.json": "18c40d7685f7501d46e66450e5470fd064124f9662b17ac310fce042491d322f"
+  },
+  "sourceUnchanged": true,
+  "finishedAt": "2026-10-06T13:36:36.573Z",
+  "status": "fail"
+}

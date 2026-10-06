@@ -1,0 +1,129 @@
+{
+  "at": "2026-10-06T11:38:23.191177+00:00",
+  "scope": "Only ended owned browser-* trace ZIPs; all non-trace evidence, baseline/candidate and other tasks untouched",
+  "beforeAllocatedBytes": 745914368,
+  "afterAllocatedBytes": 13451264,
+  "deletedCount": 27,
+  "deletedLogicalBytes": 732407687,
+  "deleted": [
+    {
+      "path": "browser-2026-10-06T10-43-50-015Z/trace-server1-setup-extra.zip",
+      "bytes": 198209
+    },
+    {
+      "path": "browser-2026-10-06T10-44-35-964Z/trace-server1-result-center-gate-a.zip",
+      "bytes": 26986477
+    },
+    {
+      "path": "browser-2026-10-06T10-44-35-964Z/trace-server1-result-center-gate-b.zip",
+      "bytes": 2897079
+    },
+    {
+      "path": "browser-2026-10-06T10-49-47-568Z/trace-server1-result-focus-gate-a.zip",
+      "bytes": 27072229
+    },
+    {
+      "path": "browser-2026-10-06T10-49-47-568Z/trace-server1-result-focus-gate-b.zip",
+      "bytes": 3564734
+    },
+    {
+      "path": "browser-2026-10-06T10-51-18-663Z/trace-server1-result-focus-gate-a.zip",
+      "bytes": 28162076
+    },
+    {
+      "path": "browser-2026-10-06T10-51-18-663Z/trace-server1-result-focus-gate-b.zip",
+      "bytes": 2833853
+    },
+    {
+      "path": "browser-2026-10-06T10-52-25-209Z/trace-server1-result-focus-gate-a.zip",
+      "bytes": 27326205
+    },
+    {
+      "path": "browser-2026-10-06T10-52-25-209Z/trace-server1-result-focus-gate-b.zip",
+      "bytes": 2808738
+    },
+    {
+      "path": "browser-2026-10-06T11-07-15-534Z/trace-server1-pagination-a.zip",
+      "bytes": 32881508
+    },
+    {
+      "path": "browser-2026-10-06T11-07-15-534Z/trace-server1-pagination-b.zip",
+      "bytes": 2819407
+    },
+    {
+      "path": "browser-2026-10-06T11-09-20-534Z/trace-server1-global-aggregation-a.zip",
+      "bytes": 13061191
+    },
+    {
+      "path": "browser-2026-10-06T11-09-20-534Z/trace-server1-global-aggregation-b.zip",
+      "bytes": 979739
+    },
+    {
+      "path": "browser-2026-10-06T11-11-06-211Z/trace-server1-sibling-busy-mobile-a.zip",
+      "bytes": 88199911
+    },
+    {
+      "path": "browser-2026-10-06T11-11-06-211Z/trace-server1-sibling-busy-mobile-b.zip",
+      "bytes": 2614724
+    },
+    {
+      "path": "browser-2026-10-06T11-14-20-623Z/trace-server1-sibling-busy-mobile-a.zip",
+      "bytes": 100758987
+    },
+    {
+      "path": "browser-2026-10-06T11-14-20-623Z/trace-server1-sibling-busy-mobile-b.zip",
+      "bytes": 3429630
+    },
+    {
+      "path": "browser-2026-10-06T11-17-39-823Z/trace-server1-sibling-busy-mobile-a.zip",
+      "bytes": 147626945
+    },
+    {
+      "path": "browser-2026-10-06T11-17-39-823Z/trace-server1-sibling-busy-mobile-b.zip",
+      "bytes": 4257919
+    },
+    {
+      "path": "browser-2026-10-06T11-21-31-731Z/trace-fallback-device-before-healthy-sse.zip",
+      "bytes": 3536558
+    },
+    {
+      "path": "browser-2026-10-06T11-21-31-731Z/trace-server1-healthy-sse-sync-a.zip",
+      "bytes": 104978509
+    },
+    {
+      "path": "browser-2026-10-06T11-21-31-731Z/trace-server1-healthy-sse-sync-b.zip",
+      "bytes": 704472
+    },
+    {
+      "path": "browser-2026-10-06T11-24-09-461Z/trace-fallback-device-before-healthy-sse.zip",
+      "bytes": 5432290
+    },
+    {
+      "path": "browser-2026-10-06T11-24-09-461Z/trace-server1-browser-close-restart-a.zip",
+      "bytes": 92992916
+    },
+    {
+      "path": "browser-2026-10-06T11-24-09-461Z/trace-server1-browser-close-restart-b.zip",
+      "bytes": 916396
+    },
+    {
+      "path": "browser-2026-10-06T11-24-09-461Z/trace-server2-browser-close-restart-a.zip",
+      "bytes": 4646692
+    },
+    {
+      "path": "browser-2026-10-06T11-24-09-461Z/trace-server2-browser-close-restart-b.zip",
+      "bytes": 720293
+    }
+  ],
+  "retained": [
+    {
+      "path": "browser-2026-10-06T10-54-47-440Z/trace-server1-setup-extra.zip",
+      "bytes": 350696
+    }
+  ],
+  "retainedPurpose": "Unique product AppShell TDZ SSR/client failure diagnostic, complementary to server log/report/screenshot",
+  "finalRunEvidence": "browser-2026-10-06T11-38-24-785Z",
+  "finalRunStatus": "4 pass / 1 fail / 10 not-run",
+  "finalRunNewTraces": 0,
+  "finalRunTempRemoved": "/home/xupeng/.cache/pi-tmp/01a110c1-d062-7540-97bf-c3f9b7303d87/notification-center-_yghe9d7"
+}

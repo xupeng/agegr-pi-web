@@ -1,0 +1,8 @@
+{
+  "fallbackContents": [
+    "node-compile-cache"
+  ],
+  "priorityFallbackContents": [
+    "node-compile-cache"
+  ]
+}

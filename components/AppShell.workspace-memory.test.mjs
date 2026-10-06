@@ -66,6 +66,8 @@ test("New restores the draft after session navigation and workspace auto-restore
   const hookSource = await readFile(new URL("../hooks/useAgentSession.ts", import.meta.url), "utf8");
   const cleanupStart = hookSource.indexOf("    return () => {", hookSource.indexOf("  // Load session on mount"));
   const cleanupEnd = hookSource.indexOf("    // eslint-disable-next-line", cleanupStart);
+  const notificationRetirement = hookSource.match(/  const retireNotificationHistory = useCallback\([\s\S]*?\n  \}, \[\]\);/);
+  assert.ok(notificationRetirement, "the notification retirement callback must be exercised by the cleanup harness");
 
   for (const rememberedCwd of ["/draft-project", "/draft-project-worktree"]) {
     await t.test(`remembered session cwd: ${rememberedCwd}`, async () => {
@@ -93,6 +95,8 @@ test("New restores the draft after session navigation and workspace auto-restore
         branchLeafChangeFnRef: { current: null },
         liveFollowFrameRef: { current: null },
         bashRecoveryIdRef: { current: 0 },
+        notificationNavigationRef: { current: 0 },
+        notificationNavigationControllerRef: { current: null },
         cancelEventStreamGrace() {},
         closeEvents() {},
         isMobile: false,
@@ -106,6 +110,11 @@ test("New restores the draft after session navigation and workspace auto-restore
         sessionCatalog: [],
         sessionKey: 0,
       });
+      context.invalidateNotificationNavigation = () => {
+        context.notificationNavigationRef.current++;
+        context.notificationNavigationControllerRef.current?.abort();
+        context.notificationNavigationControllerRef.current = null;
+      };
       context.invalidateWorkspaceRestore = () => context.workspaceRestoreTokenRef.current++;
       for (const [setter] of callbacks.matchAll(/\bset[A-Z]\w*(?=\()/g)) {
         const state = setter[3].toLowerCase() + setter.slice(4);
@@ -119,6 +128,9 @@ test("New restores the draft after session navigation and workspace auto-restore
       // Run the actual hook cleanup with the outgoing mount's captured draft key.
       const makeCleanup = vm.runInContext(stripTypeScriptTypes(`((isNew, newSessionDraftKey) => {
         const sessionHookMountedRef = { current: true };
+        const notificationHistoryRef = { current: { sessionId: null, viewGeneration: 0, ready: false } };
+        const notificationViewGenerationRef = { current: 0 };
+        ${notificationRetirement[0]}
         const newSessionPromotedRef = { current: false };
         const sessionIdRef = { current: null };
         const dataRef = { current: null };
@@ -201,6 +213,8 @@ test("an unresolved ?session= blocks the remembered-session restore", async () =
     branchLeafChangeFnRef: { current: null },
     liveFollowFrameRef: { current: null },
     bashRecoveryIdRef: { current: 0 },
+    notificationNavigationRef: { current: 0 },
+    notificationNavigationControllerRef: { current: null },
     cancelEventStreamGrace() {},
     closeEvents() {},
     isMobile: false,
@@ -213,6 +227,11 @@ test("an unresolved ?session= blocks the remembered-session restore", async () =
     initialSessionRestored: false,
     sessionCatalog: [],
   });
+  context.invalidateNotificationNavigation = () => {
+    context.notificationNavigationRef.current++;
+    context.notificationNavigationControllerRef.current?.abort();
+    context.notificationNavigationControllerRef.current = null;
+  };
   context.invalidateWorkspaceRestore = () => context.workspaceRestoreTokenRef.current++;
   const restore = callbackBody("restoreWorkspaceContext", "handleCwdChange");
   const cwdChange = callbackBody("handleCwdChange", "handleSelectSession");

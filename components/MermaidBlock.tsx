@@ -98,9 +98,9 @@ export function MermaidBlock({ code, isStreaming, defaultPreview = false }: Merm
   }
 
   const body = renderState?.key === currentKey && renderState.status === "error" ? (
-      <div className="mermaid-block mermaid-block-error">{t("i18n.invalidMermaid")}</div>
+      <div className="mermaid-block mermaid-block-error" data-notification-nonresult>{t("i18n.invalidMermaid")}</div>
     ) : renderState?.key !== currentKey || renderState.status !== "ready" ? (
-      <div className="mermaid-block mermaid-block-loading" aria-label={t("i18n.renderingMermaid")} />
+      <div className="mermaid-block mermaid-block-loading" data-notification-nonresult aria-label={t("i18n.renderingMermaid")} />
     ) : (
       <>
         {!zoomOpen && (
@@ -108,6 +108,7 @@ export function MermaidBlock({ code, isStreaming, defaultPreview = false }: Merm
             ref={previewRef}
             type="button"
             className="mermaid-block mermaid-preview-button"
+            data-notification-result-content
             title={t("i18n.openMermaidViewer")}
             aria-label={t("i18n.openMermaidViewer")}
             onClick={() => setZoomOpen(true)}
@@ -120,7 +121,7 @@ export function MermaidBlock({ code, isStreaming, defaultPreview = false }: Merm
 
   return (
     <div className="markdown-code-block">
-      <div className="markdown-code-header">
+      <div className="markdown-code-header" data-notification-nonresult>
         <span className="markdown-code-lang">mermaid</span>
         <div className="markdown-code-actions">
           {renderState?.key === currentKey && renderState.status === "ready" && (
@@ -280,7 +281,7 @@ export const CodeBlock = memo(function CodeBlock({ code, lang, headerAction, isS
 
   return (
     <div className="markdown-code-block">
-      <div className="markdown-code-header">
+      <div className="markdown-code-header" data-notification-nonresult>
         <span className="markdown-code-lang">{lang || "text"}</span>
         <div className="markdown-code-actions">
           {headerAction}

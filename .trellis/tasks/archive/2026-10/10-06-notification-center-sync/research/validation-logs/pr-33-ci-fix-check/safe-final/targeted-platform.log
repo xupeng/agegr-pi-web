@@ -1,0 +1,75 @@
+$ "env" "-u" "TMPDIR" "-u" "PI_TASK_TMPDIR" "node" "--experimental-strip-types" "--test" "lib/agent-run-observer.integration.test.mjs" "lib/rpc-manager.notifications.test.mjs"
+[pi-web] session_start dispatched to extensions for session 01a111a1-8a55-73f6-976e-eaeac5936528
+[pi-web] session_start dispatched to extensions for session 01a111a1-8a8a-73f6-976e-eaece47f5d66
+✔ real normal run uses persisted turn entry, never latest leaf or message_end, with visible text only (53.088946ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-8a95-73f6-976e-eaef036122e1
+✔ Chat-only keeps exact prompt, empty tools and no discovered resources with observer (11.539002ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-8aa2-73f6-976e-eaf06806a18d
+✔ retry error then success shares one identity and one completion (13.078923ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-8aac-73f6-976e-eaf31cd6dae8
+✔ real final error produces no completion (10.026597ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-8ab7-73f6-976e-eaf567827043
+✔ real final aborted produces no completion (10.304113ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-8ac0-73f6-976e-eaf7c1056c32
+✔ real final length produces no completion (8.809977ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-8acc-73f6-976e-eaf8355ea5ef
+✔ before-settle continuation and agent_end queued follow-up notify once after the final turn (11.840132ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-8ad7-73f6-976e-eafbb5f8867c
+[pi-web] session_start dispatched to extensions for session 01a111a1-8ae0-73f6-976e-eafd28d51f1d
+✔ settled deferred injection freezes separate identities and delivers in run order (11.789499ms)
+✔ ordinary extension injection without a wrapper prompt is collected (8.86048ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-8afd-73f6-976e-eaff5aa13ef7
+✔ handled command/input without actual runs cannot complete (28.577142ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-8b09-73f6-976e-eb00e205a154
+✔ openAsk pause survives a quick close before settled (11.661783ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-8b11-73f6-976e-eb02287442f2
+✔ public ctx.abort before-settle marks Stop even after a successful model stop (8.286662ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-8b18-73f6-976e-eb053063b065
+✔ subagent suppression excludes completions and runtime pending snapshots (7.411051ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-8b23-73f6-976e-eb063b084efe
+✔ real reload replaces observers rather than accumulating registrations (10.402065ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-8b2d-73f6-976e-eb095b978ee0
+[pi-web] session_start dispatched to extensions for session 01a111a1-8b33-73f6-976e-eb0b474c91a1
+✔ auto-compaction recovery continues the same run and completes only the successful retry (10.270941ms)
+✔ manual compaction without actual agent_start cannot create completion (6.251032ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-8b42-73f6-976e-eb0d2ca79e16
+✔ standalone real SDK bash execution creates no agent completion (14.770994ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-8b4a-73f6-976e-eb0ed4e3571c
+✔ Stop during held before-settle vetoes a normally stopped model result (7.987422ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-8b53-73f6-976e-eb1173888519
+✔ direct SDK promise rejection after turn boundary and settled is vetoed (8.995802ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-8b5c-73f6-976e-eb13a3200b9a
+[pi-web] session_start dispatched to extensions for session 01a111a1-8b5f-73f6-976e-eb151bef93fa
+✔ a caught auxiliary extension handler error does not veto a successful model run (8.411627ms)
+[pi-web] session_start dispatched to extensions for session 01a111a1-8b7d-73f6-976e-eb17df606f3e
+[pi-web] session_start dispatched to extensions for session 01a111a1-8b85-73f6-976e-eb191b970eef
+✔ native SDK and observed normal session have identical provider prompt and tool/resource loadout (33.301735ms)
+✔ real blocking extension command pending is projected, closes normally, and handled creates no run (7.293264ms)
+✔ exhausted retry final error cannot replace an earlier successful completion (11.028296ms)
+✔ collection maps only validated durable assistant text and does not redeliver external notifications (3.271742ms)
+✔ completion commit guard rejects missing-entry (0.386656ms)
+✔ completion commit guard rejects wrong-role (0.27002ms)
+✔ completion commit guard rejects suppressed (0.266746ms)
+✔ completion commit guard rejects deleting (0.519495ms)
+✔ completion commit guard rejects replacement (0.249128ms)
+✔ completion commit guard rejects closing (0.306856ms)
+✔ completion commit guard rejects destroyed (0.209566ms)
+✔ direct rejection veto runs before pending counts release and record (4.649944ms)
+✔ watchdog uses the Stop marking path before abort settles a successful witness (1.505742ms)
+✔ snapshots include alive negative ask state without construction or liveness side effects (0.910858ms)
+✔ ask open, replacement and actual close invalidate; reading leaves pending intact (1.657885ms)
+✔ blocking dialog open and close have first requestedAt, detached snapshots and invalidations (0.792601ms)
+✔ dialog timeout and signal cancellation invalidate without inventing a second request (1.082896ms)
+✔ custom redraw retains identity/first requestedAt; actual close invalidates and removes it (1.519281ms)
+✔ shutdown/destroy invalidate pending snapshot and do not retain an actionable request (0.346975ms)
+✔ factory wiring precedes SDK loader, is normal/Chat-only only, and leaves external owner untouched (0.570479ms)
+ℹ tests 40
+ℹ suites 0
+ℹ pass 40
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2400.554659
+
+exit=0; signal=null; error=none

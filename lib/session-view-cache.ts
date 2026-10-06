@@ -12,6 +12,7 @@
 //   streaming state, queued messages, run state, or SSE objects.
 
 import type { AgentMessage } from "./types";
+import type { NotificationHistoryScope } from "./notifications/viewed-result";
 
 export interface SessionViewSnapshot {
 	sessionId: string;
@@ -31,6 +32,8 @@ export interface SessionViewSnapshot {
 	totalActiveMs?: number;
 	/** Ids of history pages the user already paged in beyond the first window. */
 	loadedEntryIds: string[];
+	/** Separately proven persisted rows; optimistic cached messages are not proof. */
+	notificationHistory?: NotificationHistoryScope;
 	savedAt: number;
 }
 

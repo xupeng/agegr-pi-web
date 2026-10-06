@@ -1,0 +1,33 @@
+▲ Next.js 16.3.6 (Turbopack)
+- Local:         http://127.0.0.1:34681
+- Network:       http://127.0.0.1:34681
+✓ Ready in 248ms
+✓ Running next.config.ts took 27ms
+- Experiments (use with caution):
+  · proxyClientMaxBodySize: "128mb"
+
+○ Compiling / ...
+ GET / 200 in 2.3s (next.js: 1609ms, proxy.ts: 4ms, application-code: 683ms)
+ GET /api/notifications 200 in 1039ms (next.js: 272ms, proxy.ts: 3ms, application-code: 764ms)
+ POST /api/notifications 200 in 11ms (next.js: 1.7ms, proxy.ts: 5ms, application-code: 4ms)
+[pi-web] session_start dispatched to extensions for session 01a110d0-1d47-763f-913f-a257b3bc9ac8
+ POST /api/agent/new 200 in 452ms (next.js: 120ms, proxy.ts: 3ms, application-code: 329ms)
+ POST /api/agent/01a110d0-1d47-763f-913f-a257b3bc9ac8 200 in 1351ms (next.js: 1338ms, proxy.ts: 3ms, application-code: 10ms)
+[pi-web] session_start dispatched to extensions for session 01a110d0-23dd-763f-913f-a2587f36684e
+ POST /api/agent/new 200 in 66ms (next.js: 1.5ms, proxy.ts: 3ms, application-code: 62ms)
+ POST /api/agent/01a110d0-23dd-763f-913f-a2587f36684e 200 in 25ms (next.js: 20ms, proxy.ts: 2ms, application-code: 3ms)
+[pi-web] session_start dispatched to extensions for session 01a110d0-243c-763f-913f-a25b501e57ca
+ POST /api/agent/new 200 in 75ms (next.js: 1.7ms, proxy.ts: 3ms, application-code: 71ms)
+ POST /api/agent/01a110d0-243c-763f-913f-a25b501e57ca 200 in 8ms (next.js: 3ms, proxy.ts: 2ms, application-code: 3ms)
+ POST /api/agent/01a110d0-1d47-763f-913f-a257b3bc9ac8 200 in 19ms (next.js: 2ms, proxy.ts: 2ms, application-code: 14ms)
+ GET /api/notifications 200 in 25ms (next.js: 1.5ms, proxy.ts: 1.7ms, application-code: 21ms)
+ POST /api/agent/01a110d0-23dd-763f-913f-a2587f36684e 200 in 13ms (next.js: 3ms, proxy.ts: 2ms, application-code: 8ms)
+ GET /api/notifications 200 in 22ms (next.js: 1.3ms, proxy.ts: 1.7ms, application-code: 19ms)
+ POST /api/agent/01a110d0-23dd-763f-913f-a2587f36684e 200 in 14ms (next.js: 3ms, proxy.ts: 2ms, application-code: 9ms)
+ GET /api/agent/01a110d0-23dd-763f-913f-a2587f36684e 200 in 6ms (next.js: 3ms, proxy.ts: 1.6ms, application-code: 2ms)
+ GET /api/agent/01a110d0-23dd-763f-913f-a2587f36684e 200 in 11ms (next.js: 7ms, proxy.ts: 1.6ms, application-code: 1.9ms)
+ POST /api/agent/01a110d0-243c-763f-913f-a25b501e57ca 200 in 10ms (next.js: 2ms, proxy.ts: 1.8ms, application-code: 6ms)
+ GET /api/notifications 200 in 5ms (next.js: 1.2ms, proxy.ts: 1.6ms, application-code: 2ms)
+ GET /api/notifications 200 in 4ms (next.js: 1.2ms, proxy.ts: 1.5ms, application-code: 1.7ms)
+ GET / 200 in 47ms (next.js: 6ms, proxy.ts: 3ms, application-code: 38ms)
+[?25h

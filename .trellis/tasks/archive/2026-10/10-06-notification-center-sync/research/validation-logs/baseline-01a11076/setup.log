@@ -1,0 +1,29 @@
+UTC=2026-10-06T10:14:18Z
+initial_cwd=/home/xupeng/dev/personal/forked/agegr-pi-web
+initial_TMPDIR=/home/xupeng/.cache/pi-tmp/01a110b4-8588-7540-97bf-c3e2a2b81ae0
+v24.21.0
+11.19.0
+worktree /home/xupeng/dev/personal/forked/agegr-pi-web
+HEAD e0ad63073c4c42987571d31b1a4cb61e48a1fcd4
+branch refs/heads/feat/notification-center-sync
+
+worktree /home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/upstream-mcp-baseline-20261002
+HEAD 93e63e873481aea761cb2b2072c8a2da1654dc73
+detached
+
+worktree /home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/upstream-mcp-codemode-20261002
+HEAD bc525a62a2a0ed8e0c77bfd8e070a8ccd7ec8e09
+detached
+
+worktree /home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/upstream-pi-0991-20260930
+HEAD 3e2d0da117ecfea87cea1678adf17d8bc54b8830
+detached
+
+worktree /home/xupeng/dev/personal/forked/agegr-pi-web-worktrees/upstream-pi-0991-8505
+HEAD 3e2d0da117ecfea87cea1678adf17d8bc54b8830
+detached
+
+e0ad63073c4c42987571d31b1a4cb61e48a1fcd4
+feat/notification-center-sync
+Preparing worktree (detached HEAD e0ad630)
+HEAD is now at e0ad630 Merge pull request #32 from xupeng/remove-append-instructions

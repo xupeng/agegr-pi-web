@@ -1,0 +1,2674 @@
+{
+  "kind": "frontend-layout-only",
+  "base": "http://192.168.11.233:8505",
+  "executablePath": "/sbin/chromium",
+  "runId": "2026-10-06T13-38-14-580Z",
+  "sourceRoot": "/home/xupeng/dev/personal/forked/agegr-pi-web",
+  "taskTmp": "/home/xupeng/.cache/pi-tmp/01a1116a-5e60-7540-97bf-c44a5eb273a7/n-n1679gfx",
+  "results": "/home/xupeng/.cache/pi-tmp/01a1116a-5e60-7540-97bf-c44a5eb273a7/n-n1679gfx/results",
+  "evidence": "/home/xupeng/dev/personal/forked/agegr-pi-web/.trellis/tasks/10-06-notification-center-sync/research/validation-logs/layout-2026-10-06T13-38-14-580Z",
+  "browserTmp": "/home/xupeng/.cache/pi-ncl/od2cmuwq4uyc",
+  "sourceHashes": {
+    "components/AppShell.tsx": "d09b28b91349be032f42238f401c814369afb3dee9d243d2bd13e50ef157fe76",
+    "components/NotificationCenter.tsx": "3f18163a42c6ca0f3f8a4c7850c0aa251aec2ad5a915d0868e56bbd38d234884",
+    "components/NotificationCenter.test.mjs": "35e09e0a98729772554ab69ee64060931553133814442e78e488e9787b52cceb",
+    "app/globals.css": "dd8c686f9a779e7f2d7be63d1a56043235646e4237e8bae82d3e526e36704da9",
+    "e2e/notification-center-layout.mjs": "125f10640e0d4a2af244db114992dbbdf4430f286173d1a091335012fb2a1f39",
+    "package.json": "8d6f804dcbc7118c979d6c0a1e88c211d543b254125000d5a34ad04e15ca8713",
+    "package-lock.json": "18c40d7685f7501d46e66450e5470fd064124f9662b17ac310fce042491d322f"
+  },
+  "startedAt": "2026-10-06T13:38:14.583Z",
+  "scenarios": [
+    {
+      "name": "desktop-column-anchor",
+      "ac": "AC14",
+      "description": "667/800/1024/1280: overlay centered in the real chat column within 12px gaps, below toolbar",
+      "status": "pass"
+    },
+    {
+      "name": "viewport-resize",
+      "ac": "AC14",
+      "description": "Resize the window while the overlay is open and re-measure",
+      "status": "pass"
+    },
+    {
+      "name": "sidebar-toggle",
+      "ac": "AC14",
+      "description": "Collapse/expand the sidebar and re-measure",
+      "status": "pass"
+    },
+    {
+      "name": "sidebar-drag",
+      "ac": "AC14",
+      "description": "Drag the sidebar resize handle and re-measure",
+      "status": "pass"
+    },
+    {
+      "name": "right-file-panel",
+      "ac": "AC14",
+      "description": "Open the real right file panel and re-measure",
+      "status": "pass"
+    },
+    {
+      "name": "mobile-fullscreen",
+      "ac": "AC14",
+      "description": "390px: overlay fullscreen with a >=44px close target",
+      "status": "pass"
+    },
+    {
+      "name": "both-panels-narrow-column",
+      "ac": "AC14",
+      "description": "Both panels expanded, large sidebar and right-panel drag, real narrow column",
+      "status": "pass"
+    },
+    {
+      "name": "breakpoint-roundtrip",
+      "ac": "AC14",
+      "description": "Keep dialog open through 641/640/390/641/1024px",
+      "status": "pass"
+    },
+    {
+      "name": "long-list-scroll-close",
+      "ac": "AC14",
+      "description": "Many fixture items scroll within the constrained list, header and buttons remain reachable",
+      "status": "pass"
+    }
+  ],
+  "apiRequests": [
+    {
+      "method": "GET",
+      "path": "/api/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/open-in-explorer",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/home",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/open-in-explorer",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/home",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/open-in-explorer",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/home",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/open-in-explorer",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/home",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/open-in-explorer",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/home",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/open-in-explorer",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/home",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/open-in-explorer",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/home",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/open-in-explorer",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/home",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/open-in-explorer",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/home",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/open-in-explorer",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/home",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/open-in-explorer",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/home",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/open-in-explorer",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/agent/running",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/home",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications",
+      "status": 200
+    }
+  ],
+  "measurements": [
+    {
+      "viewport": {
+        "width": 667,
+        "height": 900
+      },
+      "step": "baseline",
+      "sample": {
+        "column": {
+          "left": 260,
+          "right": 667,
+          "top": 36,
+          "width": 407
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 272,
+          "right": 655,
+          "top": 36,
+          "bottom": 501.5,
+          "width": 383,
+          "height": 465.5
+        },
+        "close": {
+          "left": 598,
+          "right": 642,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 285,
+            "right": 493.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 501.5,
+            "right": 570.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 316,
+          "scrollHeight": 316,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 667,
+        "height": 900
+      },
+      "step": "viewport-resized",
+      "sample": {
+        "column": {
+          "left": 260,
+          "right": 727,
+          "top": 36,
+          "width": 467
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 272,
+          "right": 715,
+          "top": 36,
+          "bottom": 482,
+          "width": 443,
+          "height": 446
+        },
+        "close": {
+          "left": 658,
+          "right": 702,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 285,
+            "right": 493.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 501.5,
+            "right": 570.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 296,
+          "scrollHeight": 296,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 667,
+        "height": 900
+      },
+      "step": "sidebar-collapsed",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 667,
+          "top": 36,
+          "width": 667
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 103.5,
+          "right": 563.5,
+          "top": 36,
+          "bottom": 482,
+          "width": 460,
+          "height": 446
+        },
+        "close": {
+          "left": 506.5,
+          "right": 550.5,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 116.5,
+            "right": 325,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 333,
+            "right": 402.140625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 296,
+          "scrollHeight": 296,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": false,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 667,
+        "height": 900
+      },
+      "step": "sidebar-expanded",
+      "sample": {
+        "column": {
+          "left": 260,
+          "right": 667,
+          "top": 36,
+          "width": 407
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 272,
+          "right": 655,
+          "top": 36,
+          "bottom": 501.5,
+          "width": 383,
+          "height": 465.5
+        },
+        "close": {
+          "left": 598,
+          "right": 642,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 285,
+            "right": 493.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 501.5,
+            "right": 570.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 316,
+          "scrollHeight": 316,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 667,
+        "height": 900
+      },
+      "step": "sidebar-dragged",
+      "sample": {
+        "column": {
+          "left": 320,
+          "right": 667,
+          "top": 36,
+          "width": 347
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 332,
+          "right": 655,
+          "top": 36,
+          "bottom": 521,
+          "width": 323,
+          "height": 485
+        },
+        "close": {
+          "left": 598,
+          "right": 642,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 345,
+            "right": 553.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 561.5,
+            "right": 630.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 335,
+          "scrollHeight": 335,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 667,
+        "height": 900
+      },
+      "step": "right-panel-closed",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 667,
+          "top": 36,
+          "width": 667
+        },
+        "toolbarBottom": 36,
+        "open": false,
+        "dialog": null,
+        "close": null
+      }
+    },
+    {
+      "viewport": {
+        "width": 667,
+        "height": 900
+      },
+      "step": "right-panel-open",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 667,
+          "top": 36,
+          "width": 667
+        },
+        "toolbarBottom": 36,
+        "open": false,
+        "dialog": null,
+        "close": null
+      }
+    },
+    {
+      "viewport": {
+        "width": 800,
+        "height": 900
+      },
+      "step": "baseline",
+      "sample": {
+        "column": {
+          "left": 260,
+          "right": 800,
+          "top": 36,
+          "width": 540
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 300,
+          "right": 760,
+          "top": 36,
+          "bottom": 482,
+          "width": 460,
+          "height": 446
+        },
+        "close": {
+          "left": 703,
+          "right": 747,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 313,
+            "right": 521.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 529.5,
+            "right": 598.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 296,
+          "scrollHeight": 296,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 800,
+        "height": 900
+      },
+      "step": "viewport-resized",
+      "sample": {
+        "column": {
+          "left": 260,
+          "right": 760,
+          "top": 36,
+          "width": 500
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 280,
+          "right": 740,
+          "top": 36,
+          "bottom": 482,
+          "width": 460,
+          "height": 446
+        },
+        "close": {
+          "left": 683,
+          "right": 727,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 293,
+            "right": 501.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 509.5,
+            "right": 578.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 296,
+          "scrollHeight": 296,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 800,
+        "height": 900
+      },
+      "step": "sidebar-collapsed",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 800,
+          "top": 36,
+          "width": 800
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 170,
+          "right": 630,
+          "top": 36,
+          "bottom": 482,
+          "width": 460,
+          "height": 446
+        },
+        "close": {
+          "left": 573,
+          "right": 617,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 183,
+            "right": 391.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 399.5,
+            "right": 468.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 296,
+          "scrollHeight": 296,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": false,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 800,
+        "height": 900
+      },
+      "step": "sidebar-expanded",
+      "sample": {
+        "column": {
+          "left": 260,
+          "right": 800,
+          "top": 36,
+          "width": 540
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 300,
+          "right": 760,
+          "top": 36,
+          "bottom": 482,
+          "width": 460,
+          "height": 446
+        },
+        "close": {
+          "left": 703,
+          "right": 747,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 313,
+            "right": 521.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 529.5,
+            "right": 598.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 296,
+          "scrollHeight": 296,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 800,
+        "height": 900
+      },
+      "step": "sidebar-dragged",
+      "sample": {
+        "column": {
+          "left": 320,
+          "right": 800,
+          "top": 36,
+          "width": 480
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 332,
+          "right": 788,
+          "top": 36,
+          "bottom": 482,
+          "width": 456,
+          "height": 446
+        },
+        "close": {
+          "left": 731,
+          "right": 775,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 345,
+            "right": 553.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 561.5,
+            "right": 630.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 296,
+          "scrollHeight": 296,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 800,
+        "height": 900
+      },
+      "step": "right-panel-closed",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 800,
+          "top": 36,
+          "width": 800
+        },
+        "toolbarBottom": 36,
+        "open": false,
+        "dialog": null,
+        "close": null
+      }
+    },
+    {
+      "viewport": {
+        "width": 800,
+        "height": 900
+      },
+      "step": "right-panel-open",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 800,
+          "top": 36,
+          "width": 800
+        },
+        "toolbarBottom": 36,
+        "open": false,
+        "dialog": null,
+        "close": null
+      }
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      },
+      "step": "baseline",
+      "sample": {
+        "column": {
+          "left": 260,
+          "right": 1024,
+          "top": 36,
+          "width": 764
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 412,
+          "right": 872,
+          "top": 36,
+          "bottom": 482,
+          "width": 460,
+          "height": 446
+        },
+        "close": {
+          "left": 815,
+          "right": 859,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 425,
+            "right": 633.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 641.5,
+            "right": 710.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 296,
+          "scrollHeight": 296,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      },
+      "step": "viewport-resized",
+      "sample": {
+        "column": {
+          "left": 260,
+          "right": 984,
+          "top": 36,
+          "width": 724
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 392,
+          "right": 852,
+          "top": 36,
+          "bottom": 482,
+          "width": 460,
+          "height": 446
+        },
+        "close": {
+          "left": 795,
+          "right": 839,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 405,
+            "right": 613.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 621.5,
+            "right": 690.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 296,
+          "scrollHeight": 296,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      },
+      "step": "sidebar-collapsed",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 1024,
+          "top": 36,
+          "width": 1024
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 282,
+          "right": 742,
+          "top": 36,
+          "bottom": 482,
+          "width": 460,
+          "height": 446
+        },
+        "close": {
+          "left": 685,
+          "right": 729,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 295,
+            "right": 503.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 511.5,
+            "right": 580.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 296,
+          "scrollHeight": 296,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": false,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      },
+      "step": "sidebar-expanded",
+      "sample": {
+        "column": {
+          "left": 260,
+          "right": 1024,
+          "top": 36,
+          "width": 764
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 412,
+          "right": 872,
+          "top": 36,
+          "bottom": 482,
+          "width": 460,
+          "height": 446
+        },
+        "close": {
+          "left": 815,
+          "right": 859,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 425,
+            "right": 633.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 641.5,
+            "right": 710.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 296,
+          "scrollHeight": 296,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      },
+      "step": "sidebar-dragged",
+      "sample": {
+        "column": {
+          "left": 320,
+          "right": 1024,
+          "top": 36,
+          "width": 704
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 442,
+          "right": 902,
+          "top": 36,
+          "bottom": 482,
+          "width": 460,
+          "height": 446
+        },
+        "close": {
+          "left": 845,
+          "right": 889,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 455,
+            "right": 663.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 671.5,
+            "right": 740.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 296,
+          "scrollHeight": 296,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      },
+      "step": "right-panel-closed",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 1024,
+          "top": 36,
+          "width": 1024
+        },
+        "toolbarBottom": 36,
+        "open": false,
+        "dialog": null,
+        "close": null
+      }
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      },
+      "step": "right-panel-open",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 720,
+          "top": 36,
+          "width": 720
+        },
+        "toolbarBottom": 36,
+        "open": false,
+        "dialog": null,
+        "close": null
+      }
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "step": "baseline",
+      "sample": {
+        "column": {
+          "left": 260,
+          "right": 1280,
+          "top": 36,
+          "width": 1020
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 540,
+          "right": 1000,
+          "top": 36,
+          "bottom": 482,
+          "width": 460,
+          "height": 446
+        },
+        "close": {
+          "left": 943,
+          "right": 987,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 553,
+            "right": 761.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 769.5,
+            "right": 838.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 296,
+          "scrollHeight": 296,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "step": "viewport-resized",
+      "sample": {
+        "column": {
+          "left": 260,
+          "right": 1240,
+          "top": 36,
+          "width": 980
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 520,
+          "right": 980,
+          "top": 36,
+          "bottom": 482,
+          "width": 460,
+          "height": 446
+        },
+        "close": {
+          "left": 923,
+          "right": 967,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 533,
+            "right": 741.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 749.5,
+            "right": 818.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 296,
+          "scrollHeight": 296,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "step": "sidebar-collapsed",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 1280,
+          "top": 36,
+          "width": 1280
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 410,
+          "right": 870,
+          "top": 36,
+          "bottom": 482,
+          "width": 460,
+          "height": 446
+        },
+        "close": {
+          "left": 813,
+          "right": 857,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 423,
+            "right": 631.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 639.5,
+            "right": 708.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 296,
+          "scrollHeight": 296,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": false,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "step": "sidebar-expanded",
+      "sample": {
+        "column": {
+          "left": 260,
+          "right": 1280,
+          "top": 36,
+          "width": 1020
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 540,
+          "right": 1000,
+          "top": 36,
+          "bottom": 482,
+          "width": 460,
+          "height": 446
+        },
+        "close": {
+          "left": 943,
+          "right": 987,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 553,
+            "right": 761.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 769.5,
+            "right": 838.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 296,
+          "scrollHeight": 296,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "step": "sidebar-dragged",
+      "sample": {
+        "column": {
+          "left": 320,
+          "right": 1280,
+          "top": 36,
+          "width": 960
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 570,
+          "right": 1030,
+          "top": 36,
+          "bottom": 482,
+          "width": 460,
+          "height": 446
+        },
+        "close": {
+          "left": 973,
+          "right": 1017,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 583,
+            "right": 791.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 799.5,
+            "right": 868.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 296,
+          "scrollHeight": 296,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "step": "right-panel-closed",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 1280,
+          "top": 36,
+          "width": 1280
+        },
+        "toolbarBottom": 36,
+        "open": false,
+        "dialog": null,
+        "close": null
+      }
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "step": "right-panel-open",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 742,
+          "top": 36,
+          "width": 742
+        },
+        "toolbarBottom": 36,
+        "open": false,
+        "dialog": null,
+        "close": null
+      }
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "step": "both-panels-large-sidebar",
+      "sample": {
+        "column": {
+          "left": 480,
+          "right": 980,
+          "top": 36,
+          "width": 500
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 500,
+          "right": 960,
+          "top": 36,
+          "bottom": 888,
+          "width": 460,
+          "height": 852
+        },
+        "close": {
+          "left": 903,
+          "right": 947,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 513,
+            "right": 721.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 729.5,
+            "right": 798.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 702,
+          "scrollHeight": 6749,
+          "scrollTop": 0
+        },
+        "itemCount": 60,
+        "sidebarOpen": true,
+        "rightPanelOpen": true
+      }
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      },
+      "step": "open-breakpoint-roundtrip",
+      "sample": {
+        "column": {
+          "left": 304,
+          "right": 724,
+          "top": 36,
+          "width": 420
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 316,
+          "right": 712,
+          "top": 36,
+          "bottom": 888,
+          "width": 396,
+          "height": 852
+        },
+        "close": {
+          "left": 655,
+          "right": 699,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 329,
+            "right": 537.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 545.5,
+            "right": 614.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 702,
+          "scrollHeight": 7334,
+          "scrollTop": 0
+        },
+        "itemCount": 60,
+        "sidebarOpen": true,
+        "rightPanelOpen": true
+      }
+    },
+    {
+      "viewport": {
+        "width": 960,
+        "height": 900
+      },
+      "step": "open-breakpoint-roundtrip",
+      "sample": {
+        "column": {
+          "left": 240,
+          "right": 660,
+          "top": 36,
+          "width": 420
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 252,
+          "right": 648,
+          "top": 36,
+          "bottom": 888,
+          "width": 396,
+          "height": 852
+        },
+        "close": {
+          "left": 591,
+          "right": 635,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 265,
+            "right": 473.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 481.5,
+            "right": 550.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 702,
+          "scrollHeight": 7334,
+          "scrollTop": 0
+        },
+        "itemCount": 60,
+        "sidebarOpen": true,
+        "rightPanelOpen": true
+      }
+    },
+    {
+      "viewport": {
+        "width": 641,
+        "height": 900
+      },
+      "step": "open-breakpoint-roundtrip",
+      "sample": {
+        "column": {
+          "left": 240,
+          "right": 641,
+          "top": 36,
+          "width": 401
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 252,
+          "right": 629,
+          "top": 36,
+          "bottom": 888,
+          "width": 377,
+          "height": 852
+        },
+        "close": {
+          "left": 572,
+          "right": 616,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 265,
+            "right": 473.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 481.5,
+            "right": 550.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 702,
+          "scrollHeight": 7353,
+          "scrollTop": 0
+        },
+        "itemCount": 60,
+        "sidebarOpen": true,
+        "rightPanelOpen": true
+      }
+    },
+    {
+      "viewport": {
+        "width": 640,
+        "height": 900
+      },
+      "step": "open-breakpoint-roundtrip",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 640,
+          "top": 36,
+          "width": 640
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 0,
+          "right": 640,
+          "top": 0,
+          "bottom": 900,
+          "width": 640,
+          "height": 900
+        },
+        "close": {
+          "left": 584,
+          "right": 628,
+          "top": 8,
+          "bottom": 52,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 12,
+            "right": 220.5,
+            "top": 73,
+            "bottom": 109
+          },
+          {
+            "left": 228.5,
+            "right": 297.640625,
+            "top": 73,
+            "bottom": 109
+          }
+        ],
+        "list": {
+          "height": 752,
+          "scrollHeight": 6164,
+          "scrollTop": 0
+        },
+        "itemCount": 60,
+        "sidebarOpen": false,
+        "rightPanelOpen": true
+      }
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "step": "open-breakpoint-roundtrip",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 390,
+          "top": 36,
+          "width": 390
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 0,
+          "right": 390,
+          "top": 0,
+          "bottom": 900,
+          "width": 390,
+          "height": 900
+        },
+        "close": {
+          "left": 334,
+          "right": 378,
+          "top": 8,
+          "bottom": 52,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 12,
+            "right": 220.5,
+            "top": 73,
+            "bottom": 109
+          },
+          {
+            "left": 228.5,
+            "right": 297.640625,
+            "top": 73,
+            "bottom": 109
+          }
+        ],
+        "list": {
+          "height": 752,
+          "scrollHeight": 7334,
+          "scrollTop": 0
+        },
+        "itemCount": 60,
+        "sidebarOpen": false,
+        "rightPanelOpen": true
+      }
+    },
+    {
+      "viewport": {
+        "width": 641,
+        "height": 900
+      },
+      "step": "open-breakpoint-roundtrip",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 641,
+          "top": 36,
+          "width": 641
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 90.5,
+          "right": 550.5,
+          "top": 36,
+          "bottom": 888,
+          "width": 460,
+          "height": 852
+        },
+        "close": {
+          "left": 493.5,
+          "right": 537.5,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 103.5,
+            "right": 312,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 320,
+            "right": 389.140625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 702,
+          "scrollHeight": 6749,
+          "scrollTop": 0
+        },
+        "itemCount": 60,
+        "sidebarOpen": false,
+        "rightPanelOpen": true
+      }
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      },
+      "step": "open-breakpoint-roundtrip",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 724,
+          "top": 36,
+          "width": 724
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 132,
+          "right": 592,
+          "top": 36,
+          "bottom": 888,
+          "width": 460,
+          "height": 852
+        },
+        "close": {
+          "left": 535,
+          "right": 579,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 145,
+            "right": 353.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 361.5,
+            "right": 430.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 702,
+          "scrollHeight": 6749,
+          "scrollTop": 0
+        },
+        "itemCount": 60,
+        "sidebarOpen": false,
+        "rightPanelOpen": true
+      }
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      },
+      "step": "long-list-scrolled",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 724,
+          "top": 36,
+          "width": 724
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 132,
+          "right": 592,
+          "top": 36,
+          "bottom": 888,
+          "width": 460,
+          "height": 852
+        },
+        "close": {
+          "left": 535,
+          "right": 579,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 145,
+            "right": 353.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 361.5,
+            "right": 430.640625,
+            "top": 110,
+            "bottom": 146
+          }
+        ],
+        "list": {
+          "height": 702,
+          "scrollHeight": 6749,
+          "scrollTop": 6047
+        },
+        "itemCount": 60,
+        "sidebarOpen": false,
+        "rightPanelOpen": true
+      }
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 780
+      },
+      "step": "mobile-fullscreen",
+      "sample": {
+        "column": {
+          "left": 0,
+          "right": 390,
+          "top": 36,
+          "width": 390
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 0,
+          "right": 390,
+          "top": 0,
+          "bottom": 780,
+          "width": 390,
+          "height": 780
+        },
+        "close": {
+          "left": 334,
+          "right": 378,
+          "top": 8,
+          "bottom": 52,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 12,
+            "right": 220.5,
+            "top": 73,
+            "bottom": 109
+          },
+          {
+            "left": 228.5,
+            "right": 297.640625,
+            "top": 73,
+            "bottom": 109
+          }
+        ],
+        "list": {
+          "height": 632,
+          "scrollHeight": 632,
+          "scrollTop": 0
+        },
+        "itemCount": 2,
+        "sidebarOpen": false,
+        "rightPanelOpen": false
+      }
+    }
+  ],
+  "failures": [],
+  "screenshots": [
+    ".trellis/tasks/10-06-notification-center-sync/research/validation-logs/layout-2026-10-06T13-38-14-580Z/baseline-667.png",
+    ".trellis/tasks/10-06-notification-center-sync/research/validation-logs/layout-2026-10-06T13-38-14-580Z/baseline-800.png",
+    ".trellis/tasks/10-06-notification-center-sync/research/validation-logs/layout-2026-10-06T13-38-14-580Z/baseline-1024.png",
+    ".trellis/tasks/10-06-notification-center-sync/research/validation-logs/layout-2026-10-06T13-38-14-580Z/baseline-1280.png",
+    ".trellis/tasks/10-06-notification-center-sync/research/validation-logs/layout-2026-10-06T13-38-14-580Z/both-panels-1280.png",
+    ".trellis/tasks/10-06-notification-center-sync/research/validation-logs/layout-2026-10-06T13-38-14-580Z/roundtrip-1024-30.png",
+    ".trellis/tasks/10-06-notification-center-sync/research/validation-logs/layout-2026-10-06T13-38-14-580Z/roundtrip-960-31.png",
+    ".trellis/tasks/10-06-notification-center-sync/research/validation-logs/layout-2026-10-06T13-38-14-580Z/roundtrip-641-32.png",
+    ".trellis/tasks/10-06-notification-center-sync/research/validation-logs/layout-2026-10-06T13-38-14-580Z/roundtrip-640-33.png",
+    ".trellis/tasks/10-06-notification-center-sync/research/validation-logs/layout-2026-10-06T13-38-14-580Z/roundtrip-390-34.png",
+    ".trellis/tasks/10-06-notification-center-sync/research/validation-logs/layout-2026-10-06T13-38-14-580Z/roundtrip-641-35.png",
+    ".trellis/tasks/10-06-notification-center-sync/research/validation-logs/layout-2026-10-06T13-38-14-580Z/roundtrip-1024-36.png",
+    ".trellis/tasks/10-06-notification-center-sync/research/validation-logs/layout-2026-10-06T13-38-14-580Z/long-list-scrolled.png",
+    ".trellis/tasks/10-06-notification-center-sync/research/validation-logs/layout-2026-10-06T13-38-14-580Z/mobile-390.png"
+  ],
+  "cssResponses": [
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/components_ChatMinimap_module_08l8srm.css",
+      "sha256": "45897aa8d98eb656aae2609166072eb1519ee872ab6cbd75214ecd81d4848dad",
+      "anchored": false,
+      "narrowWrapping": false
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/_1pj7b4_._.css",
+      "sha256": "edb06d75e75aa7cc6998820ad01b72b61cbe9f18479ef98e921adc6647e7047d",
+      "anchored": true,
+      "narrowWrapping": true
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/components_ChatMinimap_module_08l8srm.css",
+      "sha256": "45897aa8d98eb656aae2609166072eb1519ee872ab6cbd75214ecd81d4848dad",
+      "anchored": false,
+      "narrowWrapping": false
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/_1pj7b4_._.css",
+      "sha256": "edb06d75e75aa7cc6998820ad01b72b61cbe9f18479ef98e921adc6647e7047d",
+      "anchored": true,
+      "narrowWrapping": true
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/components_ChatMinimap_module_08l8srm.css",
+      "sha256": "45897aa8d98eb656aae2609166072eb1519ee872ab6cbd75214ecd81d4848dad",
+      "anchored": false,
+      "narrowWrapping": false
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/_1pj7b4_._.css",
+      "sha256": "edb06d75e75aa7cc6998820ad01b72b61cbe9f18479ef98e921adc6647e7047d",
+      "anchored": true,
+      "narrowWrapping": true
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/components_ChatMinimap_module_08l8srm.css",
+      "sha256": "45897aa8d98eb656aae2609166072eb1519ee872ab6cbd75214ecd81d4848dad",
+      "anchored": false,
+      "narrowWrapping": false
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/_1pj7b4_._.css",
+      "sha256": "edb06d75e75aa7cc6998820ad01b72b61cbe9f18479ef98e921adc6647e7047d",
+      "anchored": true,
+      "narrowWrapping": true
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/components_ChatMinimap_module_08l8srm.css",
+      "sha256": "45897aa8d98eb656aae2609166072eb1519ee872ab6cbd75214ecd81d4848dad",
+      "anchored": false,
+      "narrowWrapping": false
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/_1pj7b4_._.css",
+      "sha256": "edb06d75e75aa7cc6998820ad01b72b61cbe9f18479ef98e921adc6647e7047d",
+      "anchored": true,
+      "narrowWrapping": true
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/components_ChatMinimap_module_08l8srm.css",
+      "sha256": "45897aa8d98eb656aae2609166072eb1519ee872ab6cbd75214ecd81d4848dad",
+      "anchored": false,
+      "narrowWrapping": false
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/_1pj7b4_._.css",
+      "sha256": "edb06d75e75aa7cc6998820ad01b72b61cbe9f18479ef98e921adc6647e7047d",
+      "anchored": true,
+      "narrowWrapping": true
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/components_ChatMinimap_module_08l8srm.css",
+      "sha256": "45897aa8d98eb656aae2609166072eb1519ee872ab6cbd75214ecd81d4848dad",
+      "anchored": false,
+      "narrowWrapping": false
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/_1pj7b4_._.css",
+      "sha256": "edb06d75e75aa7cc6998820ad01b72b61cbe9f18479ef98e921adc6647e7047d",
+      "anchored": true,
+      "narrowWrapping": true
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/components_ChatMinimap_module_08l8srm.css",
+      "sha256": "45897aa8d98eb656aae2609166072eb1519ee872ab6cbd75214ecd81d4848dad",
+      "anchored": false,
+      "narrowWrapping": false
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/_1pj7b4_._.css",
+      "sha256": "edb06d75e75aa7cc6998820ad01b72b61cbe9f18479ef98e921adc6647e7047d",
+      "anchored": true,
+      "narrowWrapping": true
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/components_ChatMinimap_module_08l8srm.css",
+      "sha256": "45897aa8d98eb656aae2609166072eb1519ee872ab6cbd75214ecd81d4848dad",
+      "anchored": false,
+      "narrowWrapping": false
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/_1pj7b4_._.css",
+      "sha256": "edb06d75e75aa7cc6998820ad01b72b61cbe9f18479ef98e921adc6647e7047d",
+      "anchored": true,
+      "narrowWrapping": true
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/components_ChatMinimap_module_08l8srm.css",
+      "sha256": "45897aa8d98eb656aae2609166072eb1519ee872ab6cbd75214ecd81d4848dad",
+      "anchored": false,
+      "narrowWrapping": false
+    },
+    {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/_1pj7b4_._.css",
+      "sha256": "edb06d75e75aa7cc6998820ad01b72b61cbe9f18479ef98e921adc6647e7047d",
+      "anchored": true,
+      "narrowWrapping": true
+    }
+  ],
+  "notAutomated": [
+    "real iOS safe-area and hardware rotation",
+    "server-side/API acceptance",
+    "notification state, ack, navigation or SDK behavior"
+  ],
+  "compactRightPanelOverlay": [
+    667,
+    800
+  ],
+  "browserTmpCleaned": true,
+  "sourceHashesAfter": {
+    "components/AppShell.tsx": "d09b28b91349be032f42238f401c814369afb3dee9d243d2bd13e50ef157fe76",
+    "components/NotificationCenter.tsx": "3f18163a42c6ca0f3f8a4c7850c0aa251aec2ad5a915d0868e56bbd38d234884",
+    "components/NotificationCenter.test.mjs": "35e09e0a98729772554ab69ee64060931553133814442e78e488e9787b52cceb",
+    "app/globals.css": "dd8c686f9a779e7f2d7be63d1a56043235646e4237e8bae82d3e526e36704da9",
+    "e2e/notification-center-layout.mjs": "125f10640e0d4a2af244db114992dbbdf4430f286173d1a091335012fb2a1f39",
+    "package.json": "8d6f804dcbc7118c979d6c0a1e88c211d543b254125000d5a34ad04e15ca8713",
+    "package-lock.json": "18c40d7685f7501d46e66450e5470fd064124f9662b17ac310fce042491d322f"
+  },
+  "sourceUnchanged": true,
+  "finishedAt": "2026-10-06T13:38:55.048Z",
+  "status": "pass"
+}

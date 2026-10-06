@@ -1,0 +1,36 @@
+UTC=2026-10-06T10:20:25Z
+lockfileVersion=3
+{"path":"node_modules/@earendil-works/pi-agent-core","lock":"1.0.0","installed":"1.0.0"}
+{"path":"node_modules/@earendil-works/pi-ai","lock":"1.0.0","installed":"1.0.0"}
+{"path":"node_modules/@earendil-works/pi-coding-agent","lock":"1.0.0","installed":"1.0.0"}
+{"path":"node_modules/@earendil-works/pi-tui","lock":"1.0.0","installed":"1.0.0"}
+{"path":"node_modules/typescript","lock":"5.9.3","installed":"5.9.3"}
+{"path":"node_modules/eslint","lock":"9.39.4","installed":"9.39.4"}
+{"path":"node_modules/eslint-config-next","lock":"16.3.6","installed":"16.3.6"}
+{"path":"node_modules/eslint-config-next/node_modules/eslint-plugin-react-hooks","lock":"7.0.1","installed":"7.0.1"}
+{"path":"node_modules/next","lock":"16.3.6","installed":"16.3.6"}
+node_modules/.package-lock.json=true
+node_modules/.pnpm=false
+node_modules/.ignored=false
+node_modules/.modules.yaml=false
+{"file":"eslint.json","eslintFiles":698,"errors":0,"warnings":0,"fatalErrors":0}
+{"file":"safe-eslint.json","eslintFiles":698,"errors":0,"warnings":0,"fatalErrors":0}
+@xup3ng/pi-web@0.12.0 /home/xupeng/dev/personal/forked/agegr-pi-web-notification-validation-01a11076
+├── @earendil-works/pi-agent-core@1.0.0
+├── @earendil-works/pi-ai@1.0.0
+├── @earendil-works/pi-coding-agent@1.0.0
+└── @earendil-works/pi-tui@1.0.0
+
+npm_ls_exit=0
+8d6f804dcbc7118c979d6c0a1e88c211d543b254125000d5a34ad04e15ca8713  package.json
+18c40d7685f7501d46e66450e5470fd064124f9662b17ac310fce042491d322f  package-lock.json
+e0ad63073c4c42987571d31b1a4cb61e48a1fcd4
+68f33b9a40afb37f23404351b72977c6c7066bf8
+git_diff_exit=0
+removed_owned_tsc_cache=tsconfig.tsbuildinfo
+no_next_directory_exit=0
+owned_tmp_absent_exit=0 path=/var/tmp/notification-validation-01a11076.ExlhAF4H
+owned_tmp_absent_exit=0 path=/home/xupeng/.cache/pi-tmp/01a110b4-8588-7540-97bf-c3e2a2b81ae0/notification-baseline-install-3k1h3icu
+owned_tmp_absent_exit=0 path=/home/xupeng/.cache/pi-tmp/01a110b4-8588-7540-97bf-c3e2a2b81ae0/notification-baseline-checks-xkr9pn7_
+owned_tmp_absent_exit=0 path=/home/xupeng/.cache/pi-tmp/01a110b4-8588-7540-97bf-c3e2a2b81ae0/notification-baseline-safe-gxhxfc76
+1.4G	node_modules

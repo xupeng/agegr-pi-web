@@ -1,0 +1,2058 @@
+{
+  "a": [
+    {
+      "at": 6317.336595,
+      "path": "/api/projects",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 6317.765385,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 6319.363286,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 6319.757628,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 6322.12322,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 6322.563387,
+      "path": "/api/projects",
+      "search": "?force=1",
+      "method": "GET"
+    },
+    {
+      "at": 6322.870391,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 6323.221348,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 6325.443235,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 6325.798238,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 6328.730713,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 6685.270711,
+      "path": "/api/projects",
+      "search": "?force=1",
+      "method": "GET"
+    },
+    {
+      "at": 6958.748879,
+      "path": "/api/worktrees",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 6959.174592,
+      "path": "/api/files/var/tmp/notification-browser.WpQQI5u3/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 6959.488592,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 6959.80298,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 6960.089741,
+      "path": "/api/files/var/tmp/notification-browser.WpQQI5u3/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 6960.39853,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 6961.019232,
+      "path": "/api/app-update",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 6961.309435,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 6961.597988,
+      "path": "/api/file-index",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 6961.909734,
+      "path": "/api/project-trust",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 6962.22184,
+      "path": "/api/app-update",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 6969.446057,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 7047.083392,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 7048.422331,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 7048.680549,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 8298.117869,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 9159.852313,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 10294.735526,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 10751.739955,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "POST"
+    },
+    {
+      "at": 10844.757203,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 11670.234037,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 11723.86342,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 11798.968077,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "POST"
+    },
+    {
+      "at": 11846.956759,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 12295.195626,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 13723.38101,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 14181.149518,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 14295.576796,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 15967.141501,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 16020.065858,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 16163.370956,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 16975.364243,
+      "path": "/api/projects",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 16976.368822,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 16977.973595,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 16978.309133,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 16981.427523,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110e5-b242-7668-b489-a01a308e4b32",
+      "method": "GET"
+    },
+    {
+      "at": 16981.784915,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 16982.06135,
+      "path": "/api/projects",
+      "search": "?force=1",
+      "method": "GET"
+    },
+    {
+      "at": 16982.329983,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 16982.560021,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 16982.808298,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 16986.118644,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 16986.802457,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 17144.10285,
+      "path": "/api/worktrees",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 17144.934783,
+      "path": "/api/files/var/tmp/notification-browser.WpQQI5u3/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 17145.541367,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 17146.274857,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 17147.301071,
+      "path": "/api/files/var/tmp/notification-browser.WpQQI5u3/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 17147.493075,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 17149.163727,
+      "path": "/api/app-update",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 17149.432268,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 17151.116589,
+      "path": "/api/file-index",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 17151.354055,
+      "path": "/api/project-trust",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 17151.504606,
+      "path": "/api/app-update",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 17151.666841,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 17192.996979,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 17231.001317,
+      "path": "/api/sessions/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary&force=1",
+      "method": "GET"
+    },
+    {
+      "at": 17231.890729,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 17232.236547,
+      "path": "/api/sessions/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary&force=1",
+      "method": "GET"
+    },
+    {
+      "at": 17233.217626,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 17233.506617,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 17296.702961,
+      "path": "/api/agent/01a110e5-b242-7668-b489-a01a308e4b32/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 18959.716818,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 19693.259742,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 20960.001935,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 21253.096529,
+      "path": "/api/sessions/01a110e5-b242-7668-b489-a01a308e4b32/state",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 22205.320362,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 22806.701134,
+      "path": "/api/agent/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "",
+      "method": "POST"
+    },
+    {
+      "at": 22960.951151,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 23861.495576,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "POST"
+    },
+    {
+      "at": 23927.985153,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 23962.736781,
+      "path": "/api/sessions/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary",
+      "method": "GET"
+    },
+    {
+      "at": 23963.247788,
+      "path": "/api/agent/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 23963.453829,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110e5-b242-7668-b489-a01a308e4b32",
+      "method": "GET"
+    },
+    {
+      "at": 23963.595086,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110e5-b242-7668-b489-a01a308e4b32",
+      "method": "GET"
+    },
+    {
+      "at": 24074.398825,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25120.285605,
+      "path": "/api/projects",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25121.372776,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25123.116221,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25123.505556,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25123.801931,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110e5-b242-7668-b489-a01a308e4b32",
+      "method": "GET"
+    },
+    {
+      "at": 25126.618657,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25127.037363,
+      "path": "/api/projects",
+      "search": "?force=1",
+      "method": "GET"
+    },
+    {
+      "at": 25127.300518,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25127.546792,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25127.807784,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25130.853877,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25131.593257,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25266.973877,
+      "path": "/api/web-auth",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25269.648868,
+      "path": "/api/extension-ui/settings",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25271.751425,
+      "path": "/api/tools/settings",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25272.064868,
+      "path": "/api/web-auth",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25272.273354,
+      "path": "/api/extension-ui/settings",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25272.474351,
+      "path": "/api/tools/settings",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25459.870346,
+      "path": "/api/worktrees",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 25460.90706,
+      "path": "/api/files/var/tmp/notification-browser.WpQQI5u3/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 25461.952408,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 25464.347371,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 25464.852113,
+      "path": "/api/files/var/tmp/notification-browser.WpQQI5u3/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 25465.527627,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 25469.112152,
+      "path": "/api/app-update",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25469.554035,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 25469.858837,
+      "path": "/api/file-index",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 25470.111067,
+      "path": "/api/project-trust",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 25470.38864,
+      "path": "/api/app-update",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25470.684501,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 25491.720673,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 25537.466488,
+      "path": "/api/sessions/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary&force=1",
+      "method": "GET"
+    },
+    {
+      "at": 25538.016559,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 25538.992431,
+      "path": "/api/sessions/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary&force=1",
+      "method": "GET"
+    },
+    {
+      "at": 25540.177179,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 25540.548526,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25653.11491,
+      "path": "/api/agent/01a110e5-b242-7668-b489-a01a308e4b32/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 27100.943867,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 27699.411415,
+      "path": "/api/sessions/01a110e5-b242-7668-b489-a01a308e4b32/state",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 27931.55491,
+      "path": "/api/agent/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "",
+      "method": "POST"
+    },
+    {
+      "at": 28105.236888,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29101.470095,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 30677.700611,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 30688.183752,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "POST"
+    },
+    {
+      "at": 30744.9419,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 30824.591405,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 31005.639692,
+      "path": "/api/sessions/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary",
+      "method": "GET"
+    },
+    {
+      "at": 31005.878244,
+      "path": "/api/agent/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 31006.207649,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110e5-b242-7668-b489-a01a308e4b32",
+      "method": "GET"
+    },
+    {
+      "at": 31006.46859,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110e5-b242-7668-b489-a01a308e4b32",
+      "method": "GET"
+    },
+    {
+      "at": 31092.254194,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 32140.080503,
+      "path": "/api/projects",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 32140.915834,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 32141.837304,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 32142.060395,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 32143.953902,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110e5-b242-7668-b489-a01a308e4b32",
+      "method": "GET"
+    },
+    {
+      "at": 32144.262486,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 32144.484784,
+      "path": "/api/projects",
+      "search": "?force=1",
+      "method": "GET"
+    },
+    {
+      "at": 32144.699917,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 32146.845033,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 32147.129611,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 32147.345678,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 32149.393395,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 32325.27046,
+      "path": "/api/worktrees",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 32326.501843,
+      "path": "/api/files/var/tmp/notification-browser.WpQQI5u3/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 32328.057405,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 32328.399276,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 32330.491274,
+      "path": "/api/files/var/tmp/notification-browser.WpQQI5u3/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 32330.835875,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 32331.3465,
+      "path": "/api/app-update",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 32333.915819,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 32334.249719,
+      "path": "/api/file-index",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 32334.492261,
+      "path": "/api/project-trust",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 32334.722133,
+      "path": "/api/app-update",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 32334.925237,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 32337.54508,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 32366.119288,
+      "path": "/api/sessions/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary&force=1",
+      "method": "GET"
+    },
+    {
+      "at": 32366.653677,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 32368.352257,
+      "path": "/api/sessions/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary&force=1",
+      "method": "GET"
+    },
+    {
+      "at": 32369.089082,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 32423.058567,
+      "path": "/api/agent/01a110e5-b242-7668-b489-a01a308e4b32/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 32448.204815,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 32677.114527,
+      "path": "/api/files/var/tmp/notification-browser.WpQQI5u3/NC-alpha/notification-note.txt",
+      "search": "?type=read",
+      "method": "GET"
+    },
+    {
+      "at": 32678.014731,
+      "path": "/api/git/diff",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha&path=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha%2Fnotification-note.txt",
+      "method": "GET"
+    },
+    {
+      "at": 32679.133234,
+      "path": "/api/files/var/tmp/notification-browser.WpQQI5u3/NC-alpha/notification-note.txt",
+      "search": "?type=read",
+      "method": "GET"
+    },
+    {
+      "at": 32679.355357,
+      "path": "/api/git/diff",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha&path=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha%2Fnotification-note.txt",
+      "method": "GET"
+    },
+    {
+      "at": 32722.511027,
+      "path": "/api/files/var/tmp/notification-browser.WpQQI5u3/NC-alpha/notification-note.txt",
+      "search": "?type=watch",
+      "method": "GET"
+    },
+    {
+      "at": 32753.511612,
+      "path": "/api/files/var/tmp/notification-browser.WpQQI5u3/NC-alpha/notification-note.txt",
+      "search": "?type=read",
+      "method": "GET"
+    },
+    {
+      "at": 32754.569982,
+      "path": "/api/git/diff",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha&path=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha%2Fnotification-note.txt",
+      "method": "GET"
+    },
+    {
+      "at": 34117.270446,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 34924.174192,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 35223.895524,
+      "path": "/api/sessions/01a110e5-b242-7668-b489-a01a308e4b32/state",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 35478.310126,
+      "path": "/api/agent/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "",
+      "method": "POST"
+    },
+    {
+      "at": 36121.266345,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 37434.769498,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 38121.010003,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 38242.357338,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "POST"
+    },
+    {
+      "at": 38449.314968,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 38505.668092,
+      "path": "/api/sessions/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary",
+      "method": "GET"
+    },
+    {
+      "at": 38506.147981,
+      "path": "/api/agent/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 38506.375504,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110e5-b242-7668-b489-a01a308e4b32",
+      "method": "GET"
+    },
+    {
+      "at": 38507.650673,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110e5-b242-7668-b489-a01a308e4b32",
+      "method": "GET"
+    },
+    {
+      "at": 38608.729456,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 38737.033883,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110e5-b242-7668-b489-a01a308e4b32",
+      "method": "GET"
+    },
+    {
+      "at": 38737.902853,
+      "path": "/api/git/diff",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha&path=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha%2Fnotification-note.txt",
+      "method": "GET"
+    },
+    {
+      "at": 38750.491764,
+      "path": "/api/files/var/tmp/notification-browser.WpQQI5u3/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 38751.938092,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 39814.177441,
+      "path": "/api/projects",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 39815.253526,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 39816.618254,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 39816.966327,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 39819.011052,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110e5-b242-7668-b489-a01a308e4b32",
+      "method": "GET"
+    },
+    {
+      "at": 39819.430425,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 39819.685172,
+      "path": "/api/projects",
+      "search": "?force=1",
+      "method": "GET"
+    },
+    {
+      "at": 39819.911658,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 39820.129233,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 39822.783352,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 39823.102376,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 39824.852362,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 39981.859161,
+      "path": "/api/worktrees",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 39982.849423,
+      "path": "/api/files/var/tmp/notification-browser.WpQQI5u3/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 39984.068445,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 39984.338023,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 39986.707271,
+      "path": "/api/files/var/tmp/notification-browser.WpQQI5u3/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 39987.016039,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 39987.53574,
+      "path": "/api/app-update",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 39990.010667,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 39990.338148,
+      "path": "/api/file-index",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 39990.568942,
+      "path": "/api/project-trust",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 39990.800395,
+      "path": "/api/app-update",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 39991.012544,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 40035.464382,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 40073.49352,
+      "path": "/api/sessions/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary&force=1",
+      "method": "GET"
+    },
+    {
+      "at": 40073.992356,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 40075.171513,
+      "path": "/api/sessions/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary&force=1",
+      "method": "GET"
+    },
+    {
+      "at": 40076.0745,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 40076.473123,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 40140.669689,
+      "path": "/api/agent/01a110e5-b242-7668-b489-a01a308e4b32/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 41796.490238,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 42154.362354,
+      "path": "/api/sessions/01a110e5-b242-7668-b489-a01a308e4b32/state",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 42323.076906,
+      "path": "/api/sessions/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary",
+      "method": "GET"
+    },
+    {
+      "at": 42324.350425,
+      "path": "/api/agent/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 42324.798531,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110e5-b242-7668-b489-a01a308e4b32",
+      "method": "GET"
+    },
+    {
+      "at": 42325.031115,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110e5-b242-7668-b489-a01a308e4b32",
+      "method": "GET"
+    },
+    {
+      "at": 42329.44389,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 43607.743232,
+      "path": "/api/projects",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 43608.566828,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 43609.149369,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 43609.948544,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 43610.112311,
+      "path": "/api/sessions",
+      "search": "?sessionId=01a110e5-b242-7668-b489-a01a308e4b32",
+      "method": "GET"
+    },
+    {
+      "at": 43610.887995,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 43611.058235,
+      "path": "/api/projects",
+      "search": "?force=1",
+      "method": "GET"
+    },
+    {
+      "at": 43612.467422,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 43612.75017,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 43612.950538,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 43615.099927,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 43616.61604,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 43757.24953,
+      "path": "/api/worktrees",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 43758.388568,
+      "path": "/api/files/var/tmp/notification-browser.WpQQI5u3/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 43759.450878,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 43760.810417,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 43761.105638,
+      "path": "/api/sessions/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary&force=1",
+      "method": "GET"
+    },
+    {
+      "at": 43762.753279,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 43763.060083,
+      "path": "/api/file-index",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 43763.274337,
+      "path": "/api/project-trust",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 43763.469387,
+      "path": "/api/files/var/tmp/notification-browser.WpQQI5u3/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 43763.671548,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 43765.45595,
+      "path": "/api/sessions/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "?deferThinking=1&deferMedia=1&tree=summary&force=1",
+      "method": "GET"
+    },
+    {
+      "at": 43765.549795,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 43852.144683,
+      "path": "/api/agent/01a110e5-b242-7668-b489-a01a308e4b32/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 43857.932635,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 43887.143796,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 45588.870837,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 46140.817913,
+      "path": "/api/sessions/01a110e5-b242-7668-b489-a01a308e4b32/state",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 46579.736711,
+      "path": "/api/agent/01a110e5-b242-7668-b489-a01a308e4b32",
+      "search": "",
+      "method": "POST"
+    },
+    {
+      "at": 46671.070992,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 47589.205562,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    }
+  ],
+  "b": [
+    {
+      "at": 7593.752924,
+      "path": "/api/projects",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 7595.303997,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 7595.64222,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 7597.20842,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 7597.416899,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 7597.566097,
+      "path": "/api/projects",
+      "search": "?force=1",
+      "method": "GET"
+    },
+    {
+      "at": 7597.718603,
+      "path": "/api/open-in-explorer",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 7597.85675,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 7599.696542,
+      "path": "/api/home",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 7599.931987,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 7600.25428,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 7878.789529,
+      "path": "/api/worktrees",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 7879.83543,
+      "path": "/api/files/var/tmp/notification-browser.WpQQI5u3/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 7880.851429,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 7882.45834,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 7882.8207,
+      "path": "/api/files/var/tmp/notification-browser.WpQQI5u3/NC-alpha",
+      "search": "?type=list",
+      "method": "GET"
+    },
+    {
+      "at": 7883.064766,
+      "path": "/api/git/status",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 7885.922523,
+      "path": "/api/app-update",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 7886.26672,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 7886.491499,
+      "path": "/api/file-index",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 7886.699647,
+      "path": "/api/project-trust",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 7889.316755,
+      "path": "/api/app-update",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 7889.608819,
+      "path": "/api/models",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 7901.321402,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 9578.151236,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 10400.925967,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 10613.657517,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 11578.480949,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 12910.037601,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 13578.97857,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 13630.138763,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 15420.023398,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 15579.376622,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 16641.053827,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 17579.460093,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 17931.343489,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 17995.569631,
+      "path": "/api/projects",
+      "search": "?force=1",
+      "method": "GET"
+    },
+    {
+      "at": 18040.653289,
+      "path": "/api/sessions",
+      "search": "?projectKey=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 19580.030577,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 19643.417752,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 20443.058004,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 21580.314826,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 22646.446938,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 22955.039025,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 23580.740943,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25473.096644,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25584.563165,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 25684.232159,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 27583.243263,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 27841.787474,
+      "path": "/api/file-index",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 28043.916774,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 28685.9963,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 29583.185782,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 30553.678254,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 31590.477043,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 31687.767357,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 33064.877736,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 33598.188187,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 34689.81185,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 35575.147694,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 35584.514823,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 37584.800431,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 37691.849621,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 38088.17309,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 39585.16987,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 40599.615904,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 40693.726164,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 41585.494896,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 43123.009281,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 43585.909376,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 43695.30065,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 45586.184396,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 45634.338251,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 46697.667328,
+      "path": "/api/notifications/events",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 47586.654296,
+      "path": "/api/notifications",
+      "search": "",
+      "method": "GET"
+    },
+    {
+      "at": 47842.001342,
+      "path": "/api/file-index",
+      "search": "?cwd=%2Fvar%2Ftmp%2Fnotification-browser.WpQQI5u3%2FNC-alpha",
+      "method": "GET"
+    },
+    {
+      "at": 48145.123033,
+      "path": "/api/agent/running",
+      "search": "",
+      "method": "GET"
+    }
+  ]
+}
