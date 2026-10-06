@@ -7,6 +7,35 @@ Saving a default is the star on each row of the model selector and the reasoning
 
 The reasoning control stays usable while a run streams: pi-agent-core snapshots `reasoning` when a run starts, but `AgentSession`'s `prepareRequest` / `prepareNextTurnWithContext` re-read `agent.state.thinkingLevel` before every model request, so `set_thinking_level` applies from the next request (the response already streaming keeps its level). `lib/thinking-level-mid-run.integration.test.mjs` pins this; if an SDK upgrade breaks it, disable the control while streaming rather than let it change nothing.
 
+## Subagent selection refusals in the composer
+Subagents execute only an explicit, recoverable provider/model selection. A typed refusal is shown
+with the safe provider/model identity and local English / 简体中文 / 繁體中文 guidance (missing model,
+provider context/source, authentication, enabled scope, selection mismatch, or invalid resource/tool
+policy). Raw loader/auth diagnostics are not rendered. The notice explicitly says no model request
+was sent; it does not announce a completed run.
+
+Prompt refusals retain the HTTP `prompt_rejected` / `accepted:false` admission contract. The composer
+restores the rejected draft and attachments, removes only its optimistic message, and preserves the
+previous ask, branch and result. A transport failure without that acknowledgement remains ambiguous:
+the client reconciles server state instead of restoring input that might already be accepted. A typed
+selection DTO alone is not a substitute for the negative prompt acknowledgement.
+
+A cold unavailable child can fail before the prompt POST, while the composer awaits SSE readiness.
+`startup_error` retains the handshake/stop-retry protocol and carries a safe selection DTO plus
+`prePromptRejected:true` only before `connected` is published. The connection narrowly projects it;
+only the hook's pre-POST catch consumes that projection for the same localized target/not-sent notice.
+This is not an HTTP `accepted:false` acknowledgement. A bare DTO, raw startup text, late error after
+connected or an accepted queued input cannot mint a not-sent claim. Tests execute real server bytes →
+connection → hook callbacks; browser separately checks that rejected Send makes zero prompt POSTs.
+
+A refused `set_model` (409) leaves the previous selection and unsent draft unchanged. Selecting a
+legal replacement does not send the draft automatically; the user retries explicitly. Invalid or
+unknown selection DTOs use local generic guidance without echoing their raw message. This client
+handling does not change the model selector's initial all-model fallback, ordinary-session scope,
+global-default persistence, or AskUser admission lifecycle. Real warm/cold initialization and model
+change persistence remain server responsibilities. History edits still use separate navigate and
+prompt RPCs; this does not make that existing branch transition atomic.
+
 ## Remote provider catalogs
 Built-in model lists are frozen at the pinned SDK version; newer models come from the SDK's pi.dev catalog overlay, which `ModelRuntime.refresh()` persists to `~/.pi/agent/models-store.json` (the pi CLI fills it too) and which restores offline. pi-web's own runtimes only restore it (`allowNetwork: false` / `refreshOnCreate: false`, listed in the header of `lib/model-catalog-refresh.ts`). That module's network pass runs **only when the user asks** (the "Refresh catalog" button in `EnabledModelsSection` → `/api/models/refresh`), never on a timer or on another request's path, which must not wait on a slow catalog. It calls `refresh()` with `force: true` and never `allowNetwork`, so pi's `PI_OFFLINE` rule holds (`reason: "offline"`), and `shareModelCatalogRefresh()` joins concurrent presses for the same providers. The route returns no model list: a change runs `invalidateModelsCache()` and reloads the panel, whose ordinary `/api/models` and `/api/models/enabled` loads build a fresh runtime that restores the store.
 

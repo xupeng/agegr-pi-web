@@ -24,6 +24,7 @@
 | [MCP / Code mode 运行时](./mcp-codemode.md) | 内置加载、惰性连接/fresh trust、direct-only wait/slash/dispose、工具曝光、Code mode 预算/only、SSE/UI 与 fork 兼容 | Written |
 | [MCP 设置面板](./mcp-settings.md) | config/import 写入与脱敏、Test/OAuth flows、project trust 与结构化拒绝、验证边界 | Written |
 | [模型默认设置](./model-default-settings.md) | 会话选择与显式全局保存边界、项目覆盖拒绝、SDK 写盘错误检查 | Written |
+| [子代理选模与可信扩展](./subagent-model-selection.md) | exact选择与失败admission、独立无安装资源、versioned工具许可、false provider-only例外、cold intent持久化/发布、三语安全拒绝 | Written |
 | [Trellis subagent execution snapshots](./trellis-subagent-records.md) | Single owner for exact tool/kind gate, bounded branch API projection, evidence/watermarks, scoped hook ownership and read-only UI | Written |
 | [ask_user 提问协议](./ask-user-protocol.md) | ask_user 工具契约、状态机、事件/命令协议 | Written |
 | [追加系统指令编辑契约（已退役）](./append-system-prompt.md) | Web 编辑器/API 已移除；仅保留 pi 原生 APPEND_SYSTEM.md 的发现与覆盖语义 | Retired |
