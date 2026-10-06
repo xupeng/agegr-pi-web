@@ -1,0 +1,13 @@
+▲ Next.js 16.3.6 (Turbopack)
+- Local:         http://127.0.0.1:36517
+- Network:       http://127.0.0.1:36517
+✓ Ready in 257ms
+✓ Running next.config.ts took 27ms
+- Experiments (use with caution):
+  · proxyClientMaxBodySize: "128mb"
+
+○ Compiling / ...
+ GET / 200 in 1939ms (next.js: 1205ms, proxy.ts: 7ms, application-code: 727ms)
+ GET /api/append-system 404 in 165ms (next.js: 136ms, proxy.ts: 3ms, application-code: 26ms)
+ PUT /api/append-system 404 in 40ms (next.js: 5ms, proxy.ts: 5ms, application-code: 30ms)
+[?25h

@@ -1,0 +1,15 @@
+{
+  "name": "lint",
+  "command": "npm run lint -- --format=json",
+  "exitCode": 0,
+  "durationSeconds": 19,
+  "files": 698,
+  "errors": 0,
+  "warnings": 0,
+  "diagnostics": []
+}
+npm notice
+npm notice New major version of npm available! 11.19.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

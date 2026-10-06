@@ -1,0 +1,4 @@
+{"file":".trellis/tasks/10-06-remove-append-instructions/research/provenance-and-scope.md","reason":"固定来源证据、逐文件移除与原生/共享能力保护边界"}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"设置组件局部清理、三语一致与共享样式边界"}
+{"file":".trellis/spec/frontend/type-safety.md","reason":"仅退役编辑器 DTO 和 section union，不改 SDK/历史 snapshot 类型"}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"锁文件一致验证、真实浏览器证据和隔离要求"}

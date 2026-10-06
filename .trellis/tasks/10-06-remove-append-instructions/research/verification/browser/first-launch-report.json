@@ -1,0 +1,19 @@
+{
+  "http": [
+    {
+      "method": "GET",
+      "path": "/api/append-system",
+      "status": 404
+    },
+    {
+      "method": "PUT",
+      "path": "/api/append-system",
+      "status": 404
+    }
+  ],
+  "browser": [],
+  "errors": [
+    "browserType.launch: Failed to launch chromium because executable doesn't exist at /home/xupeng/.local/share/ms-playwright/chromium_headless_shell-1243/chrome-linux/headless_shell\n    at /home/xupeng/dev/personal/forked/agegr-pi-web/.trellis/tasks/10-06-remove-append-instructions/research/browser-retirement.mjs:64:28"
+  ],
+  "serverStopped": true
+}
