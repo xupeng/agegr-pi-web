@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 41
+- **Total Sessions**: 42
 - **Last Active**: 2026-10-06
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~1824 | Active |
+| `journal-1.md` | ~1860 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 42 | 2026-10-06 | PR 34 native search CI fixture portability follow-up | `124b414663de0bb2af3f151b9d523b0dedbf3b65`, `86f920c3ec8f5f666028a1f9838a52f83fc29f51`, `6495b28e5a790a84d8c0632cfcb06dc46e8db9b0` | `feat/subagent-model-selection` |
 | 41 | 2026-10-06 | Subagent explicit model restoration and trusted extension inheritance | `8e20421`, `3fdb1df`, `0ba3761`, `a7c5ed6`, `6802d63` | `feat/subagent-model-selection` |
 | 40 | 2026-10-06 | Portable notification test fixtures for PR33 CI | `780c693`, `58a62af` | `feat/notification-center-sync` |
 | 39 | 2026-10-06 | Instance-wide notification center and tablet anchoring | `1c0fde4`, `c914947`, `3a3790b`, `afe1857` | `feat/notification-center-sync` |

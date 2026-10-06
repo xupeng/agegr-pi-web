@@ -1822,3 +1822,39 @@ Implemented independent child runtimes, fail-closed explicit model restoration, 
 ### Next Steps
 
 - Create PR to personal, wait for exact-head CI, merge with a merge commit, then fast-forward personal and safely remove only this task branch/worktree; do not deploy.
+
+
+## Session 42: PR 34 native search CI fixture portability follow-up
+
+**Date**: 2026-10-06
+**Task**: PR 34 native search CI fixture portability follow-up
+**Branch**: `feat/subagent-model-selection`
+
+### Summary
+
+CI's lint/type and broad e2e passed, but a local-only TMPDIR assertion aborted native search tests. Fixed only the fixture temp-root contract and updated the task archive before merge.
+
+### Main Changes
+
+- Prefer owned PI_TASK_TMPDIR or standard node:os tmpdir; retain exclusive HOME/agent/XDG and network isolation, no skipped tests or runtime/auth changes.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `124b414663de0bb2af3f151b9d523b0dedbf3b65` | (see git log) |
+| `86f920c3ec8f5f666028a1f9838a52f83fc29f51` | (see git log) |
+| `6495b28e5a790a84d8c0632cfcb06dc46e8db9b0` | (see git log) |
+
+### Testing
+
+- [OK] With TMPDIR and PI_TASK_TMPDIR unset: native hooks 13/13, 16 owned Responses requests, real model/search/Kimi/external 0; full suite3150/3150.
+- [OK] tsc0, ESLint763files/0errors/warnings; focused readonly Trellis check passed; CI will rerun at the new head.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Wait for exact-head checks/e2e to pass, merge PR34 normally, fast-forward personal and clean only this task's branch/worktree without deploying.
