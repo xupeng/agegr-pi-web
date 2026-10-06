@@ -1782,3 +1782,43 @@ PR33 first CI passed lint, TypeScript, production build and browser e2e, but two
 
 - Update the same PR33, wait for fresh standard Node22 CI checks and e2e, then merge only the verified head and complete safe Git closeout.
 - Preserve the other task and user dev service8505; do not publish or deploy production.
+
+
+## Session 41: Subagent explicit model restoration and trusted extension inheritance
+
+**Date**: 2026-10-06
+**Task**: Subagent explicit model restoration and trusted extension inheritance
+**Branch**: `feat/subagent-model-selection`
+
+### Summary
+
+Implemented independent child runtimes, fail-closed explicit model restoration, trusted extension inheritance and registration-aware tool permissions; integrated personal notification baseline. User authorized PR merge and Git closeout, not deployment.
+
+### Main Changes
+
+- Persist standard cold model changes; preserve historical false/exact-tool permissions and safe draft-preserving HTTP/SSE refusals.
+- Archive planning, contract, SDK and browser evidence on the feature branch before PR merge.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `8e20421` | (see git log) |
+| `3fdb1df` | (see git log) |
+| `0ba3761` | (see git log) |
+| `a7c5ed6` | (see git log) |
+| `6802d63` | (see git log) |
+
+### Testing
+
+- [OK] Post-integration tsc passed; ESLint 763 files, zero errors/warnings; npm test 3150/3150; notification integration 24/24.
+- [OK] Fresh desktop/mobile Chromium full matrix passed; 15 owned local model calls, 5 searches, zero Kimi/external requests.
+- [OK] Focused read-only integration review found no remaining P1/P2; real plugins, paid providers, Safari and Windows remain untested.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Create PR to personal, wait for exact-head CI, merge with a merge commit, then fast-forward personal and safely remove only this task branch/worktree; do not deploy.
