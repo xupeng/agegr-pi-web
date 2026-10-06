@@ -1668,3 +1668,39 @@ Integrate the SDK-discovered system AskUser as the only tool source, retire dupl
 
 - Production bundle/distribution, real TUI UI/PTY, Safari/iOS and Windows remain unverified (AC6 not fully checked); task archive is not release validation.
 - Push, PR creation and live deployment/restart require separate authorization; the existing deployed service was not changed.
+
+
+## Session 38: Retire fork append instructions editor
+
+**Date**: 2026-10-06
+**Task**: Retire fork append instructions editor
+**Branch**: `remove-append-instructions`
+
+### Summary
+
+Confirmed fork-only provenance, removed the Web editor/API while preserving native APPEND_SYSTEM.md loading, and completed isolated unit/browser acceptance.
+
+### Main Changes
+
+- Retired settings entry, dedicated API/helper/DTO/CSS and locale keys; preserved native SDK/trust/Chat only/subagent boundaries and user files.
+- Archived task planning, provenance, SDK regressions, HTTP/Chromium reports and screenshots on the feature branch before PR creation.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `fc5924e` | (see git log) |
+| `2487642` | (see git log) |
+
+### Testing
+
+- [OK] Clean npm ci tree: tsc passed; lint 698 files, 0 errors/warnings; npm test 2853/2853 passed (baseline 2870/2870).
+- [OK] Chromium desktop/mobile/project settings and retired GET/PUT 404 passed; no retired API requests. Safari/Windows/full local e2e not run.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Create PR to xupeng/agegr-pi-web:personal and merge the exact head after GitHub checks/e2e pass, as requested.

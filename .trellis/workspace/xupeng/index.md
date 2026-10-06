@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 37
+- **Total Sessions**: 38
 - **Last Active**: 2026-10-06
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~1670 | Active |
+| `journal-1.md` | ~1706 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 38 | 2026-10-06 | Retire fork append instructions editor | `fc5924e`, `2487642` | `remove-append-instructions` |
 | 37 | 2026-10-06 | System-installed AskUser Web host integration | `c275bf2`, `2f54c1b`, `ebebbe5`, `03bfb00` | `ask-user-host-integration` |
 | 36 | 2026-10-03 | Sync upstream and upgrade Pi to 1.0.0 | `18a284d`, `b9c5bcb`, `5ad64d7`, `cc58f6d` | `merge/upstream-20261003` |
 | 35 | 2026-10-02 | Merge upstream MCP and Code mode updates | `56a45e4`, `73f38df`, `459bdc3`, `ecf95e3` | `merge/upstream-mcp-codemode-20261002` |
