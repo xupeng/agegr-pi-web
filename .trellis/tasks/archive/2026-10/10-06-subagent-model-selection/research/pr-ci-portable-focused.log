@@ -1,0 +1,22 @@
+✔ native factory-ready Responses: late ready, real payload/stream hooks and unsigned citation append (302.297433ms)
+✔ legacy factory-ready Responses: late ready, real payload/stream hooks and unsigned citation append (138.459445ms)
+✔ SDK reload/model_select/turn_start clear stale pending and target switches cannot attribute old sources (69.745125ms)
+✔ hidden: no automatic native enablement, no sources even with raw search frames (62.042545ms)
+✔ defaultActive false: no automatic native enablement, no sources even with raw search frames (47.745395ms)
+✔ configuration off: no automatic native enablement, no sources even with raw search frames (44.717698ms)
+✔ explicit manual off: no automatic native enablement, no sources even with raw search frames (66.37326ms)
+✔ registration-policy deny: no automatic native enablement, no sources even with raw search frames (47.11206ms)
+✔ endpoint mismatch: no automatic native enablement, no sources even with raw search frames (55.951452ms)
+✔ effective auth endpoint override is independently checked before native injection (45.612297ms)
+✔ terminal provider failure cannot append collected sources or carry them to the next real request (45.221722ms)
+✔ native explicit false provider-only replay: no search/lifecycle/request hooks transferred (86.361968ms)
+{"nativeSearchHooksEvidence":{"tests":13,"localResponsesRequests":16,"realModelRequests":0,"realSearchRequests":0,"blockedExternalAttempts":0,"kimiRequests":0,"listeningServers":0,"serverPid":1337739}}
+✔ legacy explicit false provider-only replay: no search/lifecycle/request hooks transferred (94.410732ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2247.287989
