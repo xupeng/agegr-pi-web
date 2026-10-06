@@ -1,0 +1,102 @@
+{
+  "kind": "frontend-layout-only",
+  "base": "http://192.168.11.233:8505",
+  "executablePath": "/sbin/chromium",
+  "runId": "2026-10-06T13-35-59-495Z",
+  "sourceRoot": "/home/xupeng/dev/personal/forked/agegr-pi-web",
+  "taskTmp": "/home/xupeng/.cache/pi-tmp/01a1116a-5e60-7540-97bf-c44a5eb273a7/ncl-browser-check-y0zw3wzr",
+  "results": "/home/xupeng/.cache/pi-tmp/01a1116a-5e60-7540-97bf-c44a5eb273a7/ncl-browser-check-y0zw3wzr/results",
+  "evidence": "/home/xupeng/dev/personal/forked/agegr-pi-web/.trellis/tasks/10-06-notification-center-sync/research/validation-logs/layout-2026-10-06T13-35-59-495Z",
+  "browserTmp": "/home/xupeng/.cache/pi-ncl/obwvmuwq1ypz",
+  "sourceHashes": {
+    "components/AppShell.tsx": "d09b28b91349be032f42238f401c814369afb3dee9d243d2bd13e50ef157fe76",
+    "components/NotificationCenter.tsx": "3f18163a42c6ca0f3f8a4c7850c0aa251aec2ad5a915d0868e56bbd38d234884",
+    "components/NotificationCenter.test.mjs": "35e09e0a98729772554ab69ee64060931553133814442e78e488e9787b52cceb",
+    "app/globals.css": "dd8c686f9a779e7f2d7be63d1a56043235646e4237e8bae82d3e526e36704da9",
+    "e2e/notification-center-layout.mjs": "6496673bbfb4a9931f671b1f21786eea6f25ca6739ed794fa0cb18124694e359",
+    "package.json": "8d6f804dcbc7118c979d6c0a1e88c211d543b254125000d5a34ad04e15ca8713",
+    "package-lock.json": "18c40d7685f7501d46e66450e5470fd064124f9662b17ac310fce042491d322f"
+  },
+  "startedAt": "2026-10-06T13:35:59.497Z",
+  "scenarios": [
+    {
+      "name": "desktop-column-anchor",
+      "ac": "AC14",
+      "description": "667/800/1024/1280: overlay centered in the real chat column within 12px gaps, below toolbar",
+      "status": "not-run"
+    },
+    {
+      "name": "viewport-resize",
+      "ac": "AC14",
+      "description": "Resize the window while the overlay is open and re-measure",
+      "status": "not-run"
+    },
+    {
+      "name": "sidebar-toggle",
+      "ac": "AC14",
+      "description": "Collapse/expand the sidebar and re-measure",
+      "status": "not-run"
+    },
+    {
+      "name": "sidebar-drag",
+      "ac": "AC14",
+      "description": "Drag the sidebar resize handle and re-measure",
+      "status": "not-run"
+    },
+    {
+      "name": "right-file-panel",
+      "ac": "AC14",
+      "description": "Open the real right file panel and re-measure",
+      "status": "not-run"
+    },
+    {
+      "name": "mobile-fullscreen",
+      "ac": "AC14",
+      "description": "390px: overlay fullscreen with a >=44px close target",
+      "status": "not-run"
+    },
+    {
+      "name": "both-panels-narrow-column",
+      "ac": "AC14",
+      "description": "Both panels expanded, large sidebar and right-panel drag, real narrow column",
+      "status": "not-run"
+    },
+    {
+      "name": "breakpoint-roundtrip",
+      "ac": "AC14",
+      "description": "Keep dialog open through 641/640/390/641/1024px",
+      "status": "not-run"
+    },
+    {
+      "name": "long-list-scroll-close",
+      "ac": "AC14",
+      "description": "Many fixture items scroll within the constrained list, header and buttons remain reachable",
+      "status": "not-run"
+    }
+  ],
+  "apiRequests": [],
+  "measurements": [],
+  "failures": [
+    "AssertionError [ERR_ASSERTION]: browser profile path too long for /tmp-free socket: /home/xupeng/.cache/pi-tmp/01a1116a-5e60-7540-97bf-c44a5eb273a7/ncl-browser-check-y0zw3wzr/bp/1\n    at runScenario (file:///home/xupeng/dev/personal/forked/agegr-pi-web/e2e/notification-center-layout.mjs:215:10)\n    at file:///home/xupeng/dev/personal/forked/agegr-pi-web/e2e/notification-center-layout.mjs:384:11\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)"
+  ],
+  "screenshots": [],
+  "cssResponses": [],
+  "notAutomated": [
+    "real iOS safe-area and hardware rotation",
+    "server-side/API acceptance",
+    "notification state, ack, navigation or SDK behavior"
+  ],
+  "browserTmpCleaned": true,
+  "sourceHashesAfter": {
+    "components/AppShell.tsx": "d09b28b91349be032f42238f401c814369afb3dee9d243d2bd13e50ef157fe76",
+    "components/NotificationCenter.tsx": "3f18163a42c6ca0f3f8a4c7850c0aa251aec2ad5a915d0868e56bbd38d234884",
+    "components/NotificationCenter.test.mjs": "35e09e0a98729772554ab69ee64060931553133814442e78e488e9787b52cceb",
+    "app/globals.css": "dd8c686f9a779e7f2d7be63d1a56043235646e4237e8bae82d3e526e36704da9",
+    "e2e/notification-center-layout.mjs": "6496673bbfb4a9931f671b1f21786eea6f25ca6739ed794fa0cb18124694e359",
+    "package.json": "8d6f804dcbc7118c979d6c0a1e88c211d543b254125000d5a34ad04e15ca8713",
+    "package-lock.json": "18c40d7685f7501d46e66450e5470fd064124f9662b17ac310fce042491d322f"
+  },
+  "sourceUnchanged": true,
+  "finishedAt": "2026-10-06T13:35:59.500Z",
+  "status": "fail"
+}

@@ -1,0 +1,52 @@
+✔ keeps action icons inline in medium mobile sidebars (1.755697ms)
+✔ uses a compact narrow-mobile toolbar with a floating action layer (0.561246ms)
+✔ only renders the Agents switcher when the active session family has subagents or Trellis records (0.204679ms)
+✔ keeps the Agents panel open while switching sessions and positions it at the left (0.25875ms)
+✔ only renders branch toolbar controls for sessions with branches (0.239186ms)
+✔ keeps covered statistics and file controls out of interaction and focus (0.297272ms)
+✔ closes the mobile action layer on outside click, Escape, layout changes, and session switches (0.311973ms)
+✔ keeps the mobile action layer open after using an expanded action (0.423612ms)
+✔ keeps theme and language in settings instead of the chat toolbar (0.371044ms)
+✔ prioritizes context and cost when the mobile statistics area narrows (0.403189ms)
+✔ places trust warnings below the mobile toolbar and the file toggle in toolbar flow (0.248157ms)
+✔ closes top-bar dropdowns when the file panel expands to full width (0.198518ms)
+✔ navigation retirement is initialized before its first eager dependency-array use (0.777678ms)
+✔ panel toggle retires navigation outside a deferred or replayed state updater (0.212999ms)
+✔ auto-name retires an old notification lookup before closing its panel (0.15415ms)
+(node:1147204) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ completion targets exact result entry via explicit session adoption; pending only selects (36.620732ms)
+✔ unavailable targets do not clear or navigate; late closed-center responses do not select (2.15766ms)
+✔ delayed fetch -> globalNewSession -> reopen center -> release response cannot change selection/URL (1.018489ms)
+✔ toggling another top panel retires pending notification navigation (1.909884ms)
+✔ aborted fetch does not select and does not propagate AbortError (1.274244ms)
+✔ only AppShell owns connection; bell and center do not depend on showChat (0.403131ms)
+✔ AppShell passes every outer reading obstruction; ChatWindow owns foreground and inner dialogs (0.287832ms)
+✔ explicit context changes invalidate a pending workspace restore (1.450271ms)
+✔ all active-session transitions share one persistence effect (0.259728ms)
+✔ keeps chat scroll positions in page memory by session id (0.425504ms)
+✔ workspace restoration remains inside the cross-project branch (0.210275ms)
+(node:1147210) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+▶ New restores the draft after session navigation and workspace auto-restore
+  ✔ remembered session cwd: /draft-project (47.024701ms)
+  ✔ remembered session cwd: /draft-project-worktree (8.756155ms)
+✔ New restores the draft after session navigation and workspace auto-restore (62.235354ms)
+✔ an unresolved ?session= blocks the remembered-session restore (3.531859ms)
+✔ waits precede completions; each group sorts latest first without mutating source (23.510263ms)
+✔ empty, loading, synchronization, migration, ack and storage states are explicit (8.385773ms)
+✔ batch is disabled for pending-only lists and long lists render an initial bounded page (38.778579ms)
+✔ modal captures Escape through shared focus helper and has mobile safe-area 44px close target (6.687017ms)
+✔ desktop box centers on the real chat column across tablet/desktop widths (0.425308ms)
+✔ desktop box falls back only for unavailable columns, not narrow positive columns (0.261887ms)
+✔ overlay measures the real chat column ref, cleans up observers and keeps mobile fullscreen (1.905133ms)
+✔ hook returns stable SSR four-field state and does not start a connection (7.976889ms)
+✔ read-only hook has no owner effect; AppShell is responsible for lifecycle (4.22625ms)
+ℹ tests 39
+ℹ suites 0
+ℹ pass 39
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 201.752495
