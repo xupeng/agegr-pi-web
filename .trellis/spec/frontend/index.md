@@ -30,6 +30,7 @@
 | [追加系统指令编辑契约（已退役）](./append-system-prompt.md) | Web 编辑器/API 已移除；仅保留 pi 原生 APPEND_SYSTEM.md 的发现与覆盖语义 | Retired |
 | [移动端键盘与视口高度](./mobile-keyboard-viewport.md) | useViewportHeight 机制、focus 重试、WKWebView 兜底 | Written |
 | [会话列表刷新机制](./session-list-refresh.md) | 两级按需加载、缓存层级、刷新触发点、强制刷新竞态防护 | Written |
+| [单实例跨项目通知中心](./notification-center.md) | 真实 run 分类、持久 completion/revision、水位迁移、只读 pending、共享 SSE/兜底、正文像素确认与导航退休、对话列锚定浮层 | Written |
 | [设置弹窗在移动端的布局协议](./settings-dialog-mobile.md) | 小屏全屏化、margin auto 居中、safe-area 陷阱、滚动链、对话区字号与内容宽度模式 | Written |
 | [Clickable file paths](./clickable-file-paths.md) | Turn written-file extraction (apply_patch / trellis / Agent 快照)、索引校验链化、`PathText`、产物卡片与打开授权 | Written |
 | [会话停滞看门狗](./stall-watchdog.md) | 阈值来源与优先级、工具级宽限、`stall_aborted` 事件契约、arm/disarm/dispose 不变量、与 idle 回收的边界、已知边界 | Written |

@@ -1,0 +1,35 @@
+{
+  "outcomes": [
+    {
+      "label": "dependency-tree",
+      "executable": "npm",
+      "args": [
+        "ls",
+        "--include=dev"
+      ],
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "label": "targeted-fallback",
+      "executable": "env",
+      "args": [
+        "-u",
+        "PI_TASK_TMPDIR",
+        "node",
+        "--experimental-strip-types",
+        "--test",
+        "lib/agent-run-observer.integration.test.mjs",
+        "lib/rpc-manager.notifications.test.mjs"
+      ],
+      "exit": 0,
+      "signal": null
+    }
+  ],
+  "cleanup": {
+    "owned": "/var/tmp/pr-33-ci-fix-check-E7TuKG",
+    "removed": true
+  },
+  "sourceHashesUnchanged": true,
+  "wrapperCleanupOwner": "outer pi-tmp-run"
+}

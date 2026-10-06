@@ -1,0 +1,55 @@
+pi-tmp: workspace /home/xupeng/.cache/pi-tmp/01a110b4-8588-7540-97bf-c3e2a2b81ae0/notification-baseline-safe-gxhxfc76
+cwd=/home/xupeng/dev/personal/forked/agegr-pi-web-notification-validation-01a11076
+HOME=/var/tmp/notification-validation-01a11076.ExlhAF4H/home
+PI_CODING_AGENT_DIR=/var/tmp/notification-validation-01a11076.ExlhAF4H/agent
+TMPDIR=/var/tmp/notification-validation-01a11076.ExlhAF4H/tmp
+PI_TASK_TMPDIR=/home/xupeng/.cache/pi-tmp/01a110b4-8588-7540-97bf-c3e2a2b81ae0/notification-baseline-safe-gxhxfc76
+v24.21.0
+11.19.0
+e0ad63073c4c42987571d31b1a4cb61e48a1fcd4
+68f33b9a40afb37f23404351b72977c6c7066bf8
+8d6f804dcbc7118c979d6c0a1e88c211d543b254125000d5a34ad04e15ca8713  package.json
+18c40d7685f7501d46e66450e5470fd064124f9662b17ac310fce042491d322f  package-lock.json
+
+START safe-tsc: node_modules/.bin/tsc --noEmit  UTC=2026-10-06T10:18:32Z
+safe-tsc_exit=0
+
+START safe-lint: npm run lint  UTC=2026-10-06T10:18:34Z
+safe-lint_exit=0
+
+> @xup3ng/pi-web@0.12.0 lint
+> eslint .
+
+npm notice
+npm notice New major version of npm available! 11.19.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice
+
+START safe-eslint-json: node_modules/.bin/eslint . -f json -o /home/xupeng/.cache/pi-tmp/01a110b4-8588-7540-97bf-c3e2a2b81ae0/notification-baseline-safe-gxhxfc76/safe-eslint.json  UTC=2026-10-06T10:18:55Z
+safe-eslint-json_exit=0
+
+START safe-tests: npm test  UTC=2026-10-06T10:19:15Z
+safe-tests_exit=0
+✔ public/fonts ships the license text and provenance notice next to the webfonts (6.705914ms)
+✔ NOTICE.txt declares the SHA-256 of every bundled webfont (3.879873ms)
+✔ push always shows a notification, even when a window is visible (3.226705ms)
+✔ push ignores malformed payloads (0.178514ms)
+✔ notification click focuses an existing client at the session URL (0.418068ms)
+✔ notification click navigates an existing client to the session (0.269759ms)
+✔ notification click opens a window and rejects cross-origin targets (0.261626ms)
+✔ a stalled navigation falls back to offline.html (35.914945ms)
+✔ a stalled static asset request is bounded as well (1.777606ms)
+✔ a response that arrives in time is not cut off mid-stream (0.763794ms)
+ℹ tests 2853
+ℹ suites 13
+ℹ pass 2853
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 26215.758786
+8d6f804dcbc7118c979d6c0a1e88c211d543b254125000d5a34ad04e15ca8713  package.json
+18c40d7685f7501d46e66450e5470fd064124f9662b17ac310fce042491d322f  package-lock.json
+safe_suite_exit=0
+fixture_cleanup=/var/tmp/notification-validation-01a11076.ExlhAF4H

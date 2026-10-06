@@ -8,6 +8,8 @@ import { dispatchSessionRowContextMenu } from "@/lib/session-row-context-menu";
 import { skillExpansionToCommand } from "@/lib/slash-display";
 import { formatRelativeTime } from "@/lib/i18n/format";
 import { useI18n } from "@/hooks/useI18n";
+import { useNotifications } from "@/hooks/useNotifications";
+import { notificationSessionIds, notificationProjectCounts } from "@/lib/notifications/client";
 import { useResizablePanel } from "@/hooks/useResizablePanel";
 import { useScrollbarVisibility } from "@/hooks/useScrollbarVisibility";
 import { DirectoryPicker } from "./DirectoryPicker";
@@ -179,7 +181,6 @@ interface ValidatedProject {
   key: string;
 }
 
-const UNREAD_SESSIONS_STORAGE_KEY = "pi-web:unread-session-ids";
 const LAST_CUSTOM_CWD_STORAGE_KEY = "pi-web:last-custom-cwd";
 const RUNNING_SESSIONS_POLL_MS = 2500;
 const SESSION_PANE_DEFAULT_HEIGHT = 320;
@@ -202,29 +203,6 @@ function saveLastCustomCwd(cwd: string): void {
     window.localStorage.setItem(LAST_CUSTOM_CWD_STORAGE_KEY, cwd);
   } catch {
     // Persistence is best-effort.
-  }
-}
-
-function loadUnreadSessionIds(): Set<string> {
-  if (typeof window === "undefined") return new Set();
-  try {
-    const raw = window.localStorage.getItem(UNREAD_SESSIONS_STORAGE_KEY);
-    if (!raw) return new Set();
-    const parsed = JSON.parse(raw) as unknown;
-    if (Array.isArray(parsed)) return new Set(parsed.filter((id): id is string => typeof id === "string"));
-    return new Set();
-  } catch {
-    return new Set();
-  }
-}
-
-function saveUnreadSessionIds(ids: Set<string>): void {
-  if (typeof window === "undefined") return;
-  try {
-    if (ids.size === 0) window.localStorage.removeItem(UNREAD_SESSIONS_STORAGE_KEY);
-    else window.localStorage.setItem(UNREAD_SESSIONS_STORAGE_KEY, JSON.stringify([...ids]));
-  } catch {
-    // ignore storage quota / privacy-mode errors
   }
 }
 
@@ -473,7 +451,7 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
   const [projectSessionsByKey, setProjectSessionsByKey] = useState<Map<string, SessionInfo[]>>(new Map());
   /** Project key whose sessions are currently being fetched (for local spinners). */
   const [projectSessionsLoadingKey, setProjectSessionsLoadingKey] = useState<string | null>(null);
-  /** Full set of every session id across all projects — for unread pruning and
+  /** Full set of every session id across all projects — for running reconciliation and
    *  detecting brand-new sessions during the running poll. */
   const allSessionIdsRef = useRef<Set<string>>(new Set());
   const projectSessionsByKeyRef = useRef<Map<string, SessionInfo[]>>(new Map());
@@ -517,7 +495,7 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
   const [fileManager, setFileManager] = useState<FileManagerAvailability | null>(null);
   const [fileManagerError, setFileManagerError] = useState<string | null>(null);
   const [runningSessionIds, setRunningSessionIds] = useState<Set<string>>(() => new Set());
-  const [unreadSessionIds, setUnreadSessionIds] = useState<Set<string>>(() => loadUnreadSessionIds());
+  const { snapshot: notificationSnapshot } = useNotifications();
   const previousRunningSessionIdsRef = useRef<Set<string>>(new Set());
   const currentSuppressedCompletionSessionIdsRef = useRef<Set<string>>(new Set());
   const previousSuppressedCompletionSessionIdsRef = useRef<Set<string>>(new Set());
@@ -652,13 +630,6 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
         );
         setRunningSessionIds(new Set(data.runningSessionIds ?? []));
       }
-      // Drop unread markers for sessions that no longer exist (e.g. deleted).
-      const existingIds = allSessionIdsRef.current;
-      setUnreadSessionIds((prev) => {
-        if (prev.size === 0) return prev;
-        const next = new Set([...prev].filter((id) => existingIds.has(id)));
-        return next.size === prev.size ? prev : next;
-      });
       setError(null);
       if (!showLoading) {
         setSessionRefreshDone(true);
@@ -725,15 +696,6 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
         return next;
       });
       onSessionsChange?.(mergeLoadedSessions(projectSessionsByKeyRef.current));
-      const subagentIds = new Set(
-        sessions.filter((session) => session.relation?.kind === "subagent").map((session) => session.id),
-      );
-      if (subagentIds.size > 0) {
-        setUnreadSessionIds((previous) => {
-          const next = new Set([...previous].filter((id) => !subagentIds.has(id)));
-          return next.size === previous.size ? previous : next;
-        });
-      }
     } catch (e) {
       // Only the latest request may report errors; a stale failure must not
       // persist past a newer successful refresh.
@@ -871,12 +833,6 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
     ? t(FILE_MANAGER_ERROR_KEYS[fileManagerError] ?? fileManagerError)
     : null;
 
-  // Persist unread markers so they survive a browser refresh before the user
-  // has actually opened the completed session.
-  useEffect(() => {
-    saveUnreadSessionIds(unreadSessionIds);
-  }, [unreadSessionIds]);
-
   useEffect(() => {
     let stopped = false;
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -967,20 +923,13 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
     );
     const newlyRunning = [...runningSessionIds].filter((id) => !previous.has(id));
 
-    if (completedWithNotifications.length > 0 || newlyRunning.length > 0) {
-      setUnreadSessionIds((previousUnread) => {
-        const next = new Set(previousUnread);
-        runningSessionIds.forEach((id) => next.delete(id));
-        completedWithNotifications.forEach((id) => next.add(id));
-        return next;
-      });
-    }
     const hasUnlistedRunningSession = newlyRunning.some(
       (id) => !allSessionIdsRef.current.has(id),
     );
     if (completedInBackground.length > 0 || hasUnlistedRunningSession) {
       void refreshLists(true);
     }
+    // Preserve the single existing sound callback, independent of notification state.
     if (completedWithNotifications.length > 0) {
       onBackgroundTaskDone?.();
     }
@@ -992,16 +941,6 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
       ),
     );
   }, [runningSessionIds, selectedSessionId, projectSessionsByKey, refreshLists, onBackgroundTaskDone]);
-
-  useEffect(() => {
-    if (!selectedSessionId) return;
-    setUnreadSessionIds((prev) => {
-      if (!prev.has(selectedSessionId)) return prev;
-      const next = new Set(prev);
-      next.delete(selectedSessionId);
-      return next;
-    });
-  }, [selectedSessionId]);
 
   useEffect(() => {
     if (explorerRefreshKey !== undefined) setExplorerKey((k) => k + 1);
@@ -1352,27 +1291,23 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
   const projectSessions = selectedProjectKey ? projectSessionsByKey.get(selectedProjectKey) : undefined;
   const projectSessionsLoading = selectedProjectKey !== null && projectSessionsLoadingKey === selectedProjectKey;
 
-  // Per-project activity counts (running / unread) for the workspace selector.
-  // Running counts come from the projects endpoint (kept live by the running
-  // poll); unread counts are computed locally from the full session id set.
-  const projectActivity = useMemo(
-    () => {
-      const map = new Map<string, { running: number; unread: number }>();
-      for (const p of projects) {
-        let unread = 0;
-        for (const id of p.sessionIds) {
-          if (unreadSessionIds.has(id)) unread++;
-        }
-        map.set(p.key, { running: p.runningCount, unread });
-      }
-      return map;
-    },
-    [projects, unreadSessionIds],
-  );
+  // Server-authoritative pending/completion source. Running never clears an older completion.
+  const suppressedCompletionSessionIds = currentSuppressedCompletionSessionIdsRef.current;
+  const notificationItems = useMemo(() => {
+    const suppressed = suppressedCompletionSessionIds;
+    const knownSubagents = new Set([...projectSessionsByKey.values()].flat()
+      .filter((session) => session.relation?.kind === "subagent").map((session) => session.id));
+    return notificationSnapshot.items.filter((item) => !suppressed.has(item.sessionId) && !knownSubagents.has(item.sessionId));
+  }, [notificationSnapshot, projectSessionsByKey, suppressedCompletionSessionIds]);
+  const unreadSessionIds = useMemo(() => notificationSessionIds(notificationItems), [notificationItems]);
+  const notificationCounts = useMemo(() => notificationProjectCounts(notificationItems), [notificationItems]);
+  const projectActivity = useMemo(() => {
+    return new Map(projects.map((project) => [project.key, {
+      running: project.runningCount, unread: notificationCounts.get(project.key) ?? 0,
+    }]));
+  }, [projects, notificationCounts]);
 
-  // Any activity in a project other than the one currently selected — shown as
-  // a dot on the (collapsed) selector button so it is visible without opening
-  // the dropdown.
+  // Keep other-workspace activity discoverable even with the selector collapsed.
   const hasOtherWorkspaceActivity = useMemo(
     () => [...projectActivity.entries()].some(
       ([key, { running, unread }]) => key !== selectedProject?.key && (running > 0 || unread > 0),
@@ -2763,11 +2698,9 @@ function SessionItem({
               </span>
             </div>
             <div style={{ marginTop: 2, display: "flex", alignItems: "center", gap: 8, color: "var(--text-dim)", fontSize: 11, minWidth: 0 }}>
-              {isRunning ? (
-                <RunningSessionIndicator />
-              ) : isUnread ? (
-                <UnreadSessionIndicator />
-              ) : (
+              {isRunning && <RunningSessionIndicator />}
+              {isUnread && <UnreadSessionIndicator />}
+              {!isRunning && !isUnread && (
                 <span title={session.modified}>{formatRelativeTime(session.modified, locale)}</span>
               )}
               <span>

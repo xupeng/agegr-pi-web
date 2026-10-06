@@ -58,7 +58,14 @@
 - 按项目加载只减少网络数据量，单个大项目仍可能包含数千条会话；会话区必须保持固定 54px 行高并通过 `getSessionListIndices()` 只挂载可视窗口与 overscan。
 - fork 仍按 `parentSessionId` 展示层级；持久化 subagent 不单独占行，而是通过 `listSessionFamilies()` 把 selected/running/unread/modified 聚合到所属 main/fork 行。
 - 折叠状态必须由 `SessionSidebar` 持有，不能放在会被窗口化卸载的行组件中；正在重命名的聚焦行即使滚出 overscan 也必须继续挂载。
-- `/api/projects` 和 running poll 都要携带 `completionNotificationSuppressedSessionIds`，否则按需加载尚未访问项目时无法识别 subagent 完成事件，会错误标未读并播放完成音。
+- `/api/projects` 和 running poll 都要携带 `completionNotificationSuppressedSessionIds`，保持既有 subagent 后台完成声音抑制。未读/等待标记已改由共享 notification snapshot 决定，不能从 running→idle 差分制造未读。
+
+## 共享待查看/待交互标记
+
+- `SessionSidebar` 的 `useNotifications()` 与全局中心订阅同一客户端 store；不再写 `pi-web:unread-session-ids`，不因选择会话或开始新 run 清未读。
+- 项目按关联 session 去重计算标记；同会话旧 completion 与当前 ask/extension 可以同时存在，但项目/会话标记不是事项数量相加。运行点仍由原 2.5 秒 poll 管理，不能遮掉共享待查看/待交互标记。
+- `GET /api/notifications` 聚合仅相关会话的定向元数据；全局 SSE 是版本 invalidation，不为所有项目创建 wrapper、逐会话订阅 SSE 或续租 idle lease。保留 `/api/projects` + 当前项目 `/api/sessions?projectKey=` 两级按需加载。
+- 自动确认必须是前台当前持久化结果正文实际可见，侧栏选择和中心摘要不构成证据；revision 比较、legacy 导入水位、不可用元数据与响应倒序契约见 [通知中心规范](./notification-center.md)。
 
 ## 测试要求
 

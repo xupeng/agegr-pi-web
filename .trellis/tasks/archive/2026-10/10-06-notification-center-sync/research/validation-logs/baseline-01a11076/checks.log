@@ -1,0 +1,52 @@
+pi-tmp: workspace /home/xupeng/.cache/pi-tmp/01a110b4-8588-7540-97bf-c3e2a2b81ae0/notification-baseline-checks-xkr9pn7_
+cwd=/home/xupeng/dev/personal/forked/agegr-pi-web-notification-validation-01a11076
+HOME=/home/xupeng/.cache/pi-tmp/01a110b4-8588-7540-97bf-c3e2a2b81ae0/notification-baseline-checks-xkr9pn7_/home
+PI_CODING_AGENT_DIR=/home/xupeng/.cache/pi-tmp/01a110b4-8588-7540-97bf-c3e2a2b81ae0/notification-baseline-checks-xkr9pn7_/agent
+TMPDIR=/home/xupeng/.cache/pi-tmp/01a110b4-8588-7540-97bf-c3e2a2b81ae0/notification-baseline-checks-xkr9pn7_
+v24.21.0
+11.19.0
+e0ad63073c4c42987571d31b1a4cb61e48a1fcd4
+68f33b9a40afb37f23404351b72977c6c7066bf8
+8d6f804dcbc7118c979d6c0a1e88c211d543b254125000d5a34ad04e15ca8713  package.json
+18c40d7685f7501d46e66450e5470fd064124f9662b17ac310fce042491d322f  package-lock.json
+
+START tsc: node_modules/.bin/tsc --noEmit  UTC=2026-10-06T10:15:37Z
+tsc_exit=0
+
+START lint: npm run lint  UTC=2026-10-06T10:15:47Z
+lint_exit=0
+
+> @xup3ng/pi-web@0.12.0 lint
+> eslint .
+
+npm notice
+npm notice New major version of npm available! 11.19.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice
+
+START eslint-json: node_modules/.bin/eslint . -f json -o /home/xupeng/.cache/pi-tmp/01a110b4-8588-7540-97bf-c3e2a2b81ae0/notification-baseline-checks-xkr9pn7_/eslint.json  UTC=2026-10-06T10:16:08Z
+eslint-json_exit=0
+
+START tests: npm test  UTC=2026-10-06T10:16:27Z
+tests_exit=1
+  AssertionError [ERR_ASSERTION]: the second does not write meanwhile
+  + actual - expected
+  
+  + []
+  - [
+  -   'first writes'
+  - ]
+  
+      at TestContext.<anonymous> (file:///home/xupeng/dev/personal/forked/agegr-pi-web-notification-validation-01a11076/lib/project-trust.test.mjs:618:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'first writes' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+8d6f804dcbc7118c979d6c0a1e88c211d543b254125000d5a34ad04e15ca8713  package.json
+18c40d7685f7501d46e66450e5470fd064124f9662b17ac310fce042491d322f  package-lock.json

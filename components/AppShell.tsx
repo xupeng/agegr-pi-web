@@ -4,6 +4,10 @@ import { useState, useCallback, useRef, useEffect, useLayoutEffect, useMemo } fr
 import { useRouter, useSearchParams } from "next/navigation";
 import { useGlobalKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { SessionSidebar } from "./SessionSidebar";
+import { NotificationCenter } from "./NotificationCenter";
+import { useNotifications } from "@/hooks/useNotifications";
+import { startNotificationClient, acknowledgeAllNotifications, refreshNotifications } from "@/lib/notifications/client";
+import type { NotificationItem } from "@/lib/notifications/types";
 import { ChatWindow } from "./ChatWindow";
 import type { ChatScrollPosition } from "@/lib/chat-scroll-position";
 import { FileViewer } from "./FileViewer";
@@ -93,6 +97,9 @@ export function AppShell() {
   const isMobile = useIsMobile();
   const isNarrowMobile = useIsNarrowMobile();
   useViewportHeight();
+  const notifications = useNotifications();
+  // Exactly one app owner; sidebar, center and ChatWindow only subscribe.
+  useEffect(() => startNotificationClient(), []);
 
   // Once the user has granted notification permission, register a Web Push
   // subscription so the server can notify backgrounded PWAs (notably iOS,
@@ -206,7 +213,7 @@ export function AppShell() {
   const handleSessionScrollPositionChange = useCallback((sessionId: string, position: ChatScrollPosition) => {
     sessionScrollPositionsRef.current.set(sessionId, position);
   }, []);
-  const [searchTarget, setSearchTarget] = useState<{ sessionId: string; entryId: string; blockIndex?: number } | null>(null);
+  const [searchTarget, setSearchTarget] = useState<{ sessionId: string; entryId: string; blockIndex?: number; notificationResult?: boolean } | null>(null);
   const handleSearchTargetHandled = useCallback((target: { sessionId: string; entryId: string }) => {
     setSearchTarget((current) => current === target ? null : current);
   }, []);
@@ -373,8 +380,20 @@ export function AppShell() {
   }, []);
 
   // Single active panel — only one dropdown open at a time
-  const [activeTopPanel, setActiveTopPanel] = useState<"agents" | "branches" | "system" | "tools" | "session" | null>(null);
+  const [activeTopPanel, setActiveTopPanel] = useState<"agents" | "branches" | "system" | "tools" | "session" | "notifications" | null>(null);
   const [topPanelPos, setTopPanelPos] = useState<{ top: number; left: number; width: number } | null>(null);
+  const notificationNavigationRef = useRef(0);
+  const notificationNavigationControllerRef = useRef<AbortController | null>(null);
+  const notificationAnchorRef = useRef<HTMLDivElement>(null);
+  const activeTopPanelRef = useRef(activeTopPanel);
+  activeTopPanelRef.current = activeTopPanel;
+  // Dependency arrays execute during render, so this owner must precede every
+  // effect/callback that mentions it, not merely its eventual event handler.
+  const invalidateNotificationNavigation = useCallback(() => {
+    notificationNavigationRef.current += 1;
+    notificationNavigationControllerRef.current?.abort();
+    notificationNavigationControllerRef.current = null;
+  }, []);
 
   useEffect(() => {
     if (!sessionHasBranches) {
@@ -389,17 +408,39 @@ export function AppShell() {
   }, [hasSubagentsEntry]);
 
   useEffect(() => {
-    if (rightPanelFullWidth) setActiveTopPanel(null);
-  }, [rightPanelFullWidth]);
+    if (rightPanelFullWidth) {
+      invalidateNotificationNavigation();
+      setActiveTopPanel(null);
+    }
+  }, [rightPanelFullWidth, invalidateNotificationNavigation]);
 
   const toggleTopPanel = useCallback((
-    panel: "agents" | "branches" | "system" | "tools" | "session",
+    panel: "agents" | "branches" | "system" | "tools" | "session" | "notifications",
     keepMobileToolbarOpen = false,
   ) => {
     if (isMobile) setSidebarOpen(false);
+    // Retire synchronously, outside React's possibly deferred/replayed updater.
+    if (activeTopPanelRef.current === "notifications" || panel === "notifications") {
+      invalidateNotificationNavigation();
+    }
     setActiveTopPanel((cur) => cur === panel ? null : panel);
     if (isMobile && isNarrowMobile && keepMobileToolbarOpen) setMobileToolbarMoreOpen(true);
-  }, [isMobile, isNarrowMobile]);
+  }, [isMobile, isNarrowMobile, invalidateNotificationNavigation]);
+
+  const closeNotifications = useCallback(() => {
+    invalidateNotificationNavigation();
+    setActiveTopPanel((panel) => panel === "notifications" ? null : panel);
+  }, [invalidateNotificationNavigation]);
+  useEffect(() => () => {
+    notificationNavigationRef.current += 1;
+    notificationNavigationControllerRef.current?.abort();
+  }, []);
+  useEffect(() => {
+    if (settingsSection || projectTrustDialogOpen) {
+      closeNotifications();
+      setActiveTopPanel(null);
+    }
+  }, [settingsSection, projectTrustDialogOpen, closeNotifications]);
 
   const handleSystemInfoToggle = useCallback((
     panel: "system" | "tools",
@@ -425,8 +466,9 @@ export function AppShell() {
   const openSessionStatsPanel = useCallback(() => {
     if (isMobile) setSidebarOpen(false);
     setMobileToolbarMoreOpen(false);
+    invalidateNotificationNavigation();
     setActiveTopPanel("session");
-  }, [isMobile]);
+  }, [isMobile, invalidateNotificationNavigation]);
 
   // The composer opens Settings too: a bare /mcp opens Settings › MCP (useAgentSession).
   const openSettingsSection = useCallback((section: SettingsSection) => {
@@ -435,31 +477,35 @@ export function AppShell() {
 
   const handleSidebarToggle = useCallback(() => {
     if (isMobile) {
+      invalidateNotificationNavigation();
       setActiveTopPanel(null);
       setMobileToolbarMoreOpen(false);
     }
     setSidebarOpen((open) => !open);
-  }, [isMobile]);
+  }, [isMobile, invalidateNotificationNavigation]);
 
   const handleMobileToolbarMoreToggle = useCallback(() => {
     setSidebarOpen(false);
+    invalidateNotificationNavigation();
     setActiveTopPanel(null);
     setMobileToolbarMoreOpen((open) => !open);
-  }, []);
+  }, [invalidateNotificationNavigation]);
 
   const handleRightPanelToggle = useCallback(() => {
     if (isMobile) {
       setSidebarOpen(false);
+      invalidateNotificationNavigation();
       setActiveTopPanel(null);
       setMobileToolbarMoreOpen(false);
     }
     setRightPanelOpen((open) => !open);
-  }, [isMobile]);
+  }, [isMobile, invalidateNotificationNavigation]);
 
   const handleRightPanelExpandToggle = useCallback(() => {
+    invalidateNotificationNavigation();
     setActiveTopPanel(null);
     setRightPanelExpanded((expanded) => !expanded);
-  }, []);
+  }, [invalidateNotificationNavigation]);
 
   useEffect(() => {
     if (!mobileToolbarMoreOpen) return;
@@ -731,6 +777,7 @@ export function AppShell() {
     projectKey?: string | null,
   ) => {
     invalidateWorkspaceRestore();
+    invalidateNotificationNavigation();
     const currentFreshCwd = newSessionCwd ?? activeCwd;
     setActiveCwd(cwd);
     // Skip if cwd is null (initial mount).
@@ -807,10 +854,11 @@ export function AppShell() {
       restoreWorkspaceContext(newProject, cwd);
     }
     router.replace(typeof window !== "undefined" ? window.location.pathname : "/", { scroll: false });
-  }, [activeCwd, activeFileTabId, initialSessionRestored, invalidateWorkspaceRestore, newSessionCwd, router, selectedSession, restoreWorkspaceContext]);
+  }, [activeCwd, activeFileTabId, initialSessionRestored, invalidateNotificationNavigation, invalidateWorkspaceRestore, newSessionCwd, router, selectedSession, restoreWorkspaceContext]);
 
-  const handleSelectSession = useCallback((session: SessionInfo, isRestore = false, entryId?: string, blockIndex?: number) => {
-    setSearchTarget(entryId ? { sessionId: session.id, entryId, blockIndex } : null);
+  const handleSelectSession = useCallback((session: SessionInfo, isRestore = false, entryId?: string, blockIndex?: number, notificationResult = false) => {
+    setSearchTarget(entryId ? { sessionId: session.id, entryId, blockIndex, notificationResult } : null);
+    invalidateNotificationNavigation();
     invalidateWorkspaceRestore();
     const activeDraftKey = activeNewSessionDraftKeyRef.current;
     const activeDraftCwd = newSessionCwd ?? (selectedSession === null ? activeCwd : null);
@@ -866,10 +914,11 @@ export function AppShell() {
     if (!isRestore || new URLSearchParams(window.location.search).get("session") !== session.id) {
       router.replace(`?session=${encodeURIComponent(session.id)}`, { scroll: false });
     }
-  }, [activeCwd, activeFileTabId, invalidateWorkspaceRestore, router, isMobile, newSessionCwd, selectedSession]);
+  }, [activeCwd, activeFileTabId, invalidateNotificationNavigation, invalidateWorkspaceRestore, router, isMobile, newSessionCwd, selectedSession]);
 
   const handleNewSession = useCallback((sessionId: string, cwd: string) => {
     invalidateWorkspaceRestore();
+    invalidateNotificationNavigation();
     const draftKey = `new:${sessionId}:${cwd}`;
     rekeyDraft(parkedNewSessionDraftKey(cwd), draftKey);
     activeNewSessionDraftKeyRef.current = draftKey;
@@ -886,7 +935,7 @@ export function AppShell() {
     setActiveTopPanel(null);
     if (isMobile) setSidebarOpen(false);
     router.replace(`?cwd=${encodeURIComponent(cwd)}`, { scroll: false });
-  }, [invalidateWorkspaceRestore, router, isMobile]);
+  }, [invalidateNotificationNavigation, invalidateWorkspaceRestore, router, isMobile]);
 
   // Global keyboard shortcuts (handles Esc, Ctrl+Alt+N etc.)
   useGlobalKeyboardShortcuts({
@@ -931,17 +980,48 @@ export function AppShell() {
     }
   }, [handleSelectSession, sessionCatalog]);
 
+  const handleNotificationNavigate = useCallback(async (item: NotificationItem) => {
+    const navigation = ++notificationNavigationRef.current;
+    notificationNavigationControllerRef.current?.abort();
+    const controller = new AbortController();
+    notificationNavigationControllerRef.current = controller;
+    // One targeted metadata lookup, never a global session-list download.
+    try {
+      const response = await fetch(`/api/sessions?sessionId=${encodeURIComponent(item.sessionId)}`, {
+        cache: "no-store", signal: controller.signal,
+      });
+      if (!response.ok) throw new Error("notification-navigation-failed");
+      const data = await response.json() as { sessions: SessionInfo[] };
+      const target = data.sessions.find((session) => session.id === item.sessionId);
+      if (!target || target.relation?.kind === "subagent") throw new Error("notification-target-unavailable");
+      if (navigation !== notificationNavigationRef.current || activeTopPanelRef.current !== "notifications") return;
+      // Clicks never ack, submit pending input, or mutate the SDK branch leaf.
+      if (item.kind === "completion" && item.resultEntryId) {
+        handleSelectSession(target, false, item.resultEntryId, undefined, true);
+      } else {
+        handleSelectSession(target, false);
+      }
+      closeNotifications();
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      throw error;
+    } finally {
+      if (notificationNavigationControllerRef.current === controller) notificationNavigationControllerRef.current = null;
+    }
+  }, [closeNotifications, handleSelectSession]);
+
   // Called by ChatWindow when a new session gets its real id from pi
   const handleSessionCreated = useCallback((session: SessionInfo, sourceDraftKey: string) => {
     setRefreshKey((k) => k + 1);
     if (activeNewSessionDraftKeyRef.current !== sourceDraftKey) return;
+    invalidateNotificationNavigation();
     invalidateWorkspaceRestore();
     activeNewSessionDraftKeyRef.current = null;
     setNewSessionCwd(null);
     setSelectedSession(session);
     hydrateSelectedSession(session.id);
     router.replace(`?session=${encodeURIComponent(session.id)}`, { scroll: false });
-  }, [invalidateWorkspaceRestore, router, hydrateSelectedSession]);
+  }, [invalidateNotificationNavigation, invalidateWorkspaceRestore, router, hydrateSelectedSession]);
 
   const deliverSessionNotification = useCallback(({
     targetSession,
@@ -1022,6 +1102,7 @@ export function AppShell() {
     const sessionId = selectedSession?.id;
     if (!sessionId || autoNameStatus.kind === "naming") return;
     if (autoNameTimerRef.current) clearTimeout(autoNameTimerRef.current);
+    invalidateNotificationNavigation();
     setActiveTopPanel(null);
     setAutoNameStatus({ kind: "naming" });
 
@@ -1047,7 +1128,7 @@ export function AppShell() {
       setAutoNameStatus({ kind: "error", message });
       autoNameTimerRef.current = setTimeout(() => setAutoNameStatus({ kind: "idle" }), 5000);
     }
-  }, [autoNameStatus.kind, selectedSession?.id]);
+  }, [autoNameStatus.kind, selectedSession?.id, invalidateNotificationNavigation]);
 
   useEffect(() => {
     if (autoNameTimerRef.current) clearTimeout(autoNameTimerRef.current);
@@ -1060,6 +1141,7 @@ export function AppShell() {
 
   const handleSessionForked = useCallback((newSessionId: string) => {
     invalidateWorkspaceRestore();
+    invalidateNotificationNavigation();
     activeNewSessionDraftKeyRef.current = null;
     setRefreshKey((k) => k + 1);
     setSessionKey((k) => k + 1);
@@ -1071,7 +1153,7 @@ export function AppShell() {
     }));
     hydrateSelectedSession(newSessionId);
     router.replace(`?session=${encodeURIComponent(newSessionId)}`, { scroll: false });
-  }, [invalidateWorkspaceRestore, router, hydrateSelectedSession]);
+  }, [invalidateNotificationNavigation, invalidateWorkspaceRestore, router, hydrateSelectedSession]);
 
   const handleAskInNewChat = useCallback(async (
     prompt: string,
@@ -1093,6 +1175,7 @@ export function AppShell() {
 
   const handleSessionDeleted = useCallback((sessionId: string) => {
     invalidateWorkspaceRestore();
+    invalidateNotificationNavigation();
     setRefreshKey((k) => k + 1);
     if (selectedSession?.id === sessionId) {
       const cwd = selectedSession.cwd;
@@ -1114,7 +1197,7 @@ export function AppShell() {
       setActiveTopPanel(null);
       router.replace(cwd ? `?cwd=${encodeURIComponent(cwd)}` : (typeof window !== "undefined" ? window.location.pathname : "/"), { scroll: false });
     }
-  }, [invalidateWorkspaceRestore, selectedSession, router]);
+  }, [invalidateNotificationNavigation, invalidateWorkspaceRestore, selectedSession, router]);
 
   const handleOpenFile = useCallback((
     filePath: string,
@@ -2071,6 +2154,25 @@ export function AppShell() {
               </svg>
             )}
           </button>
+          <button
+            type="button"
+            className="notification-bell"
+            aria-haspopup="dialog"
+            aria-expanded={activeTopPanel === "notifications"}
+            aria-label={translate("notifications.open", { count: notifications.snapshot.items.length })}
+            title={translate("notifications.open", { count: notifications.snapshot.items.length })}
+            onClick={(event) => {
+              event.currentTarget.focus({ preventScroll: true });
+              setMobileToolbarMoreOpen(false);
+              toggleTopPanel("notifications");
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+              <path d="M10 21h4" />
+            </svg>
+            <span className="notification-bell-count">{notifications.snapshot.items.length}</span>
+          </button>
           {isMobile && (
             <div
               ref={mobileToolbarRef}
@@ -2167,7 +2269,7 @@ export function AppShell() {
             />
           )}
           {/* Top panel dropdown — shared, only one active at a time */}
-          {activeTopPanel && topPanelPos && (
+          {activeTopPanel && activeTopPanel !== "notifications" && topPanelPos && (
             <div style={{
               position: "fixed",
               top: topPanelPos.top,
@@ -2420,12 +2522,18 @@ export function AppShell() {
         {isMobile && renderProjectTrustWarning(true)}
         </div>
 
-        {/* Chat content */}
-        <div style={{ flex: 1, overflow: "hidden", position: "relative" }}>
+        {/* Chat content — also the real anchor for the notification overlay. */}
+        <div ref={notificationAnchorRef} data-notification-anchor="chat-column" style={{ flex: 1, overflow: "hidden", position: "relative" }}>
           {showChat ? (
             <ChatWindow
               key={sessionKey}
               session={selectedSession}
+              // Outer reading gates; ChatWindow additionally owns pending/dialog,
+              // foreground/focus and exact committed-result visibility checks.
+              notificationReadingActive={!activeTopPanel && !settingsSection && !projectTrustDialogOpen
+                && !rightPanelFullWidth && !mobileToolbarMoreOpen
+                && !(isMobile && (sidebarOpen || rightPanelOpen))
+                && !sidebarResizer.isResizing && !rightPanelResizer.isResizing}
               searchTarget={searchTarget?.sessionId === selectedSession?.id ? searchTarget : null}
               onSearchTargetHandled={handleSearchTargetHandled}
               initialScrollPosition={selectedSession ? sessionScrollPositionsRef.current.get(selectedSession.id) ?? null : null}
@@ -2632,6 +2740,17 @@ export function AppShell() {
         </div>
       </div>
     </div>
+    {activeTopPanel === "notifications" && (
+      <NotificationCenter
+        state={notifications}
+        top={topPanelPos?.top}
+        anchorRef={notificationAnchorRef}
+        onClose={closeNotifications}
+        onNavigate={handleNotificationNavigate}
+        onAcknowledgeAll={acknowledgeAllNotifications}
+        onRefresh={refreshNotifications}
+      />
+    )}
     {settingsSection && (
       <SettingsPanel
         cwd={projectTrustCwd}

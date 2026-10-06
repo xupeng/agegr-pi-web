@@ -25,6 +25,11 @@ import { useDragDrop } from "@/hooks/useDragDrop";
 import { useFileIndex } from "@/hooks/useFileIndex";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useScrollbarVisibility } from "@/hooks/useScrollbarVisibility";
+import { useNotifications } from "@/hooks/useNotifications";
+import { acknowledgeNotification } from "@/lib/notifications/client";
+import type { NotificationCompletionItem } from "@/lib/notifications/types";
+import { isCommittedNotificationResult, notificationResultTextIndexes, NotificationViewAckGate } from "@/lib/notifications/viewed-result";
+import { isNotificationAnswerContentVisible } from "@/lib/notifications/visible-content";
 import type { SessionStatsInfo } from "@/lib/pi-types";
 import type { AppUpdateResponse } from "@/lib/api-types";
 import type { ToolEntry } from "@/lib/tool-presets";
@@ -43,11 +48,13 @@ import {
 
 interface Props {
   session: SessionInfo | null;
-  searchTarget?: { sessionId: string; entryId: string; blockIndex?: number } | null;
+  searchTarget?: { sessionId: string; entryId: string; blockIndex?: number; notificationResult?: boolean } | null;
   onSearchTargetHandled?: (target: { sessionId: string; entryId: string }) => void;
   initialScrollPosition?: ChatScrollPosition | null;
   onScrollPositionChange?: (sessionId: string, position: ChatScrollPosition) => void;
   sessionRunning?: boolean;
+  /** App-level panels can cover this reading surface without unmounting it. */
+  notificationReadingActive?: boolean;
   newSessionCwd: string | null;
   newSessionDraftKey: string | null;
   onAgentEnd?: () => void;
@@ -231,7 +238,7 @@ function ProcessDetailsGroup({ messageCount, toolCallCount, defaultExpanded = fa
   );
 }
 
-export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initialScrollPosition, onScrollPositionChange, sessionRunning, newSessionCwd, newSessionDraftKey, onAgentEnd, onAttentionNeeded, onSessionCreated, onSessionForked, modelsRefreshKey, chatInputRef, onBranchDataChange, onSubagentRecordsChange, onSystemPromptChange, onSystemToolsChange, onSystemInfoLoaderChange, onSessionStatsChange, onSessionStatsPanelOpen, onOpenSettings, onContextUsageChange, onOpenFile, onOpenSession, onAskInNewChat, quoteSelectionEnabled = false, initialPrompt, onInitialPromptConsumed, soundEnabled = true, onSoundToggle, playDoneSound = () => {}, unlockAudio }: Props) {
+export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initialScrollPosition, onScrollPositionChange, sessionRunning, notificationReadingActive = true, newSessionCwd, newSessionDraftKey, onAgentEnd, onAttentionNeeded, onSessionCreated, onSessionForked, modelsRefreshKey, chatInputRef, onBranchDataChange, onSubagentRecordsChange, onSystemPromptChange, onSystemToolsChange, onSystemInfoLoaderChange, onSessionStatsChange, onSessionStatsPanelOpen, onOpenSettings, onContextUsageChange, onOpenFile, onOpenSession, onAskInNewChat, quoteSelectionEnabled = false, initialPrompt, onInitialPromptConsumed, soundEnabled = true, onSoundToggle, playDoneSound = () => {}, unlockAudio }: Props) {
   const { t } = useI18n();
   const isMobile = useIsMobile();
   const completionNotificationsEnabled = session?.relation?.kind !== "subagent";
@@ -260,7 +267,7 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
   const [restoreAnchorReady, setRestoreAnchorReady] = useState(false);
 
   const {
-    loading, error, messages, activeToolResults, entryIds, historyCursor, hasEarlierMessages, streamState,
+    loading, error, messages, activeToolResults, entryIds, committedHistory, historyCursor, hasEarlierMessages, streamState,
     agentRunning, bashRunning, pendingBash, modelNames, modelList, modelError, modelScopeWarnings, modelThinkingLevels, modelThinkingLevelMaps, toolPreset, thinkingLevel,
     retryInfo, contextUsage, forkingEntryId,
     isCompacting, compactError, compactResult, displayModel: displayModelValue, modelSwitching, sessionStats,
@@ -283,6 +290,7 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
     handleBuiltinSlashCommand,
     handleToolPresetChange, handleThinkingLevelChange, handleSetDefaultModel, handleSetDefaultThinkingLevel, loadSlashCommands, scrollUserMsgToTop,
     loadContext, activeLeafId, scrollToBottom, scrollToMessage, followTailIfAttached,
+    getCommittedNotificationHistory, refreshViewedSession,
   } = useAgentSession({
     session, sessionRunning, newSessionCwd, newSessionDraftKey, onAgentEnd: wrappedOnAgentEnd, onAttentionNeeded, onSessionCreated, onSessionForked,
     modelsRefreshKey, chatInputRef, onBranchDataChange, onSubagentRecordsChange, onSystemPromptChange, onSystemToolsChange, onSystemInfoLoaderChange, onSessionStatsPanelOpen,
@@ -290,6 +298,30 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
     deferInitialScroll: Boolean(pendingScrollRestore),
   });
   const sessionBusy = agentRunning || bashRunning;
+  const notifications = useNotifications();
+  const completion = notifications.snapshot.items.find((item): item is NotificationCompletionItem => (
+    item.kind === "completion" && item.sessionId === session?.id
+  ));
+  const notificationRefreshRef = useRef<string | null>(null);
+  const [notificationTargetUnavailable, setNotificationTargetUnavailable] = useState(false);
+  useEffect(() => {
+    if (!completion?.resultEntryId || loading || !committedHistory.ready
+      || committedHistory.entryIds.includes(completion.resultEntryId)) return;
+    const key = `${completion.sessionId}:${completion.revision}`;
+    if (notificationRefreshRef.current === key) return;
+    notificationRefreshRef.current = key;
+    // A global completion may arrive even if the session's own SSE missed it.
+    // Refresh the viewed branch, never move the SDK leaf to chase a notification.
+    void refreshViewedSession(completion.sessionId).then(() => {
+      const current = getCommittedNotificationHistory();
+      // If we joined an older in-flight read, follow it with a new ordinary
+      // history read. Only mount may force-probe disk/rebuild an idle wrapper.
+      if (current.ready && current.sessionId === completion.sessionId
+        && completion.resultEntryId && !current.entryIds.includes(completion.resultEntryId)) {
+        void refreshViewedSession(completion.sessionId);
+      }
+    });
+  }, [completion, committedHistory, loading, refreshViewedSession, getCommittedNotificationHistory]);
   const [quotedSelection, setQuotedSelection] = useState<{
     text: string;
     top: number;
@@ -459,6 +491,91 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
   const [visibleCount, setVisibleCount] = useState(VISIBLE_PAGE_SIZE);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const messageContentRef = useRef<HTMLDivElement | null>(null);
+  const notificationViewAckGateRef = useRef(new NotificationViewAckGate());
+  useEffect(() => {
+    const root = scrollContainerRef.current;
+    const content = messageContentRef.current;
+    if (!completion?.resultEntryId || !root || !content || !committedHistory.ready
+      || loading || error || pendingScrollRestore || !notificationReadingActive
+      || extensionDialog || extensionCustomUi || quotedSelection || quoteInputOpen) return;
+    const observedHistory = committedHistory;
+    const observedCompletion = completion;
+    let disposed = false;
+    let inFlight = false;
+    let retry: ReturnType<typeof setTimeout> | null = null;
+    let visibilityFrame: number | null = null;
+    const visibleText = () => {
+      const marker = Array.from(content.querySelectorAll<HTMLElement>("[data-notification-result-entry-id]"))
+        .find((element) => element.dataset.notificationResultEntryId === observedCompletion.resultEntryId);
+      if (!marker) return false;
+      const indexes = (marker.dataset.notificationResultTextIndexes ?? "").split(",")
+        .filter(Boolean).map(Number).filter((index) => Number.isSafeInteger(index) && index >= 0);
+      const textBlocks = Array.from(marker.querySelectorAll<HTMLElement>("[data-message-text]"));
+      const viewport = window.visualViewport;
+      const left = viewport?.offsetLeft ?? 0;
+      const top = viewport?.offsetTop ?? 0;
+      return indexes.some((index) => {
+        // Reveal buttons, model labels and process shells are not answer content.
+        const body = textBlocks[index]?.querySelector<HTMLElement>(".markdown-body, pre");
+        if (!body) return false;
+        return isNotificationAnswerContentVisible(body, root, {
+          left, top, right: left + (viewport?.width ?? window.innerWidth), bottom: top + (viewport?.height ?? window.innerHeight),
+        });
+      });
+    };
+    const checkVisibility = () => {
+      if (disposed || inFlight || document.visibilityState !== "visible" || !document.hasFocus()
+        || getCommittedNotificationHistory() !== observedHistory || !content.isConnected
+        || !visibleText()) return;
+      const gate = notificationViewAckGateRef.current;
+      const delay = gate.delay(observedCompletion.revision);
+      if (delay > 0) {
+        if (Number.isFinite(delay) && !retry) retry = setTimeout(() => { retry = null; checkVisibility(); }, delay);
+        return;
+      }
+      if (!gate.begin(observedCompletion.revision)) return;
+      inFlight = true;
+      void acknowledgeNotification(observedCompletion).then(() => {
+        gate.sent(observedCompletion.revision);
+      }).catch(() => {
+        gate.failed(observedCompletion.revision);
+        inFlight = false;
+        if (!disposed && !retry) retry = setTimeout(() => { retry = null; checkVisibility(); }, 2000);
+      });
+    };
+    const scheduleVisibility = () => {
+      if (disposed || visibilityFrame !== null) return;
+      visibilityFrame = requestAnimationFrame(() => { visibilityFrame = null; checkVisibility(); });
+    };
+    const intersectionObserver = new IntersectionObserver(scheduleVisibility, { root, threshold: 0 });
+    const observeResults = () => {
+      intersectionObserver.disconnect();
+      content.querySelectorAll<HTMLElement>("[data-notification-result-entry-id] [data-message-text]")
+        .forEach((element) => intersectionObserver.observe(element));
+      scheduleVisibility();
+    };
+    const mutations = new MutationObserver(observeResults);
+    mutations.observe(content, { childList: true, subtree: true });
+    root.addEventListener("scroll", scheduleVisibility, { passive: true });
+    content.addEventListener("load", scheduleVisibility, true);
+    window.addEventListener("focus", scheduleVisibility);
+    window.addEventListener("resize", scheduleVisibility);
+    document.addEventListener("visibilitychange", scheduleVisibility);
+    observeResults();
+    return () => {
+      disposed = true;
+      if (retry) clearTimeout(retry);
+      if (visibilityFrame !== null) cancelAnimationFrame(visibilityFrame);
+      intersectionObserver.disconnect();
+      mutations.disconnect();
+      root.removeEventListener("scroll", scheduleVisibility);
+      content.removeEventListener("load", scheduleVisibility, true);
+      window.removeEventListener("focus", scheduleVisibility);
+      window.removeEventListener("resize", scheduleVisibility);
+      document.removeEventListener("visibilitychange", scheduleVisibility);
+    };
+  }, [completion, committedHistory, loading, error, pendingScrollRestore, notificationReadingActive,
+    extensionDialog, extensionCustomUi, quotedSelection, quoteInputOpen, scrollContainerRef, getCommittedNotificationHistory]);
   const prevScrollDistanceRef = useRef<number | null>(null);
   const loadingOlderRef = useRef(false);
   const restoreStartedRef = useRef(false);
@@ -467,7 +584,9 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
   const [pendingSearchScroll, setPendingSearchScroll] = useState<Props["searchTarget"]>(null);
   const searchMessage = messages[entryIds.indexOf(pendingSearchScroll?.entryId ?? "")];
   const searchBlock = searchMessage?.role === "assistant"
-    ? (pendingSearchScroll?.blockIndex === undefined
+    ? (pendingSearchScroll?.notificationResult
+      ? splitFinalAssistantBlocks(searchMessage).answerBlocks.find((block) => block.type === "text" && block.text.trim())
+      : pendingSearchScroll?.blockIndex === undefined
       ? searchMessage.content.find((block) => block.type === "text")
       : searchMessage.content[pendingSearchScroll.blockIndex])
     : undefined;
@@ -577,19 +696,31 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
   }, [entryIds, pendingScrollRestore, restoreAnchorReady, scrollToBottom, scrollToMessage, searchTarget, visibleCount]);
 
   useEffect(() => {
-    if (!searchTarget || loading) return;
+    if (!searchTarget || loading || searchTarget.sessionId !== session?.id) return;
+    setNotificationTargetUnavailable(false);
     const controller = new AbortController();
     const locate = async () => {
       const history = searchHistoryRef.current;
       let found = history.entryIds.includes(searchTarget.entryId);
+      const notificationTarget = searchTarget.notificationResult === true;
       if (!found && !sessionBusy && history.hasEarlierMessages && history.historyCursor && !loadingOlderRef.current) {
         loadingOlderRef.current = true;
         const container = scrollContainerRef.current;
         if (container) prevScrollDistanceRef.current = captureScrollDistance(container.scrollHeight, container.scrollTop);
-        // ponytail: one extra page of 200 entries; deeper or other-branch hits just open the session.
-        const context = await loadContext(searchTarget.sessionId, activeLeafId, history.historyCursor, { tail: 200, signal: controller.signal });
-        loadingOlderRef.current = false;
-        found = Boolean(context?.entryIds.includes(searchTarget.entryId));
+        // Search retains its one-page behavior; notification targets may be an
+        // older completion retained through subsequent stopped/failed runs.
+        let before: string | null = history.historyCursor;
+        try {
+          while (!found && before && !controller.signal.aborted) {
+            const context = await loadContext(searchTarget.sessionId, activeLeafId, before, { tail: 200, signal: controller.signal });
+            if (!context || controller.signal.aborted) break;
+            found = context.entryIds.includes(searchTarget.entryId);
+            if (!notificationTarget || !context.hasMore || context.oldestEntryId === before) break;
+            before = context.oldestEntryId;
+          }
+        } finally {
+          loadingOlderRef.current = false;
+        }
       }
       if (controller.signal.aborted) return;
       if (found) {
@@ -597,12 +728,13 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
         setVisibleCount((current) => Math.max(current, (searchHistoryRef.current.entryIds.length + 200) * 2));
         setPendingSearchScroll(searchTarget);
       } else {
+        if (notificationTarget) setNotificationTargetUnavailable(true);
         onSearchTargetHandled?.(searchTarget);
       }
     };
     void locate();
     return () => controller.abort();
-  }, [searchTarget, loading, activeLeafId, sessionBusy, loadContext, onSearchTargetHandled, scrollContainerRef]);
+  }, [searchTarget, loading, activeLeafId, sessionBusy, loadContext, onSearchTargetHandled, scrollContainerRef, session?.id]);
 
   useLayoutEffect(() => {
     if (!pendingSearchScroll || pendingSearchScroll !== searchTarget) return;
@@ -614,6 +746,8 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
         { backgroundColor: "var(--bg-selected)" },
         { backgroundColor: "transparent" },
       ], { duration: 2500 });
+    } else if (pendingSearchScroll.notificationResult) {
+      setNotificationTargetUnavailable(true);
     }
     setPendingSearchScroll(null);
     onSearchTargetHandled?.(pendingSearchScroll);
@@ -1041,6 +1175,11 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
       </div>
 
       <div className="relative flex min-h-0 min-w-0 flex-1 overflow-hidden">
+        {notificationTargetUnavailable && completion && (
+          <div role="status" className="absolute left-4 right-4 top-2 z-40 rounded border border-border bg-panel px-3 py-2 text-text-muted" style={{ fontSize: "calc(12px + var(--chat-font-size-offset, 0px))" }}>
+            {t("notifications.resultUnavailable")}
+          </div>
+        )}
         {extensionDialog && (
           <ExtensionDialog key={extensionDialog.id} request={extensionDialog} waitingCount={waitingExtensionDialogCount} onRespond={respondToExtensionUi} />
         )}
@@ -1088,6 +1227,9 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
 
               const renderMessage = (idx: number, options: { attachRef?: boolean; keyPrefix?: string; messageOverride?: AgentMessage; showTimestamp?: boolean; writtenFiles?: WrittenFile[]; recoverTruncation?: boolean } = {}): ReactNode => {
                 const msg = options.messageOverride ?? messages[idx];
+                const resultTextIndexes = completion?.resultEntryId === entryIds[idx]
+                  && isCommittedNotificationResult(committedHistory, session?.id ?? null, entryIds[idx], messages[idx])
+                  ? notificationResultTextIndexes(messages[idx], msg) : [];
                 const isVisible = isMessageGroupAnchor(msg) || msg.role === "assistant";
                 const currentRefIdx = visibleRefIndexByMessage.get(idx);
                 const keyPrefix = options.keyPrefix ?? "message";
@@ -1133,7 +1275,10 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
                 );
                 if (!isVisible || currentRefIdx === undefined) return view;
                 return (
-                  <div key={`${keyPrefix}-${messageKey}`} data-entry-id={entryIds[idx]} ref={options.attachRef === false ? undefined : attachVisibleRef(idx, currentRefIdx)}>
+                  <div key={`${keyPrefix}-${messageKey}`} data-entry-id={entryIds[idx]}
+                    data-notification-result-entry-id={resultTextIndexes.length ? entryIds[idx] : undefined}
+                    data-notification-result-text-indexes={resultTextIndexes.length ? resultTextIndexes.join(",") : undefined}
+                    ref={options.attachRef === false ? undefined : attachVisibleRef(idx, currentRefIdx)}>
                     {view}
                   </div>
                 );

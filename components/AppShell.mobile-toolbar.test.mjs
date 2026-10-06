@@ -72,7 +72,7 @@ test("closes the mobile action layer on outside click, Escape, layout changes, a
 });
 
 test("keeps the mobile action layer open after using an expanded action", () => {
-  const toggleTopPanel = source.match(/const toggleTopPanel = useCallback\([\s\S]*?\n  \}, \[isMobile, isNarrowMobile\]\);/)?.[0];
+  const toggleTopPanel = source.match(/const toggleTopPanel = useCallback\([\s\S]*?\n  \}, \[isMobile, isNarrowMobile, invalidateNotificationNavigation\]\);/)?.[0];
   const historyHandler = source.match(/onClick=\{\(\) => \{[\s\S]*?handleViewFullHistory\(\);[\s\S]*?\n          \}\}/)?.[0];
   const autoNameHandler = source.match(/onClick=\{\(\) => \{[\s\S]*?void handleAutoName\(\);[\s\S]*?\n              \}\}/)?.[0];
 
@@ -115,8 +115,8 @@ test("places trust warnings below the mobile toolbar and the file toggle in tool
 test("closes top-bar dropdowns when the file panel expands to full width", () => {
   assert.match(
     source,
-    /const handleRightPanelExpandToggle = useCallback\(\(\) => \{\s*setActiveTopPanel\(null\);\s*setRightPanelExpanded\(\(expanded\) => !expanded\);/,
+    /const handleRightPanelExpandToggle = useCallback\(\(\) => \{\s*invalidateNotificationNavigation\(\);\s*setActiveTopPanel\(null\);\s*setRightPanelExpanded\(\(expanded\) => !expanded\);/,
   );
   assert.match(source, /onClick=\{handleRightPanelExpandToggle\}/);
-  assert.match(source, /if \(rightPanelFullWidth\) setActiveTopPanel\(null\);/);
+  assert.match(source, /if \(rightPanelFullWidth\) \{\s*invalidateNotificationNavigation\(\);\s*setActiveTopPanel\(null\);/);
 });

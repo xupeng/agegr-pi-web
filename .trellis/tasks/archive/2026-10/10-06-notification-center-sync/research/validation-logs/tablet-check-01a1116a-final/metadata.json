@@ -1,0 +1,119 @@
+{
+  "node": "v24.21.0",
+  "npm": "11.19.0",
+  "lint": {
+    "files": 733,
+    "errors": 0,
+    "warnings": 0,
+    "fatal": 0
+  },
+  "versions": {
+    "typescript": "5.9.3",
+    "eslint": "9.39.4",
+    "eslint-config-next": "16.3.6",
+    "next": "16.3.6",
+    "@earendil-works/pi-agent-core": "1.0.0",
+    "@earendil-works/pi-ai": "1.0.0",
+    "@earendil-works/pi-coding-agent": "1.0.0",
+    "@earendil-works/pi-tui": "1.0.0",
+    "eslint-config-next/node_modules/eslint-plugin-react-hooks": "7.0.1"
+  },
+  "mixedTreeMarkers": [
+    {
+      "p": "node_modules/.pnpm",
+      "exists": false
+    },
+    {
+      "p": "node_modules/.ignored",
+      "exists": false
+    },
+    {
+      "p": "node_modules/.modules.yaml",
+      "exists": false
+    }
+  ],
+  "browser": {
+    "report": "/home/xupeng/dev/personal/forked/agegr-pi-web/.trellis/tasks/10-06-notification-center-sync/research/validation-logs/layout-2026-10-06T13-41-40-298Z/report.json",
+    "status": "pass",
+    "scenarios": 10,
+    "measurements": 39,
+    "screenshots": 15,
+    "nonGET": [],
+    "apiRequests": 131,
+    "sourceUnchanged": true,
+    "browserTmpCleaned": true,
+    "taskTmpCleaned": true,
+    "maxCenterError": 0,
+    "compact": {
+      "viewport": {
+        "width": 641,
+        "height": 900
+      },
+      "step": "compact-max-sidebar",
+      "sample": {
+        "column": {
+          "left": 321,
+          "right": 641,
+          "top": 36,
+          "width": 320
+        },
+        "toolbarBottom": 36,
+        "open": true,
+        "dialog": {
+          "left": 333,
+          "right": 629,
+          "top": 36,
+          "bottom": 888,
+          "width": 296,
+          "height": 852
+        },
+        "close": {
+          "left": 572,
+          "right": 616,
+          "top": 45,
+          "bottom": 89,
+          "width": 44,
+          "height": 44,
+          "hittable": true
+        },
+        "actions": [
+          {
+            "left": 346,
+            "right": 554.5,
+            "top": 110,
+            "bottom": 146
+          },
+          {
+            "left": 346,
+            "right": 415.140625,
+            "top": 154,
+            "bottom": 190
+          }
+        ],
+        "headerStyle": {
+          "minWidth": "0px",
+          "overflowWrap": "anywhere"
+        },
+        "list": {
+          "height": 658,
+          "scrollHeight": 7938,
+          "scrollTop": 0
+        },
+        "itemCount": 60,
+        "sidebarOpen": true,
+        "rightPanelOpen": false
+      }
+    },
+    "httpCSS": {
+      "url": "http://192.168.11.233:8505/_next/static/chunks/_1pj7b4_._.css",
+      "sha256": "edb06d75e75aa7cc6998820ad01b72b61cbe9f18479ef98e921adc6647e7047d",
+      "anchored": true,
+      "headerRule": ".notification-center h2 {\n  overflow-wrap: anywhere;\n  min-width: 0;\n  margin: 0;\n  font-size: 16px;\n}",
+      "actionsRule": ".notification-center-actions button {\n  overflow-wrap: anywhere;\n  min-width: 0;\n  max-width: 100%;\n  min-height: 36px;\n  padding: 6px 10px;\n  font-size: 13px;\n}"
+    }
+  },
+  "checksSourceMatchesBrowser": true,
+  "runtimeFixtureCleaned": true,
+  "checkTmpCleaned": true,
+  "services": "    PID    PPID COMMAND\n1118376     884 /home/xupeng/.local/share/mise/installs/node/24.21.0/bin/node /home/xupeng/dev/personal/forked/agegr-pi-web/node_modules/next/dist/bin/next dev -H 192.168.11.233 -p 8505\n1118396 1118376 next-server (v16.3.6)\n1005816 1005786 next-server (v16.3.6)\n"
+}

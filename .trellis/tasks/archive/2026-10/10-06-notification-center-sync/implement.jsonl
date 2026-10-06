@@ -1,0 +1,14 @@
+{"file":".trellis/spec/frontend/state-management.md","reason":"服务端globalThis、客户端共享store与SSR边界；通知权威不得放localStorage"}
+{"file":".trellis/spec/frontend/hook-guidelines.md","reason":"useSyncExternalStore稳定snapshot、连接身份、cleanup和历史请求作用域"}
+{"file":".trellis/spec/frontend/session-list-refresh.md","reason":"两级按需加载、定向元数据、缓存竞态与subagent抑制"}
+{"file":".trellis/spec/frontend/pi-sdk-admission.md","reason":"admission不是完成；Stop/MCP prepare/运行完成的独立边界"}
+{"file":".trellis/spec/frontend/ask-user-protocol.md","reason":"原pending owner、镜像回退和stale close；通知查看不得提交交互"}
+{"file":".trellis/spec/frontend/session-restore.md","reason":"跨项目显式通知跳转不能被tab/workspace记忆抢回"}
+{"file":".trellis/spec/frontend/chat-tail-follow.md","reason":"结果可视观察不得增加第二套跟随或强迫上滚用户回底部"}
+{"file":".trellis/spec/frontend/settings-dialog-mobile.md","reason":"手机全屏、安全区、44px关闭与滚动链"}
+{"file":"docs/agents/sessions.md","reason":"wrapper生命周期、settled、SSE与reload所有权"}
+{"file":"docs/agents/tools.md","reason":"只读observer不能改变Chat-only发现、工具pins或system prompt"}
+{"file":".trellis/tasks/archive/2026-10/10-06-notification-center-sync/research/runtime-integration.md","reason":"服务端pending/删除/持久化接入与实例级聚合禁止路径"}
+{"file":".trellis/tasks/archive/2026-10/10-06-notification-center-sync/research/completion-contract.md","reason":"公开boundary observer可行性、结果entry证据与SDK特殊异常限制"}
+{"file":".trellis/spec/frontend/notification-center.md","reason":"实例共享通知的已实现API/持久化/版本/正文确认与导航退休契约"}
+{"file":".trellis/tasks/archive/2026-10/10-06-notification-center-sync/research/implementation-boundary.md","reason":"本轮owner分工、固定跨层接口、隔离验证与清理责任"}

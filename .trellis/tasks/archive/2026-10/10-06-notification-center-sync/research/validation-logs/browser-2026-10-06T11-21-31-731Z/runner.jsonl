@@ -1,0 +1,17 @@
+{"at":"2026-10-06T11:21:31.744Z","type":"environment","detail":{"originalTMPDIR":"/home/xupeng/.cache/pi-tmp/01a110c1-d062-7540-97bf-c3f9b7303d87/notification-center-unpli18k","correctedTMPDIR":"/var/tmp/notification-browser.ij5IRP1i/tmp","home":"/var/tmp/notification-browser.ij5IRP1i/home","agent":"/var/tmp/notification-browser.ij5IRP1i/agent","root":"/home/xupeng/dev/personal/forked/agegr-pi-web","sdk":"1.0.0"}}
+{"at":"2026-10-06T11:21:31.751Z","type":"server-start","detail":{"pid":1082388,"port":42849,"log":"/home/xupeng/.cache/pi-tmp/01a110c1-d062-7540-97bf-c3f9b7303d87/notification-center-unpli18k/results/server-1.log","startedAt":"2026-10-06T11:21:31.751Z","argv":["/home/xupeng/.local/share/mise/installs/node/24.21.0/bin/node","/home/xupeng/dev/personal/forked/agegr-pi-web/node_modules/next/dist/bin/next","dev","-H","127.0.0.1","-p","42849"],"stoppedAt":null}}
+{"at":"2026-10-06T11:21:40.825Z","type":"browser-permission","detail":{"label":"a","notification":"denied","queried":"denied","secure":true,"url":"http://127.0.0.1:42849/"}}
+{"at":"2026-10-06T11:21:42.937Z","type":"browser-permission","detail":{"label":"b","notification":"denied","queried":"denied","secure":true,"url":"http://127.0.0.1:42849/"}}
+{"at":"2026-10-06T11:21:45.631Z","type":"PASS","detail":"global-aggregation"}
+{"at":"2026-10-06T11:21:48.008Z","type":"PASS","detail":"revision-bulk-fallback"}
+{"at":"2026-10-06T11:21:50.326Z","type":"PASS","detail":"new-run-preserves-old"}
+{"at":"2026-10-06T11:21:58.058Z","type":"PASS","detail":"result-center-gate"}
+{"at":"2026-10-06T11:22:04.741Z","type":"PASS","detail":"result-settings-long"}
+{"at":"2026-10-06T11:22:11.832Z","type":"PASS","detail":"result-file-fullscreen"}
+{"at":"2026-10-06T11:22:15.357Z","type":"UNSUPPORTED","detail":{"name":"result-focus-gate","reason":"Headless Chromium retains native document focus across target activation even after disabling Playwright forced-focus; no JS focus/visibility stub permitted"}}
+{"at":"2026-10-06T11:22:25.459Z","type":"PASS","detail":"pagination"}
+{"at":"2026-10-06T11:22:31.295Z","type":"PASS","detail":"process-final-target"}
+{"at":"2026-10-06T11:22:36.219Z","type":"PASS","detail":"code-only-body"}
+{"at":"2026-10-06T11:22:43.549Z","type":"PASS","detail":"mermaid-loading-error"}
+{"at":"2026-10-06T11:22:48.031Z","type":"PASS","detail":"metadata-navigation-retired"}
+{"at":"2026-10-06T11:22:54.405Z","type":"PASS","detail":"sibling-busy-mobile"}

@@ -20,6 +20,7 @@ import { normalizeToolCalls } from "@/lib/normalize";
 import { isPromptRejectedError, readAgentCommandError, sendAgentCommand } from "@/lib/agent-client";
 import { formatModelSelectionError } from "@/lib/model-selection-error-display";
 import { resolvePendingAskAfterClose } from "@/lib/ask-user/resolve-pending-ask";
+import { bindNotificationHistoryProof, EMPTY_NOTIFICATION_HISTORY, type NotificationHistoryScope } from "@/lib/notifications/viewed-result";
 import {
   deleteSessionViewSnapshot,
   getSessionViewSnapshot,
@@ -359,6 +360,34 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
   const [messages, setMessages] = useState<AgentMessage[]>([]);
   const [activeToolResults, setActiveToolResults] = useState<Map<string, ToolResultMessage>>(new Map());
   const [entryIds, setEntryIds] = useState<string[]>([]);
+  const [committedHistory, setCommittedHistory] = useState<NotificationHistoryScope>(EMPTY_NOTIFICATION_HISTORY);
+  const notificationHistoryRef = useRef<NotificationHistoryScope>(EMPTY_NOTIFICATION_HISTORY);
+  const notificationViewGenerationRef = useRef(0);
+  const publishNotificationHistory = useCallback((next: NotificationHistoryScope) => {
+    notificationHistoryRef.current = next;
+    setCommittedHistory(next);
+  }, []);
+  const invalidateNotificationHistory = useCallback((sid: string, leafId?: string | null) => {
+    const previous = notificationHistoryRef.current;
+    const viewGeneration = ++notificationViewGenerationRef.current;
+    const preserve = previous.sessionId === sid && (leafId === undefined || previous.leafId === leafId);
+    publishNotificationHistory({
+      ...(preserve ? previous : EMPTY_NOTIFICATION_HISTORY),
+      sessionId: sid,
+      leafId: leafId === undefined ? (preserve ? previous.leafId : null) : leafId,
+      ready: false,
+      viewGeneration,
+    });
+    return viewGeneration;
+  }, [publishNotificationHistory]);
+  const getCommittedNotificationHistory = useCallback(() => notificationHistoryRef.current, []);
+  const retireNotificationHistory = useCallback(() => {
+    notificationHistoryRef.current = {
+      ...notificationHistoryRef.current,
+      viewGeneration: ++notificationViewGenerationRef.current,
+      ready: false,
+    };
+  }, []);
   const [historyCursor, setHistoryCursor] = useState<string | null>(null);
   const [hasEarlierMessages, setHasEarlierMessages] = useState(false);
   const [streamState, dispatch] = useReducer(streamReducer, INITIAL_STREAMING_STATE);
@@ -845,6 +874,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
   const flight = (async (): Promise<unknown> => {
     let messagesLoaded = false;
     const requestSeq = ++sessionReqSeqRef.current;
+    const notificationGeneration = invalidateNotificationHistory(sid);
     // A full session load replaces the viewed branch; supersede pending pages.
     contextReqSeqRef.current += 1;
     const requestWatermark = trellisEventWatermarkRef.current;
@@ -879,6 +909,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         !sessionHookMountedRef.current
         || sessionIdRef.current !== sid
         || requestSeq !== sessionReqSeqRef.current
+        || notificationGeneration !== notificationViewGenerationRef.current
       ) return null;
       // Freshness check: when the disk snapshot is unchanged (same opaque
       // revision), keep any history the user already paged in instead of
@@ -921,6 +952,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
           stats: d.stats,
           totalActiveMs: d.totalActiveMs,
           loadedEntryIds: entryIdsRef.current,
+          notificationHistory: notificationHistoryRef.current,
         });
       } else {
         setMessages(persistedMessages);
@@ -928,6 +960,21 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         setHistoryCursor(d.context.oldestEntryId);
         setHasEarlierMessages(d.context.hasMore);
       }
+      const previousNotificationHistory = notificationHistoryRef.current;
+      const notificationProof = bindNotificationHistoryProof(
+        revisionUnchanged ? entryIdsRef.current : d.context.entryIds ?? [],
+        persistedMessages,
+        d.context.entryIds ?? [],
+        d.context.messages,
+        previousNotificationHistory.leafId === d.leafId ? previousNotificationHistory : undefined,
+      );
+      publishNotificationHistory({
+        sessionId: sid,
+        leafId: d.leafId,
+        viewGeneration: notificationGeneration,
+        ready: true,
+        ...notificationProof,
+      });
       applyTrellisHistory(sid, d.trellisSubagentRecords, persistedMessages, d.leafId ?? null, requestWatermark, { latest: true });
       // Tool-preset state is independent of the view cache: it must be applied
       // on every read, cached window or not (#700).
@@ -951,6 +998,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
           stats: d.stats,
           totalActiveMs: d.totalActiveMs,
           loadedEntryIds: d.context.entryIds ?? [],
+          notificationHistory: notificationHistoryRef.current,
         });
       }
       if (d.wrapperRebuilt) {
@@ -1017,11 +1065,14 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
       if (loadFlightsRef.current.get(flightKey) === flight) loadFlightsRef.current.delete(flightKey);
     });
     return await flight;
-  }, [resetTrellisScope, applyTrellisHistory, setToolPresetState, syncLiveModel]);
+  }, [resetTrellisScope, applyTrellisHistory, setToolPresetState, syncLiveModel, invalidateNotificationHistory, publishNotificationHistory]);
 
   const loadContext = useCallback(async (sid: string, leafId: string | null, before?: string | null, options?: { tail?: number; signal?: AbortSignal }) => {
     const isReplacement = !before;
     if (!isReplacement && trellisActiveLeafRef.current !== leafId) return;
+    const notificationGeneration = isReplacement
+      ? invalidateNotificationHistory(sid, leafId)
+      : notificationViewGenerationRef.current;
     const requestSeq = ++contextReqSeqRef.current;
     const requestWatermark = trellisEventWatermarkRef.current;
     const requestViewGeneration = isReplacement
@@ -1061,6 +1112,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         || requestSeq !== contextReqSeqRef.current
         || requestViewGeneration !== trellisViewGenerationRef.current
         || trellisActiveLeafRef.current !== leafId
+        || notificationGeneration !== notificationViewGenerationRef.current
       ) return;
       setHistoryCursor(d.context.oldestEntryId);
       setHasEarlierMessages(d.context.hasMore);
@@ -1085,6 +1137,21 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         setEntryIds(d.context.entryIds ?? []);
         applyTrellisHistory(sid, d.trellisSubagentRecords, d.context.messages, leafId, requestWatermark);
       }
+      const previousHistory = notificationHistoryRef.current;
+      const notificationProof = bindNotificationHistoryProof(
+        before ? [...d.context.entryIds, ...entryIdsRef.current] : d.context.entryIds,
+        before ? [...d.context.messages, ...messagesRef.current] : d.context.messages,
+        d.context.entryIds,
+        d.context.messages,
+        before ? previousHistory : undefined,
+      );
+      publishNotificationHistory({
+        sessionId: sid,
+        leafId,
+        viewGeneration: notificationGeneration,
+        ready: !before || previousHistory.ready,
+        ...notificationProof,
+      });
       return d.context;
     } catch (e) {
       if (
@@ -1098,7 +1165,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
     } finally {
       trellisHistoryRequestsInFlightRef.current -= 1;
     }
-  }, [applyTrellisHistory]);
+  }, [applyTrellisHistory, invalidateNotificationHistory, publishNotificationHistory]);
 
   const refreshViewedSession = useCallback(async (sid: string) => {
     if (shouldFollowTrellisHeadRefresh(
@@ -2981,6 +3048,14 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         setActiveLeafId(cached.leafId);
         setMessages(cached.messages);
         setEntryIds(cached.entryIds);
+        publishNotificationHistory({
+          sessionId: session.id,
+          leafId: cached.leafId,
+          viewGeneration: ++notificationViewGenerationRef.current,
+          ready: false,
+          messages: cached.notificationHistory?.messages ?? [],
+          entryIds: cached.notificationHistory?.entryIds ?? [],
+        });
         setHistoryCursor(cached.oldestEntryId);
         setHasEarlierMessages(cached.hasMore);
         setError(null);
@@ -3020,6 +3095,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
     }
     return () => {
       sessionHookMountedRef.current = false;
+      retireNotificationHistory();
       const abandonedDraftKey = isNew ? newSessionDraftKey : null;
       if (abandonedDraftKey) {
         queueMicrotask(() => {
@@ -3052,6 +3128,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
             stats: currentData.stats,
             totalActiveMs: currentData.totalActiveMs,
             loadedEntryIds: entryIdsRef.current,
+            notificationHistory: notificationHistoryRef.current,
           });
         } else {
           deleteSessionViewSnapshot(sid);
@@ -3195,7 +3272,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
 
   return {
     // State
-    data, loading, error, activeLeafId, messages, activeToolResults, entryIds, historyCursor, hasEarlierMessages, streamState,
+    data, loading, error, activeLeafId, messages, activeToolResults, entryIds, committedHistory, historyCursor, hasEarlierMessages, streamState,
     agentRunning, modelNames, modelList, modelError, modelScopeWarnings, modelThinkingLevels, modelThinkingLevelMaps, newSessionModel, toolPreset, thinkingLevel,
     retryInfo, contextUsage, systemPrompt, forkingEntryId,
     isCompacting, compactError, compactResult, currentModel, displayModel, modelSwitching, sessionStats, autoCompactionEnabled,
@@ -3226,6 +3303,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
     handleToolPresetChange, handleThinkingLevelChange, handleSetDefaultModel, handleSetDefaultThinkingLevel, loadTools, loadSlashCommands, setActiveLeafId, setData, setMessages, loadContext,
     scrollToBottom, scrollUserMsgToTop, scrollToMessage,
     followTailIfAttached,
+    getCommittedNotificationHistory, refreshViewedSession,
     dispatch, setAgentRunning, setForkingEntryId,
     bashRunning, pendingBash,
     // Subscriptions

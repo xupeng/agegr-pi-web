@@ -18,6 +18,11 @@ import { renderStallAbortText, STALL_ABORT_CUSTOM_TYPE, type StallAbortNoticeDet
 import { resolveStallWatchdogSettings, StallWatchdog, type StallWatchdogStall } from "./stall-watchdog";
 import { notifySessionComplete } from "./web-push";
 import { hasActiveSessionLivenessProvider } from "./session-liveness";
+import { AgentRunTracker, completionResultText } from "./agent-run-tracker";
+import { createAgentRunObserver } from "./agent-run-observer";
+import { isBlockingExtensionUiRequest } from "./browser-notifications";
+import { invalidateNotifications, isNotificationSessionDeleting, recordNotificationCompletion } from "./notifications/store";
+import type { NotificationCompletionInput, NotificationRuntimeSession } from "./notifications/types";
 import type { SlashCommandInfo } from "@earendil-works/pi-coding-agent";
 import type { AgentSessionLike, ContextUsage, ExtensionUiContextLike, ToolInfo } from "./pi-types";
 import type {
@@ -157,6 +162,7 @@ type ExtensionCommandContextActionsLike = {
 };
 
 type AgentSessionWrapperOptions = {
+  runTracker?: AgentRunTracker;
   exactSystemPrompt?: () => string;
   chatOnly?: boolean;
   onAgentRunComplete?: AgentRunCompleteListener;
@@ -333,7 +339,8 @@ export class AgentSessionWrapper {
   private listeners = new Set<EventListener>();
   private activeToolEvents = new Map<string, AgentEvent>();
   private pendingUiResponses = new Map<string, PendingUiResponse>();
-  private pendingUiRequests = new Map<string, AgentEvent>();
+  private pendingUiRequests = new Map<string, ExtensionUiRequest>();
+  private pendingUiRequestedAt = new Map<string, string>();
   private activeCustomUis = new Map<string, ActiveCustomUi>();
   private extensionUiAbortController = new AbortController();
   private extensionStatuses = new Map<string, string>();
@@ -351,6 +358,7 @@ export class AgentSessionWrapper {
   private extensionBindingError: unknown = null;
   private readonly exactSystemPrompt?: () => string;
   private readonly chatOnly: boolean;
+  private readonly runTracker: AgentRunTracker;
   private readonly onAgentRunComplete?: AgentRunCompleteListener;
   private readonly suppressCompletionNotifications: boolean;
   private readonly mcpHost?: Pick<McpHost, "prepareForPrompt" | "dispose">;
@@ -380,6 +388,7 @@ export class AgentSessionWrapper {
   ) {
     this.exactSystemPrompt = options.exactSystemPrompt;
     this.chatOnly = options.chatOnly ?? false;
+    this.runTracker = options.runTracker ?? new AgentRunTracker(inner.sessionId, randomUUID());
     this.onAgentRunComplete = options.onAgentRunComplete;
     this.suppressCompletionNotifications = options.suppressCompletionNotifications ?? false;
     this.mcpHost = options.mcpHost;
@@ -446,7 +455,10 @@ export class AgentSessionWrapper {
     this.stallWatchdog?.dispose();
     this.stallWatchdog = this.createStallWatchdog();
     this.unsubscribe = this.inner.subscribe((event: AgentEvent) => {
-      if (event.type === "agent_start") this.agentRunNeedsCompletion = true;
+      if (event.type === "agent_start") {
+        this.agentRunNeedsCompletion = true;
+        this.runTracker.agentStart();
+      }
       if (event.type === "agent_end") {
         invalidateSessionListCache();
         // Every tool call of the run has finished; nothing is left to replay.
@@ -455,7 +467,10 @@ export class AgentSessionWrapper {
       this.trackActiveToolEvent(event);
       this.stallWatchdog?.observe(event);
       if (event.type === "agent_start") this.stallWatchdog?.arm();
-      if (event.type === "agent_settled") this.stallWatchdog?.disarm();
+      if (event.type === "agent_settled") {
+        this.stallWatchdog?.disarm();
+        this.recordRunCompletions(this.runTracker.settle(this.inner.sessionManager.getLeafId(), new Date().toISOString()));
+      }
       if (IDLE_RESET_EVENT_TYPES.has(event.type)) this.resetIdleTimer();
       this.emit(event);
       if (event.type === "agent_settled") this.notifyAgentRunCompleteIfIdle();
@@ -546,6 +561,7 @@ export class AgentSessionWrapper {
    * watchdog so both take exactly the same unwind path.
    */
   private async abortTurn(): Promise<void> {
+    this.runTracker.markStopped();
     this.stallWatchdog?.disarm();
     this.forceShutdownOnIdle = true;
     this.resetIdleTimer();
@@ -599,6 +615,48 @@ export class AgentSessionWrapper {
     }
   }
 
+  private recordRunCompletions(candidates: NotificationCompletionInput[]): void {
+    for (const candidate of candidates) {
+      // Generation is embodied by this wrapper/tracker pair. Never let a closing,
+      // replaced or deleting wrapper's late promise publish into the new owner.
+      if (!this.isAlive() || this.suppressCompletionNotifications
+        || getRegistry().get(this.sessionId) !== this || candidate.sessionId !== this.sessionId
+        || isNotificationSessionDeleting(this.sessionId) || !candidate.resultEntryId) continue;
+      try {
+        const entry = this.inner.sessionManager.getEntry(candidate.resultEntryId);
+        if (entry?.type !== "message" || entry.message.role !== "assistant") continue;
+        recordNotificationCompletion({ ...candidate, summary: completionResultText(entry.message) });
+      } catch (error) {
+        // Notification collection must never interfere with the original run.
+        console.error("[pi-web] completion collection failed:", error instanceof Error ? error.message : error);
+      }
+    }
+  }
+
+  /** Current owner state only: no resource loading, disk reads or liveness lease. */
+  notificationSnapshot(): NotificationRuntimeSession {
+    return {
+      sessionId: this.sessionId, cwd: this.cwd, pendingAsk: structuredClone(this.pendingAsk ?? null),
+      extensionRequests: [...this.pendingUiRequests.values()].flatMap((request) => {
+        const requestedAt = this.pendingUiRequestedAt.get(request.id);
+        return isBlockingExtensionUiRequest(request) && requestedAt
+          ? [{ request: structuredClone(request), requestedAt }] : [];
+      }),
+    };
+  }
+
+  private setPendingUiRequest(request: ExtensionUiRequest): void {
+    this.pendingUiRequests.set(request.id, request);
+    if (!this.pendingUiRequestedAt.has(request.id)) this.pendingUiRequestedAt.set(request.id, new Date().toISOString());
+    invalidateNotifications();
+  }
+
+  private deletePendingUiRequest(id: string): void {
+    const changed = this.pendingUiRequests.delete(id);
+    this.pendingUiRequestedAt.delete(id);
+    if (changed) invalidateNotifications();
+  }
+
   /**
    * Register the question set an agent wants the user to answer as the
    * session's open ask. Deliberately does not wait for the user: `ask_user`
@@ -610,6 +668,8 @@ export class AgentSessionWrapper {
    */
   openAsk(input: PendingAskOpenInput): Promise<PendingAskOpenResult> {
     const result = getAskUserStore().open(input);
+    this.runTracker.markAskPaused();
+    invalidateNotifications();
     // A supersede closes the earlier ask, so the browsers watching it must
     // hear that before they hear about its replacement.
     if (result.superseded !== undefined) this.emitAskClosed(input.sessionId, result.superseded);
@@ -705,6 +765,7 @@ export class AgentSessionWrapper {
   }
 
   private emitAskClosed(sessionId: string, outcome: AskUserOutcome): void {
+    invalidateNotifications();
     this.emit({
       type: "ask.closed",
       askId: outcome.askId,
@@ -736,6 +797,7 @@ export class AgentSessionWrapper {
           uiContext?: ExtensionUiContextLike;
           mode?: "rpc";
           commandContextActions?: ExtensionCommandContextActionsLike;
+          abortHandler?: () => void;
           shutdownHandler?: () => void;
           onError?: (error: { extensionPath: string; event: string; error: string }) => void;
         }) => Promise<void>;
@@ -743,6 +805,12 @@ export class AgentSessionWrapper {
           uiContext,
           mode: "rpc",
           commandContextActions: this.createExtensionCommandContextActions(),
+          abortHandler: () => {
+            this.runTracker.markStopped();
+            void this.inner.abort().catch((error) => {
+              console.error("[pi-web] extension abort failed:", error instanceof Error ? error.message : error);
+            });
+          },
           shutdownHandler: () => this.emit({
             type: "extension_ui_request",
             id: randomUUID(),
@@ -1049,6 +1117,7 @@ export class AgentSessionWrapper {
           const promptImages = command.images as Array<{ type: "image"; data: string; mimeType: string }> | undefined;
           const streamingBehavior = command.streamingBehavior as "steer" | "followUp" | undefined;
           let preflightAccepted = false;
+          const runPromptTicket = this.runTracker.beginPrompt();
           let preflightSettled = false;
           let promptSettled = false;
           let acceptPreflight!: () => void;
@@ -1071,13 +1140,16 @@ export class AgentSessionWrapper {
               reject(error);
             };
           });
-          const finishPrompt = () => {
+          const finishPrompt = (failed = false) => {
             if (promptSettled) return;
             promptSettled = true;
+            // Veto an attributable rejection before releasing counts or candidates.
+            const candidates = this.runTracker.finishPrompt(runPromptTicket, failed);
             this.pendingPromptCount = Math.max(0, this.pendingPromptCount - 1);
             this.resetIdleTimer();
             if (!this.isRunning()) this.stallWatchdog?.disarm();
             this.notifyAgentRunCompleteIfIdle();
+            this.recordRunCompletions(candidates);
           };
 
           this.pendingPromptCount += 1;
@@ -1099,7 +1171,7 @@ export class AgentSessionWrapper {
               })
               .then(() => {
                 if (!controller.signal.aborted) return;
-                finishPrompt();
+                finishPrompt(true);
                 throw new Error(MCP_WAIT_STOPPED_MESSAGE);
               });
             const wait = { controller, done: waited.then(() => undefined, () => undefined) };
@@ -1121,12 +1193,13 @@ export class AgentSessionWrapper {
               // Pi 0.99 invokes this only once the prompt is accepted, with the
               // disposition it was accepted as ("started" | "queued" | "handled");
               // a rejected prompt throws before it fires. Any invocation is an ack.
-              preflightResult: () => {
+              preflightResult: (disposition) => {
+                this.runTracker.acceptPrompt(runPromptTicket, disposition);
                 acceptPreflight();
               },
             });
           } catch (error) {
-            finishPrompt();
+            finishPrompt(true);
             throw error;
           }
 
@@ -1138,7 +1211,7 @@ export class AgentSessionWrapper {
             if (!streamingBehavior) this.emit({ type: "prompt_done" });
           }, (error) => {
             rejectPreflight(error);
-            finishPrompt();
+            finishPrompt(true);
             invalidateSessionListCache();
             // A preflight rejection is returned by the POST itself. Only an
             // unexpected failure after acceptance needs the asynchronous event.
@@ -1641,6 +1714,8 @@ export class AgentSessionWrapper {
   destroy(options: { preserveAsk?: boolean } = {}): void {
     if (!this._alive) return;
     this._alive = false;
+    this.runTracker.dispose();
+    invalidateNotifications();
     this.disposeMcpHost();
     // Tell attached SSE listeners to drop this instance so the browser
     // EventSource errors and reconnects instead of staying OPEN on a dead wrapper.
@@ -1659,6 +1734,7 @@ export class AgentSessionWrapper {
     for (const id of Array.from(this.activeCustomUis.keys())) this.closeCustomUi(id, undefined);
     this.pendingUiResponses.clear();
     this.pendingUiRequests.clear();
+    this.pendingUiRequestedAt.clear();
     this.activeToolEvents.clear();
     this.clearExtensionWidgets(false);
 
@@ -1702,6 +1778,8 @@ export class AgentSessionWrapper {
     // Closing starts before the first await, so a request that arrives while
     // extensions shut down starts a fresh wrapper instead of prompting this one.
     this.closing = true;
+    this.runTracker.dispose();
+    invalidateNotifications();
 
     this.shutdownPromise = (async () => {
       try {
@@ -1992,9 +2070,9 @@ export class AgentSessionWrapper {
       id,
       method: "custom",
       lines,
-    } as ExtensionUiRequest as AgentEvent;
-    this.pendingUiRequests.set(id, event);
-    this.emit(event);
+    } as ExtensionUiRequest;
+    this.setPendingUiRequest(event);
+    this.emit(event as AgentEvent);
   }
 
   private closeCustomUi(id: string, value: unknown): void {
@@ -2002,7 +2080,7 @@ export class AgentSessionWrapper {
     if (!custom || custom.settled) return;
     custom.settled = true;
     this.activeCustomUis.delete(id);
-    this.pendingUiRequests.delete(id);
+    this.deletePendingUiRequest(id);
     try {
       custom.component.dispose?.();
     } catch {
@@ -2136,7 +2214,7 @@ export class AgentSessionWrapper {
       const cleanup = () => {
         if (timeoutId) clearTimeout(timeoutId);
         abortSignal.removeEventListener("abort", onAbort);
-        this.pendingUiRequests.delete(id);
+        this.deletePendingUiRequest(id);
         this.pendingUiResponses.delete(id);
         this.emit({ type: "extension_ui_closed", id });
       };
@@ -2152,7 +2230,7 @@ export class AgentSessionWrapper {
       if (timeout) timeoutId = setTimeout(() => settle(defaultValue), timeout);
       abortSignal.addEventListener("abort", onAbort, { once: true });
 
-      this.pendingUiRequests.set(id, fullRequest as AgentEvent);
+      this.setPendingUiRequest(fullRequest as ExtensionUiRequest);
       this.pendingUiResponses.set(id, {
         resolve: (response) => settle(parseResponse(response)),
         cancel: () => settle(defaultValue),
@@ -2387,6 +2465,7 @@ function registerRpcWrapper(wrapper: AgentSessionWrapper): void {
   const persisted = readPersistedAsk(sessionId);
   if (persisted !== undefined) getAskUserStore().restore(sessionId, persisted);
   registry.set(sessionId, wrapper);
+  invalidateNotifications();
   wrapper.start();
   if (!wrapper.isChatOnly()) wrapper.beginExtensionBinding();
 }
@@ -2486,6 +2565,17 @@ function trackStartingSession(cwd: string): () => void {
 
 export function getRpcSession(sessionId: string): AgentSessionWrapper | undefined {
   return getRegistry().get(sessionId);
+}
+
+export function getRpcNotificationSnapshots(): NotificationRuntimeSession[] {
+  const snapshots: NotificationRuntimeSession[] = [];
+  // Read the already-existing registry rather than initializing one for a subscriber.
+  for (const wrapper of globalThis.__piSessions?.values() ?? []) {
+    if (!wrapper.isAlive() || wrapper.hasSuppressedCompletionNotifications()
+      || typeof wrapper.notificationSnapshot !== "function") continue;
+    snapshots.push(wrapper.notificationSnapshot());
+  }
+  return snapshots;
 }
 
 export interface SetRpcSessionToolsResult {
@@ -2848,6 +2938,10 @@ export async function startRpcSession(
         ? undefined
         : projectTrustReloadOptions(sessionCwd, agentDir);
     const settingsManager = SettingsManager.create(sessionCwd, agentDir);
+    // Initialize before loader creation; the observer is the same read-only
+    // inline extension in normal and Chat-only, and absent for subagents.
+    const runTracker = new AgentRunTracker(sessionManager.getSessionId(), randomUUID());
+    const runObserver = createAgentRunObserver(runTracker);
     // Chat-only sessions and subagents that replace Pi's prompt send an exact
     // system prompt. The prompt is resolved at prompt time through this inline
     // extension: it may read the session's context files, which exist only
@@ -2892,9 +2986,10 @@ export async function startRpcSession(
       modelRuntime: normalModelRuntime,
       settingsManager,
       resourceLoaderOptions: chatOnly
-        ? { ...CHAT_ONLY_RESOURCE_LOADER_OPTIONS, extensionFactories: [exactSystemPromptExtension] }
+        ? { ...CHAT_ONLY_RESOURCE_LOADER_OPTIONS, extensionFactories: [runObserver, exactSystemPromptExtension] }
         : {
             extensionFactories: [
+              runObserver,
               ...(builtins?.extensions ?? []),
               createReadOnlyMcpPolicyExtension(),
               createProjectCommandBashExtension({
@@ -2997,6 +3092,7 @@ export async function startRpcSession(
         : undefined;
     exactSystemPromptRef.current = exactSystemPrompt;
     const wrapper = new AgentSessionWrapper(inner, {
+      runTracker,
       exactSystemPrompt,
       chatOnly,
       onAgentRunComplete: (completedSessionId) => {

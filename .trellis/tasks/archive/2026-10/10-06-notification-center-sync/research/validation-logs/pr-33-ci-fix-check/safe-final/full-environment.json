@@ -1,0 +1,9 @@
+{
+  "PATH": "/home/xupeng/.pi/agent/bin:/home/xupeng/.local/share/mise/installs/codex/latest/bin:/home/xupeng/.local/share/mise/installs/pi/latest/pi:/home/xupeng/.local/share/mise/installs/pnpm/12.5.1:/home/xupeng/.local/share/mise/installs/node/24.21.0/bin:/home/xupeng/.local/share/mise/installs/npm-douban-neogen-cli/0.3.2/node_modules/.bin:/home/xupeng/.local/share/mise/installs/npm-mindfoldhq-trellis/0.6.17/node_modules/.bin:/home/xupeng/.local/share/mise/installs/npm-xup3ng-pi-web/0.12.0/node_modules/.bin:/home/xupeng/.local/share/mise/installs/npm-esbuild/0.28.2/node_modules/.bin:/home/xupeng/.local/share/mise/installs/npm-jiti/2.7.0/node_modules/.bin:/home/xupeng/.local/share/mise/installs/npm-sass/1.104.1/node_modules/.bin:/home/xupeng/.local/share/mise/installs/npm-terser/5.51.2/node_modules/.bin:/home/xupeng/.local/share/mise/installs/npm-vite/8.3.0/node_modules/.bin:/home/xupeng/.local/share/mise/installs/npm-yaml/2.9.1/node_modules/.bin:/home/xupeng/.local/share/mise/installs/claude/latest:/home/xupeng/.local/share/mise/installs/gh/latest/gh_2.101.0_linux_amd64/bin:/home/xupeng/.local/share/mise/installs/codegraph/latest/codegraph-linux-x64/bin:/home/xupeng/.local/share/mise/installs/npm-playwright/1.63.0/node_modules/.bin:/home/xupeng/.local/share/mise/shims:/usr/share/omarchy/bin:/home/xupeng/.bun/bin:/home/xupeng/bin:/sbin:/usr/sbin:/usr/local/sbin:/usr/local/bin:/usr/bin:/home/xupeng/.local/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/xupeng/.local/share/pnpm:/home/xupeng/.local/share/pnpm/bin",
+  "LANG": "C.UTF-8",
+  "HOME": "/var/tmp/pr-33-ci-fix-check-tSjDDA/home",
+  "PI_CODING_AGENT_DIR": "/var/tmp/pr-33-ci-fix-check-tSjDDA/agent",
+  "TMPDIR": "/var/tmp/pr-33-ci-fix-check-tSjDDA/tmp",
+  "XDG_CONFIG_HOME": "/var/tmp/pr-33-ci-fix-check-tSjDDA/config",
+  "XDG_CACHE_HOME": "/var/tmp/pr-33-ci-fix-check-tSjDDA/cache"
+}
