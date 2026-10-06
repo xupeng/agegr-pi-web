@@ -891,3 +891,43 @@ export interface PluginToggleResult {
 export interface PluginsBulkResponse extends PluginsResponse {
   results: PluginToggleResult[];
 }
+
+/**
+ * Safe, user-facing reasons a subagent model selection can fail. Kept here (client-safe, no SDK
+ * import) so the browser never imports the server selection module. Never carries credentials,
+ * provider config, or raw URLs.
+ */
+export const MODEL_SELECTION_FAILURE_REASONS = [
+  "missing-selection",
+  "provider-context-unavailable",
+  "provider-source-invalid",
+  "provider-replay-unsupported",
+  "model-unavailable",
+  "auth-unavailable",
+  "outside-scope",
+  "scope-unresolved",
+  "selection-mismatch",
+  "resource-policy-invalid",
+] as const;
+
+export type ModelSelectionFailureReason = (typeof MODEL_SELECTION_FAILURE_REASONS)[number];
+
+export interface ModelSelectionFailureDTO {
+  code: "model_selection_failed";
+  reason: ModelSelectionFailureReason;
+  message: string;
+  provider?: string;
+  modelId?: string;
+}
+
+/** Narrow decode for an untrusted error body. Unknown reasons are rejected, not passed through. */
+export function isModelSelectionFailureDTO(value: unknown): value is ModelSelectionFailureDTO {
+  if (typeof value !== "object" || value === null) return false;
+  const candidate = value as Record<string, unknown>;
+  return candidate.code === "model_selection_failed"
+    && typeof candidate.reason === "string"
+    && (MODEL_SELECTION_FAILURE_REASONS as readonly string[]).includes(candidate.reason)
+    && typeof candidate.message === "string"
+    && (candidate.provider === undefined || typeof candidate.provider === "string")
+    && (candidate.modelId === undefined || typeof candidate.modelId === "string");
+}

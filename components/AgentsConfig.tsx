@@ -52,7 +52,9 @@ const EMPTY_PROFILE: EditableProfile = {
   systemPrompt: "",
   tools: ["read", "bash", "edit", "write", "grep", "find", "ls"],
   loadSkills: false,
-  loadExtensions: false,
+  // New profiles inherit the currently enabled, trusted extensions by default
+  // (general-purpose / explore / plan do too); an explicit off switch still wins.
+  loadExtensions: true,
   promptMode: "append",
   inheritContext: false,
   runInBackground: false,

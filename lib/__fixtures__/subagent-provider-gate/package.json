@@ -1,0 +1,7 @@
+{
+  "name": "pi-web-subagent-provider-gate",
+  "private": true,
+  "pi": {
+    "extensions": ["extensions/index.mjs", "extensions/search.mjs"]
+  }
+}

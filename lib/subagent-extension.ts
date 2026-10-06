@@ -13,6 +13,7 @@ import {
 } from "./subagents";
 import { MAX_SUBAGENT_INPUT_FILES } from "./subagent-input";
 import type { WrittenFile } from "./written-file-sources";
+import { ModelSelectionError } from "./subagent-model-selection";
 
 export const HOST_SUBAGENT_EXTENSION_NAME = "pi-web-subagents";
 const HOST_SUBAGENT_EXTENSION_PATH = `<inline:${HOST_SUBAGENT_EXTENSION_NAME}>`;
@@ -194,6 +195,15 @@ export function createSubagentExtension(
         async execute(toolCallId, params, signal, onUpdate, ctx) {
           try {
             const resume = params.resume?.trim();
+            if (resume && params.model) {
+              // Resuming reuses the session's persisted model selection; silently ignoring the
+              // override would report success while the requested model is not applied.
+              return {
+                content: [{ type: "text", text: "Changing the model while resuming a subagent is not supported. Start a new subagent with the model instead." }],
+                details: undefined,
+                isError: true,
+              };
+            }
             const execution = resume
               ? await runtime.resume({
                   parentContext: ctx,
@@ -252,7 +262,7 @@ export function createSubagentExtension(
           } catch (error) {
             return {
               content: [{ type: "text", text: error instanceof Error ? error.message : String(error) }],
-              details: undefined,
+              details: error instanceof ModelSelectionError ? { modelSelection: error.toSafeDTO() } : undefined,
               isError: true,
             };
           }
@@ -312,7 +322,7 @@ export function createSubagentExtension(
             await runtime.steer(params.agent_id, params.message);
             return { content: [{ type: "text", text: `Steering message sent to ${params.agent_id}.` }], details: undefined };
           } catch (error) {
-            return { content: [{ type: "text", text: error instanceof Error ? error.message : String(error) }], details: undefined, isError: true };
+            return { content: [{ type: "text", text: error instanceof Error ? error.message : String(error) }], details: error instanceof ModelSelectionError ? { modelSelection: error.toSafeDTO() } : undefined, isError: true };
           }
         },
       }));

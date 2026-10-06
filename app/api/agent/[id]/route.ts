@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { readPersistedAsk } from "@/lib/ask-user/persist";
 import { resolveSessionPath } from "@/lib/session-reader";
 import { startRpcSession, getRpcSession, setRpcSessionTools } from "@/lib/rpc-manager";
+import { ModelSelectionError } from "@/lib/subagent-model-selection";
 
 // POST /api/agent/[id] - Send a command to an existing session
 export async function POST(
@@ -55,18 +56,30 @@ export async function POST(
 
     const { session } = await startRpcSession(id, filePath, undefined, {
       ...(toolNames !== undefined ? { toolNames } : {}),
+      ...(body.type === "set_model" && typeof body.provider === "string" && typeof body.modelId === "string"
+        ? { initialModel: { provider: body.provider, modelId: body.modelId }, modelSelectionIntent: "user-command" } : {}),
     });
-    const result = await session.send(body);
+    // Cold set_model was applied under the startup lock before publication. Sending again
+    // would duplicate model_change and race another request's successfully committed intent.
+    const result = body.type === "set_model" && typeof body.provider === "string" && typeof body.modelId === "string"
+      ? { id: body.modelId, provider: body.provider }
+      : await session.send(body);
     promptAccepted = body.type === "prompt";
 
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
+    // A subagent model-selection refusal is a typed, safe 409 for non-prompt commands; a prompt
+    // keeps `prompt_rejected/accepted:false` so the composer restores the draft unchanged.
+    const modelSelection = error instanceof ModelSelectionError ? error.toSafeDTO() : undefined;
     return NextResponse.json({
-      error: error instanceof Error ? error.message : String(error),
+      // The safe DTO owns the message when present, so a loader/auth error string from the
+      // server never reaches the client.
+      error: modelSelection?.message ?? (error instanceof Error ? error.message : String(error)),
       ...(commandType === "prompt" && !promptAccepted
         ? { code: "prompt_rejected", accepted: false }
         : {}),
-    }, { status: 500 });
+      ...(modelSelection ? { modelSelection } : {}),
+    }, { status: modelSelection ? 409 : 500 });
   }
 }
 

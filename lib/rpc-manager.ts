@@ -1,9 +1,9 @@
 import type { ThinkingLevel } from "@earendil-works/pi-agent-core";
-import { createAgentSessionFromServices, createAgentSessionServices, getAgentDir, initTheme, SessionManager, SettingsManager, Theme } from "@earendil-works/pi-coding-agent";
+import { createAgentSessionFromServices, createAgentSessionServices, getAgentDir, initTheme, SessionManager, SettingsManager, Theme, type InlineExtension, type LoadExtensionsResult } from "@earendil-works/pi-coding-agent";
 import { KeybindingsManager as TuiKeybindingsManager, TUI_KEYBINDINGS } from "@earendil-works/pi-tui";
 import { randomUUID } from "crypto";
 import { existsSync, realpathSync, writeFileSync } from "fs";
-import { resolve } from "path";
+import { join, resolve } from "path";
 import { validateAgentImages } from "./image-attachments";
 import { invalidateModelsCache } from "./models-cache";
 import { resolveVisibleModels, selectInitialModelScope } from "./model-scope";
@@ -34,14 +34,32 @@ import {
   preferPiWebSubagentExtension,
 } from "./subagent-extension";
 import { createAskUserExtension } from "./ask-user/extension";
-import { projectAskUserTools } from "./ask-user/extension-policy";
+import { createAskUserToolProjection, projectAskUserTools } from "./ask-user/extension-policy";
 import {
+  decodeSubagentSessionResources,
+  hasSubagentMetadata,
   listSubagentProfiles,
   readSubagentRun,
   readSubagentSessionResources,
   SUBAGENT_CONTROL_TOOL_NAMES,
+  type SubagentSessionResources,
 } from "./subagents";
 import { createSubagentController } from "./subagent-runtime";
+import { createSubagentSessionServices, readProviderOnlySources } from "./subagent-session-services";
+import { authorizeProviderSourceRefs, captureProviderSources, hasUnreplayableProviderSource, readCapturedProviderSources, SUBAGENT_PROVIDER_SOURCES_TYPE } from "./subagent-provider-sources";
+import { assertExplicitSelectionMatches, ModelSelectionError, resolveSubagentModelSelection } from "./subagent-model-selection";
+import { ModelRuntime } from "@earendil-works/pi-coding-agent";
+import { getCurrentSystemMessage } from "@earendil-works/pi-ai";
+import {
+  buildSubagentExcludeTools,
+  initializeSubagentBuiltinTools,
+  projectRegistrationAwareExtensionTools,
+  preserveSubagentManualOffTools,
+  resolveSnapshotToolPolicy,
+} from "./subagent-tool-policy";
+import type {
+  CreateNoInstallResourceLoaderOptions,
+} from "./subagent-resource-loader";
 import { isBuiltInSubagentsEnabled } from "./subagent-settings";
 import { resolveShellTools } from "./powershell-settings";
 import {
@@ -223,6 +241,8 @@ const COMMANDS_ALLOWED_DURING_SESSION_REPLACEMENT = new Set([
 export interface RpcSessionStartOptions {
   toolNames?: string[];
   initialModel?: { provider: string; modelId: string };
+  /** Explicit HTTP user intent: persist with SDK setModel before publishing a cold wrapper. */
+  modelSelectionIntent?: "user-command";
   allowInitialModelFallback?: boolean;
   thinkingLevel?: ThinkingLevel;
 }
@@ -699,6 +719,7 @@ export class AgentSessionWrapper {
   }
 
   async waitUntilReady(): Promise<void> {
+    await this.ensureExtensionsBound();
     await this.waitForExtensionsBound();
   }
 
@@ -789,6 +810,33 @@ export class AgentSessionWrapper {
     } finally {
       this.resetIdleTimer();
     }
+  }
+
+  /** Shared child admission gate, also used by Agent resume before it creates a new run. */
+  async validateModelSelection(): Promise<void> {
+    if (!this.suppressCompletionNotifications) return;
+    const branch = this.inner.sessionManager.getBranch() as unknown as SessionEntry[];
+    const decoded = decodeSubagentSessionResources(branch);
+    if (decoded.kind !== "valid") throw new ModelSelectionError("resource-policy-invalid", "Invalid child policy");
+    const selected = getLatestModelChange(branch);
+    if (!this.inner.model) throw new ModelSelectionError("missing-selection", "No live model");
+    assertExplicitSelectionMatches(selected, this.inner.model);
+    this.syncProjectTrust();
+    await this.inner.settingsManager.reload();
+    // Inherited services already discover current authorized resources. C provenance is only
+    // an explicit-false provider-only replay lead, never an admission requirement for inherit.
+    const sources = decoded.resources.loadExtensions ? undefined : decoded.resources.providerSources;
+    if (sources && selected) {
+      try {
+        await authorizeProviderSourceRefs({ refs: sources, providerId: selected.provider,
+          cwd: this.cwd, agentDir: getAgentDir(), settingsManager: this.inner.settingsManager });
+      } catch (error) {
+        throw new ModelSelectionError(error instanceof ModelSelectionError ? error.reason : "provider-source-invalid", "Source authorization failed", selected);
+      }
+    }
+    const resolved = await resolveSubagentModelSelection({ modelRuntime: this.inner.modelRuntime as ModelRuntime,
+      settingsManager: this.inner.settingsManager, ...(selected ? { requestedReference: selected } : {}) });
+    assertExplicitSelectionMatches(selected, this.inner.model, resolved.model);
   }
 
   /** Apply a coding tool selection; `carry` defaults to the tools active now. */
@@ -983,11 +1031,15 @@ export class AgentSessionWrapper {
 
       switch (type) {
       case "prompt": {
+        // A subagent must never send a request for a model that is not its branch's newest
+        // explicit selection (for example after a cold restore fell back to an SDK provider
+        // default). Refuse before admission so the draft is kept and no request is sent.
         // Serialize only admission. Once the preceding prompt has either
         // passed or failed preflight, the SDK can atomically decide whether
         // this submission starts a run or joins its streaming queue.
         const releaseAdmission = await this.acquirePromptAdmission();
         try {
+          await this.validateModelSelection();
           if (this.inner.isBashRunning) {
             throw new Error("Cannot send a prompt while a shell command is running");
           }
@@ -1166,6 +1218,61 @@ export class AgentSessionWrapper {
 
       case "set_model": {
         const { provider, modelId } = command as { provider: string; modelId: string };
+        const decoded = decodeSubagentSessionResources(this.inner.sessionManager.getBranch() as unknown as SessionEntry[]);
+        if (decoded.kind === "invalid") throw new ModelSelectionError("resource-policy-invalid", "Invalid child policy");
+        if (decoded.kind === "valid") {
+          if (typeof provider !== "string" || typeof modelId !== "string" || !provider.trim() || !modelId.trim()) {
+            throw new ModelSelectionError("model-unavailable", "Model identity must be nonempty strings");
+          }
+          const release = await this.acquirePromptAdmission();
+          try {
+            await this.inner.settingsManager.reload();
+            this.syncProjectTrust();
+            let newSources: import("./subagents").SubagentProviderSourcesSnapshot | undefined;
+            if (!decoded.resources.loadExtensions) {
+              const savedSources = decoded.resources.providerSources?.refs.some((ref) => ref.providerId === provider) ? decoded.resources.providerSources : undefined;
+              const parentId = readSubagentRun(this.inner.sessionManager.getBranch() as unknown as SessionEntry[], this.sessionId, this.sessionFile)?.parentSessionId;
+              const parent = parentId ? getRegistry().get(parentId) : undefined;
+              if (!savedSources && parent?.isAlive() && hasUnreplayableProviderSource(parent.inner.resourceLoader.getExtensions?.(), provider)) {
+                throw new ModelSelectionError("provider-replay-unsupported", "Unconfirmed parent provider contribution");
+              }
+              const preparedSources = readProviderOnlySources(this.inner.resourceLoader);
+              const sources = savedSources ?? (preparedSources?.refs.some((ref) => ref.providerId === provider) ? preparedSources : undefined)
+                ?? (parent?.isAlive() ? readCapturedProviderSources(parent.inner.resourceLoader.getExtensions?.(), provider) : undefined);
+              const prepared = await createSubagentSessionServices({
+                cwd: this.cwd, agentDir: getAgentDir(),
+                settingsManager: this.inner.settingsManager, modelRuntime: this.inner.modelRuntime as ModelRuntime,
+                resourceLoader: { loadExtensions: false }, resourceLoaderReloadOptions: projectTrustReloadOptions(this.cwd, getAgentDir()),
+                providerOnly: { providerId: provider, sources },
+              });
+              newSources = readProviderOnlySources(prepared.resourceLoader);
+            }
+            const selection = await resolveSubagentModelSelection({
+              modelRuntime: this.inner.modelRuntime as ModelRuntime,
+              settingsManager: this.inner.settingsManager,
+              requestedReference: { provider, modelId },
+            });
+            await this.waitUntilReady();
+            try {
+              await this.inner.setModel(selection.model);
+            } catch {
+              throw new ModelSelectionError("auth-unavailable", "Model switch failed", selection.reference);
+            }
+            if (!this.inner.model) throw new ModelSelectionError("selection-mismatch", "No live model", selection.reference);
+            assertExplicitSelectionMatches(getLatestModelChange(this.inner.sessionManager.getBranch() as unknown as SessionEntry[]), this.inner.model);
+            if (selection.thinkingLevel) this.inner.setThinkingLevel(selection.thinkingLevel);
+            if (newSources) {
+              const refs = [...(decoded.resources.providerSources?.refs ?? []).filter((ref) => ref.providerId !== provider).slice(-7), ...newSources.refs];
+              this.inner.sessionManager.appendCustomEntry(SUBAGENT_PROVIDER_SOURCES_TYPE, { version: 1, refs });
+            }
+            invalidateModelsCache();
+            invalidateSessionListCache();
+            return { id: selection.model.id, provider: selection.model.provider };
+          } catch (error) {
+            if (error instanceof ModelSelectionError && !error.provider) throw new ModelSelectionError(error.reason, "Model switch refused", { provider, modelId });
+            throw error;
+          } finally { release(); }
+        }
         let model = this.inner.modelRuntime.getModel(provider, modelId);
         if (!model) {
           await this.inner.modelRuntime.refresh({ allowNetwork: false });
@@ -1345,12 +1452,14 @@ export class AgentSessionWrapper {
       }
 
       case "steer": {
+        await this.validateModelSelection();
         const steerImages = command.images as Array<{ type: "image"; data: string; mimeType: string }> | undefined;
         await this.inner.steer(command.message as string, steerImages?.length ? steerImages : undefined);
         return null;
       }
 
       case "follow_up": {
+        await this.validateModelSelection();
         const followImages = command.images as Array<{ type: "image"; data: string; mimeType: string }> | undefined;
         await this.inner.followUp(command.message as string, followImages?.length ? followImages : undefined);
         return null;
@@ -1427,6 +1536,7 @@ export class AgentSessionWrapper {
         }
         this.extensionStatuses.clear();
         this.resetExtensionWidgetsForReload();
+        if (this.suppressCompletionNotifications) preserveSubagentManualOffTools(this.inner.resourceLoader.getExtensions?.(), activeToolNames);
         this.syncProjectTrust();
         await this.inner.reload();
         // pi rebuilds from the tools active before, then extensions adjust them as they start
@@ -1528,7 +1638,7 @@ export class AgentSessionWrapper {
     }
   }
 
-  destroy(): void {
+  destroy(options: { preserveAsk?: boolean } = {}): void {
     if (!this._alive) return;
     this._alive = false;
     this.disposeMcpHost();
@@ -1538,7 +1648,7 @@ export class AgentSessionWrapper {
     // A timed-out closing wrapper may be overtaken by a replacement. Its
     // late cleanup must not erase that replacement's rehydrated open ask.
     const registered = getRegistry().get(this.sessionId);
-    if (!registered || registered === this) getAskUserStore().forgetSession(this.sessionId);
+    if (!options.preserveAsk && (!registered || registered === this)) getAskUserStore().forgetSession(this.sessionId);
     if (this.idleTimer) clearTimeout(this.idleTimer);
     this.stallWatchdog?.dispose();
     this.stallWatchdog = null;
@@ -2211,6 +2321,7 @@ export class AgentSessionWrapper {
       reload: async () => {
         this.extensionStatuses.clear();
         this.resetExtensionWidgetsForReload();
+        if (this.suppressCompletionNotifications) preserveSubagentManualOffTools(this.inner.resourceLoader.getExtensions?.(), this.inner.getActiveToolNames());
         this.syncProjectTrust();
         await this.inner.reload({
           beforeSessionStart: () => {
@@ -2291,6 +2402,7 @@ const SUBAGENT_CONTROLLER = createSubagentController({
       suppressCompletionNotifications: true,
     });
     registerRpcWrapper(wrapper);
+    return wrapper;
   },
   reopenSession: async (sessionId, sessionFile) =>
     (await startRpcSession(sessionId, sessionFile, undefined)).session,
@@ -2576,6 +2688,48 @@ export function getCompletionNotificationSuppressedRpcSessionIds(): string[] {
 }
 
 /**
+ * The no-install resource-loader config for a restored child. A versioned tool policy is applied
+ * as a registration-aware projection (same Extension objects, late registrations filtered); a
+ * legacy snapshot keeps the copied ask-user projection and its exact `tools` allow list.
+ */
+function subagentResourceLoaderConfig(
+  resources: SubagentSessionResources,
+  options: {
+    chatOnly: boolean;
+    exactSystemPromptExtension: InlineExtension;
+    usesExactSystemPrompt: boolean;
+  },
+): Omit<CreateNoInstallResourceLoaderOptions, "cwd" | "agentDir" | "settingsManager"> {
+  const useVersionedPolicy = resources.toolPolicy !== undefined;
+  const policy = resolveSnapshotToolPolicy(resources);
+  const manualOffNames = new Set<string>();
+  return {
+    loadExtensions: resources.loadExtensions,
+    loadSkills: resources.loadSkills,
+    noSkills: !resources.loadSkills,
+    noPromptTemplates: true,
+    noThemes: true,
+    noContextFiles: true,
+    ...(options.chatOnly ? { systemPrompt: " ", systemPromptOverride: () => undefined } : {}),
+    appendSystemPrompt: resources.appendSystemPrompt,
+    ...(options.usesExactSystemPrompt ? { extensionFactories: [options.exactSystemPromptExtension] } : {}),
+    ...(resources.loadExtensions
+      ? {
+          projectExtensions: (base: LoadExtensionsResult) => {
+            if (!useVersionedPolicy) return projectAskUserTools(base, false);
+            const projection = createAskUserToolProjection(base, false);
+            return projectRegistrationAwareExtensionTools(base, {
+              policy: { extensionAllow: policy.extensionAllow, extensionDeny: policy.extensionDeny },
+              manualOffNames,
+              transform: projection.transform,
+            });
+          },
+        }
+      : {}),
+  };
+}
+
+/**
  * Get or create an AgentSession for the given session.
  * For new sessions (sessionFile === ""), pi generates its own id.
  * New sessions resolve enabledModels before construction so the initial model,
@@ -2589,6 +2743,11 @@ export async function startRpcSession(
   options: RpcSessionStartOptions = {},
 ): Promise<{ session: AgentSessionWrapper; realSessionId: string }> {
   const { initialModel, allowInitialModelFallback, thinkingLevel } = options;
+  const userModelIntent = options.modelSelectionIntent === "user-command" ? initialModel : undefined;
+  const applyWaitingIntent = async (started: { session: AgentSessionWrapper; realSessionId: string }) => {
+    if (userModelIntent) await started.session.send({ type: "set_model", ...userModelIntent });
+    return started;
+  };
   const requestedToolNames = options.toolNames === undefined
     ? undefined
     : validateSessionToolSelection(options.toolNames);
@@ -2596,10 +2755,21 @@ export async function startRpcSession(
   const locks = getLocks();
 
   const existing = registry.get(sessionId);
-  if (existing?.isAlive()) return { session: existing, realSessionId: sessionId };
+  if (existing?.isAlive()) return applyWaitingIntent({ session: existing, realSessionId: sessionId });
 
   const inflight = locks.get(sessionId);
-  if (inflight) return inflight;
+  if (inflight) {
+    let started: { session: AgentSessionWrapper; realSessionId: string };
+    try { started = await inflight; }
+    catch (error) {
+      // A target intent must survive a competing stale-history startup failure.
+      if (initialModel) return startRpcSession(sessionId, sessionFile, cwd, options);
+      throw error;
+    }
+    // Do not retry a failed SDK switch on an already committed winner. Each request keeps its
+    // own intent and shares the winner's selection/admission lock, not its startup target.
+    return applyWaitingIntent(started);
+  }
 
   const closingWait = closingRpcSessionWait(sessionId);
   if (closingWait) {
@@ -2620,11 +2790,15 @@ export async function startRpcSession(
     sessionManager = SessionManager.create(cwd, undefined);
   }
   const sessionCwd = sessionManager.getCwd();
-  const subagentResources = sessionFile
-    ? readSubagentSessionResources(
-        sessionManager.getEntries() as unknown as SessionEntry[],
-      )
-    : null;
+  const subagentDecode = sessionFile
+    ? decodeSubagentSessionResources(sessionManager.getBranch() as unknown as SessionEntry[])
+    : { kind: "none" as const };
+  if (subagentDecode.kind === "invalid" || (subagentDecode.kind === "none" && hasSubagentMetadata(sessionManager.getEntries() as unknown as SessionEntry[]))) {
+    // A child marker with an unreadable snapshot must not fall through to the normal,
+    // fully-resourced startup path. HTTP history reads still browse it via `readSubagentRun`.
+    throw new ModelSelectionError("resource-policy-invalid", "Invalid child policy");
+  }
+  const subagentResources = subagentDecode.kind === "valid" ? subagentDecode.resources : null;
   const persistedToolNames = subagentResources
     ? undefined
     : readSessionToolSelection(sessionManager.getEntries() as unknown as SessionEntry[]);
@@ -2644,7 +2818,13 @@ export async function startRpcSession(
 
     // Determine which tools to pass based on requested toolNames.
     // Since v0.68.0, session creation expects string[] tool names instead of Tool[] instances.
-    let toolsOption: string[] | undefined = subagentResources?.tools;
+    // A versioned child policy governs built-ins through `excludeTools` and extensions through
+    // the registration-aware projection, so it passes no hard `tools` list. A legacy snapshot
+    // keeps its exact `tools` list, which is the only licence old readers understand.
+    const useVersionedToolPolicy = subagentResources?.toolPolicy !== undefined;
+    let toolsOption: string[] | undefined = subagentResources && !useVersionedToolPolicy
+      ? subagentResources.tools
+      : undefined;
     if (!subagentResources && selectedToolNames !== undefined) {
       // toolNames === [] -> "all off" (an empty allow-list disables every tool).
       // Otherwise DO NOT pass a builtin-only allow-list: passing CODING_TOOL_NAMES
@@ -2680,29 +2860,39 @@ export async function startRpcSession(
     const builtins = subagentResources || chatOnly
       ? undefined
       : await createPiWebBuiltinExtensions({ agentDir });
-    const services = await createAgentSessionServices({
+    const explicitSavedModel = getLatestModelChange(sessionManager.getBranch() as unknown as SessionEntry[]);
+    const providerTarget = initialModel?.provider ?? explicitSavedModel?.provider;
+    const parentId = subagentResources ? readSubagentRun(sessionManager.getBranch() as unknown as SessionEntry[], sessionId, sessionFile)?.parentSessionId : undefined;
+    const sourceParent = parentId ? registry.get(parentId) : undefined;
+    const providerSources = (subagentResources?.providerSources?.refs.some((ref) => ref.providerId === providerTarget) ? subagentResources.providerSources : undefined) ?? (sourceParent?.isAlive() && providerTarget
+      ? readCapturedProviderSources(sourceParent.inner.resourceLoader.getExtensions?.(), providerTarget) : undefined);
+    if (subagentResources && !subagentResources.loadExtensions && !providerSources && providerTarget && sourceParent?.isAlive()
+      && hasUnreplayableProviderSource(sourceParent.inner.resourceLoader.getExtensions?.(), providerTarget)) {
+      throw new ModelSelectionError("provider-replay-unsupported", "Unconfirmed parent provider contribution");
+    }
+    const normalModelRuntime = !subagentResources ? await ModelRuntime.create({ authPath: join(agentDir, "auth.json"),
+      modelsPath: join(agentDir, "models.json"), refreshOnCreate: false, allowModelNetwork: false }) : undefined;
+    let finalizeNormalSources: ReturnType<typeof captureProviderSources> | undefined;
+    const services = subagentResources
+      ? await createSubagentSessionServices({
+          cwd: sessionCwd,
+          agentDir,
+          settingsManager,
+          resourceLoader: subagentResourceLoaderConfig(subagentResources, {
+            chatOnly,
+            exactSystemPromptExtension,
+            usesExactSystemPrompt,
+          }),
+          resourceLoaderReloadOptions: projectTrustReloadOptions(sessionCwd, agentDir),
+          ...(!subagentResources.loadExtensions && providerTarget ? { providerOnly: { providerId: providerTarget, sources: providerSources } } : {}),
+        })
+      : await createAgentSessionServices({
       cwd: sessionCwd,
       agentDir,
+      modelRuntime: normalModelRuntime,
       settingsManager,
-      resourceLoaderOptions: subagentResources
-        ? {
-            noExtensions: !subagentResources.loadExtensions,
-            extensionsOverride: (base) => projectAskUserTools(base, false),
-            noSkills: !subagentResources.loadSkills,
-            noPromptTemplates: true,
-            noThemes: true,
-            noContextFiles: true,
-            ...(chatOnly
-              ? {
-                  systemPrompt: " ",
-                  systemPromptOverride: () => undefined,
-                }
-              : {}),
-            appendSystemPrompt: subagentResources.appendSystemPrompt,
-            ...(usesExactSystemPrompt ? { extensionFactories: [exactSystemPromptExtension] } : {}),
-          }
-        : chatOnly
-          ? { ...CHAT_ONLY_RESOURCE_LOADER_OPTIONS, extensionFactories: [exactSystemPromptExtension] }
+      resourceLoaderOptions: chatOnly
+        ? { ...CHAT_ONLY_RESOURCE_LOADER_OPTIONS, extensionFactories: [exactSystemPromptExtension] }
         : {
             extensionFactories: [
               ...(builtins?.extensions ?? []),
@@ -2718,10 +2908,15 @@ export async function startRpcSession(
               ),
               createAskUserExtension((sessionId) => getRegistry().get(sessionId), () => sessionManager.getSessionId()),
             ],
-            extensionsOverride: (base) => projectAskUserTools(preferUserBashExtension(preferPiWebSubagentExtension(base))),
+            extensionsOverride: (base) => {
+              const projected = projectAskUserTools(preferUserBashExtension(preferPiWebSubagentExtension(base)));
+              finalizeNormalSources = captureProviderSources(projected, sessionCwd, normalModelRuntime ? { modelRuntime: normalModelRuntime, agentDir } : undefined);
+              return projected;
+            },
           },
       ...(trustReloadOptions ? { resourceLoaderReloadOptions: trustReloadOptions } : {}),
     });
+    finalizeNormalSources?.(services.modelRuntime, services.diagnostics);
     const scope = await resolveVisibleModels(
       services.modelRuntime,
       services.settingsManager.getEnabledModels(),
@@ -2737,7 +2932,7 @@ export async function startRpcSession(
     const branch = sessionManager.getBranch();
     // System messages carry the prompt and tool loadout, not a conversation.
     const hasExistingMessages = branch.some((entry) => entry.type === "message" && entry.message.role !== "system");
-    const savedModel = hasExistingMessages
+    const savedModel = hasExistingMessages || subagentResources
       ? getLatestModelChange(branch as unknown as SessionEntry[])
       : null;
     const restoredModel = savedModel
@@ -2750,18 +2945,37 @@ export async function startRpcSession(
           : {}),
         ...(thinkingLevel ? { thinkingLevel } : {}),
       });
-    const startupModel = restoredModel && services.modelRuntime.hasConfiguredAuth(restoredModel.provider)
+    const childSelection = subagentResources ? await resolveSubagentModelSelection({
+      modelRuntime: services.modelRuntime,
+      settingsManager: services.settingsManager,
+      ...(initialModel ? { requestedReference: initialModel }
+        : savedModel ? { requestedReference: savedModel } : {}),
+      ...(thinkingLevel ? { thinkingLevel } : {}),
+    }) : undefined;
+    const startupModel = childSelection?.model ?? (restoredModel && services.modelRuntime.hasConfiguredAuth(restoredModel.provider)
       ? restoredModel
-      : initial?.model;
-    const { session: inner } = await createAgentSessionFromServices({
+      : initial?.model);
+    const savedChildLoadout = subagentResources?.toolPolicy ? getCurrentSystemMessage(sessionManager.buildSessionContext().messages) : undefined;
+    const { session: inner, modelFallbackMessage } = await createAgentSessionFromServices({
       services,
       sessionManager,
       ...(startupModel ? { model: startupModel } : {}),
-      ...(initial?.thinkingLevel ? { thinkingLevel: initial.thinkingLevel } : {}),
+      ...(childSelection?.thinkingLevel || initial?.thinkingLevel ? { thinkingLevel: childSelection?.thinkingLevel ?? initial?.thinkingLevel } : {}),
       ...(scope.scopedModels.length > 0 ? { scopedModels: [...scope.scopedModels] } : {}),
       ...(toolsOption !== undefined ? { tools: toolsOption } : {}),
-      ...(subagentResources ? { excludeTools: [...SUBAGENT_CONTROL_TOOL_NAMES, "ask_user"] } : {}),
+      ...(subagentResources
+        ? {
+            excludeTools: useVersionedToolPolicy
+              ? buildSubagentExcludeTools(resolveSnapshotToolPolicy(subagentResources).builtinTools)
+              : [...SUBAGENT_CONTROL_TOOL_NAMES, "ask_user"],
+          }
+        : {}),
     });
+
+    if (childSelection && (modelFallbackMessage || !inner.model || inner.model.provider !== childSelection.model.provider || inner.model.id !== childSelection.model.id)) {
+      inner.dispose();
+      throw new ModelSelectionError("selection-mismatch", "SDK changed selected model", childSelection.reference);
+    }
 
     // A pinned selection replaces only the coding tools of the SDK's initial loadout, which
     // already holds the extension tools pi activates on registration and whatever
@@ -2794,11 +3008,54 @@ export async function startRpcSession(
       ...(builtins?.mcpHost ? { mcpHost: builtins.mcpHost } : {}),
     });
     const realSessionId = inner.sessionId as string;
+    if (subagentResources) {
+      try {
+        await wrapper.waitUntilReady();
+        if (useVersionedToolPolicy) {
+          const policy = resolveSnapshotToolPolicy(subagentResources);
+          // The policy grants permission, not activation. Native transcript pins (even [])
+          // take priority on cold restore; only absent pins use the profile's initial defaults.
+          const preferred = savedChildLoadout ? (savedChildLoadout.toolsAdded ?? []).map((tool) => tool.name) : undefined;
+          if (preferred !== undefined) {
+            const builtinNames = new Set(inner.getAllTools().filter((tool) => tool.sourceInfo.source === "builtin").map((tool) => tool.name));
+            inner.setActiveToolsByName(inner.getActiveToolNames().filter((name) => !builtinNames.has(name) || preferred.includes(name)));
+          }
+          initializeSubagentBuiltinTools(inner, policy.builtinTools, inner.resourceLoader.getExtensions(), preferred);
+        }
+      } catch {
+        wrapper.destroy({ preserveAsk: true });
+        await wrapper.waitUntilDisposed(SESSION_SHUTDOWN_DEADLINE_MS + 1000);
+        throw new ModelSelectionError("provider-context-unavailable", "Child binding failed", childSelection?.reference);
+      }
+    }
+    if (userModelIntent) {
+      try {
+        await wrapper.waitUntilReady();
+        await wrapper.send({ type: "set_model", ...userModelIntent });
+      } catch (error) {
+        // This wrapper was never published. No competing winner is removed and the old ask
+        // stays intact. The startup lock is held until its owned cleanup finishes.
+        wrapper.destroy({ preserveAsk: true });
+        await wrapper.waitUntilDisposed(SESSION_SHUTDOWN_DEADLINE_MS + 1000);
+        throw error;
+      }
+    }
+    const replayedSources = readProviderOnlySources(services.resourceLoader);
+    if (replayedSources && !subagentResources?.providerSources) sessionManager.appendCustomEntry(SUBAGENT_PROVIDER_SOURCES_TYPE, replayedSources);
     registerRpcWrapper(wrapper);
 
     return { session: wrapper, realSessionId };
-  })().finally(() => {
-    locks.delete(sessionId);
+  })().catch((error: unknown) => {
+    if (subagentResources && error instanceof ModelSelectionError && !error.provider) {
+      const reference = initialModel ?? getLatestModelChange(sessionManager.getBranch() as unknown as SessionEntry[]);
+      throw new ModelSelectionError(error.reason, "Child initialization refused", reference ?? undefined);
+    }
+    if (subagentResources && !(error instanceof ModelSelectionError)) {
+      throw new ModelSelectionError("provider-context-unavailable", "Child initialization failed");
+    }
+    throw error;
+  }).finally(() => {
+    if (locks.get(sessionId) === starting) locks.delete(sessionId);
     finishStartingSession();
   });
 

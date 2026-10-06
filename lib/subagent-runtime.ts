@@ -1,12 +1,12 @@
-import { projectAskUserTools } from "./ask-user/extension-policy";
+import { createAskUserToolProjection } from "./ask-user/extension-policy";
 import type { ThinkingLevel } from "@earendil-works/pi-agent-core";
 import {
   createAgentSessionFromServices,
-  createAgentSessionServices,
   getAgentDir,
   initTheme,
   SessionManager,
   SettingsManager,
+  type LoadExtensionsResult,
   type ModelRuntime,
 } from "@earendil-works/pi-coding-agent";
 import type { AgentSessionLike } from "./pi-types";
@@ -22,12 +22,9 @@ import {
 import {
   readSubagentRun,
   resolveSubagentProfile,
-  SUBAGENT_CONTROL_TOOL_NAMES,
   SUBAGENT_META_TYPE,
   SUBAGENT_STATUS_TYPE,
   SUBAGENT_RESULT_TYPE,
-  selectSubagentExtensionTools,
-  withSubagentExtensionTools,
   type SubagentMetadata,
   type SubagentResultMetadata,
   type SubagentRunInfo,
@@ -42,6 +39,15 @@ import { isBuiltInSubagentsEnabled, readSubagentSettings } from "./subagent-sett
 import { SubagentQueue } from "./subagent-queue";
 import { addWorktree, removeWorktree } from "./worktree";
 import { randomUUID } from "node:crypto";
+import {
+  buildSubagentExcludeTools,
+  initializeSubagentBuiltinTools,
+  projectRegistrationAwareExtensionTools,
+  resolveProfileToolPolicy,
+} from "./subagent-tool-policy";
+import { createSubagentSessionServices, readProviderOnlySources } from "./subagent-session-services";
+import { hasUnreplayableProviderSource, readCapturedProviderSources } from "./subagent-provider-sources";
+import { resolveSubagentModelSelection, assertExplicitSelectionMatches, ModelSelectionError } from "./subagent-model-selection";
 
 interface HostSession {
   readonly inner: AgentSessionLike;
@@ -50,14 +56,22 @@ interface HostSession {
   isAlive(): boolean;
   isRunning(): boolean;
   waitUntilReady(): Promise<void>;
+  validateModelSelection?(): Promise<void>;
+  shutdown?(): Promise<void>;
 }
 
 export interface SubagentRuntimeDependencies {
   getSession(sessionId: string): HostSession | undefined;
+  /**
+   * Optional embedding/test seam. Production omits it, so every child creates and owns its
+   * own runtime; when provided it is used as-is and never refreshed here. It is never the
+   * parent session's runtime.
+   */
+  modelRuntime?: ModelRuntime;
   registerSession(
     inner: AgentSessionLike,
     options?: { exactSystemPrompt?: string; chatOnly?: boolean },
-  ): void;
+  ): HostSession | void;
   reopenSession(sessionId: string, sessionFile: string): Promise<HostSession>;
   resolveSessionPath(sessionId: string): Promise<string | null>;
   invalidateSessionList(): void;
@@ -153,21 +167,22 @@ function settleOrphanedRun(run: SubagentRunInfo): SubagentRunInfo {
   return run.status === "running" || run.status === "queued" ? { ...run, status: "interrupted" } : run;
 }
 
-function parseSubagentModel(runtime: ModelRuntime, value: string | undefined) {
-  if (!value?.trim()) return undefined;
-  const requested = value.trim();
-  const slash = requested.indexOf("/");
-  if (slash > 0) {
-    const provider = requested.slice(0, slash);
-    const modelId = requested.slice(slash + 1);
-    const model = runtime.getModel(provider, modelId);
-    if (!model) throw new Error(`Subagent model not found: ${requested}`);
-    return model;
+/** Read the latest explicit model change from the active branch, mirroring the RPC cold path. */
+function latestExplicitModel(sessionManager: {
+  getBranch?: () => unknown;
+  getEntries?: () => unknown;
+}): { provider: string; modelId: string } | null {
+  const branch = typeof sessionManager.getBranch === "function"
+    ? sessionManager.getBranch()
+    : sessionManager.getEntries?.();
+  if (!Array.isArray(branch)) return null;
+  for (let i = branch.length - 1; i >= 0; i -= 1) {
+    const entry = branch[i] as { type?: unknown; provider?: unknown; modelId?: unknown };
+    if (entry?.type === "model_change" && typeof entry.provider === "string" && typeof entry.modelId === "string") {
+      return { provider: entry.provider, modelId: entry.modelId };
+    }
   }
-  const matches = runtime.getModels().filter((model) => model.id === requested);
-  if (matches.length === 1) return matches[0];
-  if (matches.length === 0) throw new Error(`Subagent model not found: ${requested}`);
-  throw new Error(`Subagent model is ambiguous; use provider/modelId: ${requested}`);
+  return null;
 }
 
 function parentContextText(parent: HostSession): string {
@@ -219,6 +234,8 @@ export function createSubagentController(
     if (!parent.sessionFile) throw new Error("Parent session must be persisted before starting a subagent");
 
     let isolatedWorktree: { path: string; branch: string } | undefined;
+    let unpublishedInner: AgentSessionLike | undefined;
+    let unpublishedWrapper: HostSession | undefined;
     try {
       const profile = resolveSubagentProfile(parent.cwd, request.profile);
       if (!profile) throw new Error(`Unknown or disabled subagent profile: ${request.profile}`);
@@ -241,7 +258,6 @@ export function createSubagentController(
       }
 
       const agentDir = getAgentDir();
-      const parentModelRuntime = (parent.inner as unknown as { modelRuntime: ModelRuntime }).modelRuntime;
       const settingsManager = SettingsManager.create(childCwd, agentDir);
       const inheritedParentContext = inheritContext
         ? `The following is the active conversation context from the parent session. Use it only as background for the delegated task:\n${parentContextText(parent)}`
@@ -258,14 +274,24 @@ export function createSubagentController(
       });
       const { chatOnly, appendSystemPrompt, delegatedTask } = promptPlan;
       if (!chatOnly) initTheme();
-      const services = await createAgentSessionServices({
+      // Independent child runtime + no-install resource loader: the child resolves its own
+      // providers, and its refresh/registration never touches the parent runtime.
+      const toolPolicy = resolveProfileToolPolicy(profile);
+      const manualOffNames = new Set<string>();
+      const parentModel = parent.inner.model as { provider: string; id: string };
+      const targetSource = request.model ?? profile.model ?? `${parentModel.provider}/${parentModel.id}`;
+      const targetProvider = targetSource.includes("/") ? targetSource.slice(0, targetSource.indexOf("/")) : parentModel.provider;
+      if (!profile.loadExtensions && hasUnreplayableProviderSource(parent.inner.resourceLoader?.getExtensions?.(), targetProvider)) {
+        throw new ModelSelectionError("provider-replay-unsupported", "Parent provider contribution cannot be replayed");
+      }
+      const services = await createSubagentSessionServices({
         cwd: childCwd,
         agentDir,
-        modelRuntime: parentModelRuntime,
         settingsManager,
-        resourceLoaderOptions: {
-          noExtensions: !profile.loadExtensions,
-          extensionsOverride: (base) => projectAskUserTools(base, false),
+        ...(dependencies.modelRuntime ? { modelRuntime: dependencies.modelRuntime } : {}),
+        resourceLoader: {
+          loadExtensions: profile.loadExtensions,
+          loadSkills: profile.loadSkills,
           noSkills: !profile.loadSkills,
           noPromptTemplates: true,
           noThemes: true,
@@ -281,25 +307,47 @@ export function createSubagentController(
           ...(promptPlan.exactSystemPrompt !== undefined
             ? { extensionFactories: [createExactSystemPromptExtension(() => promptPlan.exactSystemPrompt)] }
             : {}),
+          // Registration-aware projection keeps the same Extension objects and filters allow/deny
+          // both at load time and for later registrations. ask_user is composed onto the same Map.
+          ...(profile.loadExtensions
+            ? {
+                projectExtensions: (base: LoadExtensionsResult) => {
+                  if (toolPolicy.extensionAllow.length === 0 && toolPolicy.extensionDeny.length === 0) return base;
+                  const projection = createAskUserToolProjection(base, false);
+                  return projectRegistrationAwareExtensionTools(base, {
+                    policy: {
+                      extensionAllow: toolPolicy.extensionAllow,
+                      extensionDeny: toolPolicy.extensionDeny,
+                    },
+                    transform: projection.transform,
+                    manualOffNames,
+                  });
+                },
+              }
+            : {}),
         },
-        ...((profile.loadExtensions || profile.loadSkills)
-          ? { resourceLoaderReloadOptions: projectTrustReloadOptions(childCwd, agentDir) }
-          : {}),
+        resourceLoaderReloadOptions: projectTrustReloadOptions(childCwd, agentDir),
+        ...(!profile.loadExtensions ? {
+          providerOnly: { providerId: targetProvider, sources: readCapturedProviderSources(parent.inner.resourceLoader?.getExtensions?.(), targetProvider) },
+        } : {}),
       });
 
-      const extensionToolNames = profile.loadExtensions
-        ? profile.extensionTools?.length
-          ? selectSubagentExtensionTools(
-            services.resourceLoader.getExtensions().extensions,
-            profile.extensionTools,
-            profile.disallowedExtensionTools,
-          )
-          : services.resourceLoader.getExtensions().extensions.flatMap((extension) => [...extension.tools.keys()])
-        : [];
-      const activeTools = resolveShellTools(
-        withSubagentExtensionTools(profile.tools, extensionToolNames),
-        settingsManager.getDefaultTools(),
-      );
+      // Only the child-owned, final trust-reloaded settings may decide shell mapping. Parent
+      // settings or the pre-trust construction view may describe a different cwd/permission set.
+      const builtinTools = resolveShellTools(profile.tools, services.settingsManager.getDefaultTools());
+      const excludeTools = buildSubagentExcludeTools(builtinTools);
+
+      // Strict selection: request > profile > parent reference, re-resolved in the child runtime
+      // and checked against the configured enabledModels scope and configured auth. No provider
+      // default and no parent model object are reused.
+      const selection = await resolveSubagentModelSelection({
+        modelRuntime: services.modelRuntime,
+        settingsManager: services.settingsManager,
+        ...(request.model ? { requestedModel: request.model } : {}),
+        ...(profile.model ? { profileModel: profile.model } : {}),
+        parentModel: { provider: parentModel.provider, modelId: parentModel.id },
+        ...(thinking ? { thinkingLevel: thinking as ThinkingLevel } : {}),
+      });
 
       const sessionManager = isolatedWorktree
         ? SessionManager.create(childCwd, undefined, { parentSession: parent.sessionFile })
@@ -318,32 +366,59 @@ export function createSubagentController(
         resourceSnapshot: {
           version: 1,
           appendSystemPrompt: [...appendSystemPrompt],
-          tools: [...activeTools],
+          // Conservative legacy projection for older readers: built-ins only, never the
+          // dynamic extension licence. New readers use `toolPolicy`.
+          tools: [...builtinTools],
           loadSkills: profile.loadSkills,
-        loadExtensions: profile.loadExtensions,
-        ...(promptPlan.exactSystemPrompt !== undefined ? { exactSystemPrompt: promptPlan.exactSystemPrompt } : {}),
+          loadExtensions: profile.loadExtensions,
+          ...(!profile.loadExtensions && readProviderOnlySources(services.resourceLoader) ? { providerSources: readProviderOnlySources(services.resourceLoader) } : {}),
+          ...(promptPlan.exactSystemPrompt !== undefined ? { exactSystemPrompt: promptPlan.exactSystemPrompt } : {}),
+          toolPolicy: {
+            version: 1,
+            builtinTools: [...builtinTools],
+            extensionAllow: [...toolPolicy.extensionAllow],
+            extensionDeny: [...toolPolicy.extensionDeny],
+          },
         },
         ...(isolatedWorktree ? { worktreePath: isolatedWorktree.path, worktreeBranch: isolatedWorktree.branch } : {}),
       };
       sessionManager.appendCustomEntry(SUBAGENT_META_TYPE, metadata);
       sessionManager.appendSessionInfo(metadata.description);
 
-      const requestedModel = parseSubagentModel(parentModelRuntime, request.model ?? profile.model);
-      const parentModel = parent.inner.model as ReturnType<ModelRuntime["getModel"]>;
-      const { session: inner } = await createAgentSessionFromServices({
+      const { session: inner, modelFallbackMessage } = await createAgentSessionFromServices({
         services,
         sessionManager,
-        model: requestedModel ?? parentModel,
-        ...(thinking ? { thinkingLevel: thinking as ThinkingLevel } : {}),
-        tools: activeTools,
-        excludeTools: [...SUBAGENT_CONTROL_TOOL_NAMES, "ask_user"],
+        model: selection.model,
+        ...(selection.thinkingLevel ? { thinkingLevel: selection.thinkingLevel } : {}),
+        ...(selection.scopedModels.length > 0 ? { scopedModels: [...selection.scopedModels] } : {}),
+        excludeTools,
       });
-      dependencies.registerSession(inner, {
+      unpublishedInner = inner;
+      if (modelFallbackMessage || !inner.model || inner.model.provider !== selection.model.provider || inner.model.id !== selection.model.id) {
+        throw new ModelSelectionError("selection-mismatch", "SDK changed child target", selection.reference);
+      }
+      const registered = dependencies.registerSession(inner, {
         ...(promptPlan.exactSystemPrompt !== undefined
           ? { exactSystemPrompt: promptPlan.exactSystemPrompt }
           : {}),
         chatOnly,
       });
+      unpublishedWrapper = registered || undefined;
+      // Wait for the wrapper's extension binding before any prompt is admitted, so a tool an
+      // extension registers at session_start exists and the request cannot race the lifecycle.
+      if (registered && typeof registered.waitUntilReady === "function") {
+        await registered.waitUntilReady();
+        await registered.validateModelSelection?.();
+      }
+
+      initializeSubagentBuiltinTools(inner, builtinTools, services.resourceLoader.getExtensions());
+      // Binding may have attempted a failed re-registration while retaining the old definition.
+      const readySelection = await resolveSubagentModelSelection({
+        modelRuntime: services.modelRuntime,
+        settingsManager: services.settingsManager,
+        requestedReference: selection.reference,
+      });
+      assertExplicitSelectionMatches(selection.reference, inner.model, readySelection.model);
 
       const initialRun: SubagentRunInfo = {
         sessionId: inner.sessionId,
@@ -383,6 +458,8 @@ export function createSubagentController(
         abortRequested: false,
       };
       getSubagentRuns().set(initialRun.sessionId, stored);
+      unpublishedWrapper = undefined;
+      unpublishedInner = undefined;
       request.onUpdate?.(initialRun);
       dependencies.invalidateSessionList();
 
@@ -410,6 +487,7 @@ export function createSubagentController(
         dependencies.invalidateSessionList();
         let result: SubagentRunInfo;
         try {
+          if (registered) await registered.validateModelSelection?.();
           await inner.prompt(delegatedTask, { source: "rpc" });
           const text = inner.getLastAssistantText()?.trim();
           const aborted = stored.abortRequested && !maxTurnsReached;
@@ -490,6 +568,8 @@ export function createSubagentController(
 
       return { run: stored.run, completion: stored.completion };
     } catch (error) {
+      if (unpublishedWrapper?.shutdown) await unpublishedWrapper.shutdown();
+      else unpublishedInner?.dispose();
       if (isolatedWorktree) {
         try { await removeWorktree(parent.cwd, isolatedWorktree.path); } catch { /* preserve setup failure and avoid force deletion */ }
       }
@@ -513,6 +593,17 @@ export function createSubagentController(
     if (!wrapper?.isAlive()) wrapper = await dependencies.reopenSession(request.sessionId, sessionPath);
     if (!wrapper.isAlive()) throw new Error("Subagent session is no longer available");
     if (wrapper.isRunning()) throw new Error("Subagent is already running");
+    // Refuse to continue a wrapper whose live model drifted from the branch's newest explicit
+    // selection (for example an SDK provider-default answer recorded as a physical response).
+    const liveModel = wrapper.inner.model as { provider: string; id: string } | undefined;
+    if (liveModel && typeof (wrapper.inner.sessionManager as { getBranch?: unknown }).getBranch === "function") {
+      assertExplicitSelectionMatches(
+        latestExplicitModel(wrapper.inner.sessionManager as never),
+        liveModel,
+      );
+    }
+    await wrapper.waitUntilReady();
+    await wrapper.validateModelSelection?.();
 
     const runInBackground = request.runInBackground ?? existing.runInBackground;
     const initialRun: SubagentRunInfo = {
@@ -555,6 +646,7 @@ export function createSubagentController(
       request.onUpdate?.(stored.run);
       let result: SubagentRunInfo;
       try {
+        await wrapper!.validateModelSelection?.();
         await wrapper!.inner.prompt(request.task, { source: "rpc" });
         const text = wrapper!.inner.getLastAssistantText()?.trim();
         const providerError = stored.abortRequested ? undefined : lastAssistantError(manager);
@@ -634,6 +726,7 @@ export function createSubagentController(
     const wrapper = dependencies.getSession(sessionId);
     if (!wrapper?.isAlive() || !wrapper.isRunning()) throw new Error("Subagent is not running");
     if (!message.trim()) throw new Error("Steering message is required");
+    await wrapper.validateModelSelection?.();
     await wrapper.inner.steer(message.trim());
   }
 
