@@ -54,20 +54,6 @@ export interface ExtensionUiVisibilitySettingsResponse {
   hiddenStatusKeys: string[];
 }
 
-export interface AppendSystemProjectOverride {
-  path: string;
-  trusted: boolean;
-}
-
-/** Shape returned by GET/PUT /api/append-system. */
-export interface AppendSystemPromptResponse {
-  path: string;
-  content: string;
-  exists: boolean;
-  maxBytes: number;
-  projectOverride: AppendSystemProjectOverride | null;
-}
-
 export interface SkillSearchResult {
   package: string;
   installs: string;

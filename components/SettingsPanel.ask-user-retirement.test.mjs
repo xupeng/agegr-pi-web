@@ -74,7 +74,6 @@ test("retirement leaves other panes' reload, trust and stacked dialog wiring int
   for (const component of ["AgentsConfig", "PluginsConfig"]) {
     assert.match(panelSource, new RegExp(`<${component} embedded[^\\n]*sessionId=\\{sessionId\\}[^\\n]*onReloaded=\\{onSessionReloaded\\}`));
   }
-  assert.match(panelSource, /<AppendSystemConfig embedded[^\n]*onSessionReloaded=\{onSessionReloaded\}/);
   assert.match(panelSource, /<McpConfig embedded[^\n]*trust=\{projectTrust\} onTrustProject=\{onOpenTrustDialog\} onProjectTrustChanged=\{onProjectTrustChanged\}/);
   assert.match(panelSource, /listenForPanelEscape\(document, onClose\)/);
   assert.match(panelSource, /focusModalPanel\(document, dialogRef\.current/);
