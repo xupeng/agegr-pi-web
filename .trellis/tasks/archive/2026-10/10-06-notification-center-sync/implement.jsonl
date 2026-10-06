@@ -8,7 +8,7 @@
 {"file":".trellis/spec/frontend/settings-dialog-mobile.md","reason":"手机全屏、安全区、44px关闭与滚动链"}
 {"file":"docs/agents/sessions.md","reason":"wrapper生命周期、settled、SSE与reload所有权"}
 {"file":"docs/agents/tools.md","reason":"只读observer不能改变Chat-only发现、工具pins或system prompt"}
-{"file":".trellis/tasks/10-06-notification-center-sync/research/runtime-integration.md","reason":"服务端pending/删除/持久化接入与实例级聚合禁止路径"}
-{"file":".trellis/tasks/10-06-notification-center-sync/research/completion-contract.md","reason":"公开boundary observer可行性、结果entry证据与SDK特殊异常限制"}
+{"file":".trellis/tasks/archive/2026-10/10-06-notification-center-sync/research/runtime-integration.md","reason":"服务端pending/删除/持久化接入与实例级聚合禁止路径"}
+{"file":".trellis/tasks/archive/2026-10/10-06-notification-center-sync/research/completion-contract.md","reason":"公开boundary observer可行性、结果entry证据与SDK特殊异常限制"}
 {"file":".trellis/spec/frontend/notification-center.md","reason":"实例共享通知的已实现API/持久化/版本/正文确认与导航退休契约"}
-{"file":".trellis/tasks/10-06-notification-center-sync/research/implementation-boundary.md","reason":"本轮owner分工、固定跨层接口、隔离验证与清理责任"}
+{"file":".trellis/tasks/archive/2026-10/10-06-notification-center-sync/research/implementation-boundary.md","reason":"本轮owner分工、固定跨层接口、隔离验证与清理责任"}

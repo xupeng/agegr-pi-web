@@ -9,7 +9,7 @@
 {"file":".trellis/spec/frontend/chat-tail-follow.md","reason":"结果可视判定保留既有滚动门禁和唯一跟随原语"}
 {"file":".trellis/spec/frontend/settings-dialog-mobile.md","reason":"全屏中心safe-area、关闭点击目标与滚动链"}
 {"file":".trellis/spec/frontend/trellis-subagent-records.md","reason":"Trellis记录不参与全局待办计数/通知"}
-{"file":".trellis/tasks/10-06-notification-center-sync/research/runtime-integration.md","reason":"generation、删除、持久化失败及原pending权威"}
-{"file":".trellis/tasks/10-06-notification-center-sync/research/completion-contract.md","reason":"常规SDK实测与特殊异常披露、唯一结果DOM/committed-history/旧revision竞态"}
+{"file":".trellis/tasks/archive/2026-10/10-06-notification-center-sync/research/runtime-integration.md","reason":"generation、删除、持久化失败及原pending权威"}
+{"file":".trellis/tasks/archive/2026-10/10-06-notification-center-sync/research/completion-contract.md","reason":"常规SDK实测与特殊异常披露、唯一结果DOM/committed-history/旧revision竞态"}
 {"file":".trellis/spec/frontend/notification-center.md","reason":"检查durable revision、公开真实run、正文像素证据、辅助UI排除和导航请求资格"}
-{"file":".trellis/tasks/10-06-notification-center-sync/research/validation-baseline.md","reason":"固定baseline与锁依赖、祖先skills隔离污染和最终可比门禁"}
+{"file":".trellis/tasks/archive/2026-10/10-06-notification-center-sync/research/validation-baseline.md","reason":"固定baseline与锁依赖、祖先skills隔离污染和最终可比门禁"}
