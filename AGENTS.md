@@ -124,7 +124,6 @@ app/api/
   provider-usage/query/route.ts    POST provider usage quotas
   push/config/route.ts             GET VAPID public key
   push/subscribe/route.ts          POST register a push subscription
-  append-system/route.ts           GET/PUT global APPEND_SYSTEM.md; project override is read-only
   extension-ui/settings/route.ts   GET/PUT extension widget/status visibility rules
   settings/ask-user/route.ts       GET/PUT persistent ask_user switch
   app-update/route.ts              GET current vs latest published pi-web version
@@ -207,7 +206,6 @@ components/
   OAuthPastePanel.tsx      paste box for a sign-in's redirected address or code (Models, MCP)
   ProjectTrustDialog.tsx   trust confirmation listing the project's MCP servers
   SettingsPanel.tsx        all settings sections, visited panes stay mounted
-  AppendSystemConfig.tsx   global APPEND_SYSTEM.md editor, native pi discovery
   AgentsConfig.tsx         built-in subagent toggle + agent profile editor
   PluginsConfig.tsx        Settings › Plugins: installed package plugins
   SkillsConfig.tsx         Settings › Skills: loaded, search, install
@@ -266,7 +264,7 @@ The guard is `canRestoreRememberedSession()` (`lib/session-restore.ts:28`, used 
 - Stall watchdog: a turn that produces no agent event for 15 minutes (`PI_WEB_STALL_TIMEOUT_MS`, or `stallTimeoutMs` in `~/.pi/agent/pi-web-settings.json`; `0` disables) is aborted through the same path as Stop and reports the last in-flight tool. `stallToolTimeouts` overrides the budget per tool (default `bash` = 30 min) so a legitimately silent long command is not killed. This is independent of the idle timer: it aborts the turn, never shuts the session down. The reason is also persisted as a `pi-web.stall.abort` custom message (`lib/message-display.ts`), so a reload shows a localized notice instead of a bare "operation aborted". See `lib/stall-watchdog.ts`.
 - Observe watchdog progress on raw inner events, independently of the slim SSE projection. A top-level exact `trellis_subagent` tool-end with `details.kind === "trellis-subagent-progress"` retains structured final details until the canonical message; no arbitrary output text or nested final exception. Trellis snapshots are scoped, bounded, read-only last-reported records, never built-in child sessions. See [.trellis/spec/frontend/trellis-subagent-records.md](.trellis/spec/frontend/trellis-subagent-records.md).
 - Prompt admission, run completion and MCP preparation are distinct: rejected/Stopped preparation keeps the unsent draft and old ask; only accepted prompts supersede an ask. `ask_user` and subagent controls remain model-only; preserve configured/coding pins and active carry on reload/navigation. See [pi-sdk-admission.md](.trellis/spec/frontend/pi-sdk-admission.md), [ask-user-protocol.md](.trellis/spec/frontend/ask-user-protocol.md) and [mcp-codemode.md](.trellis/spec/frontend/mcp-codemode.md).
-- Global append instructions use pi's native `APPEND_SYSTEM.md`; project files override rather than append, and are read-only in this editor. Chat only and built-in subagents do not consume that global append file; running sessions require explicit reload. See [append-system-prompt.md](.trellis/spec/frontend/append-system-prompt.md).
+- The native append prompt stays pi's own `APPEND_SYSTEM.md` mechanism: pi discovers the global file under the agent dir, a trusted project file overrides rather than stacks, Chat only and built-in subagents ignore it, and running sessions need a reload. The fork's Web editor and `/api/append-system` are retired; edit the file directly. See [append-system-prompt.md](.trellis/spec/frontend/append-system-prompt.md).
 - Chat font size is absolute (12–24 px, default 14), content width 820–2000 px, owned by `useChatAppearance`. Every new chat typography surface uses `calc(Xpx + var(--chat-font-size-offset, 0px))`; settings/file previews do not consume that offset. Preserve the font keyboard shortcuts, minimap, right-side file layout and mobile keyboard behavior. Settings on ≤640px remain fullscreen with header safe-area, a 44px close target, a constrained scrolling General pane, and margin-auto centering for oversized modal surfaces. See [settings-dialog-mobile.md](.trellis/spec/frontend/settings-dialog-mobile.md).
 - Keep the fork's file-open options channel (page/modeHint/sourceSessionId), exact successful written-file evidence and session-root authorization. Never grant file access from MCP prose, decorated result names or preview-only patches. See [clickable-file-paths.md](.trellis/spec/frontend/clickable-file-paths.md).
 - Both the SDK and fork session catalog order by newest activity then reverse filename; `mergeSessionLists()` preserves that tie-break when joining runtime snapshots. Keep the incremental scan and on-demand sidebar loading described above.

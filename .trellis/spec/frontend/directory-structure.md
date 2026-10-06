@@ -34,7 +34,7 @@
 │   │   ├── auth/{providers,api-key/[provider],login/[provider],logout/[provider]}/route.ts
 │   │   ├── models/route.ts + models-config/{catalog,discover,test}/route.ts
 │   │   ├── plugins/  skills/  subagents/  terminal/  git/  worktrees  file-index  cwd/
-│   │   └── web-auth  push  provider-usage  project-trust  extension-ui  append-system  tools/settings …
+│   │   └── web-auth  push  provider-usage  project-trust  extension-ui  tools/settings …
 │   ├── layout.tsx / page.tsx / manifest.ts
 │   ├── login/page.tsx                         唯一另一个 page，也是唯一带 "use client" 的 app 文件
 │   └── globals.css / settings.css             全局样式（CSS 变量、@font-face、对话区字号链）
