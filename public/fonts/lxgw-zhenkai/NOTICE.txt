@@ -1,0 +1,37 @@
+LXGW ZhenKai GB (霞鹜臻楷 GB) webfonts
+=====================================
+
+97 `lxgwzhenkaigb-subset-*.woff2` files, each covering one `unicode-range`
+slice of the `LXGW ZhenKai GB` family. The slice list is copied from the
+`LXGW WenKai Screen` subsets in `public/fonts/lxgw-wenkai-screen/` so a
+character that resolves to WenKai at weight 400 resolves to the matching
+ZhenKai subset at weight 501-900, and the browser fetches the same ranges.
+
+Source: lxgw/LxgwZhenKai v0.825, asset `LXGWZhenKaiGB-Regular.ttf`
+  https://github.com/lxgw/LxgwZhenKai/releases/download/v0.825/LXGWZhenKaiGB-Regular.ttf
+  sha256 40876902a7ce25268ab710ad8fe6e2b63bc002aa4b68d22fd45fc1243726ced5
+  (17,545,474 bytes)
+Upstream project: https://github.com/lxgw/LxgwZhenKai
+License: SIL Open Font License 1.1 -- see OFL.txt in this directory. Its
+reserved-name grant explicitly allows subsets and WOFF2 conversions made for
+web font delivery; these files are only ever served from this app.
+
+How the subsets were built (fonttools 4.66.1; one run per slice, `--unicodes`
+being that slice's `unicode-range` from `app/fonts-content-cjk.css`):
+
+  pyftsubset LXGWZhenKaiGB-Regular.ttf --unicodes='U+4e09-4e0b,...' \
+    --flavor=woff2 --ignore-missing-unicodes \
+    --output-file=lxgwzhenkaigb-subset-<N>.woff2
+
+ZhenKai GB omits some codepoints its WenKai slices cover (emoji, IPA and other
+extended Latin, Armenian, Georgian: 980 of 14,492); the browser falls through
+to the next family in `--font-content` for those, exactly as it already does
+for the WenKai slices, which do not carry every listed codepoint either.
+
+SHA-256
+-------
+
+SHA256SUMS.txt in this directory lists the SHA-256 of every subset file. After
+changing any font here, regenerate it with:
+
+  cd public/fonts/lxgw-zhenkai && sha256sum *.woff2 > SHA256SUMS.txt

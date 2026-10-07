@@ -751,8 +751,16 @@ button.extension-widget-trigger:focus-visible {
      view deliberately does NOT use it - it takes the UI stack off `body`
      instead, so its labels keep the sans faces of the surrounding chrome
      rather than this stack's kai glyphs; see readFontFamilyStack() in
-     components/AskUserAppHost.tsx. */
-  --font-content: "Oxanium", "LXGW WenKai GB Screen", "LXGW WenKai Screen", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
+     components/AskUserAppHost.tsx.
+
+     "PiWebBodyCJK" is the role family that picks the CJK face by weight:
+     weight 400 renders LXGW WenKai Screen and 501-900 renders LXGW ZhenKai GB,
+     both from the self-hosted subsets (with `local()` preferred) declared in
+     app/fonts-content-cjk.css. It replaces the old "LXGW WenKai GB Screen" /
+     "LXGW WenKai Screen" entries: naming a locally installed, single-weight
+     family first in the stack means it wins every weight, so it would swallow
+     the bold face. */
+  --font-content: "Oxanium", "PiWebBodyCJK", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
 }
 
 pre, code {
@@ -774,6 +782,12 @@ pre, code {
   font-size: calc(14px + var(--chat-font-size-offset, 0px));
   font-family: var(--font-content);
   font-weight: 500;
+  /* Chromium strokes synthetic bold onto any request of 600+ while the font
+     file itself is a Regular weight (both CJK faces are), even when the
+     @font-face already declares the requested weight. That would double-bold
+     ZhenKai; the family provides a real face per range instead. Oxanium's
+     variable weight axis is unaffected. See app/fonts-content-cjk.css. */
+  font-synthesis-weight: none;
   line-height: 1.75;
   color: var(--text);
   word-break: break-word;

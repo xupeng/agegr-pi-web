@@ -101,8 +101,9 @@ test("host maps Pi Web tokens onto the --pi-ask-* namespace", () => {
 test("host keeps the UI font stack and never uses the chat prose stack", () => {
   // The stack must be the UI stack (`body`), which is what the deleted native
   // card inherited: Latin in Oxanium, CJK in the device's own sans. The prose
-  // stack (--font-content) would put the question in LXGW WenKai Screen, whose
-  // kai glyphs read bigger and heavier than the card's sans.
+  // stack (--font-content) would put the question in PiWebBodyCJK (LXGW WenKai
+  // Screen / LXGW ZhenKai GB), whose kai glyphs read bigger and heavier than
+  // the card's sans.
   assert.match(hostSource, /function readFontFamilyStack\(\): string \{[\s\S]*?getComputedStyle\(document\.body\)\.fontFamily/);
   assert.doesNotMatch(hostSource, /getPropertyValue\("--font-content"\)/);
   assert.match(hostSource, /"--pi-ask-font-family": fontFamily/);

@@ -3,7 +3,7 @@ import { PwaRegistration } from "@/components/PwaRegistration";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "katex/dist/katex.min.css";
 import "./fonts.css";
-import "./fonts-lxgw-wenkai-screen.css";
+import "./fonts-content-cjk.css";
 import "./globals.css";
 import "./settings.css";
 
