@@ -1858,3 +1858,42 @@ CI's lint/type and broad e2e passed, but a local-only TMPDIR assertion aborted n
 ### Next Steps
 
 - Wait for exact-head checks/e2e to pass, merge PR34 normally, fast-forward personal and clean only this task's branch/worktree without deploying.
+
+
+## Session 43: Reconstruct clean PR 34 history and prevent raw task artifacts
+
+**Date**: 2026-10-07
+**Task**: Reconstruct clean PR 34 history and prevent raw task artifacts
+**Branch**: `chore/pr34-clean-history`
+
+### Summary
+
+Verified offline recovery and clean B-to-R reconstruction; preserve delivered product bytes and keep raw task evidence private. Publication/CI/deployment are pending delivery.
+
+### Main Changes
+
+Reconstructed PR 34 directly from confirmed B into clean R=31483c6 without importing raw evidence. Product/test/fixture/assets/package/lock blobs and modes remain original c3. Retained historical task Markdown/context/provenance and old journal SHA references; raw 280 files retained in a verified private original-all-refs.bundle and evidence copy. Independent tree/history review verified 224 unique raw blobs unreachable, three pre-base shared blobs preserved. Narrow artifact ignore/policy added with nested Markdown/metadata negative tests. Local clean npm-ci gates: tsc0, ESLint763/0/0,3150/3150; first3124/3150 ancestor/XDG pollution recorded as failure, corrected isolation passes without product/test changes. Implementation is final; exact-lease remote publication, new small PR exact-head CI/merge and clean-SHA26812 deployment remain delivery steps, not claimed complete here. Private recovery/operational records: /home/xupeng/services/pi-web/history-backups/20261007-pr34/. GitHub read-only PR refs/cache/old clones can still retain original objects;8505 and unrelated refs protected.
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `2d6ef7a` | (see git log) |
+| `1d56a3e` | (see git log) |
+| `a770585` | (see git log) |
+| `31483c6` | (see git log) |
+| `821aaa8` | (see git log) |
+| `9fb9fe6` | (see git log) |
+
+### Testing
+
+- [OK] Clean npm-ci: tsc0, ESLint763/0/0,3150/3150. Full independent tree/history and all280 evidence blobs verified.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Exact-lease personal replacement; small clean-base PR exact-head CI/merge; independent clean-SHA26812 build/deploy; protect8505 and unrelated refs.
