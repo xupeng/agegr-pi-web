@@ -16,12 +16,25 @@ License: SIL Open Font License 1.1 -- see OFL.txt in this directory. Its
 reserved-name grant explicitly allows subsets and WOFF2 conversions made for
 web font delivery; these files are only ever served from this app.
 
-How the subsets were built (fonttools 4.66.1; one run per slice, `--unicodes`
-being that slice's `unicode-range` from `app/fonts-content-cjk.css`):
+How the subsets were built
+--------------------------
+
+`scripts/build-content-cjk-fonts.py --subsets` downloads (or takes with
+`--ttf`) the pinned release above, checks its size and SHA-256, then runs
+fonttools' `pyftsubset` once per slice -- `--unicodes` being that slice's
+`unicode-range` from `scripts/lxgw-content-cjk-slices.json`:
 
   pyftsubset LXGWZhenKaiGB-Regular.ttf --unicodes='U+4e09-4e0b,...' \
     --flavor=woff2 --ignore-missing-unicodes \
     --output-file=lxgwzhenkaigb-subset-<N>.woff2
+
+Rebuilding needs python3 plus fonttools and brotli:
+
+  python3 -m venv .venv && .venv/bin/pip install fonttools brotli
+  .venv/bin/python scripts/build-content-cjk-fonts.py --all
+
+The build is deterministic: re-running it against the pinned release
+reproduces these bytes and SHA256SUMS.txt exactly.
 
 ZhenKai GB omits some codepoints its WenKai slices cover (emoji, IPA and other
 extended Latin, Armenian, Georgian: 980 of 14,492); the browser falls through
@@ -32,6 +45,10 @@ SHA-256
 -------
 
 SHA256SUMS.txt in this directory lists the SHA-256 of every subset file. After
-changing any font here, regenerate it with:
+changing any font here, regenerate it with the build script:
 
-  cd public/fonts/lxgw-zhenkai && sha256sum *.woff2 > SHA256SUMS.txt
+  python3 scripts/build-content-cjk-fonts.py --subsets
+
+`python3 scripts/build-content-cjk-fonts.py --check` fails when the stylesheet,
+the subsets or this manifest drift from `scripts/lxgw-content-cjk-slices.json`
+(sorted by filename, which is why the order here is not the slice order).
