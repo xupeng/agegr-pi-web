@@ -1,0 +1,12 @@
+{"file":".trellis/spec/frontend/model-default-settings.md","reason":"当前会话选择与显式保存全局默认的边界"}
+{"file":".trellis/spec/frontend/subagent-model-selection.md","reason":"已实现exact引用、独立可信资源、versioned许可、来源例外与cold发布事务的可执行合同"}
+{"file":".trellis/spec/frontend/type-safety.md","reason":"SDK 结构适配、未知输入与错误 DTO 的类型归属"}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"锁一致依赖树、三语文案、真实 runtime 与浏览器验证"}
+{"file":"docs/agents/models.md","reason":"enabledModels 解析、scope UI 容错与认证/catalog 刷新"}
+{"file":"docs/agents/subagents.md","reason":"profile 默认继承修改边界、已有显式禁用与 model-only 控制工具"}
+{"file":"docs/agents/tools.md","reason":"许可与激活分离、Chat-only/APPEND_SYSTEM、搜索 hooks 与子代理快照"}
+{"file":"docs/agents/settings-ui.md","reason":"AgentsConfig 新建默认与共享设置块，不重构其他设置"}
+{"file":"docs/agents/sessions.md","reason":"child ready、wrapper binding、closing/start locks 与并发通知中心合同"}
+{"file":".trellis/spec/frontend/pi-sdk-admission.md","reason":"新建/恢复失败保持 prompt_rejected/accepted:false 和原交互"}
+{"file":".trellis/tasks/archive/2026-10/10-06-subagent-model-selection/research/inherit-trusted-review.md","reason":"默认继承的公开 SDK 工具过滤/无安装适配、动态搜索与旧快照兼容证据"}
+{"file":".trellis/tasks/archive/2026-10/10-06-subagent-model-selection/research/investigation.md","reason":"实际会话根因与 SDK 公共 API／刷新隔离的技术证据"}
