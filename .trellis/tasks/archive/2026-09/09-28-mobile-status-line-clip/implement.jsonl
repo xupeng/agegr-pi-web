@@ -1,5 +1,0 @@
-{"file":".trellis/spec/frontend/index.md","reason":"前端规范索引"}
-{"file":".trellis/spec/frontend/component-guidelines.md","reason":"样式渠道、对话区字号 offset 规则、组件测试写法"}
-{"file":".trellis/spec/frontend/hook-guidelines.md","reason":"useLayoutEffect 使用判据、依赖数组与 cleanup、Traps"}
-{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"门禁命令、验证基线来源、浏览器证据要求"}
-{"file":".trellis/spec/frontend/mobile-keyboard-viewport.md","reason":"移动端视口/键盘与对话区底部的关系，避免与既有视口契约冲突"}

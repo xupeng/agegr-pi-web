@@ -1,3 +1,0 @@
-$ "node_modules/.bin/tsc" "--noEmit" "--incremental" "false"
-
-exit=0; signal=null; error=none

@@ -1,5 +1,0 @@
-{"file":".trellis/spec/frontend/index.md","reason":"前端规范索引"}
-{"file":".trellis/spec/frontend/hook-guidelines.md","reason":"全局快捷键注册点、依赖数组与 cleanup、纯函数测试写法、Traps"}
-{"file":".trellis/spec/frontend/component-guidelines.md","reason":"aria-keyshortcuts / aria-describedby 的既有写法、设置页文案与样式落位、对话区字号 offset 规则"}
-{"file":".trellis/spec/frontend/settings-dialog-mobile.md","reason":"对话区字号偏好的唯一入口、存储 key、默认值与 clamp 契约"}
-{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"门禁命令与验证基线来源、三语文案要求、数据链路脚本不等于浏览器验证"}
