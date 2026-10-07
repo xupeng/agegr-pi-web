@@ -1490,6 +1490,49 @@ export function AppShell() {
     );
   };
 
+  const renderSubagentsButton = (mobile: boolean) => hasSubagentsEntry && (
+    <button
+      type="button"
+      onClick={() => {
+        if (mobile) setMobileToolbarMoreOpen(false);
+        toggleTopPanel("agents");
+      }}
+      title={translate("agentSwitcher.title")}
+      aria-label={translate("agentSwitcher.title")}
+      aria-pressed={activeTopPanel === "agents"}
+      style={{
+        position: "relative",
+        display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+        width: mobile ? TOP_BAR_ICON_BUTTON_SIZE : undefined,
+        height: mobile ? TOP_BAR_ICON_BUTTON_SIZE : "100%", padding: mobile ? 0 : "0 12px",
+        background: activeTopPanel === "agents" ? "var(--bg-selected)" : "none",
+        border: "none",
+        borderTop: activeTopPanel === "agents" ? "2px solid var(--accent)" : "2px solid transparent",
+        borderRight: "1px solid var(--border)",
+        color: activeTopPanel === "agents" ? "var(--text)" : "var(--text-muted)",
+        cursor: "pointer", flexShrink: 0, fontSize: 11, whiteSpace: "nowrap",
+        transition: "color 0.1s, background 0.1s",
+      }}
+      data-mobile-toolbar-action={mobile ? "agents" : undefined}
+    >
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect x="5" y="7" width="14" height="11" rx="2" /><path d="M9 11h.01M15 11h.01M9 15h6M12 7V4M10 4h4" />
+      </svg>
+      {!mobile && <span>{translate("agentSwitcher.title")}</span>}
+      <span
+        aria-hidden="true"
+        style={{
+          minWidth: 15, height: 15, padding: "0 4px", display: "grid", placeItems: "center",
+          borderRadius: 7, background: "var(--bg-selected)", color: "var(--accent)",
+          fontSize: 10, lineHeight: 1, fontVariantNumeric: "tabular-nums",
+          ...(mobile ? { position: "absolute", top: 2, right: 2, minWidth: 13, height: 13, padding: "0 3px", fontSize: 9 } : {}),
+        }}
+      >
+        {subagentsEntryCount}
+      </span>
+    </button>
+  );
+
   const renderChatToolbarActions = (mobile: boolean) => {
     if (!mobile && !showChat) return null;
     return (
@@ -1633,45 +1676,7 @@ export function AppShell() {
             </button>
           );
         })()}
-        {hasSubagentsEntry && (
-          <button
-            type="button"
-            onClick={() => toggleTopPanel("agents", mobile)}
-            title={translate("agentSwitcher.title")}
-            aria-label={translate("agentSwitcher.title")}
-            aria-pressed={activeTopPanel === "agents"}
-            style={{
-              position: "relative",
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-              width: mobile ? TOP_BAR_ICON_BUTTON_SIZE : undefined,
-              height: "100%", padding: mobile ? 0 : "0 12px",
-              background: activeTopPanel === "agents" ? "var(--bg-selected)" : "none",
-              border: "none",
-              borderTop: activeTopPanel === "agents" ? "2px solid var(--accent)" : "2px solid transparent",
-              borderRight: "1px solid var(--border)",
-              color: activeTopPanel === "agents" ? "var(--text)" : "var(--text-muted)",
-              cursor: "pointer", flexShrink: 0, fontSize: 11, whiteSpace: "nowrap",
-              transition: "color 0.1s, background 0.1s",
-            }}
-            data-mobile-toolbar-action={mobile ? "agents" : undefined}
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <rect x="5" y="7" width="14" height="11" rx="2" /><path d="M9 11h.01M15 11h.01M9 15h6M12 7V4M10 4h4" />
-            </svg>
-            {!mobile && <span>{translate("agentSwitcher.title")}</span>}
-            <span
-              aria-hidden="true"
-              style={{
-                minWidth: 15, height: 15, padding: "0 4px", display: "grid", placeItems: "center",
-                borderRadius: 7, background: "var(--bg-selected)", color: "var(--accent)",
-                fontSize: 10, lineHeight: 1, fontVariantNumeric: "tabular-nums",
-                ...(mobile ? { position: "absolute", top: 2, right: 2, minWidth: 13, height: 13, padding: "0 3px", fontSize: 9 } : {}),
-              }}
-            >
-              {subagentsEntryCount}
-            </span>
-          </button>
-        )}
+        {!mobile && renderSubagentsButton(false)}
         {sessionHasBranches && (mobile ? (
           <button
             type="button"
@@ -2173,6 +2178,7 @@ export function AppShell() {
             </svg>
             <span className="notification-bell-count">{notifications.snapshot.items.length}</span>
           </button>
+          {isMobile && renderSubagentsButton(true)}
           {isMobile && (
             <div
               ref={mobileToolbarRef}
