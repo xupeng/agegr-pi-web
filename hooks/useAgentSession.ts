@@ -17,7 +17,8 @@ import type {
 } from "@/lib/types";
 import { isBlockingExtensionUiRequest } from "@/lib/browser-notifications";
 import { normalizeToolCalls } from "@/lib/normalize";
-import { isPromptRejectedError, sendAgentCommand } from "@/lib/agent-client";
+import { isPromptRejectedError, readAgentCommandError, sendAgentCommand } from "@/lib/agent-client";
+import { formatModelSelectionError } from "@/lib/model-selection-error-display";
 import { resolvePendingAskAfterClose } from "@/lib/ask-user/resolve-pending-ask";
 import { bindNotificationHistoryProof, EMPTY_NOTIFICATION_HISTORY, type NotificationHistoryScope } from "@/lib/notifications/viewed-result";
 import {
@@ -31,7 +32,7 @@ import { CONFIGURED_TOOL_PRESET, getPresetFromToolNames, getToolNamesForPreset, 
 import type { SessionStatsInfo } from "@/lib/pi-types";
 import { mergeSessionStats, type SessionFileStats } from "@/lib/session-stats";
 import { userMessageKey } from "@/lib/prompt-recovery";
-import { AgentEventConnection } from "@/lib/agent-event-connection";
+import { AgentEventConnection, AgentEventConnectionError } from "@/lib/agent-event-connection";
 import { isNestedToolExecutionEvent, isSystemMessageEvent } from "@/lib/agent-event-wire";
 import { getToolExecutionProgress } from "@/lib/tool-execution-progress";
 import { formatStallAbortNotice } from "@/lib/message-display";
@@ -1245,7 +1246,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
             : {}),
         }),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) throw readAgentCommandError(await res.json().catch(() => ({})), res.status);
       const result = await res.json() as {
         sessionId: string;
         model?: SelectedModel | null;
@@ -2262,6 +2263,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
     const piImages = images?.map((img) => ({ type: "image" as const, data: img.data, mimeType: img.mimeType }));
     let sentSessionId: string | null = null;
     let promptRequestStarted = false;
+    let selectionOperation: "prompt" | "set-model" = "prompt";
 
     try {
       if (isNew && newSessionCwd) {
@@ -2274,7 +2276,9 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         if (selectedModel) {
           setPendingModel(selectedModel);
           if (existingSid) {
+            selectionOperation = "set-model";
             await sendAgentCommand(sid, { type: "set_model", provider: selectedModel.provider, modelId: selectedModel.modelId });
+            selectionOperation = "prompt";
           }
         }
         await ensureEventsConnected(sid);
@@ -2318,7 +2322,12 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
           ? prev
           : [...prev.slice(0, optimisticIndex), ...prev.slice(optimisticIndex + 1)];
       });
-      addNotice({ type: "error", message: e instanceof Error ? e.message : String(e) });
+      // Only the pre-POST readiness path may consume the SSE startup refusal.
+      // Keep prompt HTTP and queued-input acknowledgement guards unchanged.
+      const selectionError = !promptRequestStarted && e instanceof AgentEventConnectionError
+        ? e.prePromptRejection ?? e
+        : e;
+      addNotice({ type: "error", message: formatModelSelectionError(selectionError, translate, selectionOperation) ?? (e instanceof Error ? e.message : String(e)) });
       restoreSubmission(message, images, composerDraftKey);
       optimisticUserMessageKeyRef.current = null;
       // Rejection only describes this submission. Another tab or an event we
@@ -2334,7 +2343,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
       setAgentPhase(null);
       dispatch({ type: "end" });
     }
-  }, [isNew, newSessionCwd, newSessionModel, session, ensureNewSession, ensureEventsConnected, promoteNewSession, waitForPromptSettlement, addNotice, cancelEventStreamGrace, closeEvents, composerDraftKey, reconcileAgentState, restoreSubmission, editEntryId, setEdit]);
+  }, [isNew, newSessionCwd, newSessionModel, session, ensureNewSession, ensureEventsConnected, promoteNewSession, waitForPromptSettlement, addNotice, cancelEventStreamGrace, closeEvents, composerDraftKey, reconcileAgentState, restoreSubmission, editEntryId, setEdit, translate]);
 
   const executeBash = useCallback(async (command: string, excludeFromContext: boolean) => {
     if (agentRunningRef.current || bashRunningRef.current) return;
@@ -2450,6 +2459,9 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
   const handleModelChange = useCallback(async (provider: string, modelId: string) => {
     if (isNew) {
       const selectedModel = { provider, modelId };
+      const previousModel = newSessionModelOverrideRef.current;
+      const previousPendingModel = pendingModel;
+      const previousThinkingLevel = newSessionDefaultThinkingLevel;
       newSessionModelOverrideRef.current = selectedModel;
       setNewSessionModel(selectedModel);
       setPendingModel(selectedModel);
@@ -2459,12 +2471,23 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
           asConcreteThinkingLevel(pinned) ?? defaultThinkingLevelRef.current,
         );
       }
-      const sid = sessionIdRef.current ?? await ensuringNewSessionRef.current;
-      if (!sid) return;
       try {
+        const sid = sessionIdRef.current ?? await ensuringNewSessionRef.current;
+        if (!sid) return;
         await sendAgentCommand(sid, { type: "set_model", provider, modelId });
       } catch (e) {
         console.error("Failed to set model:", e);
+        if (newSessionModelOverrideRef.current === selectedModel) {
+          newSessionModelOverrideRef.current = previousModel;
+          setNewSessionModel(previousModel);
+          setPendingModel(previousPendingModel);
+          setNewSessionDefaultThinkingLevel(previousThinkingLevel);
+        }
+        addNotice({
+          type: "error",
+          message: formatModelSelectionError(e, translate, "set-model")
+            ?? translate("chat.modelSwitchFailed", { error: e instanceof Error ? e.message : String(e) }),
+        });
       }
       return;
     }
@@ -2486,18 +2509,21 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
       console.error("Failed to set model:", e);
       modelSwitchPendingRef.current = false;
       setCurrentModelOverride(previousOverride);
+      const selectionError = formatModelSelectionError(e, translate, "set-model");
       addNotice({
         type: "error",
-        message: `Failed to switch model: ${e instanceof Error ? e.message : String(e)}`,
+        message: selectionError
+          ?? translate("chat.modelSwitchFailed", { error: e instanceof Error ? e.message : String(e) }),
       });
       // A failed response can still follow a server-side write (for example, a
       // dropped connection), so let the session file settle the displayed model.
-      await loadSession(sid, false, true);
+      // A typed refusal, unlike that transport ambiguity, preserves the original branch/selection.
+      if (!selectionError) await loadSession(sid, false, true);
     } finally {
       modelSwitchPendingRef.current = false;
       setModelSwitching(false);
     }
-  }, [addNotice, currentModelOverride, isNew, loadSession, setNewSessionModel]);
+  }, [addNotice, currentModelOverride, isNew, loadSession, setNewSessionModel, pendingModel, newSessionDefaultThinkingLevel, translate]);
 
   const handleCompact = useCallback(async () => {
     const sid = sessionIdRef.current;
@@ -2784,12 +2810,15 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
       // accepted the queued prompt before the response was lost. Restoring in
       // that case would invite a duplicate turn.
       if (isPromptRejectedError(e)) restore();
+      const selectionError = formatModelSelectionError(e, translate);
       addNotice({
         type: "error",
-        message: e instanceof Error ? e.message : String(e),
+        message: selectionError
+          ? isPromptRejectedError(e) ? selectionError : translate("chat.modelSelectionUnconfirmed")
+          : e instanceof Error ? e.message : String(e),
       });
     }
-  }, [addNotice, composerDraftKey, editEntryId, restoreSubmission]);
+  }, [addNotice, composerDraftKey, editEntryId, restoreSubmission, translate]);
 
   const handleSteer = useCallback(async (message: string, images?: AttachedImage[]) => {
     await sendStreamingPrompt(message, "steer", images);

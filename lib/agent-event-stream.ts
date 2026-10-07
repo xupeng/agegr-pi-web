@@ -2,8 +2,10 @@ import {
   isEventIncludedInSnapshot,
   toClientAgentEvent,
   type AgentEventLike,
+  type AgentStartupErrorEvent,
 } from "./agent-event-wire";
 import { acquireSessionLivenessLease } from "./session-liveness";
+import { ModelSelectionError } from "./subagent-model-selection";
 
 export interface AgentEventStreamSession {
   readonly isStreaming: boolean;
@@ -228,6 +230,7 @@ export function createAgentEventStream(
       };
 
       const publishSession = async () => {
+        let connected = false;
         try {
           const session = await sessionPromise;
           if (closed) return;
@@ -273,6 +276,7 @@ export function createAgentEventStream(
               .filter((event) => event.type === "extension_ui_request" && typeof event.id === "string")
               .map((event) => event.id as string),
           });
+          connected = true;
           for (const event of bufferedEvents) forwardEvent(event, snapshot);
           if (snapshot !== undefined && snapshot !== null) {
             encode({ type: "message_start", message: snapshot });
@@ -280,10 +284,19 @@ export function createAgentEventStream(
           snapshotPublished = true;
         } catch (error) {
           if (closed) return;
-          encode({
+          const modelSelection = error instanceof ModelSelectionError ? error.toSafeDTO() : undefined;
+          const startupError: AgentStartupErrorEvent = {
             type: "startup_error",
-            errorMessage: `Failed to start agent: ${errorMessage(error)}`,
-          });
+            errorMessage: modelSelection
+              ? "Failed to start agent: Model selection failed"
+              : `Failed to start agent: ${errorMessage(error)}`,
+            ...(modelSelection ? {
+              code: modelSelection.code,
+              ...(!connected ? { prePromptRejected: true as const } : {}),
+              modelSelection,
+            } : {}),
+          };
+          encode(startupError);
           cleanup(true);
         }
       };

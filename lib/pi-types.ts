@@ -71,6 +71,7 @@ interface SkillLike {
 }
 
 interface ResourceLoaderLike {
+  getExtensions?(): import("@earendil-works/pi-coding-agent").LoadExtensionsResult;
   getSkills(): { skills: SkillLike[] };
   getAgentsFiles(): { agentsFiles: Array<{ path: string; content: string }> };
 }

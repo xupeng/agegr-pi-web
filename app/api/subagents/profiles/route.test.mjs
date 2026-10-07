@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test, { after } from "node:test";
@@ -239,4 +239,52 @@ test("profiles route rejects missing paths, malformed profiles, and unsafe names
   response = await PATCH(jsonRequest("PATCH", { cwd, scope: "project", name: "api-test-agent" }));
   assert.equal(response.status, 400);
   assert.deepEqual(await response.json(), { error: "enabled required" });
+});
+
+
+test("actual PUT missing new fields defaults to inheritance, preserving authored existing false/aliases", async (t) => {
+  const cwd = await mkdtemp(join(tmpdir(), "pi-web-subagent-route-review-"));
+  allowFileRoot(cwd);
+  t.after(() => rm(cwd, { recursive: true, force: true }));
+  const missing = profile();
+  delete missing.loadExtensions;
+  delete missing.loadSkills;
+  let response = await PUT(jsonRequest("PUT", { cwd, scope: "project", profile: missing }));
+  assert.equal(response.status, 200);
+  const saved = (await response.json()).profile;
+  assert.equal(saved.loadExtensions, true);
+  assert.equal(saved.loadSkills, false);
+  assert.match(await readFile(join(cwd, ".pi", "agents", "api-test-agent.md"), "utf8"), /load_extensions: true/);
+  for (const flags of ["load_extensions: false\nextensions: pi-authored-package", "extensions: none", "extensions: false"]) {
+    await mkdir(join(cwd, ".pi", "agents"), { recursive: true });
+    await writeFile(join(cwd, ".pi", "agents", "api-test-agent.md"), `---\n${flags}\n---\n\nauthored prompt\n`);
+    response = await PUT(jsonRequest("PUT", { cwd, scope: "project", profile: missing }));
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).profile.loadExtensions, false);
+    const source = await readFile(join(cwd, ".pi", "agents", "api-test-agent.md"), "utf8");
+    assert.ok(source.includes(flags.split("\n").at(-1)), "route did not coerce or overwrite authored alias");
+    const listed = await GET(new Request(`http://localhost/api/subagents/profiles?cwd=${encodeURIComponent(cwd)}`));
+    assert.equal((await listed.json()).profiles.find((p) => p.name === missing.name).loadExtensions, false);
+  }
+});
+
+test("actual PUT rejects invalid resource booleans without creating or overwriting a profile", async (t) => {
+  const cwd = await mkdtemp(join(tmpdir(), "pi-web-subagent-route-review-invalid-"));
+  allowFileRoot(cwd);
+  t.after(() => rm(cwd, { recursive: true, force: true }));
+  const file = join(cwd, ".pi", "agents", "api-test-agent.md");
+  for (const flag of ["loadSkills", "loadExtensions"]) {
+    for (const value of ["false", "true", null, 0, [], {}]) {
+      const response = await PUT(jsonRequest("PUT", { cwd, scope: "project", profile: profile({ [flag]: value }) }));
+      assert.equal(response.status, 400);
+      assert.equal((await response.json()).error, `${flag} must be a boolean`);
+      assert.equal(existsSync(file), false);
+    }
+  }
+  const good = await PUT(jsonRequest("PUT", { cwd, scope: "project", profile: profile({ loadExtensions: false }) }));
+  assert.equal(good.status, 200);
+  const before = await readFile(file, "utf8");
+  const invalid = await PUT(jsonRequest("PUT", { cwd, scope: "project", profile: profile({ loadExtensions: "true" }) }));
+  assert.equal(invalid.status, 400);
+  assert.equal(await readFile(file, "utf8"), before);
 });

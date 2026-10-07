@@ -1,8 +1,19 @@
 import type { JsonAgentSessionEvent } from "@earendil-works/pi-coding-agent";
+import type { ModelSelectionFailureDTO } from "./api-types";
 
 export interface AgentEventLike {
   type: string;
   [key: string]: unknown;
+}
+
+/** Startup handshake failure, not a prompt HTTP acknowledgement. */
+export interface AgentStartupErrorEvent extends AgentEventLike {
+  type: "startup_error";
+  errorMessage: string;
+  code?: "model_selection_failed";
+  /** Refuses only a submission awaiting readiness, never an accepted/queued prompt. */
+  prePromptRejected?: true;
+  modelSelection?: ModelSelectionFailureDTO;
 }
 
 type JsonMessageUpdateEvent = Extract<

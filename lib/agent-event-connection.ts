@@ -1,4 +1,5 @@
 import type { AgentEventLike } from "./agent-event-wire";
+import { AgentCommandError, readModelSelectionFailureDTO } from "./agent-client";
 
 export interface AgentEventSourceLike {
   readonly readyState: number;
@@ -10,7 +11,12 @@ export interface AgentEventSourceLike {
 export type AgentEventConnectionStatus = "ready_timeout" | "startup_error" | "closed";
 
 export class AgentEventConnectionError extends Error {
-  constructor(public readonly status: AgentEventConnectionStatus, message?: string) {
+  constructor(
+    public readonly status: AgentEventConnectionStatus,
+    message?: string,
+    /** Safe selection projection for a caller that has not dispatched its prompt yet. */
+    public readonly prePromptRejection?: AgentCommandError,
+  ) {
     super(message ?? (
       status === "ready_timeout"
         ? "Timed out starting the agent session. Please try again."
@@ -151,8 +157,21 @@ export class AgentEventConnection {
         attempt.succeed();
         this.stopRetrying();
       } else if (event.type === "startup_error") {
-        const message = typeof event.errorMessage === "string" ? event.errorMessage : undefined;
-        this.fail(connection, new AgentEventConnectionError("startup_error", message));
+        const selectionFailed = event.code === "model_selection_failed" || "modelSelection" in event;
+        // Neither status nor raw text/DTO alone is a negative admission acknowledgement.
+        // A late event after connected cannot reject an already accepted/queued submission.
+        const prePromptRejection = !attempt.ready
+          && event.code === "model_selection_failed"
+          && event.prePromptRejected === true
+          ? new AgentCommandError(
+              "Model selection failed", 0, "model_selection_failed", undefined,
+              readModelSelectionFailureDTO(event.modelSelection), true,
+            )
+          : undefined;
+        const message = selectionFailed
+          ? "Failed to start agent: Model selection failed"
+          : typeof event.errorMessage === "string" ? event.errorMessage : undefined;
+        this.fail(connection, new AgentEventConnectionError("startup_error", message, prePromptRejection));
         return;
       }
       this.options.onEvent(event);

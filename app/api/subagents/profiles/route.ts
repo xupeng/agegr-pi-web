@@ -6,6 +6,7 @@ import {
   listSubagentProfileSources,
   saveSubagentProfile,
   type SubagentProfile,
+  type SubagentProfileSaveInput,
   type SubagentWritableScope,
 } from "@/lib/subagents";
 import { writeDisabledBuiltInSubagent } from "@/lib/subagent-settings";
@@ -45,13 +46,20 @@ export async function PUT(req: Request) {
     const body = await req.json() as {
       cwd?: unknown;
       scope?: unknown;
-      profile?: Omit<SubagentProfile, "scope" | "filePath">;
+      profile?: SubagentProfileSaveInput;
     };
     const cwd = await validateCwd(body.cwd);
     const scope = validateScope(body.scope);
     if (!body.profile || typeof body.profile.name !== "string") {
       return NextResponse.json({ error: "profile required" }, { status: 400 });
     }
+    for (const flag of ["loadSkills", "loadExtensions"] as const) {
+      if (body.profile[flag] !== undefined && typeof body.profile[flag] !== "boolean") {
+        return NextResponse.json({ error: `${flag} must be a boolean` }, { status: 400 });
+      }
+    }
+    // Missing switches are intentionally forwarded, not coerced: save uses true for a new
+    // profile and preserves an existing authored false/alias.
     return NextResponse.json({ profile: saveSubagentProfile(cwd, scope, body.profile) });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
