@@ -8,16 +8,33 @@ import test from "node:test";
 // could not reach those CDNs silently fell back to a default font. The faces are
 // now vendored under `public/fonts/`; keep them complete, licensed, and free of
 // external font hosts.
+//
+// `app/fonts-content-cjk.css` declares two weight bands of one role family: the
+// WenKai Screen slices at 400 and the ZhenKai GB slices at 501-900. Each CJK
+// family therefore keeps its own directory, subset count, manifest and notice
+// next to the bytes.
 
 const layoutSource = await readFile(new URL("../app/layout.tsx", import.meta.url), "utf8");
 const oxaniumCss = await readFile(new URL("../app/fonts.css", import.meta.url), "utf8");
-const lxgwCss = await readFile(new URL("../app/fonts-lxgw-wenkai-screen.css", import.meta.url), "utf8");
+const cjkCss = await readFile(new URL("../app/fonts-content-cjk.css", import.meta.url), "utf8");
 
 const publicDir = new URL("./", import.meta.url);
 const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
 
+// Every vendored CJK family: its directory and the source its NOTICE.txt must
+// name. Each ships one `unicode-range` slice per line of the other's list.
+const CJK_FAMILIES = [
+  { dir: "lxgw-wenkai-screen", notice: /lxgw-wenkai-screen-webfont@1\.7\.0/ },
+  { dir: "lxgw-zhenkai", notice: /lxgw\/LxgwZhenKai v0\.825/ },
+];
+const CJK_SUBSETS_PER_FAMILY = 97;
+
+function cjkPathsFor(dir, css = cjkCss) {
+  return referencedFontPaths(css).filter((pathname) => pathname.startsWith(`/fonts/${dir}/`));
+}
+
 function referencedFontPaths(css) {
-  // The generated LXGW stylesheet keeps upstream's unquoted `url(...)` form.
+  // The generated CJK stylesheet keeps upstream's unquoted `url(...)` form.
   return [...css.matchAll(/url\(\s*["']?(\/fonts\/[^"')]+)["']?\s*\)/g)].map((match) => match[1]);
 }
 
@@ -27,7 +44,8 @@ async function readPublicFile(pathname) {
 
 test("layout no longer links webfonts from an external CDN", () => {
   assert.match(layoutSource, /import "\.\/fonts\.css";/);
-  assert.match(layoutSource, /import "\.\/fonts-lxgw-wenkai-screen\.css";/);
+  assert.match(layoutSource, /import "\.\/fonts-content-cjk\.css";/);
+  assert.doesNotMatch(layoutSource, /fonts-lxgw-wenkai-screen\.css/);
   assert.doesNotMatch(layoutSource, /fonts\.googleapis\.com/);
   assert.doesNotMatch(layoutSource, /fonts\.gstatic\.com/);
   assert.doesNotMatch(layoutSource, /cdn\.jsdelivr\.net/);
@@ -35,41 +53,50 @@ test("layout no longer links webfonts from an external CDN", () => {
 
 test("every self-hosted @font-face url resolves to a file in public/", async () => {
   const oxaniumPaths = referencedFontPaths(oxaniumCss);
-  const lxgwPaths = referencedFontPaths(lxgwCss);
+  const cjkPaths = referencedFontPaths(cjkCss);
 
   assert.equal(oxaniumPaths.length, 2);
   assert.equal(new Set(oxaniumPaths).size, 2);
-  assert.equal(lxgwPaths.length, 97);
-  assert.equal(new Set(lxgwPaths).size, 97, "each unicode-range subset needs its own file");
+  assert.equal(cjkPaths.length, CJK_FAMILIES.length * CJK_SUBSETS_PER_FAMILY);
+  assert.equal(new Set(cjkPaths).size, cjkPaths.length, "each unicode-range subset needs its own file");
+  for (const { dir } of CJK_FAMILIES) {
+    assert.equal(cjkPathsFor(dir).length, CJK_SUBSETS_PER_FAMILY, `${dir} must declare every slice`);
+  }
 
-  for (const pathname of [...oxaniumPaths, ...lxgwPaths]) {
+  for (const pathname of [...oxaniumPaths, ...cjkPaths]) {
     const bytes = await readPublicFile(pathname);
     assert.ok(bytes.byteLength > 0, `${pathname} must not be empty`);
   }
 });
 
-test("the vendored subsets are exactly the files the stylesheet declares", async () => {
-  const declared = new Set(referencedFontPaths(lxgwCss).map((pathname) => pathname.split("/").pop()));
-  const onDisk = new Set((await readdir(new URL("./fonts/lxgw-wenkai-screen/", publicDir))).filter((name) => name.endsWith(".woff2")));
+test("the vendored subsets are exactly the files the stylesheets declare", async () => {
+  for (const { dir } of CJK_FAMILIES) {
+    const declared = new Set(cjkPathsFor(dir).map((pathname) => pathname.split("/").pop()));
+    const onDisk = new Set(
+      (await readdir(new URL(`./fonts/${dir}/`, publicDir))).filter((name) => name.endsWith(".woff2")),
+    );
 
-  assert.deepEqual([...onDisk].sort(), [...declared].sort());
+    assert.deepEqual([...onDisk].sort(), [...declared].sort(), `${dir} must ship exactly its declared slices`);
+  }
 });
 
-test("the lxgw subset manifest matches the shipped bytes", async () => {
-  const manifest = (await readPublicFile("/fonts/lxgw-wenkai-screen/SHA256SUMS.txt")).toString("utf8");
-  const entries = manifest
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const [hash, name] = line.split(/\s+/);
-      return { hash, name };
-    });
+test("each lxgw subset manifest matches the shipped bytes", async () => {
+  for (const { dir } of CJK_FAMILIES) {
+    const manifest = (await readPublicFile(`/fonts/${dir}/SHA256SUMS.txt`)).toString("utf8");
+    const entries = manifest
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const [hash, name] = line.split(/\s+/);
+        return { hash, name };
+      });
 
-  assert.equal(entries.length, 97);
-  for (const { hash, name } of entries) {
-    const actual = sha256(await readPublicFile(`/fonts/lxgw-wenkai-screen/${name}`));
-    assert.equal(actual, hash, `${name} no longer matches SHA256SUMS.txt`);
+    assert.equal(entries.length, CJK_SUBSETS_PER_FAMILY, `${dir}/SHA256SUMS.txt`);
+    for (const { hash, name } of entries) {
+      const actual = sha256(await readPublicFile(`/fonts/${dir}/${name}`));
+      assert.equal(actual, hash, `${dir}/${name} no longer matches SHA256SUMS.txt`);
+    }
   }
 });
 
@@ -84,9 +111,12 @@ test("each vendored family ships its license next to the fonts", async () => {
     assert.equal(declared[1], sha256(await readPublicFile(`/fonts/oxanium/${name}`)));
   }
 
-  const lxgwOfl = (await readPublicFile("/fonts/lxgw-wenkai-screen/OFL.txt")).toString("utf8");
-  const lxgwNotice = (await readPublicFile("/fonts/lxgw-wenkai-screen/NOTICE.txt")).toString("utf8");
-  assert.match(lxgwOfl, /SIL Open Font License, Version 1\.1/);
-  assert.match(lxgwNotice, /lxgw-wenkai-screen-webfont@1\.7\.0/);
+  for (const { dir, notice } of CJK_FAMILIES) {
+    const ofl = (await readPublicFile(`/fonts/${dir}/OFL.txt`)).toString("utf8");
+    assert.match(ofl, /SIL Open Font License, Version 1\.1/);
+    assert.match((await readPublicFile(`/fonts/${dir}/NOTICE.txt`)).toString("utf8"), notice);
+  }
+
+  // The WenKai package license (MIT) covers the upstream packaging scripts.
   await readPublicFile("/fonts/lxgw-wenkai-screen/LICENSE.txt");
 });

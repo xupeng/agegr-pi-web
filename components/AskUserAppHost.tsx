@@ -19,12 +19,13 @@ export interface AskUserAppHostProps {
  *
  * This is deliberately the `body` stack - the UI stack the native card
  * inherited from the message column - and not `--font-content`, the chat prose
- * stack: `--font-content` lists LXGW WenKai Screen, whose kai glyphs are
- * visibly larger and heavier than the sans the card used, which read as "wrong
- * font / font too large" on a phone. Asking for the UI stack keeps Latin in
- * Oxanium and CJK in the device's own sans (PingFang SC on iOS, Noto Sans CJK
- * elsewhere), exactly like the card did. The value must not be able to break
- * out of the inline style, so only font-stack characters survive.
+ * stack: `--font-content` resolves CJK to `PiWebBodyCJK` (LXGW WenKai Screen /
+ * LXGW ZhenKai GB), whose kai glyphs are visibly larger and heavier than the
+ * sans the card used, which read as "wrong font / font too large" on a phone.
+ * Asking for the UI stack keeps Latin in Oxanium and CJK in the device's own
+ * sans (PingFang SC on iOS, Noto Sans CJK elsewhere), exactly like the card
+ * did. The value must not be able to break out of the inline style, so only
+ * font-stack characters survive.
  */
 function readFontFamilyStack(): string {
   if (typeof document === "undefined") return "";
