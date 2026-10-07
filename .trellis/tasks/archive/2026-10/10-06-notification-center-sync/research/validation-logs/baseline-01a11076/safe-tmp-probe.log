@@ -1,6 +1,0 @@
-TARGET SOURCE               FSTYPE OPTIONS
-/      /dev/mapper/root[/@] btrfs  rw,relatime,compress=zstd:3,ssd,space_cache=v2,subvolid=256,subvol=/@
-Filesystem        Size  Used Avail Use% Mounted on
-/dev/mapper/root  464G   85G  378G  19% /
-drwxr-xr-x 1 xupeng xupeng   42 Sep 21 05:42 /home/xupeng/.agents/skills
-drwxrwxrwt 1 root   root   6142 Oct  6 15:53 /var/tmp

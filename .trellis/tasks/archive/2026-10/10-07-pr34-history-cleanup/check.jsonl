@@ -1,2 +1,0 @@
-{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Full isolated type/lint/test and browser proof without raw artifact commits."}
-{"file":".trellis/tasks/archive/2026-10/10-07-pr34-history-cleanup/research/history-boundaries.md","reason":"Review whole-tree identity, history reachability, lease/ref scope and honest retained limitations."}

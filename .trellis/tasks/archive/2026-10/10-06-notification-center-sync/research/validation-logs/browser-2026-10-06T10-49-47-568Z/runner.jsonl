@@ -1,9 +1,0 @@
-{"at":"2026-10-06T10:49:47.580Z","type":"environment","detail":{"originalTMPDIR":"/home/xupeng/.cache/pi-tmp/01a110c1-d062-7540-97bf-c3f9b7303d87/notification-center-tcx0qya5","correctedTMPDIR":"/var/tmp/notification-browser.ulP5N5Uj/tmp","home":"/var/tmp/notification-browser.ulP5N5Uj/home","agent":"/var/tmp/notification-browser.ulP5N5Uj/agent","root":"/home/xupeng/dev/personal/forked/agegr-pi-web","sdk":"1.0.0"}}
-{"at":"2026-10-06T10:49:47.591Z","type":"server-start","detail":{"pid":1063908,"port":36245,"log":"/home/xupeng/.cache/pi-tmp/01a110c1-d062-7540-97bf-c3f9b7303d87/notification-center-tcx0qya5/results/server-1.log","startedAt":"2026-10-06T10:49:47.591Z","argv":["/home/xupeng/.local/share/mise/installs/node/24.21.0/bin/node","/home/xupeng/dev/personal/forked/agegr-pi-web/node_modules/next/dist/bin/next","dev","-H","127.0.0.1","-p","36245"],"stoppedAt":null}}
-{"at":"2026-10-06T10:49:57.650Z","type":"browser-permission","detail":{"label":"a","notification":"denied","queried":"denied","secure":true,"url":"http://127.0.0.1:36245/"}}
-{"at":"2026-10-06T10:49:59.235Z","type":"browser-permission","detail":{"label":"b","notification":"denied","queried":"denied","secure":true,"url":"http://127.0.0.1:36245/"}}
-{"at":"2026-10-06T10:50:02.224Z","type":"PASS","detail":"global-aggregation"}
-{"at":"2026-10-06T10:50:05.372Z","type":"PASS","detail":"revision-bulk-fallback"}
-{"at":"2026-10-06T10:50:07.774Z","type":"PASS","detail":"new-run-preserves-old"}
-{"at":"2026-10-06T10:50:15.507Z","type":"PASS","detail":"result-center-gate"}
-{"at":"2026-10-06T10:50:22.305Z","type":"PASS","detail":"result-settings-long"}

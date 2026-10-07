@@ -1,4 +1,0 @@
-Related process scan before cleanup (no env):
-verified uid=1000, inode=7122016, no inherited pi-tmp lock, formal logs present: /home/xupeng/.cache/pi-tmp/01a10fa1-d7ee-753b-a8de-d7aa28090808/ask-user-candidate-installed-ufjf82c5
-removed exact owned failure path: /home/xupeng/.cache/pi-tmp/01a10fa1-d7ee-753b-a8de-d7aa28090808/ask-user-candidate-installed-ufjf82c5
-Worktree/node_modules not touched.

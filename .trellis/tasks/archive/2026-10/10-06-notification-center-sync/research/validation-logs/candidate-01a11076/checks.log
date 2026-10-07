@@ -1,5 +1,0 @@
-npm_ci=0
-tsc=0
-lint=0
-tests=1
-diff_check=0

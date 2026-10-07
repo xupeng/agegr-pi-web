@@ -1,9 +1,0 @@
-candidate HEAD=e0ad63073c4c42987571d31b1a4cb61e48a1fcd4
-branch=feat/notification-center-sync
-fixture=/var/tmp/notification-candidate-01a11076.83OF89b0
-v24.21.0
-11.19.0
-8d6f804dcbc7118c979d6c0a1e88c211d543b254125000d5a34ad04e15ca8713  package.json
-18c40d7685f7501d46e66450e5470fd064124f9662b17ac310fce042491d322f  package-lock.json
-8d6f804dcbc7118c979d6c0a1e88c211d543b254125000d5a34ad04e15ca8713  package.json
-18c40d7685f7501d46e66450e5470fd064124f9662b17ac310fce042491d322f  package-lock.json

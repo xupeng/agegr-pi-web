@@ -1,3 +1,0 @@
-{"file":".trellis/spec/guides/index.md","reason":"Use existing guide hierarchy and avoid ad-hoc instruction ownership."}
-{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Clean-lock verification and honest browser/source evidence boundaries."}
-{"file":".trellis/tasks/archive/2026-10/10-07-pr34-history-cleanup/research/history-boundaries.md","reason":"Locked history scope, exact artifact exclusion, clean PR publication shape and protected runtime."}
