@@ -1,22 +1,25 @@
-name: CI
+name: Slow tests
 
 on:
   push:
     branches: [main, personal]
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  # This entry is usable only after the workflow exists on the default branch.
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  # PR, push and manual events cannot cancel one another, even for the same ref.
+  group: slow-tests-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-# Preserve the full npm test collection. Slow tests is an independent workflow.
 jobs:
-  checks:
+  e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,24 +36,33 @@ jobs:
       - name: Install dependencies
         id: install
         run: exec /usr/bin/env -i PATH="$PATH" node lib/ci-test-env.mjs install "$CI_RUNTIME_ROOT" "$RUNNER_TEMP"
-      - name: Lint
-        id: lint
-        run: exec /usr/bin/env -i PATH="$PATH" node lib/ci-test-env.mjs lint "$CI_RUNTIME_ROOT" "$RUNNER_TEMP"
-      - name: Type check
-        id: types
-        run: exec /usr/bin/env -i PATH="$PATH" node lib/ci-test-env.mjs types "$CI_RUNTIME_ROOT" "$RUNNER_TEMP"
-      - name: Tests
-        id: tests
-        run: exec /usr/bin/env -i PATH="$PATH" node lib/ci-test-env.mjs tests "$CI_RUNTIME_ROOT" "$RUNNER_TEMP"
+      - name: Install Chromium
+        id: browser
+        run: exec /usr/bin/env -i PATH="$PATH" node lib/ci-test-env.mjs browser "$CI_RUNTIME_ROOT" "$RUNNER_TEMP"
+      - name: Build
+        id: build
+        run: exec /usr/bin/env -i PATH="$PATH" node lib/ci-test-env.mjs build "$CI_RUNTIME_ROOT" "$RUNNER_TEMP"
+      - name: e2e/run.mjs (start)
+        id: run
+        run: exec /usr/bin/env -i PATH="$PATH" node lib/ci-test-env.mjs run "$CI_RUNTIME_ROOT" "$RUNNER_TEMP"
+      - name: e2e/subagents.mjs (dev)
+        id: subagents
+        # Keep independent subagent evidence after a main-suite failure, but
+        # never start it after a failed build or a cancellation.
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: exec /usr/bin/env -i PATH="$PATH" node lib/ci-test-env.mjs subagents "$CI_RUNTIME_ROOT" "$RUNNER_TEMP"
       - name: Clean owned runtime tree
         if: ${{ always() && env.CI_RUNTIME_ROOT != '' }}
         run: exec /usr/bin/env -i PATH="$PATH" node lib/ci-test-env.mjs cleanup "$CI_RUNTIME_ROOT" "$RUNNER_TEMP"
-      - name: Upload failure logs and timings
+      - name: Upload failure artifacts
         if: ${{ always() && (failure() || cancelled()) }}
         uses: actions/upload-artifact@v4
         with:
-          name: fast-checks-${{ github.run_id }}-${{ github.run_attempt }}
-          path: test-results/ci/
+          name: slow-tests-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            test-results/e2e/
+            test-results/e2e-subagents/
+            test-results/ci/
           retention-days: 7
           if-no-files-found: warn
       - name: Summary
@@ -62,9 +74,10 @@ jobs:
           CI_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           CI_BASE_REF: ${{ github.base_ref }}
           CI_INSTALL_OUTCOME: ${{ steps.install.outcome }}
-          CI_LINT_OUTCOME: ${{ steps.lint.outcome }}
-          CI_TYPES_OUTCOME: ${{ steps.types.outcome }}
-          CI_TESTS_OUTCOME: ${{ steps.tests.outcome }}
+          CI_BROWSER_OUTCOME: ${{ steps.browser.outcome }}
+          CI_BUILD_OUTCOME: ${{ steps.build.outcome }}
+          CI_RUN_OUTCOME: ${{ steps.run.outcome }}
+          CI_SUBAGENTS_OUTCOME: ${{ steps.subagents.outcome }}
         run: |
           exec /usr/bin/env -i PATH="$PATH" GITHUB_STEP_SUMMARY="$GITHUB_STEP_SUMMARY" \
             GITHUB_EVENT_NAME="$GITHUB_EVENT_NAME" HEAD_SHA="$HEAD_SHA" GITHUB_SHA="$GITHUB_SHA" \
@@ -72,5 +85,6 @@ jobs:
             GITHUB_RUN_ID="$GITHUB_RUN_ID" GITHUB_RUN_ATTEMPT="$GITHUB_RUN_ATTEMPT" \
             CI_JOB_STATUS="$CI_JOB_STATUS" CI_PR_HEAD_SHA="$CI_PR_HEAD_SHA" CI_PR_MERGE_SHA="$CI_PR_MERGE_SHA" \
             CI_BASE_SHA="$CI_BASE_SHA" CI_BASE_REF="$CI_BASE_REF" CI_INSTALL_OUTCOME="$CI_INSTALL_OUTCOME" \
-            CI_LINT_OUTCOME="$CI_LINT_OUTCOME" CI_TYPES_OUTCOME="$CI_TYPES_OUTCOME" CI_TESTS_OUTCOME="$CI_TESTS_OUTCOME" \
-            node lib/ci-test-env.mjs summary fast
+            CI_BROWSER_OUTCOME="$CI_BROWSER_OUTCOME" CI_BUILD_OUTCOME="$CI_BUILD_OUTCOME" \
+            CI_RUN_OUTCOME="$CI_RUN_OUTCOME" CI_SUBAGENTS_OUTCOME="$CI_SUBAGENTS_OUTCOME" \
+            node lib/ci-test-env.mjs summary slow

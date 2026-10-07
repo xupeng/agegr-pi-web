@@ -8,6 +8,11 @@ npm run dev   # port 30141
 
 Typecheck: `node_modules/.bin/tsc --noEmit` · Lint: `npm run lint`
 
+Fast gate before a commit: `node_modules/.bin/tsc --noEmit`, `npm run lint`, `npm test`;
+each round run only the tests for the files you changed. The existing main and subagent
+browser suites run asynchronously in the `Slow tests` GitHub Actions workflow — never run
+`npm run test:e2e` (or `npm run build`) in the development loop. See `e2e/README.md`.
+
 **Never run `next build` during dev**: it pollutes `.next/` and breaks `npm run dev`.
 
 ### Dev server troubleshooting
@@ -274,6 +279,7 @@ The guard is `canRestoreRememberedSession()` (`lib/session-restore.ts:28`, used 
 ### Development and delivery
 - Upstream sync is a non-fast-forward, fixed-target merge with per-block semantic integration: no whole-file ours/theirs, no `-X ours/theirs`, no blanket `git add .`/`git add -A`. Preserve fork package/release metadata and user assets; follow [.trellis/spec/guides/upstream-sync.md](.trellis/spec/guides/upstream-sync.md).
 - Validate tsc, lint and tests against a clean lock-consistent `npm ci --include=dev` tree; isolate HOME/PI_CODING_AGENT_DIR for runtime tests. Never run MCP writes against the live dev server or real agent directory. Source/data-chain assertions are not browser verification; unrun browser/Safari/Windows coverage stays a disclosed risk.
+- Keep the fast/slow split in CI: `CI` owns the fast gate (`checks`: lint, `tsc --noEmit`, the full `npm test`), while `.github/workflows/slow-tests.yml` (`Slow tests` / `e2e`) owns the existing main (start) and subagent (dev) browser suites; other harnesses remain deferred. PR updates and `main`/`personal` pushes trigger runs; manual dispatch requires the workflow on the default branch. Both workflows use an explicit minimal environment, reject workspace dotenv, and isolate HOME/TMPDIR/PI_TASK_TMPDIR/agent paths; slow tests share an explicit browser cache across HOME changes and upload both E2E artifact directories plus command logs/timings. Cancellation is scoped by event and PR/ref, with owned-process cleanup and a job timeout. Never delete or skip tests to speed the local loop; delivery needs the latest candidate's fast and slow runs green, matching actual checkout, PR head and base SHA. The workflow name changed even though job id `e2e` remains; do not assume old branch-protection check names still match. Classification and timing collection are in `e2e/README.md`.
 - Trellis archive and session-log commits belong on the task feature branch, together with its work, before the PR is merged: work → specs if needed → task artifacts → archive → journal → PR. Never append them separately on main after merging. Push an explicit branch (`git push origin <branch>`), never bare `git push` under matching mode.
 
 ---
