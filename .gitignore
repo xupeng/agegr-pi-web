@@ -50,3 +50,27 @@ next-env.d.ts
 .pi-web/
 *.tgz
 e2e_*.mjs
+
+# Raw task verification outputs: retain privately; commit Markdown summaries.
+# Task metadata/manifests and product/test fixture JSON are outside this scope.
+.trellis/tasks/**/research/**/*.log
+.trellis/tasks/**/research/**/*.stderr
+.trellis/tasks/**/research/**/*.jsonl
+.trellis/tasks/**/research/**/*.png
+.trellis/tasks/**/research/**/*.jpg
+.trellis/tasks/**/research/**/*.jpeg
+.trellis/tasks/**/research/**/*.webp
+.trellis/tasks/**/research/**/*.gif
+.trellis/tasks/**/research/**/*.zip
+.trellis/tasks/**/research/**/*.gz
+.trellis/tasks/**/research/**/*.webm
+.trellis/tasks/**/research/**/*.mp4
+.trellis/tasks/**/research/**/*-browser-*/**/*.json
+.trellis/tasks/**/research/**/browser-results/**/*.json
+.trellis/tasks/**/research/**/validation-logs/**/*.json
+.trellis/tasks/**/research/**/*eslint*.json
+.trellis/tasks/**/research/**/tsc-results.json
+.trellis/tasks/**/research/**/report.json
+!.trellis/tasks/**/research/**/task.json
+!.trellis/tasks/**/research/**/check.jsonl
+!.trellis/tasks/**/research/**/implement.jsonl

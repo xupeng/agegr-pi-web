@@ -54,7 +54,7 @@
 ## 必须遵循的模式
 
 - **提交前跑三件套**（`node_modules/.bin/tsc --noEmit`、`npm run lint`、`npm test`，三者退出码 0），
-  并把计数与基线逐项对照记录在任务 `research/` 下；具体口径见「验证基线」段，不要只看数字是否变小。
+  并把计数与基线逐项对照写入任务 `research/` 的跟踪 Markdown 摘要；原始输出不提交，见「任务验证产物契约」。不要只看数字是否变小。
 - **新增用户可见文案必须同时改三语**（`en` / `zh-CN` / `zh-TW`）：
   `lib/i18n/registry.test.mjs:39` 强制 key 与占位符集合一致，`:32` 精确断言
   `getSupportedLocales()` 为 `["en", "zh-CN", "zh-TW"]`。文案规则见 `docs/i18n.md`。
@@ -145,7 +145,7 @@ npm ci
   **不要**把带 `node_modules` 的临时 worktree 建在 `/tmp`（本机 `/tmp` 是 2 GiB tmpfs，
   两个 `node_modules` 就会 `ENOSPC`）；用仓库同级的普通目录。
 - 提交前的最小集合：`node_modules/.bin/tsc --noEmit`、`npm run lint`、`npm test`
-  三者退出码为 0，且计数与基线逐项对照记录在任务 `research/` 下。
+  三者退出码为 0，且计数与基线逐项对照写入任务 `research/` 的跟踪 Markdown 摘要。
 
 ### 数据链路脚本不等于浏览器验证
 
@@ -155,8 +155,8 @@ npm ci
   跑出 24 个产物、`research/verify-ac5.mjs` 量出 1242 → 1929 条路径）。它证明数据正确，
   **不能**证明点击、右栏、视口布局。
 - **真实浏览器运行**（Playwright + 已安装的 Chromium）：凡依赖点击、右栏打开、viewport 的
-  断言都必须真跑（例：`e2e/clickable-file-paths.mjs`），并把断言输出与截图留在任务
-  `research/` 下。跑不起来时必须区分「环境阻塞」与「功能失败」，未覆盖的项就写「未覆盖」，
+  断言都必须真跑（例：`e2e/clickable-file-paths.mjs`），在跟踪 Markdown 中记录结论、覆盖和证据位置；
+  原始输出与截图留在私有正式证据目录或受控 CI artifact。跑不起来时必须区分「环境阻塞」与「功能失败」，未覆盖的项就写「未覆盖」，
   禁止用代码阅读推断成通过。
 - 沿用的既有前提：`e2e/` 依赖真实 dev server（先查端口、复用健康进程，禁止 `next build`）；
   本机 Playwright 默认 revision 可能未安装，需显式使用已安装的 chromium headless shell。
@@ -165,13 +165,25 @@ npm ci
 
 ## Code Review 检查清单
 
+### 任务验证产物契约
+
+1. **范围/触发**：提交任务验收、日志、报告或截图；任务 archive/journal 随任务 PR，并不要求原始产物入库。
+2. **命令**：提交前执行 `git diff --cached --name-only`、`git diff --cached --numstat` 和 `git diff --cached --stat`，审查完整路径和体量。
+3. **契约**：Git 保留命令/环境/依赖树/计数/覆盖/保留位置的 Markdown 摘要及 task.json、context JSONL；日志、生成报告、截图和归档放私有正式证据或受控 CI artifact。不得只在自动清理缓存保存唯一证据。
+4. **拒绝条件**：staged 混入原始产物或未知路径则停止；ignore 对已跟踪文件不生效，也不能替代审查。例外必须另行说明和确认，不盲目 `-f`。
+5. **正/基础/反例**：精简摘要加可复核外部证据是正确做法；无二进制证据的纯文本任务仍提交规划/验收；全量 trace/日志入 Git 再删除是反例。
+6. **断言**：检查 ignore 仅覆盖 task research 原始输出，不误伤 Markdown、task元数据/清单或产品 fixture；历史结果与当前结果分开，新 SHA 的未跑项目不能标通过。
+7. **错误/正确**：错误是把所有 research 输出打包提交；正确是归档精简任务文档，明确外部证据保留与清理责任。历史重写须独立备份、树等价和明确授权，不承诺清除 GitHub 只读 PR refs。
+
+详见 [任务产物检查表](../guides/task-artifacts.md)；`.gitignore` 仅提供 task research 兜底，不禁止产品或测试 fixture。
+
 每项都能被命令或文件证据验证，避免「注意代码质量」这类空话：
 
 - [ ] `node_modules/.bin/tsc --noEmit` 退出码 0
 - [ ] `npm run lint` 退出码 0；诊断数有变化时完成归因（规则级别 / 文件覆盖数 /
       plugin + config 版本 / 依赖树一致性）
 - [ ] `npm test` 全绿；新增用例落在 5 个 glob 目录内
-- [ ] 与基线逐项对照已记录在任务 `research/` 下，且写明基线来源（哪个依赖树、哪次安装）
+- [ ] 与基线逐项对照已写入任务 `research/` 的 Markdown 摘要，原始输出未提交，且写明基线来源与外部证据位置
 - [ ] 新增 `.ts` / `.tsx` 无 `any` / `@ts-expect-error` / `enum`；非空断言有明确依据
 - [ ] 新边界输入走 `unknown` + 手写守卫，未新增 schema 校验库依赖
 - [ ] `as` 有依据（如 `as const`、已窄化联合、CSS 自定义属性、SDK 适配或边界校验）；
