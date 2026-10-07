@@ -63,5 +63,7 @@ declare function writeDefaultPreferences(settingsManager: SettingsManager,
 
 ## 7. 错误与正确方式
 
-错误：在 `startRpcSession` 中持久化浏览器一次模型选择，或 SDK setter 后立刻响应成功。
+错误：在 `startRpcSession` 中把浏览器一次会话选择写成全局默认值，或全局 SDK setter 后立刻响应成功。
 正确：当前会话选择沿原有 session 设置路径；只有显式 `PUT /api/models/default` 验证权限、scope 和项目遮蔽，再等待 flush 与错误检查。
+
+当前会话的 cold `set_model` 用户intent需要标准SDK `model_change`持久化后发布wrapper；这不是写全局默认值。子代理exact选模/可信扩展/执行scope和拒绝契约见[子代理选模与可信扩展](./subagent-model-selection.md)。
