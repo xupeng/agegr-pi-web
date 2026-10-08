@@ -208,7 +208,13 @@ export async function DELETE(
   const { id } = await params;
   let releaseNotificationDeletion: (() => void) | undefined;
   try {
-    const filePath = await resolveSessionPath(id);
+    // A live/closing runtime may own a planned path not yet persisted. Deletion
+    // is teardown, not cold restore: retain that path so shutdown can flush and
+    // the cleanup below can remove it. Saved files still require header ownership.
+    const runtimePath = getRpcSession(id)?.sessionFile;
+    const filePath = runtimePath && !existsSync(runtimePath)
+      ? runtimePath
+      : await resolveSessionPath(id);
     if (!filePath) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }

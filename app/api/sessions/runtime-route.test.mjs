@@ -133,6 +133,7 @@ test("deleting an unpersisted session shuts down its runtime and invalidates cac
     cacheSessionPath(id, filePath);
     let shutdownCalled = false;
     globalThis.__piSessions.set(id, {
+      sessionFile: filePath,
       isAlive: () => true,
       isRunning: () => false,
       shutdown: async () => {

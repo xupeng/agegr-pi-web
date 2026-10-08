@@ -12,7 +12,7 @@ import {
   createProjectCommandBashOperations,
   preferUserBashExtension,
 } from "./project-command-env";
-import { cacheSessionPath, getLatestModelChange, invalidateSessionListCache, readLatestSessionEntryId, resolveSessionPath } from "./session-reader";
+import { cacheSessionPath, getLatestModelChange, invalidateSessionListCache, openPersistedSessionManager, readLatestSessionEntryId, resolveSessionPath } from "./session-reader";
 import { getProjectTrustStatus, projectTrustReloadOptions } from "./project-trust";
 import { renderStallAbortText, STALL_ABORT_CUSTOM_TYPE, type StallAbortNoticeDetails } from "./message-display";
 import { resolveStallWatchdogSettings, StallWatchdog, type StallWatchdogStall } from "./stall-watchdog";
@@ -2610,7 +2610,7 @@ export async function setRpcSessionTools(
       await pending.catch(() => undefined);
       return setRpcSessionTools(sessionId, sessionFile, requestedToolNames);
     }
-    const manager = SessionManager.open(sessionFile, undefined);
+    const manager = openPersistedSessionManager(sessionFile, sessionId);
     if (readSubagentSessionResources(manager.getEntries() as unknown as SessionEntry[])) {
       throw new Error("Subagent tool selection is fixed by its profile");
     }
@@ -2874,7 +2874,7 @@ export async function startRpcSession(
 
   let sessionManager: SessionManager;
   if (sessionFile) {
-    sessionManager = SessionManager.open(sessionFile, undefined);
+    sessionManager = openPersistedSessionManager(sessionFile, sessionId);
   } else {
     if (!cwd) throw new Error("cwd is required for a new session");
     sessionManager = SessionManager.create(cwd, undefined);

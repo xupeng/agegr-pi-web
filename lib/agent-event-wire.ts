@@ -10,7 +10,7 @@ export interface AgentEventLike {
 export interface AgentStartupErrorEvent extends AgentEventLike {
   type: "startup_error";
   errorMessage: string;
-  code?: "model_selection_failed";
+  code?: "model_selection_failed" | "session_unavailable";
   /** Refuses only a submission awaiting readiness, never an accepted/queued prompt. */
   prePromptRejected?: true;
   modelSelection?: ModelSelectionFailureDTO;

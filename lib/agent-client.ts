@@ -8,6 +8,7 @@
 // hooks/useAgentSession.ts. This helper collapses that down to one line.
 
 import { isModelSelectionFailureDTO, type ModelSelectionFailureDTO } from "./api-types";
+import { SESSION_UNAVAILABLE_CODE } from "./session-unavailable";
 
 export class AgentCommandError extends Error {
   constructor(
@@ -19,10 +20,18 @@ export class AgentCommandError extends Error {
     public readonly modelSelection?: ModelSelectionFailureDTO,
     /** Also true for an undecodable selection DTO; raw diagnostic text must stay hidden. */
     public readonly modelSelectionFailed = modelSelection !== undefined,
+    public readonly sessionUnavailable = code === SESSION_UNAVAILABLE_CODE,
   ) {
     super(message);
     this.name = "AgentCommandError";
   }
+}
+
+/** Only an explicit refusal may invalidate an unsent composer's runtime identity. */
+export function isUnavailableAgentSessionError(error: unknown): error is AgentCommandError {
+  return error instanceof AgentCommandError
+    && error.sessionUnavailable
+    && error.accepted === false;
 }
 
 export function isPromptRejectedError(error: unknown): error is AgentCommandError {
@@ -50,6 +59,8 @@ export function readAgentCommandError(value: unknown, status: number): AgentComm
     typeof body.accepted === "boolean" ? body.accepted : undefined,
     modelSelection,
     selectionFailure,
+    body.code === SESSION_UNAVAILABLE_CODE
+      || (body.code === "prompt_rejected" && body.accepted === false && body.reason === SESSION_UNAVAILABLE_CODE),
   );
 }
 

@@ -17,7 +17,7 @@ import type {
 } from "@/lib/types";
 import { isBlockingExtensionUiRequest } from "@/lib/browser-notifications";
 import { normalizeToolCalls } from "@/lib/normalize";
-import { isPromptRejectedError, readAgentCommandError, sendAgentCommand } from "@/lib/agent-client";
+import { isPromptRejectedError, isUnavailableAgentSessionError, readAgentCommandError, sendAgentCommand } from "@/lib/agent-client";
 import { formatModelSelectionError } from "@/lib/model-selection-error-display";
 import { resolvePendingAskAfterClose } from "@/lib/ask-user/resolve-pending-ask";
 import { bindNotificationHistoryProof, EMPTY_NOTIFICATION_HISTORY, type NotificationHistoryScope } from "@/lib/notifications/viewed-result";
@@ -498,6 +498,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
   const slashCommandsLoadRef = useRef<Promise<SlashCommandInfo[] | null> | null>(null);
   const slashCommandsGenerationRef = useRef(0);
   const newSessionPromotedRef = useRef(false);
+  const newSessionRetiredRef = useRef(false);
   const newSessionModelOverrideRef = useRef<SelectedModel | null>(null);
   const thinkingLevelOverrideRef = useRef<ConcreteThinkingLevel | null>(null);
   const thinkingLevelPinsRef = useRef<Record<string, string>>({});
@@ -1220,6 +1221,9 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
 
   const ensureNewSession = useCallback(async () => {
     if (sessionIdRef.current) return sessionIdRef.current;
+    // A restored slash draft can reload its palette without user interaction.
+    // Once retired, do not create a replacement from any passive/control load.
+    if (newSessionRetiredRef.current) return null;
     if (!isNew || !newSessionCwd) return sessionIdRef.current;
     if (ensuringNewSessionRef.current) return ensuringNewSessionRef.current;
 
@@ -2212,6 +2216,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
       restoreSubmission(message, images, composerDraftKey);
       return;
     }
+    newSessionRetiredRef.current = false; // explicit send, not a palette effect
     if (editEntryId) {
       // Navigate and prompt are two RPCs: a prompt rejected after navigating
       // keeps the new leaf until the server can apply both atomically.
@@ -2327,9 +2332,35 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
       const selectionError = !promptRequestStarted && e instanceof AgentEventConnectionError
         ? e.prePromptRejection ?? e
         : e;
-      addNotice({ type: "error", message: formatModelSelectionError(selectionError, translate, selectionOperation) ?? (e instanceof Error ? e.message : String(e)) });
+      addNotice({ type: "error", message: isUnavailableAgentSessionError(selectionError)
+        ? translate("chat.sessionUnavailable")
+        : formatModelSelectionError(selectionError, translate, selectionOperation) ?? (e instanceof Error ? e.message : String(e)) });
       restoreSubmission(message, images, composerDraftKey);
       optimisticUserMessageKeyRef.current = null;
+      if (
+        sentSessionId
+        && isNew
+        && isUnavailableAgentSessionError(selectionError)
+        && !newSessionPromotedRef.current
+        && sessionHookMountedRef.current
+        && sessionPropIdRef.current === null
+        && sessionIdRef.current === sentSessionId
+      ) {
+        // Nothing was admitted under this expired ensure_session identity. Keep
+        // the draft and explicit choices, but stop reconnecting to it. Only a
+        // later user send may ensure a fresh runtime in the original cwd.
+        closeEvents();
+        cancelEventStreamGrace();
+        sessionIdRef.current = null;
+        newSessionRetiredRef.current = true;
+        clearSlashCommands();
+        setSystemPrompt(null);
+        onSystemToolsChange?.(null);
+        setLiveModel(null);
+        setLiveThinkingLevel(null);
+        sdkAgentActiveRef.current = false;
+        sentSessionId = null;
+      }
       // Rejection only describes this submission. Another tab or an event we
       // missed may still have a real run active for the same session, so keep
       // its SSE connection until server state says the wrapper is idle.
@@ -2343,7 +2374,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
       setAgentPhase(null);
       dispatch({ type: "end" });
     }
-  }, [isNew, newSessionCwd, newSessionModel, session, ensureNewSession, ensureEventsConnected, promoteNewSession, waitForPromptSettlement, addNotice, cancelEventStreamGrace, closeEvents, composerDraftKey, reconcileAgentState, restoreSubmission, editEntryId, setEdit, translate]);
+  }, [isNew, newSessionCwd, newSessionModel, session, ensureNewSession, ensureEventsConnected, promoteNewSession, waitForPromptSettlement, addNotice, cancelEventStreamGrace, clearSlashCommands, closeEvents, composerDraftKey, reconcileAgentState, restoreSubmission, editEntryId, setEdit, translate, onSystemToolsChange]);
 
   const executeBash = useCallback(async (command: string, excludeFromContext: boolean) => {
     if (agentRunningRef.current || bashRunningRef.current) return;
@@ -2646,6 +2677,8 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
     if (!text.startsWith("/")) return { handled: false };
     const match = text.match(/^\/([^\s]+)(?:\s+([\s\S]*))?$/);
     if (!match) return { handled: false };
+    // Called only for an explicit send; a bare /mcp may need a fresh command list.
+    newSessionRetiredRef.current = false;
 
     const [, commandName, rawArgs = ""] = match;
     const args = rawArgs.trim();
