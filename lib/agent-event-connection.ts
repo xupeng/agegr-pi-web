@@ -1,5 +1,6 @@
 import type { AgentEventLike } from "./agent-event-wire";
 import { AgentCommandError, readModelSelectionFailureDTO } from "./agent-client";
+import { SESSION_UNAVAILABLE_CODE } from "./session-unavailable";
 
 export interface AgentEventSourceLike {
   readonly readyState: number;
@@ -160,6 +161,7 @@ export class AgentEventConnection {
         const selectionFailed = event.code === "model_selection_failed" || "modelSelection" in event;
         // Neither status nor raw text/DTO alone is a negative admission acknowledgement.
         // A late event after connected cannot reject an already accepted/queued submission.
+        const unavailable = event.code === SESSION_UNAVAILABLE_CODE;
         const prePromptRejection = !attempt.ready
           && event.code === "model_selection_failed"
           && event.prePromptRejected === true
@@ -167,7 +169,9 @@ export class AgentEventConnection {
               "Model selection failed", 0, "model_selection_failed", undefined,
               readModelSelectionFailureDTO(event.modelSelection), true,
             )
-          : undefined;
+          : !attempt.ready && unavailable && event.prePromptRejected === true
+            ? new AgentCommandError("Session is no longer available. Please try again.", 404, SESSION_UNAVAILABLE_CODE, false)
+            : undefined;
         const message = selectionFailed
           ? "Failed to start agent: Model selection failed"
           : typeof event.errorMessage === "string" ? event.errorMessage : undefined;

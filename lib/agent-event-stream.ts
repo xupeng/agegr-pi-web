@@ -6,6 +6,7 @@ import {
 } from "./agent-event-wire";
 import { acquireSessionLivenessLease } from "./session-liveness";
 import { ModelSelectionError } from "./subagent-model-selection";
+import { SessionUnavailableError } from "./session-unavailable";
 
 export interface AgentEventStreamSession {
   readonly isStreaming: boolean;
@@ -285,6 +286,7 @@ export function createAgentEventStream(
         } catch (error) {
           if (closed) return;
           const modelSelection = error instanceof ModelSelectionError ? error.toSafeDTO() : undefined;
+          const unavailable = error instanceof SessionUnavailableError;
           const startupError: AgentStartupErrorEvent = {
             type: "startup_error",
             errorMessage: modelSelection
@@ -294,6 +296,10 @@ export function createAgentEventStream(
               code: modelSelection.code,
               ...(!connected ? { prePromptRejected: true as const } : {}),
               modelSelection,
+            } : {}),
+            ...(unavailable ? {
+              code: error.code,
+              ...(!connected ? { prePromptRejected: true as const } : {}),
             } : {}),
           };
           encode(startupError);

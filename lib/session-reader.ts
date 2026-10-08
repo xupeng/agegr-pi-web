@@ -22,6 +22,7 @@ import {
   setCachedProjects,
 } from "./session-list-cache";
 import { readSubagentRun, SUBAGENT_META_TYPE } from "./subagents";
+import { SessionUnavailableError } from "./session-unavailable";
 
 export { getAgentDir };
 
@@ -369,6 +370,10 @@ export async function readSessionById(sessionId: string): Promise<SessionInfo | 
   }
   const info = await readSessionInfoFast(path, mtimeMs);
   if (!info) return null;
+  if (info.id !== sessionId) {
+    invalidateSessionPathCache(sessionId);
+    return null;
+  }
   const session = await toSessionInfo(info, (parentPath) => findSessionIdByPath(parentPath));
   const [withProject] = await attachSessionProjectInfo([session]);
   return withProject ?? null;
@@ -610,13 +615,29 @@ function getSmCache(): Map<string, SmCacheEntry> {
   return globalThis.__piSmCache;
 }
 
-function sessionFileStats(filePath: string): { fingerprint: string; bytes: number } | null {
+function sessionFileStats(filePath: string): { fingerprint: string; bytes: number; mtimeMs: number } | null {
   try {
     const stats = statSync(filePath);
-    return { fingerprint: `${stats.size}:${stats.mtimeMs}`, bytes: stats.size };
+    if (!stats.isFile()) return null;
+    return { fingerprint: `${stats.size}:${stats.mtimeMs}`, bytes: stats.size, mtimeMs: stats.mtimeMs };
   } catch {
     return null;
   }
+}
+
+/**
+ * SDK open() creates a new identity in process.cwd() for a missing/empty file.
+ * A Web cold restore must never use that creation behavior. The header, not
+ * the filename, owns the identity; also reject a stale path reassigned to it.
+ */
+export function openPersistedSessionManager(filePath: string, sessionId?: string): SessionManager {
+  const stats = sessionFileStats(filePath);
+  if (!stats || stats.bytes === 0) throw new SessionUnavailableError();
+  const manager = SessionManager.open(filePath, undefined);
+  if (sessionId !== undefined && manager.getSessionId() !== sessionId) {
+    throw new SessionUnavailableError();
+  }
+  return manager;
 }
 
 /** Evict least-recently-used entries until both the count and byte caps hold. */
@@ -649,14 +670,14 @@ export function openSessionManager(
   filePath: string,
   options: { mutable?: boolean } = {},
 ): SessionManager {
-  if (options.mutable) return SessionManager.open(filePath, undefined);
+  if (options.mutable) return openPersistedSessionManager(filePath);
 
   const cache = getSmCache();
   const pathKey = sessionPathKey(filePath);
   const stats = sessionFileStats(filePath);
-  if (stats === null) {
+  if (stats === null || stats.bytes === 0) {
     cache.delete(pathKey);
-    return SessionManager.open(filePath, undefined);
+    throw new SessionUnavailableError();
   }
 
   const cached = cache.get(pathKey);
@@ -667,7 +688,7 @@ export function openSessionManager(
     return cached.sm as SessionManager;
   }
 
-  const sm = SessionManager.open(filePath, undefined);
+  const sm = openPersistedSessionManager(filePath);
   if (stats.bytes > SM_CACHE_LIMITS.maxFileBytes) {
     // Too large to hold: drop any stale entry for this path and serve fresh.
     cache.delete(pathKey);
@@ -680,7 +701,21 @@ export function openSessionManager(
 
 export async function resolveSessionPath(sessionId: string): Promise<string | null> {
   const cached = getPathCache().get(sessionId);
-  if (cached) return cached;
+  if (cached) {
+    // registerRpcWrapper caches the planned filename before pi's first flush.
+    // Live wrappers are read separately; a cache entry alone cannot resume one.
+    const stats = sessionFileStats(cached);
+    if (stats && stats.bytes > 0) {
+      try {
+        const header = readSessionHeader(cached);
+        // Preserve valid oversized legacy headers without opening/migrating the
+        // SDK just to check ownership. Normal cached paths only read a prefix.
+        const owner = header?.id ?? (await readSessionInfoFast(cached, stats.mtimeMs))?.id;
+        if (owner === sessionId) return cached;
+      } catch { /* removed or unreadable while resolving: retire this cache entry */ }
+    }
+    invalidateSessionPathCache(sessionId);
+  }
 
   const targetedPath = await findSessionPathById(sessionId);
   if (targetedPath) {

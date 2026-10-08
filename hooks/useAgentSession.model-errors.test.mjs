@@ -7,7 +7,7 @@ import { createJiti } from "jiti";
 // Same callback-execution pattern as mcp-slash-command.test.mjs, not a browser or React mount.
 // The real HTTP decoder and formatter feed the hook's actual callbacks; only hook state/IO are stubbed.
 const jiti = createJiti(import.meta.url, { interopDefault: true });
-const { AgentCommandError, isPromptRejectedError, readAgentCommandError, sendAgentCommand } = await jiti.import("../lib/agent-client.ts");
+const { AgentCommandError, isPromptRejectedError, isUnavailableAgentSessionError, readAgentCommandError, sendAgentCommand } = await jiti.import("../lib/agent-client.ts");
 const { AgentEventConnection, AgentEventConnectionError } = await jiti.import("../lib/agent-event-connection.ts");
 const { createAgentEventStream } = await jiti.import("../lib/agent-event-stream.ts");
 const { ModelSelectionError } = await jiti.import("../lib/subagent-model-selection.ts");
@@ -65,10 +65,11 @@ function hook(t, { locale = "en", isNew = false, busy = false, fail = true, fail
     return response({ success: true, data: null }, 200);
   };
   const scope = {
-    AgentEventConnectionError, AgentCommandError, isPromptRejectedError, readAgentCommandError, sendAgentCommand, formatModelSelectionError,
+    AgentEventConnectionError, AgentCommandError, isPromptRejectedError, isUnavailableAgentSessionError, readAgentCommandError, sendAgentCommand, formatModelSelectionError,
     translate: translate(locale), console: { error: noop },
     isNew, newSessionCwd: isNew ? "/fixture/project" : null, session: isNew ? null : { id: "child-id" },
     sessionIdRef: ref(isNew ? null : "child-id"), ensuringNewSessionRef: ref(null), sessionHookMountedRef: ref(true),
+    newSessionRetiredRef: ref(false),
     newSessionModel: null, pendingModel: oldModel, newSessionDefaultThinkingLevel: "medium",
     newSessionModelOverrideRef: ref(null), thinkingLevelOverrideRef: ref(null), thinkingLevelPinsRef: ref({}), defaultThinkingLevelRef: ref("medium"),
     toolPreset: "configured", sessionToolsPinnedRef: ref(false), getToolNamesForPreset: () => undefined,

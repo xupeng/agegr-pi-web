@@ -3,6 +3,7 @@ import { readPersistedAsk } from "@/lib/ask-user/persist";
 import { resolveSessionPath } from "@/lib/session-reader";
 import { startRpcSession, getRpcSession, setRpcSessionTools } from "@/lib/rpc-manager";
 import { ModelSelectionError } from "@/lib/subagent-model-selection";
+import { SessionUnavailableError, sessionUnavailableFailure } from "@/lib/session-unavailable";
 
 // POST /api/agent/[id] - Send a command to an existing session
 export async function POST(
@@ -30,7 +31,7 @@ export async function POST(
     if (body.type === "set_tools") {
       const filePath = existing?.sessionFile || await resolveSessionPath(id) || undefined;
       if (!existing?.isAlive() && !filePath) {
-        return NextResponse.json({ error: "Session not found" }, { status: 404 });
+        return NextResponse.json(sessionUnavailableFailure(body.type), { status: 404 });
       }
       const changed = await setRpcSessionTools(id, filePath, toolNames);
       return NextResponse.json({
@@ -46,12 +47,7 @@ export async function POST(
 
     const filePath = await resolveSessionPath(id);
     if (!filePath) {
-      return NextResponse.json({
-        error: "Session not found",
-        ...(body.type === "prompt"
-          ? { code: "prompt_rejected", accepted: false }
-          : {}),
-      }, { status: 404 });
+      return NextResponse.json(sessionUnavailableFailure(body.type), { status: 404 });
     }
 
     const { session } = await startRpcSession(id, filePath, undefined, {
@@ -68,6 +64,9 @@ export async function POST(
 
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
+    if (error instanceof SessionUnavailableError && !promptAccepted) {
+      return NextResponse.json(sessionUnavailableFailure(commandType), { status: 404 });
+    }
     // A subagent model-selection refusal is a typed, safe 409 for non-prompt commands; a prompt
     // keeps `prompt_rejected/accepted:false` so the composer restores the draft unchanged.
     const modelSelection = error instanceof ModelSelectionError ? error.toSafeDTO() : undefined;
