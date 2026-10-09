@@ -387,6 +387,20 @@ export function AppShell() {
   const notificationAnchorRef = useRef<HTMLDivElement>(null);
   const activeTopPanelRef = useRef(activeTopPanel);
   activeTopPanelRef.current = activeTopPanel;
+  // Latest document interaction mode, for the notification bell only. Safari can keep
+  // matching :focus-visible after the native modal returns focus to its opener, so the
+  // accent outline is gated on the real input mode instead of trusting that heuristic.
+  const [notificationBellPointerFocus, setNotificationBellPointerFocus] = useState(false);
+  useEffect(() => {
+    const markPointerInput = () => setNotificationBellPointerFocus(true);
+    const markKeyboardInput = () => setNotificationBellPointerFocus(false);
+    document.addEventListener("pointerdown", markPointerInput, true);
+    document.addEventListener("keydown", markKeyboardInput, true);
+    return () => {
+      document.removeEventListener("pointerdown", markPointerInput, true);
+      document.removeEventListener("keydown", markKeyboardInput, true);
+    };
+  }, []);
   // Dependency arrays execute during render, so this owner must precede every
   // effect/callback that mentions it, not merely its eventual event handler.
   const invalidateNotificationNavigation = useCallback(() => {
@@ -2162,6 +2176,7 @@ export function AppShell() {
           <button
             type="button"
             className="notification-bell"
+            data-pointer-focus={notificationBellPointerFocus || undefined}
             aria-haspopup="dialog"
             aria-expanded={activeTopPanel === "notifications"}
             aria-label={translate("notifications.open", { count: notifications.snapshot.items.length })}

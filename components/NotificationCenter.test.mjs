@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { Script } from "node:vm";
 import { createJiti } from "jiti";
+import ts from "typescript";
 const jiti = createJiti(import.meta.url, { jsx: { runtime: "automatic" }, tsconfigPaths: true });
 const React = await jiti.import("react");
 const { renderToStaticMarkup } = await jiti.import("react-dom/server");
@@ -83,6 +85,67 @@ test("desktop box centers on the real chat column across tablet/desktop widths",
     assert.ok(box.left >= 12 && box.left + box.width <= viewport - 12, `on screen at ${viewport}`);
     assert.equal(box.top, anchor.top, `stays below toolbar at ${viewport}`);
   }
+});
+
+test("bell focus outline follows the latest input mode, not the focus-visible heuristic", async () => {
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const shell = await readFile(new URL("./AppShell.tsx", import.meta.url), "utf8");
+  // A pointer dismissal must stay neutral even when the browser still reports focus-visible,
+  // so the accent outline is opt-in for keyboard input rather than a bare :focus-visible rule.
+  assert.match(css, /\.notification-bell:focus\s*\{\s*outline: none;/);
+  assert.match(css, /\.notification-bell:focus-visible:not\(\[data-pointer-focus="true"\]\)\s*\{\s*outline: 2px solid var\(--accent\);/);
+  assert.doesNotMatch(css, /\.notification-bell:focus-visible\s*\{\s*outline: 2px solid var\(--accent\);/);
+  assert.match(css, /\.notification-bell\[aria-expanded="true"\]\s*\{\s*background: var\(--bg-hover\);/);
+  assert.match(css, /@media \(hover: hover\)\s*\{\s*\.notification-bell:hover\s*\{/);
+  assert.doesNotMatch(css, /\.notification-bell\[aria-expanded="true"\],\s*\.notification-bell:hover/);
+  assert.match(shell, /const \[notificationBellPointerFocus, setNotificationBellPointerFocus\] = useState\(false\);/);
+  assert.match(shell, /data-pointer-focus=\{notificationBellPointerFocus \|\| undefined\}/);
+});
+
+test("bell input-mode effect tracks pointer/keyboard switches and pairs capture cleanup", async () => {
+  const shell = await readFile(new URL("./AppShell.tsx", import.meta.url), "utf8");
+  const source = ts.createSourceFile("AppShell.tsx", shell, ts.ScriptTarget.Latest, true);
+  let effect = null;
+  const visit = (node) => {
+    const callback = ts.isCallExpression(node) && node.expression.getText(source) === "useEffect" ? node.arguments[0]?.getText(source) ?? "" : "";
+    if (!effect && callback.includes('"pointerdown"') && callback.includes("setNotificationBellPointerFocus")) effect = node;
+    ts.forEachChild(node, visit);
+  };
+  visit(source);
+  assert.ok(effect, "AppShell registers the bell input-mode effect");
+  assert.equal(effect.arguments[1].getText(source), "[]", "listener registration is mount-only");
+  const effectText = effect.getText(source);
+  // The effect only observes input mode: it must not swallow events, move focus or touch panels.
+  assert.doesNotMatch(effectText, /preventDefault|stopPropagation|\.focus\(|blur\(|activeTopPanel|setActiveTopPanel/);
+
+  const registrations = [];
+  const writes = [];
+  const context = {
+    setNotificationBellPointerFocus: (value) => writes.push(value),
+    document: {
+      addEventListener(type, listener, capture) { registrations.push({ type, listener, capture, removed: false }); },
+      removeEventListener(type, listener, capture) {
+        const registration = registrations.find((entry) => entry.type === type && !entry.removed);
+        assert.ok(registration, `cleanup only removes the registered ${type} listener`);
+        assert.equal(registration.listener, listener, `${type} cleanup keeps the registered identity`);
+        assert.equal(registration.capture, capture, `${type} cleanup keeps the capture flag`);
+        registration.removed = true;
+      },
+    },
+  };
+  context.useEffect = (callback) => { context.cleanup = callback(); };
+  new Script(ts.transpileModule(effectText, { compilerOptions: { target: ts.ScriptTarget.ESNext } }).outputText).runInNewContext(context);
+  assert.deepEqual(registrations.map(({ type, capture }) => [type, capture]), [["pointerdown", true], ["keydown", true]]);
+
+  const dispatch = (type) => registrations.find((entry) => entry.type === type).listener({ type });
+  dispatch("pointerdown");
+  assert.deepEqual(writes, [true], "pointer dismissal suppresses the outline while focus-visible may still match");
+  dispatch("keydown");
+  dispatch("pointerdown");
+  dispatch("keydown");
+  assert.deepEqual(writes, [true, false, true, false], "both input directions stay live after the first switch");
+  context.cleanup();
+  assert.ok(registrations.every((entry) => entry.removed), "unmount removes both capture listeners");
 });
 
 test("desktop box falls back only for unavailable columns, not narrow positive columns", () => {

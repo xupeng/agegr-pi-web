@@ -2082,7 +2082,12 @@ span.token.table {
 .notification-center-more { width: 100%; min-height: 44px; }
 .notification-center-empty { text-align: center; padding: 28px 0; }
 .notification-bell { display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 44px; height: 36px; flex-shrink: 0; padding: 0 6px; border: 0; border-radius: 6px; background: none; color: var(--text-muted); cursor: pointer; }
-.notification-bell[aria-expanded="true"], .notification-bell:hover { background: var(--bg-hover); color: var(--text); }
+.notification-bell[aria-expanded="true"] { background: var(--bg-hover); color: var(--text); }
+.notification-bell:focus { outline: none; }
+.notification-bell:focus-visible:not([data-pointer-focus="true"]) { outline: 2px solid var(--accent); outline-offset: -2px; }
+@media (hover: hover) {
+  .notification-bell:hover { background: var(--bg-hover); color: var(--text); }
+}
 .notification-bell-count { font-size: 11px; font-weight: 600; color: var(--accent); }
 @media (max-width: 640px) {
   .notification-center {
