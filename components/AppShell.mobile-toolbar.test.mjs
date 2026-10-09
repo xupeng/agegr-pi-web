@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { runInNewContext } from "node:vm";
 
 const source = await readFile(new URL("./AppShell.tsx", import.meta.url), "utf8");
 const mobileHookSource = await readFile(new URL("../hooks/useIsMobile.ts", import.meta.url), "utf8");
@@ -38,13 +39,31 @@ test("keeps the mobile Agents icon directly after notifications and outside the 
   assert.match(source, /if \(mobile\) setMobileToolbarMoreOpen\(false\);\s*toggleTopPanel\("agents"\)/);
 });
 
-test("keeps the Agents panel open while switching sessions and positions it at the left", () => {
+test("positions the Agents panel at the left", () => {
   assert.match(source, /const AGENT_PANEL_WIDTH = 420/);
   assert.match(
     source,
     /if \(activeTopPanel === "agents"\)[\s\S]*?left: topBarRect\.left[\s\S]*?width: Math\.min\(AGENT_PANEL_WIDTH, topBarRect\.width\)/,
   );
-  assert.match(source, /<AgentSessionPanel[\s\S]*?onSelectSession=\{handleSelectSession\}/);
+});
+
+test("closes the Agents panel before selecting a child, the main session, or the current session", () => {
+  const start = source.indexOf("<AgentSessionPanel");
+  const panel = source.slice(start, source.indexOf("<TrellisSubagentRecords", start));
+  const handler = panel.match(/onSelectSession=\{(\(session\) => \{[\s\S]*?\})\}/)?.[1];
+  assert.ok(handler, "the panel must close even when handleSelectSession returns early for the current session");
+  const calls = [];
+  const select = runInNewContext(`(${handler})`, {
+    setActiveTopPanel: (panel) => calls.push(["panel", panel]),
+    handleSelectSession: (session) => calls.push(["session", session]),
+  });
+  const main = { id: "main" };
+  const child = { id: "child" };
+  for (const session of [child, main, main]) {
+    calls.length = 0;
+    select(session);
+    assert.deepEqual(calls, [["panel", null], ["session", session]]);
+  }
 });
 
 test("only renders branch toolbar controls for sessions with branches", () => {
