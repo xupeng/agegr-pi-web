@@ -2292,7 +2292,10 @@ export function AppShell() {
                     subagents={effectiveAgentFamily.subagents}
                     selectedSessionId={selectedSession.id}
                     runningSessionIds={runningSessionIds}
-                    onSelectSession={handleSelectSession}
+                    onSelectSession={(session) => {
+                      setActiveTopPanel(null);
+                      handleSelectSession(session);
+                    }}
                   />
                   <TrellisSubagentRecords
                     records={trellisRecords}

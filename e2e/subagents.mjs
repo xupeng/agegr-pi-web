@@ -415,6 +415,8 @@ try {
     await page.getByRole("button", { name: /trellis-check .* Succeeded/ }).waitFor();
     await page.getByText("Built-in child", { exact: true }).click();
     await page.waitForURL((url) => url.searchParams.get("session") === CHILD);
+    await page.locator("[data-trellis-subagent-records='true']").waitFor({ state: "detached" });
+    assert.equal(await mixedButton.getAttribute("aria-pressed"), "false", "selecting a child reveals its conversation instead of keeping the Agents panel open");
     await page.goto(`${base}/?session=${MIXED}`, { waitUntil: "domcontentloaded" });
     await openAgents();
     await page.screenshot({ path: join(artifacts, `mixed-${viewport.width}.png`) });
