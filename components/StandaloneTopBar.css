@@ -1,0 +1,39 @@
+/* The slot and visible surface share one height; no inferred device padding. */
+.app-topbar-slot {
+  --topbar-initial-left: env(safe-area-inset-left);
+  flex-shrink: 0;
+  height: calc(36px + env(safe-area-inset-top));
+}
+.app-topbar-surface {
+  display: flex;
+  align-items: center;
+  position: relative;
+  height: calc(36px + env(safe-area-inset-top));
+  padding-top: env(safe-area-inset-top);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel);
+}
+/* The sidebar overlays on phones; otherwise its width comes from the same
+   AppShell layout owner. The file panel is closed in SSR / first render. */
+@media (min-width: 641px) {
+  .app-topbar-slot {
+    --topbar-initial-left: calc(env(safe-area-inset-left) + var(--topbar-sidebar-width));
+  }
+}
+/* Fixed from the SSR surface's first paint, not only after hydration measures
+   it. Layout effects replace the initial bounds with the real column rect. */
+@supports (-webkit-touch-callout: none) {
+  @media (display-mode: standalone) {
+    .app-topbar-surface {
+      position: fixed;
+      top: 0;
+      left: var(--topbar-left, var(--topbar-initial-left));
+      right: env(safe-area-inset-right);
+      width: var(--topbar-width, auto);
+      z-index: 30;
+    }
+    .app-topbar-surface[data-measured="true"] {
+      right: auto;
+    }
+  }
+}

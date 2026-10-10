@@ -6,6 +6,10 @@ import "./fonts.css";
 import "./fonts-content-cjk.css";
 import "./globals.css";
 import "./settings.css";
+import "./viewport.css";
+// The standalone header must have its fixed/opaque styles before hydration.
+import "../components/StandaloneTopBar.css";
+import "./keyboard-viewport.css";
 
 export const metadata: Metadata = {
   title: "Pi Web",
@@ -30,9 +34,11 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "Pi Web",
   },
+  // Next emits only the mobile-web-app-capable prefix; iOS still reads this name.
+  other: { "apple-mobile-web-app-capable": "yes" },
   formatDetection: {
     telephone: false,
   },

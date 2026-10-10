@@ -1,0 +1,6 @@
+/* The viewport-height custom property is a keyboard-only inline override.
+   Keep its stylesheet default invalid so every consumer uses its 100dvh
+   fallback before focus and after the hook removes the inline value. */
+:root {
+  --app-viewport-height: initial;
+}

@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const layoutSource = await readFile(new URL("../app/layout.tsx", import.meta.url), "utf8");
 const settingsCssSource = await readFile(new URL("../app/settings.css", import.meta.url), "utf8");
 const cssSource = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+const viewportCssSource = await readFile(new URL("../app/viewport.css", import.meta.url), "utf8");
 const appShellSource = await readFile(new URL("./AppShell.tsx", import.meta.url), "utf8");
 const chatWindowSource = await readFile(new URL("./ChatWindow.tsx", import.meta.url), "utf8");
 const chatInputSource = await readFile(new URL("./ChatInput.tsx", import.meta.url), "utf8");
@@ -14,6 +16,13 @@ const mcpConfigSource = await readFile(new URL("./McpConfig.tsx", import.meta.ur
 const mcpSignInSource = await readFile(new URL("./McpSignIn.tsx", import.meta.url), "utf8");
 const mcpAddSource = await readFile(new URL("./McpAddServer.tsx", import.meta.url), "utf8");
 
+test("removes the temporary installed-app diagnostics and its logging endpoint", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.doesNotMatch(page, /StandaloneDiagnostics|device-diag/);
+  assert.equal(existsSync(new URL("./StandaloneDiagnostics.tsx", import.meta.url)), false);
+  assert.equal(existsSync(new URL("../app/api/device-diag/route.ts", import.meta.url)), false);
+});
+
 /** The declarations of the first `selector {` rule in a stylesheet. */
 function cssRule(css, selector) {
   const start = css.indexOf(`${selector} {`);
@@ -21,11 +30,38 @@ function cssRule(css, selector) {
   return css.slice(start, css.indexOf("}", start));
 }
 
-test("configures iOS standalone mode to use the full screen", () => {
-  assert.match(layoutSource, /statusBarStyle: "black-translucent"/);
+test("restores viewport cover for safe-area consumers while retaining the accepted status-bar mode", () => {
+  assert.match(layoutSource, /statusBarStyle: "default"/);
+  assert.doesNotMatch(layoutSource, /statusBarStyle: "black-translucent"/);
+  assert.match(layoutSource, /"apple-mobile-web-app-capable": "yes"/);
   assert.match(layoutSource, /viewportFit: "cover"/);
   assert.match(layoutSource, /interactiveWidget: "resizes-content"/);
-  assert.match(cssSource, /@media \(display-mode: standalone\) \{[\s\S]*?--app-viewport-height: 100vh;/);
+  assert.doesNotMatch(cssSource, /--app-safe-top|100vh - 100dvh/);
+  assert.doesNotMatch(layoutSource, /devServiceWorkerCleanup|caches\.delete|\.unregister\(/);
+});
+
+test("non-keyboard height falls back to dvh on first paint and after inline override removal", () => {
+  assert.doesNotMatch(cssSource, /--app-viewport-height\s*:/);
+  assert.match(layoutSource, /import "\.\/globals\.css";[\s\S]*import "\.\/viewport\.css";/);
+  assert.match(viewportCssSource, /:root \{\s*--app-viewport-height: initial;\s*\}/);
+  assert.doesNotMatch(viewportCssSource, /--app-viewport-height:\s*(?:100vh|\d+px)/);
+  assert.match(cssSource, /html, body \{[^}]*height: var\(--app-viewport-height, 100dvh\);/);
+  assert.match(appShellSource, /height: "var\(--app-viewport-height, 100dvh\)"/);
+  assert.match(viewportHookSource, /if \(keyboardOpen\) \{\s*setPixelProperty\("--app-viewport-height", viewport\.height\);/);
+  assert.match(viewportHookSource, /else \{\s*clearProperty\("--app-viewport-height"\)/);
+});
+
+test("keeps bottom spacing owned by the safe area, without adding a device-sized composer spacer", async () => {
+  const topbarCss = await readFile(new URL("./StandaloneTopBar.css", import.meta.url), "utf8");
+  assert.match(chatWindowSource, /className="chat-content [^"\n]+"\s*style=\{\{ paddingBottom: "env\(safe-area-inset-bottom\)" \}\}/);
+  assert.match(chatInputSource, /padding: compact \? 0 : "0 16px 8px"/);
+  assert.match(appShellSource, /height: "var\(--app-viewport-height, 100dvh\)"/);
+  for (const surface of ["slot", "surface"]) {
+    assert.match(cssRule(topbarCss, `.app-topbar-${surface}`), /height: calc\(36px \+ env\(safe-area-inset-top\)\)/);
+  }
+  assert.match(topbarCss, /left: var\(--topbar-left, var\(--topbar-initial-left\)\)/);
+  assert.match(topbarCss, /right: env\(safe-area-inset-right\)/);
+  assert.doesNotMatch(topbarCss, /34px|100vh - 100dvh/);
 });
 
 test("tracks the visual viewport while the software keyboard is open", () => {
@@ -34,7 +70,6 @@ test("tracks the visual viewport while the software keyboard is open", () => {
   assert.match(appShellSource, /paddingBottom: "env\(safe-area-inset-bottom\)"/);
   assert.match(appShellSource, /paddingLeft: "env\(safe-area-inset-left\)"/);
   assert.match(appShellSource, /paddingRight: "env\(safe-area-inset-right\)"/);
-  assert.match(appShellSource, /height: "calc\(36px \+ env\(safe-area-inset-top\)\)"/);
   assert.match(appShellSource, /\/\* Right panel tab bar \*\/[\s\S]*?height: "calc\(36px \+ env\(safe-area-inset-top\)\)"/);
   assert.match(appShellSource, /height: "var\(--app-viewport-height, 100dvh\)"/);
   assert.match(appShellSource, /data-mobile-toolbar-file=\{mobile \? "true" : undefined\}/);
@@ -52,6 +87,20 @@ test("tracks the visual viewport while the software keyboard is open", () => {
   assert.match(cssSource, /height: var\(--app-viewport-height, 100dvh\)/);
   assert.match(cssSource, /left: env\(safe-area-inset-left\)/);
   assert.match(chatWindowSource, /paddingBottom: "env\(safe-area-inset-bottom\)"/);
+});
+
+test("keyboard alignment has a root consumer without changing non-keyboard or fixed containing blocks", async () => {
+  const css = await readFile(new URL("../app/keyboard-viewport.css", import.meta.url), "utf8");
+  assert.match(layoutSource, /import "\.\/keyboard-viewport\.css";/);
+  assert.match(appShellSource, /<div data-app-viewport style=/);
+  assert.match(cssRule(css, "html[data-keyboard-viewport] [data-app-viewport]"), /position: fixed;/);
+  assert.match(css, /top: calc\(var\(--app-viewport-offset-top, 0px\) \+ var\(--app-viewport-pan-correction, 0px\)\)/);
+  assert.match(css, /top: calc\(var\(--app-viewport-offset-top, 0px\) \+ var\(--app-topbar-pan-correction, 0px\)\)/);
+  assert.match(css, /@supports \(-webkit-touch-callout: none\)[\s\S]*@media \(display-mode: standalone\)[\s\S]*html\[data-keyboard-viewport\] \.app-topbar-surface/);
+  // Match declarations, not the max-height feature in a media query.
+  assert.doesNotMatch(css.replace(/\/\*[\s\S]*?\*\//g, ""), /[;{]\s*(?:transform|filter|height|padding)\s*:/);
+  assert.match(viewportHookSource, /heightSignal && isUnscaled/);
+  assert.match(viewportHookSource, /delete root\.dataset\.keyboardViewport/);
 });
 
 test("contains chat content and inputs within the mobile viewport", () => {
