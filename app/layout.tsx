@@ -6,8 +6,10 @@ import "./fonts.css";
 import "./fonts-content-cjk.css";
 import "./globals.css";
 import "./settings.css";
+import "./viewport.css";
 // The standalone header must have its fixed/opaque styles before hydration.
 import "../components/StandaloneTopBar.css";
+import "./keyboard-viewport.css";
 
 export const metadata: Metadata = {
   title: "Pi Web",

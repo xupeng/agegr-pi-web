@@ -1596,7 +1596,7 @@ export function ChatWindow({ session, searchTarget, onSearchTargetHandled, initi
         {chatInputElement}
         <ExtensionStatusBar statuses={extensionStatuses} widgets={extensionWidgets} />
       </div>
-      {isEmptyNew && <div className="min-h-0 flex-1" />}
+      {isEmptyNew && <div className="chat-empty-bottom-spacer min-h-0 flex-1" />}
     </div>
   );
 }

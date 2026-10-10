@@ -1,0 +1,25 @@
+/* Keyboard-only, unscaled alignment. Pan corrections come from verified box
+   feedback, not scrollY. No transform or change to fixed containing blocks. */
+html[data-keyboard-viewport] [data-app-viewport] {
+  position: fixed;
+  top: calc(var(--app-viewport-offset-top, 0px) + var(--app-viewport-pan-correction, 0px));
+  left: 0;
+  right: 0;
+}
+
+/* Keep the empty-page title/ask/composer group centred without a keyboard.
+   With the mobile keyboard open, only its lower flex spacer disappears: the
+   existing message-area flex item absorbs the space above the composer. */
+@media (max-width: 640px), (pointer: coarse) and (max-height: 500px) {
+  html[data-keyboard-open] .chat-empty-bottom-spacer {
+    display: none;
+  }
+}
+
+@supports (-webkit-touch-callout: none) {
+  @media (display-mode: standalone) {
+    html[data-keyboard-viewport] .app-topbar-surface {
+      top: calc(var(--app-viewport-offset-top, 0px) + var(--app-topbar-pan-correction, 0px));
+    }
+  }
+}
