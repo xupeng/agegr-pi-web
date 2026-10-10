@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import type { BranchPreview, SessionEntry, SessionTreeNode } from "@/lib/types";
 import { useI18n } from "@/hooks/useI18n";
 
@@ -275,7 +276,23 @@ export function BranchNavigator({ tree, activeLeafId, onLeafChange, inline, cont
     update();
     const ro = new ResizeObserver(update);
     ro.observe(anchor);
-    return () => ro.disconnect();
+    let frame: number | undefined;
+    const schedule = () => {
+      if (frame !== undefined) cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(update);
+    };
+    const viewport = window.visualViewport;
+    viewport?.addEventListener("resize", schedule);
+    viewport?.addEventListener("scroll", schedule);
+    const geometry = new MutationObserver(schedule);
+    geometry.observe(document.documentElement, { attributes: true, attributeFilter: ["style", "data-keyboard-viewport"] });
+    return () => {
+      ro.disconnect();
+      geometry.disconnect();
+      viewport?.removeEventListener("resize", schedule);
+      viewport?.removeEventListener("scroll", schedule);
+      if (frame !== undefined) cancelAnimationFrame(frame);
+    };
   }, [open, inline, containerRef]);
 
   const activePathIds = useMemo(
@@ -350,10 +367,11 @@ export function BranchNavigator({ tree, activeLeafId, onLeafChange, inline, cont
           {branchIcon}
            {!compact && <span>{t("i18n.branches")}</span>}
         </button>
-        {open && dropdownPos && (
-          <div style={{
+        {/* The inline trigger may live in a fixed toolbar stacking context. */}
+        {open && dropdownPos && typeof document !== "undefined" && createPortal(
+          <div data-branch-dropdown="true" style={{
             position: "fixed",
-            top: dropdownPos.top,
+            top: `calc(${dropdownPos.top}px + var(--app-topbar-pan-correction, 0px))`,
             left: dropdownPos.left,
             width: dropdownPos.width,
             background: "var(--bg-panel)",
@@ -380,7 +398,8 @@ export function BranchNavigator({ tree, activeLeafId, onLeafChange, inline, cont
                 {noBranchReason}
               </div>
             )}
-          </div>
+          </div>,
+          document.body,
         )}
       </div>
     );

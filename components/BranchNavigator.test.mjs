@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFile } from "node:fs/promises";
 import { createJiti } from "jiti";
 
 const jiti = createJiti(import.meta.url, {
@@ -16,6 +17,16 @@ const msg = (id, role, text) => ({ type: "message", id, parentId: null, timestam
 const info = (id) => ({ type: "session_info", id, parentId: null, timestamp: "t", name: "x" });
 const model = (id) => ({ type: "model_change", id, parentId: null, timestamp: "t", provider: "test", modelId: "test" });
 const node = (entry, children = []) => ({ entry, children });
+
+test("inline dropdown escapes a fixed toolbar and guards document access during SSR", async () => {
+  const source = await readFile(new URL("./BranchNavigator.tsx", import.meta.url), "utf8");
+  assert.match(source, /open && dropdownPos && typeof document !== "undefined" && createPortal\(/);
+  assert.ok(source.includes('top: `calc(${dropdownPos.top}px + var(--app-topbar-pan-correction, 0px))`'), "BCR anchor converted by independently verified fixed-header plane, not root/scrollY");
+  assert.match(source, /zIndex: 500,[\s\S]*?document\.body,/);
+  const html = renderToStaticMarkup(React.createElement(I18nProvider, null,
+    React.createElement(BranchNavigator, { tree: [], activeLeafId: null, onLeafChange() {}, inline: true, open: true })));
+  assert.match(html, /<button/);
+});
 
 test("compressChain labels a chain by its first message entry", () => {
   const chain = node(msg("u1", "user", "原问题"), [node(msg("a1", "assistant", "回答"))]);

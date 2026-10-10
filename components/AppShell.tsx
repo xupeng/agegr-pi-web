@@ -16,6 +16,8 @@ import { openFileTab, saveFileViewerState } from "./file-tab-state";
 import { SettingsPanel, SettingsSectionIcon } from "./SettingsPanel";
 import { ProjectTrustDialog, type ProjectTrustFailure } from "./ProjectTrustDialog";
 import { BranchNavigator, hasSessionBranches } from "./BranchNavigator";
+
+import { StandaloneTopBar } from "./StandaloneTopBar";
 import { SystemPromptPanel } from "./SystemPromptPanel";
 import { ToolDefinitionsPanel } from "./ToolDefinitionsPanel";
 import { AgentSessionPanel } from "./AgentSessionPanel";
@@ -582,7 +584,24 @@ export function AppShell() {
     update();
     const ro = new ResizeObserver(update);
     ro.observe(topBarRef.current);
-    return () => ro.disconnect();
+    // Position can change without a size change during keyboard focus panning.
+    let frame: number | undefined;
+    const schedule = () => {
+      if (frame !== undefined) cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(update);
+    };
+    const viewport = window.visualViewport;
+    viewport?.addEventListener("resize", schedule);
+    viewport?.addEventListener("scroll", schedule);
+    const geometry = new MutationObserver(schedule);
+    geometry.observe(document.documentElement, { attributes: true, attributeFilter: ["style", "data-keyboard-viewport"] });
+    return () => {
+      ro.disconnect();
+      geometry.disconnect();
+      viewport?.removeEventListener("resize", schedule);
+      viewport?.removeEventListener("scroll", schedule);
+      if (frame !== undefined) cancelAnimationFrame(frame);
+    };
   }, [activeTopPanel, isMobile]);
 
   // Files unmount when inactive; workspace terminals stay mounted until closed.
@@ -2090,7 +2109,7 @@ export function AppShell() {
         }
       }
     `}</style>
-    <div style={{
+    <div data-app-viewport style={{
       display: "flex",
       width: "100%",
       height: "var(--app-viewport-height, 100dvh)",
@@ -2149,7 +2168,7 @@ export function AppShell() {
       <div inert={rightPanelFullWidth} style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
         {/* Top bar with sidebar toggle */}
         <div ref={topBarRef} style={{ flexShrink: 0, background: "var(--bg-panel)" }}>
-        <div style={{ display: "flex", alignItems: "center", position: "relative", borderBottom: "1px solid var(--border)", height: "calc(36px + env(safe-area-inset-top))", paddingTop: "env(safe-area-inset-top)" }}>
+        <StandaloneTopBar sidebarWidth={sidebarOpen ? sidebarResizer.width : 0}>
           <button
             onClick={handleSidebarToggle}
              title={sidebarOpen ? translate("sidebar.hide") : translate("sidebar.show")}
@@ -2274,6 +2293,8 @@ export function AppShell() {
             </>
           )}
           {!isMobile && renderMainFileToggle(false)}
+        </StandaloneTopBar>
+          {/* Dropdowns must not inherit the fixed surface's stacking context. */}
           {isMobile && sessionHasBranches && (
             <BranchNavigator
               tree={branchTree}
@@ -2291,9 +2312,9 @@ export function AppShell() {
           )}
           {/* Top panel dropdown — shared, only one active at a time */}
           {activeTopPanel && activeTopPanel !== "notifications" && topPanelPos && (
-            <div style={{
+            <div data-top-panel-dropdown="true" style={{
               position: "fixed",
-              top: topPanelPos.top,
+          top: `calc(${topPanelPos.top}px + var(--app-topbar-pan-correction, 0px))`,
               left: topPanelPos.left,
               width: topPanelPos.width,
               maxHeight: `calc(100dvh - ${topPanelPos.top}px)`,
@@ -2542,7 +2563,6 @@ export function AppShell() {
             </div>
           )}
 
-        </div>
         {isMobile && renderProjectTrustWarning(true)}
         </div>
 
@@ -2665,7 +2685,7 @@ export function AppShell() {
         } as React.CSSProperties}
       >
         {/* Right panel tab bar */}
-        <div style={{
+        <div data-app-topbar="files" style={{
           display: "flex",
           alignItems: "center",
           flexShrink: 0,
