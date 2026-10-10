@@ -19,6 +19,8 @@ const mcpAddSource = await readFile(new URL("./McpAddServer.tsx", import.meta.ur
 test("removes the temporary installed-app diagnostics and its logging endpoint", async () => {
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   assert.doesNotMatch(page, /StandaloneDiagnostics|device-diag/);
+  assert.match(page, /export const dynamic = "force-dynamic"/);
+  assert.match(page, /fallback=\{<TopBarShell \/>\}/);
   assert.equal(existsSync(new URL("./StandaloneDiagnostics.tsx", import.meta.url)), false);
   assert.equal(existsSync(new URL("../app/api/device-diag/route.ts", import.meta.url)), false);
 });
