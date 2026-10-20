@@ -32,9 +32,9 @@ const HEARTBEAT_INTERVAL_MS = 30_000;
  * this app never triggers (issue #923).
  *
  * The limit also has to absorb what a healthy client on a slow link has in
- * flight: one `read` of an image emits its base64 twice (the tool result's
- * `message_start` and `message_end`), and the second queues up while the first
- * one is still being written to the socket.
+ * flight: one `read` of an image emits its base64 in the tool result's
+ * `message_end` (its `message_start` goes as the role only), and that queues
+ * up while earlier events are still being written to the socket.
  */
 const STREAM_HIGH_WATER_MARK_BYTES = 512 * 1024;
 const DEFAULT_BACKLOG_LIMIT_BYTES = 16 * 1024 * 1024;
@@ -280,7 +280,7 @@ export function createAgentEventStream(
           connected = true;
           for (const event of bufferedEvents) forwardEvent(event, snapshot);
           if (snapshot !== undefined && snapshot !== null) {
-            encode({ type: "message_start", message: snapshot });
+            forwardEvent({ type: "message_start", message: snapshot }, undefined);
           }
           snapshotPublished = true;
         } catch (error) {

@@ -7,7 +7,7 @@ import { createJiti } from "jiti";
 // Same callback-execution pattern as mcp-slash-command.test.mjs, not a browser or React mount.
 // The real HTTP decoder and formatter feed the hook's actual callbacks; only hook state/IO are stubbed.
 const jiti = createJiti(import.meta.url, { interopDefault: true });
-const { AgentCommandError, isPromptRejectedError, isUnavailableAgentSessionError, readAgentCommandError, sendAgentCommand } = await jiti.import("../lib/agent-client.ts");
+const { AgentCommandError, agentStatusUrl, isPromptRejectedError, isUnavailableAgentSessionError, readAgentCommandError, sendAgentCommand } = await jiti.import("../lib/agent-client.ts");
 const { AgentEventConnection, AgentEventConnectionError } = await jiti.import("../lib/agent-event-connection.ts");
 const { createAgentEventStream } = await jiti.import("../lib/agent-event-stream.ts");
 const { ModelSelectionError } = await jiti.import("../lib/subagent-model-selection.ts");
@@ -88,6 +88,10 @@ function hook(t, { locale = "en", isNew = false, busy = false, fail = true, fail
     waitForPromptSettlement: async () => { state.wait++; }, refreshViewedSession: async () => {}, scheduleEventStreamClose: noop,
     onAgentEnd: () => { state.ends++; }, syncLiveModel: noop, setRetryInfo: noop, setActiveToolResults: noop,
     setIsCompacting: noop, setAutoCompactionEnabled: noop, normalizeQueuedMessages: (value) => value, setQueuedMessages: noop,
+    // Context usage is a separate concern (hooks/context-usage.test.mjs): the hook
+    // stamps a request id before every status read and applies the reply only if it
+    // is still the newest one, so both the counter ref and the apply step must exist.
+    contextUsageRequestIdRef: ref(0), applyContextUsage: noop, refreshContextUsage: noop, agentStatusUrl,
     setContextUsage: noop, setSystemPrompt: noop, setExtensionStatuses: noop, setExtensionWidgets: noop,
     setPendingAsk: (value) => { state.pendingAsk = value; },
   };

@@ -152,9 +152,15 @@ async function buildSubagentSessionServices(options: CreateSubagentSessionServic
   loader.diagnostics.push(...providerDiagnostics);
   if (options.providerOnly) {
     const { providerId, sources } = options.providerOnly;
-    const registeredByExtension = modelRuntime.getRegisteredProviderIds().includes(providerId);
+    // Only an extension this loader actually loaded makes the provider an authorized lead.
+    const contributedByExtension = readCapturedProviderSources(loader.resourceLoader.getExtensions(), providerId) !== undefined;
+    // A provider the caller's own runtime already exposes needs no replay: nothing is
+    // authorized by a lead here. This covers a test fixture's runtime and a runtime this
+    // code built itself; a child `/model` switch still replays a saved or parent lead.
+    const runtimeExposesProvider = modelRuntime.getRegisteredProviderIds().includes(providerId)
+      || modelRuntime.getModels().some((model) => model.provider === providerId);
     // An extension lead must be checked even if models.json happens to have a same-name provider.
-    if (sources || registeredByExtension || !modelRuntime.getModels().some((model) => model.provider === providerId)) {
+    if (sources || contributedByExtension || !runtimeExposesProvider) {
       if (!sources) throw new ModelSelectionError("provider-context-unavailable", "No confirmed provider source");
       let files;
       try {

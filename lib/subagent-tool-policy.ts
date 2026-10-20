@@ -113,6 +113,18 @@ export interface SubagentExtensionToolProjectionOptions {
   transform?: ExtensionToolTransform;
   /** Wrapper-owned manual-off names, retained conservatively across loader generations. */
   manualOffNames?: Set<string>;
+  /**
+   * Tool names a capability the profile itself turned on owns, kept past the extension
+   * selectors: Code mode's `codemode` tool belongs to an inline extension the profile enables,
+   * not to an extension the user had to select with `ext:`.
+   */
+  keepToolNames?: readonly string[];
+  /**
+   * Name prefixes a capability the profile turned on owns. MCP tools (`mcp__*`) connect long
+   * after the profile's `ext:` selectors are fixed, so the MCP policy extension decides which
+   * of them a run may call, not the registration filter.
+   */
+  keepToolPrefixes?: readonly string[];
 }
 
 /**
@@ -188,11 +200,15 @@ export function projectRegistrationAwareExtensionTools(
   );
   const transform = options.transform;
   const manualOffNames = options.manualOffNames ?? new Set<string>();
+  const keepToolNames = new Set(options.keepToolNames ?? []);
+  const keepToolPrefixes = [...(options.keepToolPrefixes ?? [])];
   manualOffByResult.set(base, manualOffNames);
   for (const extension of base.extensions) {
     extension.tools = new RegistrationFilteredToolMap(
       extension.tools,
-      (toolName) => !manualOffNames.has(toolName) && filter(extension, toolName),
+      (toolName) => !manualOffNames.has(toolName) && (keepToolNames.has(toolName)
+        || keepToolPrefixes.some((prefix) => toolName.startsWith(prefix))
+        || filter(extension, toolName)),
       transform === undefined ? undefined : (tool) => transform(extension, tool),
     );
   }

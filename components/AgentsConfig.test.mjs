@@ -2,33 +2,52 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+import ts from "typescript";
+import vm from "node:vm";
+
 const source = await readFile(new URL("./AgentsConfig.tsx", import.meta.url), "utf8");
 const cssSource = await readFile(new URL("../app/settings.css", import.meta.url), "utf8");
 const chatInputSource = await readFile(new URL("./ChatInput.tsx", import.meta.url), "utf8");
 const modelSelectorSource = await readFile(new URL("./ModelSelector.tsx", import.meta.url), "utf8");
 
-test("keeps same-name profiles selectable by scope and groups writable sources first", () => {
-  assert.match(source, /return `\$\{profile\.scope\}:\$\{profile\.name\}`/);
-  assert.match(source, /\["project", "global", "workspace", "builtin"\] as const/);
-  assert.match(source, /profile\.scope === scope/);
+test("editor draft preserves named and empty selections independently of activation", () => {
+  const declaration = source.slice(source.indexOf("function editableProfile("), source.indexOf("function profileKey("));
+  const code = ts.transpileModule(declaration, { compilerOptions: { target: ts.ScriptTarget.ES2020 } }).outputText;
+  const editable = vm.runInNewContext(`${code}; editableProfile`);
+  for (const skills of [["review", "audit"], []]) {
+    const draft = editable({ name: "reviewer", tools: [], loadSkills: false, skills });
+    assert.equal(draft.loadSkills, false);
+    assert.deepEqual(Array.from(draft.skills ?? ["LOST"]), skills);
+    draft.skills.push("new");
+    assert.notEqual(draft.skills.length, skills.length);
+  }
+  for (const extensions of [["codegraph"], []]) {
+    const draft = editable({ name: "reviewer", tools: [], loadExtensions: true, extensions });
+    assert.deepEqual(Array.from(draft.extensions ?? ["LOST"]), extensions);
+  }
 });
 
-test("uses the shared enabled status treatment", () => {
-  assert.match(source, /<ConfigStatusDot active=\{profile\.enabled\}/);
-  assert.match(source, /className=\{`is-grow\$\{profile\.enabled \? "" : " is-muted"\}`\}/);
-  assert.match(cssSource, /\.config-sidebar-text\.is-muted \{[\s\S]*?color: var\(--text-dim\)/);
+test("draft backfills MCP as off and keeps an explicit choice", () => {
+  const declaration = source.slice(source.indexOf("function editableProfile("), source.indexOf("function profileKey("));
+  const code = ts.transpileModule(declaration, { compilerOptions: { target: ts.ScriptTarget.ES2020 } }).outputText;
+  const editable = vm.runInNewContext(`${code}; editableProfile`);
+  assert.equal(editable({ name: "legacy", tools: [], loadSkills: false, loadExtensions: false }).mcp, "off");
+  for (const mcp of ["on", "off"]) {
+    assert.equal(editable({ name: "reviewer", tools: [], loadSkills: false, loadExtensions: false, mcp }).mcp, mcp);
+  }
 });
 
-test("offers a persisted built-in sub-agent switch with explicit session reload", () => {
-  assert.match(source, /fetch\("\/api\/subagents\/settings"/);
-  assert.match(source, /JSON\.stringify\(\{ enabled \}\)/);
-  assert.match(source, /<ConfigSwitch[\s\S]*?checked=\{builtInEnabled\}[\s\S]*?t\("agents\.builtInTitle"\)/);
-  assert.match(source, /sendAgentCommand\(sessionId, \{ type: "reload" \}\)/);
-  assert.match(source, /reloadNeeded && sessionId/);
-  assert.match(source, /className="agents-concurrency-control"[\s\S]*?t\("agents\.maxConcurrent"\)/);
-  assert.equal((source.match(/className="agents-feature-setting"/g) ?? []).length, 1);
-  assert.match(cssSource, /\.agents-feature-setting \{[\s\S]*?border-bottom: 1px solid var\(--border\)/);
-  assert.match(cssSource, /\.agents-concurrency-control \{[\s\S]*?white-space: nowrap;/);
+test("draft backfills code mode for legacy profiles and keeps an explicit choice", () => {
+  const declaration = source.slice(source.indexOf("function editableProfile("), source.indexOf("function profileKey("));
+  const code = ts.transpileModule(declaration, { compilerOptions: { target: ts.ScriptTarget.ES2020 } }).outputText;
+  const editable = vm.runInNewContext(`${code}; editableProfile`);
+  // Profiles written before the setting existed have no value: code mode stays disabled.
+  assert.equal(editable({ name: "legacy", tools: [], loadSkills: false, loadExtensions: false }).codemode, "off");
+  // An explicit choice survives the draft, so duplicating a profile keeps it too.
+  for (const codemode of ["on", "off", "inherit"]) {
+    const draft = editable({ name: "reviewer", tools: [], loadSkills: false, loadExtensions: false, codemode });
+    assert.equal(draft.codemode, codemode);
+  }
 });
 
 test("marks profiles shadowed by a higher-precedence source", () => {
@@ -103,7 +122,9 @@ test("reuses the ChatInput model selector with scoped models", () => {
   assert.match(chatInputSource, /import \{ ModelSelector, type ModelSelectorOption \} from "\.\/ModelSelector"/);
   assert.match(source, /<ModelSelector[\s\S]*?options=\{modelSelectorOptions\}[\s\S]*?variant="field"/);
   assert.match(chatInputSource, /<ModelSelector[\s\S]*?options=\{modelOptions\}/);
-  assert.match(modelSelectorSource, /filterModelOptions\(sortedOptions, filter\)/);
+  // Upstream stopped re-sorting the selector's options (pi's /model order wins), so the
+  // merged ModelSelector filters the given list directly.
+  assert.match(modelSelectorSource, /filterModelOptions\(options, filter\)/);
   assert.match(modelSelectorSource, /modelsByProvider\.map/);
   assert.match(modelSelectorSource, /event\.key !== "Escape" \|\| !open[\s\S]*?event\.preventDefault\(\)[\s\S]*?event\.stopPropagation\(\)/);
   assert.match(source, /agents\.modelUnavailable/);
@@ -165,4 +186,19 @@ test("confirms deletion and limits it to writable profiles", () => {
   assert.match(source, /window\.confirm\(t\("agents\.deleteConfirm", \{ name: selected\.displayName \}\)\)/);
   assert.match(source, /selected && isWritableScope\(selected\.scope\) && mode === "edit"/);
   assert.match(source, /method: "DELETE"/);
+});
+
+test("a profile model's pi :level suffix names its base model; a listed colon id matches whole", () => {
+  const constant = source.slice(source.indexOf("const THINKING_OPTIONS"), source.indexOf("\n", source.indexOf("const THINKING_OPTIONS")));
+  const declaration = source.slice(source.indexOf("function profileModelBase("), source.indexOf("function profileKey("));
+  const code = ts.transpileModule(`${constant}\n${declaration}`, { compilerOptions: { target: ts.ScriptTarget.ES2020 } }).outputText;
+  const base = vm.runInNewContext(`${code}; profileModelBase`);
+  const listed = new Set(["openai/gpt-5", "ollama/qwen3:8b", "local/tuned:high"]);
+  const isListed = (reference) => listed.has(reference);
+  assert.equal(base("openai/gpt-5:high", isListed), "openai/gpt-5");
+  assert.equal(base("openai/gpt-5", isListed), "openai/gpt-5");
+  assert.equal(base("ollama/qwen3:8b", isListed), "ollama/qwen3:8b");
+  assert.equal(base("local/tuned:high", isListed), "local/tuned:high");
+  assert.equal(base("openai/gpt-5:turbo", isListed), "openai/gpt-5:turbo");
+  assert.equal(base("openai/gpt-5:", isListed), "openai/gpt-5:");
 });

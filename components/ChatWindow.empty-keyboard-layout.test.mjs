@@ -8,7 +8,8 @@ const input = await readFile(new URL("./ChatInput.tsx", import.meta.url), "utf8"
 const css = await readFile(new URL("../app/keyboard-viewport.css", import.meta.url), "utf8");
 
 test("only empty new sessions have a lower centring spacer after the composer", () => {
-  assert.match(source, /const isEmptyNew = isNew && messages\.length === 0 && !streamState\.isStreaming && !sessionBusy;/);
+  // The streaming reply now lives in the streaming store, so the flag is the selector's.
+  assert.match(source, /const isEmptyNew = isNew && messages\.length === 0 && !isStreaming && !sessionBusy;/);
   assert.match(source, /\{chatInputElement\}\s*<ExtensionStatusBar[^>]*\/>\s*<\/div>\s*\{isEmptyNew && <div className="chat-empty-bottom-spacer min-h-0 flex-1" \/>\}/);
   assert.equal((source.match(/chat-empty-bottom-spacer/g) ?? []).length, 1);
   assert.match(source, /className="relative flex min-h-0 min-w-0 flex-1 overflow-hidden"/);
@@ -18,7 +19,9 @@ test("only the mobile keyboard-open rule removes the empty lower spacer", () => 
   assert.match(css, /@media \(max-width: 640px\), \(pointer: coarse\) and \(max-height: 500px\) \{\s*html\[data-keyboard-open\] \.chat-empty-bottom-spacer \{\s*display: none;\s*\}\s*\}/);
   assert.equal((css.match(/chat-empty-bottom-spacer/g) ?? []).length, 1);
   assert.doesNotMatch(css, /justify-content|margin\s*:|padding\s*:/);
-  assert.match(source, /\{isEmptyNew && \(\s*<div className="mb-3 w-full"/);
+  // The brand hero keeps upstream's `.new-session-hero` markup, in the fork's
+  // composer-column position.
+  assert.match(source, /\{isEmptyNew && \(\s*<div className="new-session-hero"/);
   assert.match(source, /\{askUserCardInColumn\}\s*<div className="relative shrink-0">/);
 });
 

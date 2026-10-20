@@ -32,7 +32,18 @@ test("completion targets exact result entry via explicit session adoption; pendi
     assert.equal(selections[0][0], target);
     assert.equal(selections[0][1], false);
     assert.equal(selections[0][2], kind === "completion" ? "result-entry" : undefined);
-    assert.equal(selections[0][4], kind === "completion" ? true : undefined);
+    // The merged shell passes the option bag `SelectSessionOptions`
+    // (`{ notificationResult: true }`) instead of the bare `true` the fork
+    // used before upstream grew the 5th `options` argument. The contract is
+    // unchanged: a notification click view-confirms its result without
+    // acknowledging it; only the argument shape moved.
+    if (kind === "completion") {
+      // A sandbox-created object has a different realm prototype, so compare
+      // the flag, not the bag's identity.
+      assert.equal(selections[0][4]?.notificationResult, true);
+    } else {
+      assert.equal(selections[0][4], undefined);
+    }
     assert.equal(env.closed, true);
   }
   assert.deepEqual(requests, Array(3).fill("/api/sessions?sessionId=session-a"));

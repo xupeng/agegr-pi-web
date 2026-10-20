@@ -9,6 +9,7 @@ import {
   normalizeDisplayMath,
 } from "@/lib/markdown";
 import { isMessageGroupAnchor, splitFinalAssistantBlocks } from "@/lib/message-display";
+import { loadMinimapPreviewLocked, saveMinimapPreviewLocked } from "@/lib/minimap-preview-lock";
 import type { AgentMessage, AssistantMessage, CustomMessage, TextContent, UserMessage } from "@/lib/types";
 import { useI18n } from "@/hooks/useI18n";
 import { useHoverCapable } from "@/hooks/useIsMobile";
@@ -17,10 +18,13 @@ import styles from "./ChatMinimap.module.css";
 
 interface Props {
   messages: AgentMessage[];
-  streamingMessage: Partial<AgentMessage> | null;
+  /** The reply being streamed, read when the turns are measured: it never re-renders the minimap. */
+  getStreamingMessage: () => Partial<AgentMessage> | null;
   scrollContainer: RefObject<HTMLDivElement | null>;
   messageRefs: RefObject<(HTMLDivElement | null)[]>;
   onRevealHistory: () => void;
+  /** Turns of the branch the server has not sent yet: numbers continue from it (#791). */
+  turnsBefore: number;
 }
 
 /**
@@ -33,6 +37,9 @@ const TICK_GAP_MAX = 14;
 /** Notion anchors its outline this far below the top of the view instead of centring it. */
 const RAIL_TOP_ANCHOR = 130;
 const MINIMAP_MARGIN = 8;
+// The lock button sits at the bottom of the rail (6px inset + 30px): ticks stop
+// above it so the last one stays visible and clickable.
+const MINIMAP_LOCK_RESERVE = 36;
 /** A pointer that rests on the rail opens the panel; crossing it must not flash the panel open. */
 const HOVER_OPEN_DELAY_MS = 120;
 const NAVIGATION_ACTIVE_LOCK_MS = 1600;
@@ -328,6 +335,8 @@ export interface TickSpacing {
  * fits, which turns the column below the anchor into a scroll position map. Ticks are never
  * clipped: a tick the reader cannot reach is a heading the rail cannot point at. The anchor itself
  * gives way only for a rail shorter than the anchor, so the group never starts off-screen.
+ * `layoutNodes` passes the height left under the lock button, so this stays a pure function of the
+ * rail it is given.
  */
 export function tickSpacing(count: number, minimapHeight: number): TickSpacing {
   const height = Math.max(1, minimapHeight);
@@ -345,7 +354,12 @@ export function tickSpacing(count: number, minimapHeight: number): TickSpacing {
 
 function layoutNodes(allNodes: NodeInfo[], minimapHeight: number): NodeLayout {
   const height = Math.max(1, minimapHeight);
-  const { gap, start, fillsHeight } = tickSpacing(allNodes.length, height);
+  // The lock button owns the rail's bottom: lay the outline out in what is left
+  // of it and place the ticks against the full height.
+  const { gap, start, fillsHeight } = tickSpacing(
+    allNodes.length,
+    Math.max(1, height - MINIMAP_LOCK_RESERVE),
+  );
   return {
     nodes: allNodes.map((node, index) => ({
       ...node,
@@ -356,12 +370,13 @@ function layoutNodes(allNodes: NodeInfo[], minimapHeight: number): NodeLayout {
   };
 }
 
-export function ChatMinimap({
+export const ChatMinimap = memo(function ChatMinimap({
   messages,
-  streamingMessage,
+  getStreamingMessage,
   scrollContainer,
   messageRefs,
   onRevealHistory,
+  turnsBefore,
 }: Props) {
   const { t } = useI18n();
   const [visible, setVisible] = useState(false);
@@ -369,6 +384,7 @@ export function ChatMinimap({
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [minimapHeight, setMinimapHeight] = useState(600);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [locked, setLocked] = useState(loadMinimapPreviewLocked);
   const [mouseYRatio, setMouseYRatio] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const allNodesRef = useRef<NodeInfo[]>([]);
@@ -386,12 +402,8 @@ export function ChatMinimap({
   /** Row to scroll to once `onRevealHistory()` has mounted the message that owns it. */
   const pendingNavigationRef = useRef<number | null>(null);
 
-  const allMessages = useMemo(
-    () => (streamingMessage ? [...messages, streamingMessage] : messages) as (AgentMessage | Partial<AgentMessage>)[],
-    [messages, streamingMessage],
-  );
-  const allMessagesRef = useRef(allMessages);
-  allMessagesRef.current = allMessages;
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
 
   // A turn's own header is a preview row only unless its answers had no outline to show, so the
   // rail stays an outline of the answers' structure, like Notion's, and still covers every turn.
@@ -474,7 +486,11 @@ export function ChatMinimap({
       let refIndex = 0;
       let currentTurn: TurnInfo | null = null;
 
-      for (const message of allMessagesRef.current) {
+      const streamingMessage = getStreamingMessage();
+      const allMessages: (AgentMessage | Partial<AgentMessage>)[] = streamingMessage
+        ? [...messagesRef.current, streamingMessage]
+        : messagesRef.current;
+      for (const message of allMessages) {
         const isAnchor = isMessageGroupAnchor(message);
         if (!isAnchor && message.role !== "assistant") continue;
         const element = refs?.[refIndex];
@@ -543,7 +559,7 @@ export function ChatMinimap({
         jumpToElement(pendingElement, pendingNode.index);
       }
     }, 150);
-  }, [jumpToElement, messageRefs, scrollContainer, syncActiveNode]);
+  }, [getStreamingMessage, jumpToElement, messageRefs, scrollContainer, syncActiveNode]);
 
   useEffect(() => {
     const el = scrollContainer.current;
@@ -613,10 +629,10 @@ export function ChatMinimap({
   // way elsewhere does not flash a 240px panel; a touch screen keeps the tap, since a tap is the
   // only thing it can do. Either way the panel is only the switch — every jump starts inside it.
   const togglePreview = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    if (canHover) return;
+    if (canHover || locked) return;
     if (previewBoxRef.current?.contains(event.target as Node)) return;
     setPreviewOpen((open) => !open);
-  }, [canHover]);
+  }, [canHover, locked]);
 
   const cancelHoverOpen = useCallback(() => {
     if (hoverTimerRef.current === null) return;
@@ -625,13 +641,24 @@ export function ChatMinimap({
   }, []);
 
   const handleRailEnter = useCallback(() => {
-    if (!canHover) return;
+    if (!canHover || locked) return;
     cancelHoverOpen();
     hoverTimerRef.current = setTimeout(() => {
       hoverTimerRef.current = null;
       setPreviewOpen(true);
     }, HOVER_OPEN_DELAY_MS);
-  }, [canHover, cancelHoverOpen]);
+  }, [canHover, cancelHoverOpen, locked]);
+
+  const toggleLock = useCallback(() => {
+    const next = !locked;
+    setLocked(next);
+    saveMinimapPreviewLocked(next);
+    if (next) {
+      cancelHoverOpen();
+      setPreviewOpen(false);
+      setMouseYRatio(null);
+    }
+  }, [cancelHoverOpen, locked]);
 
   // Leaving the rail also leaves the panel (it is a child, so moving into the panel is not a leave).
   // Only for a hover-capable pointer: a touch screen synthesises a `mouseleave` right after a tap,
@@ -724,6 +751,24 @@ export function ChatMinimap({
         overflow: "visible",
       }}
     >
+      {turnsBefore > 0 && (
+        <div
+          data-minimap-earlier=""
+          style={{
+            position: "absolute",
+            right: 13,
+            top: 0,
+            height: Math.max(
+              MINIMAP_MARGIN,
+              positionedNodes.length > 0 ? positionedNodes[0].topRatio * minimapHeight - nodeGap / 2 : MINIMAP_MARGIN,
+            ),
+            width: 1,
+            background: "repeating-linear-gradient(to bottom, var(--text-dim) 0 2px, transparent 2px 4px)",
+            zIndex: 0,
+            pointerEvents: "none",
+          }}
+        />
+      )}
       {positionedNodes.map((node) => {
         const isNearest = previewOpen && nearestNode?.index === node.index;
         const isActive = activeIndex === node.index;
@@ -757,6 +802,39 @@ export function ChatMinimap({
         );
       })}
 
+      <button
+        type="button"
+        className={styles.lock}
+        data-minimap-lock={locked ? "on" : "off"}
+        aria-pressed={locked}
+        title={t(locked ? "chatMinimap.unlockPreview" : "chatMinimap.lockPreview")}
+        aria-label={t("chatMinimap.lockPreview")}
+        onMouseDown={(event) => event.stopPropagation()}
+        onClick={(event) => {
+          event.stopPropagation();
+          toggleLock();
+        }}
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <rect x="4" y="11" width="16" height="10" rx="2" />
+          {locked ? (
+            <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+          ) : (
+            <path d="M8 11V7a4 4 0 0 1 7.9-.9" />
+          )}
+        </svg>
+      </button>
+
       {previewOpen && previewTurns.length > 0 && (
         <div
           ref={previewBoxRef}
@@ -765,6 +843,17 @@ export function ChatMinimap({
           onMouseDown={(event) => event.stopPropagation()}
           onMouseMove={(event) => event.stopPropagation()}
         >
+          {turnsBefore > 0 && (
+            <button
+              type="button"
+              className={styles.earlier}
+              data-minimap-preview-earlier=""
+              // The chat's top sentinel pages the older history in.
+              onClick={() => scrollContainer.current?.scrollTo({ top: 0, behavior: "smooth" })}
+            >
+              {t("chatMinimap.earlierTurns", { count: turnsBefore })}
+            </button>
+          )}
           {previewTurns.map((group) => {
             const isLocated = nearestTurnIndex === group.turnIndex;
             return (
@@ -781,7 +870,7 @@ export function ChatMinimap({
                 <div className={styles.turnHead}>
                   <span className={styles.number} data-minimap-turn-number="">
                     <span aria-hidden="true">
-                      {String(group.turnIndex + 1).padStart(2, "0")}
+                      {String(turnsBefore + group.turnIndex + 1).padStart(2, "0")}
                     </span>
                     {group.header.turn.toolCount > 0 && (
                       <span
@@ -832,7 +921,7 @@ export function ChatMinimap({
       )}
     </div>
   );
-}
+});
 
 // Hook to create a stable array of refs for messages
 export function useMessageRefs(count: number): RefObject<(HTMLDivElement | null)[]> {

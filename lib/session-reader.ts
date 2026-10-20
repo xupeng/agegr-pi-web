@@ -3,25 +3,26 @@ import {
   getAgentDir,
 } from "@earendil-works/pi-coding-agent";
 import { closeSync, type Dirent, fstatSync, openSync, readSync, statSync } from "fs";
-import { readdir, stat } from "fs/promises";
+import { readdir } from "fs/promises";
 import { basename, isAbsolute, join, normalize as normalizePath, relative, resolve as resolvePath, sep } from "path";
 import type { AgentMessage, ImageContent, SessionEntry, SessionHeader, SessionInfo, SessionContext } from "./types";
 import { normalizeToolCalls } from "./normalize";
-import { getThinkingPreview } from "./message-display";
+import { withoutMessageSignatures } from "./message-signatures";
+import { getThinkingPreview, isMessageGroupAnchor } from "./message-display";
 import { projectIdentityKey } from "./project-identity";
 import { sessionPathKey } from "./session-path";
+import { skillExpansionToCommand } from "./slash-display";
 import { MAX_TOOL_RESULT_IMAGE_BYTES, TOOL_RESULT_IMAGE_MIMES } from "./tool-result-images";
 import { resolveProject, type ProjectInfo } from "./worktree";
+import { readSubagentRun, SUBAGENT_META_TYPE } from "./subagents";
+import { checkSessionMembership, listSessionsIncremental, scanSessionFileInfo, type ScannedSessionInfo } from "./session-list-scanner";
 import {
-  type CachedSessionEntry,
-  type SessionListCacheFile,
+  emptyProjectCacheFile,
   getCachedProjects,
-  loadSessionListCacheFile,
-  readSessionInfoFast,
-  saveSessionListCacheFile,
+  loadProjectCacheFile,
+  saveProjectCacheFile,
   setCachedProjects,
 } from "./session-list-cache";
-import { readSubagentRun, SUBAGENT_META_TYPE } from "./subagents";
 import { SessionUnavailableError } from "./session-unavailable";
 
 export { getAgentDir };
@@ -164,13 +165,23 @@ function readSessionRelationEntries(filePath: string): SessionEntry[] {
 export async function attachSessionProjectInfo(sessions: SessionInfo[]): Promise<SessionInfo[]> {
   const uniqueCwds = [...new Set(sessions.map((s) => s.cwd).filter(Boolean))];
   const projectByCwd = new Map<string, ProjectInfo>();
-  await Promise.all(uniqueCwds.map(async (cwd) => {
+  // Project info is git-backed, and the same few dozen cwds come back on every
+  // cold start: consult the on-disk cache (same TTL as worktree.ts's in-memory
+  // one) before spawning git, then persist whatever had to be resolved.
+  const diskCache = loadProjectCacheFile();
+  const now = Date.now();
+  for (const [cwd, info] of getCachedProjects(diskCache, uniqueCwds, now, PROJECT_CACHE_TTL_MS)) {
+    projectByCwd.set(cwd, info as ProjectInfo);
+  }
+  const missingCwds = uniqueCwds.filter((cwd) => !projectByCwd.has(cwd));
+  await Promise.all(missingCwds.map(async (cwd) => {
     projectByCwd.set(cwd, await resolveProject(cwd));
   }));
-  return withProjectInfo(sessions, projectByCwd);
-}
+  if (missingCwds.length > 0) {
+    const cache = diskCache ?? emptyProjectCacheFile();
+    saveProjectCacheFile(setCachedProjects(cache, projectByCwd, now));
+  }
 
-function withProjectInfo(sessions: SessionInfo[], projectByCwd: Map<string, ProjectInfo>): SessionInfo[] {
   return sessions.map((session) => {
     const project = session.cwd ? projectByCwd.get(session.cwd) : undefined;
     const projectRoot = project?.projectRoot ?? session.cwd;
@@ -202,153 +213,103 @@ export function mergeSessionLists(
   );
 }
 
-/** Mirror of pi's directory layout: <sessionsDir>/<encoded-cwd>/<file>.jsonl */
-async function collectSessionFiles(): Promise<string[]> {
-  const sessionsDir = join(getAgentDir(), "sessions");
+/** Mirrors worktree.ts's in-memory project cache TTL. */
+const PROJECT_CACHE_TTL_MS = 600_000;
+
+type ScannedSubagent = NonNullable<ReturnType<typeof readSubagentRun>>;
+
+/**
+ * A fork's or subagent's run, read from its file, per scanned row. The scanner
+ * hands back the same row object while the file's size and mtime stay the same
+ * and a new one once they change, so the row is the cache key: every list
+ * rebuild re-read ~140 subagent files synchronously (~36 ms of blocked event
+ * loop) though only the session that just ran had changed.
+ */
+const scannedSubagentRuns = new WeakMap<ScannedSessionInfo, ScannedSubagent | null>();
+
+function resolveScannedSessionRelation(
+  scanned: ScannedSessionInfo,
+  pathToId: Map<string, string>,
+): { originSessionId?: string; subagent: ScannedSubagent | null } {
+  const originSessionId = scanned.parentSessionPath
+    ? pathToId.get(sessionPathKey(scanned.parentSessionPath))
+    : undefined;
+  if (!scanned.parentSessionPath) return { originSessionId, subagent: null };
+
+  const cached = scannedSubagentRuns.get(scanned);
+  if (cached !== undefined) return { originSessionId, subagent: cached };
   try {
-    const dirs = (await readdir(sessionsDir, { withFileTypes: true }))
-      .filter((entry) => entry.isDirectory() || entry.isSymbolicLink())
-      .map((entry) => normalizePath(`${sessionsDir}/${entry.name}`));
-    const files: string[] = [];
-    for (const dir of dirs) {
-      try {
-        const names = await readdir(dir);
-        for (const name of names) {
-          if (name.endsWith(".jsonl")) files.push(normalizePath(`${dir}/${name}`));
-        }
-      } catch {
-        // unreadable dir (vanished cwd, permissions) — skip it
-      }
-    }
-    return files;
+    const subagent = readSubagentRun(readSessionRelationEntries(scanned.path), scanned.id, scanned.path);
+    scannedSubagentRuns.set(scanned, subagent);
+    return { originSessionId, subagent };
   } catch {
-    return [];
+    // Malformed or concurrently removed session: read it again next time.
+    return { originSessionId, subagent: null };
   }
-}
-
-async function mapWithConcurrency<T, R>(
-  items: readonly T[],
-  limit: number,
-  fn: (item: T) => Promise<R>,
-): Promise<R[]> {
-  const results = new Array<R>(items.length);
-  let next = 0;
-  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (next < items.length) {
-      const index = next++;
-      results[index] = await fn(items[index]);
-    }
-  });
-  await Promise.all(workers);
-  return results;
 }
 
 /**
- * Incremental scan: stat every session file (~46ms for ~3000 files), reuse
- * summaries from the on-disk cache for unchanged files, and re-read only the
- * files whose mtime changed. Falls back to a full read when no cache exists
- * (first cold start of a fresh machine / deleted cache file).
+ * The list's first message is for the row title and the subagent filter, never
+ * the whole prompt: a pasted document or an expanded skill made one row 300 KB
+ * and the list several MB, fetched again by every open tab after each run. A
+ * skill expansion goes as the /skill: command its row shows; any other text is
+ * cut to CATALOG_FIRST_MESSAGE_MAX code units, never splitting a surrogate pair.
  */
-async function loadAllSessions(): Promise<SessionInfo[]> {
-  const files = await collectSessionFiles();
-  const stats = await mapWithConcurrency(files, 64, async (path) => {
-    try {
-      const s = await stat(path);
-      return { path, mtimeMs: s.mtimeMs };
-    } catch {
-      return null;
-    }
-  });
+const CATALOG_FIRST_MESSAGE_MAX = 500;
 
-  const diskCache = loadSessionListCacheFile();
-  const mtimeByPath = new Map<string, number>();
-  const sessionsByPath = new Map<string, CachedSessionEntry>();
-  const changedPaths: string[] = [];
-  for (const st of stats) {
-    if (!st) continue;
-    mtimeByPath.set(st.path, st.mtimeMs);
-    const cached = diskCache?.sessions[st.path];
-    if (cached && Math.abs(cached.mtimeMs - st.mtimeMs) < 1) {
-      sessionsByPath.set(st.path, cached.info);
-    } else {
-      changedPaths.push(st.path);
-    }
-  }
-
-  const freshInfos = await mapWithConcurrency(changedPaths, 32, async (path) => {
-    const info = await readSessionInfoFast(path, mtimeByPath.get(path) ?? 0);
-    return info ? { path, info } : null;
-  });
-  for (const entry of freshInfos) {
-    if (entry) sessionsByPath.set(entry.path, entry.info);
-  }
-
-  const pathToId = new Map<string, string>();
-  for (const info of sessionsByPath.values()) pathToId.set(sessionPathKey(info.path), info.id);
-
-  const sessions: SessionInfo[] = [];
-  for (const info of sessionsByPath.values()) {
-    sessions.push(await toSessionInfo(info, (parentPath) => pathToId.get(sessionPathKey(parentPath))));
-  }
-
-  // Project info: disk cache (same TTL as the in-memory project cache) first,
-  // otherwise resolveProject (which itself checks its in-memory cache before
-  // spawning git).
-  const uniqueCwds = [...new Set(sessions.map((s) => s.cwd).filter(Boolean))];
-  const projectByCwd = new Map<string, ProjectInfo>();
-  const now = Date.now();
-  const cachedProjects = getCachedProjects(diskCache, uniqueCwds, now, PROJECT_CACHE_TTL_MS);
-  for (const [cwd, info] of cachedProjects) projectByCwd.set(cwd, info as ProjectInfo);
-  const missingCwds = uniqueCwds.filter((cwd) => !projectByCwd.has(cwd));
-  await Promise.all(missingCwds.map(async (cwd) => {
-    projectByCwd.set(cwd, await resolveProject(cwd));
-  }));
-
-  // Persist the refreshed cache (best-effort, never blocks the response).
-  const newCache: SessionListCacheFile = { version: 1, sessions: {}, projects: {} };
-  for (const [path, info] of sessionsByPath) {
-    newCache.sessions[path] = { mtimeMs: mtimeByPath.get(path) ?? 0, info };
-  }
-  setCachedProjects(newCache, projectByCwd, now);
-  saveSessionListCacheFile(newCache);
-
-  return withProjectInfo(sessions, projectByCwd);
+export function catalogFirstMessage(text: string): string {
+  const display = skillExpansionToCommand(text) ?? text;
+  if (display.length <= CATALOG_FIRST_MESSAGE_MAX) return display;
+  const last = display.charCodeAt(CATALOG_FIRST_MESSAGE_MAX - 1);
+  return display.slice(0, last >= 0xd800 && last <= 0xdbff ? CATALOG_FIRST_MESSAGE_MAX - 1 : CATALOG_FIRST_MESSAGE_MAX);
 }
 
-/**
- * Build a SessionInfo from a cached per-file summary. `resolveParentId` maps
- * a parent .jsonl path to its session id: the list path uses the in-memory
- * path→id map, the single-session path resolves just that one file.
- */
-async function toSessionInfo(
-  info: CachedSessionEntry,
-  resolveParentId: (parentPath: string) => string | undefined,
-): Promise<SessionInfo> {
-  cacheSessionPath(info.id, info.path);
-  const originSessionId = info.parentSessionPath ? resolveParentId(info.parentSessionPath) : undefined;
-  let subagent = null;
-  if (info.parentSessionPath) {
-    try {
-      subagent = readSubagentRun(readSessionRelationEntries(info.path), info.id, info.path);
-    } catch { /* malformed or concurrently removed session */ }
-  }
+function mapScannedSession(
+  scanned: ScannedSessionInfo,
+  pathToId: Map<string, string>,
+): SessionInfo {
+  cacheSessionPath(scanned.id, scanned.path);
+  const { originSessionId, subagent } = resolveScannedSessionRelation(scanned, pathToId);
+  const detailsPending = scanned.detailsPending === true;
   return {
-    path: info.path,
-    id: info.id,
-    cwd: info.cwd,
-    name: info.name,
-    created: info.created,
-    modified: info.modified,
-    messageCount: info.messageCount,
-    firstMessage: info.firstMessage,
+    path: scanned.path,
+    id: scanned.id,
+    cwd: scanned.cwd,
+    name: scanned.name,
+    created: scanned.created.toISOString(),
+    modified: scanned.modified.toISOString(),
+    messageCount: scanned.messageCount,
+    // A pending row has no first message yet; the placeholder would read as a
+    // real "(no messages)" session until the details arrive.
+    firstMessage: detailsPending && !scanned.firstMessage
+      ? ""
+      : catalogFirstMessage(scanned.firstMessage || "(no messages)"),
     parentSessionId: originSessionId,
     ...(subagent
       ? { relation: { kind: "subagent" as const, parentSessionId: subagent.parentSessionId, profile: subagent.profile, description: subagent.description, status: subagent.status } }
-      : info.parentSessionPath
+      : scanned.parentSessionPath
         ? { relation: { kind: "fork" as const, ...(originSessionId ? { originSessionId } : {}) } }
         : {}),
     transient: false,
+    ...(detailsPending ? { detailsPending: true } : {}),
   };
+}
+
+async function buildSessionList(scanned: ScannedSessionInfo[]): Promise<SessionInfo[]> {
+  const pathToId = new Map<string, string>();
+  for (const session of scanned) pathToId.set(sessionPathKey(session.path), session.id);
+  return attachSessionProjectInfo(scanned.map((session) => mapScannedSession(session, pathToId)));
+}
+
+/**
+ * One session's catalogue row, read the way listAllSessions() reads it
+ * (project info, `modified` as the last message time), so the row a caller
+ * shows at once is not moved by the next list refresh. Only the file itself
+ * is scanned: a fork's `originSessionId` is the caller's to add.
+ */
+export async function readSessionInfo(filePath: string): Promise<SessionInfo | null> {
+  const scanned = await scanSessionFileInfo(filePath);
+  return scanned ? (await buildSessionList([scanned]))[0] ?? null : null;
 }
 
 /**
@@ -362,25 +323,40 @@ async function toSessionInfo(
 export async function readSessionById(sessionId: string): Promise<SessionInfo | null> {
   const path = await resolveSessionPath(sessionId);
   if (!path) return null;
-  let mtimeMs: number;
+  let scanned: ScannedSessionInfo | null = null;
   try {
-    mtimeMs = (await stat(path)).mtimeMs;
+    scanned = await scanSessionFileInfo(path);
   } catch {
     return null;
   }
-  const info = await readSessionInfoFast(path, mtimeMs);
-  if (!info) return null;
-  if (info.id !== sessionId) {
+  if (!scanned) return null;
+  if (scanned.id !== sessionId) {
     invalidateSessionPathCache(sessionId);
     return null;
   }
-  const session = await toSessionInfo(info, (parentPath) => findSessionIdByPath(parentPath));
-  const [withProject] = await attachSessionProjectInfo([session]);
-  return withProject ?? null;
+  // Only the fork's parent id needs a second file read; the row is built from
+  // this one scan, so a single-session lookup never triggers a full listing.
+  const pathToId = new Map<string, string>();
+  if (scanned.parentSessionPath) {
+    const parentId = findSessionIdByPath(scanned.parentSessionPath);
+    if (parentId) pathToId.set(sessionPathKey(scanned.parentSessionPath), parentId);
+  }
+  const [session] = await attachSessionProjectInfo([mapScannedSession(scanned, pathToId)]);
+  return session ?? null;
 }
 
-/** Mirrors worktree.ts's in-memory project cache TTL. */
-const PROJECT_CACHE_TTL_MS = 600_000;
+async function loadAllSessions(): Promise<SessionInfo[]> {
+  return buildSessionList(await listSessionsIncremental());
+}
+
+/**
+ * Return a cheap catalogue for the first paint. Changed files contribute only
+ * header/stat metadata; a normal listAllSessions() call hydrates the exact
+ * counts, names, and first messages afterwards.
+ */
+export async function listSessionSummaries(): Promise<SessionInfo[]> {
+  return buildSessionList(await listSessionsIncremental({ deferDetails: true }));
+}
 
 export async function listAllSessions(options: { force?: boolean; allowStale?: boolean } = {}): Promise<SessionInfo[]> {
   if (options.force) {
@@ -550,6 +526,9 @@ export function invalidateSessionListCache(): void {
 }
 
 export function getSessionListVersion(): number {
+  // Session files another process (the pi CLI) creates or deletes bump no
+  // version. Every poll of the version may start a filename check instead.
+  void checkSessionMembership(defaultSessionsDir(), invalidateSessionListCache);
   return globalThis.__piSessionListGeneration ?? 0;
 }
 
@@ -710,7 +689,7 @@ export async function resolveSessionPath(sessionId: string): Promise<string | nu
         const header = readSessionHeader(cached);
         // Preserve valid oversized legacy headers without opening/migrating the
         // SDK just to check ownership. Normal cached paths only read a prefix.
-        const owner = header?.id ?? (await readSessionInfoFast(cached, stats.mtimeMs))?.id;
+        const owner = header?.id ?? (await scanSessionFileInfo(cached))?.id;
         if (owner === sessionId) return cached;
       } catch { /* removed or unreadable while resolving: retire this cache entry */ }
     }
@@ -848,6 +827,7 @@ export function buildSessionContext(
     entries, leafId ?? null, tail && tail > 0 ? tail : entries.length, excludeLeaf,
   );
   const hasMore = Boolean(tail && tail > 0 && sliced[0]?.parentId);
+  const turnsBefore = hasMore ? countTurnsBefore(entries, sliced[0]) : 0;
 
   // Convert messages and their IDs together to keep fork/navigation targets aligned.
   const messages: AgentMessage[] = [];
@@ -865,8 +845,46 @@ export function buildSessionContext(
     entryIds,
     oldestEntryId: sliced[0]?.id ?? null,
     hasMore,
+    turnsBefore,
     ...getSessionSettings(entries, leafId),
   };
+}
+
+/**
+ * The fields of entryToUiMessage()'s result that isMessageGroupAnchor() reads,
+ * without converting the entry's body.
+ */
+function turnAnchorShape(entry: SessionEntry): Parameters<typeof isMessageGroupAnchor>[0] | null {
+  switch (entry.type) {
+    case "message":
+      return entry.message.role === "system" ? null : entry.message as AgentMessage;
+    case "compaction":
+      return { role: "custom", customType: "compaction", display: true };
+    case "branch_summary":
+      return entry.summary ? { role: "user" } : null;
+    case "custom_message":
+      return { role: "custom", customType: entry.customType, display: entry.display };
+    default:
+      return null;
+  }
+}
+
+/**
+ * Turns on the branch above `oldest`, the first entry of a page: the anchors
+ * the chat would group by (#791). The minimap numbers loaded turns from it, so
+ * a turn keeps its number as older pages load.
+ */
+function countTurnsBefore(entries: SessionEntry[], oldest: SessionEntry): number {
+  const byId = new Map<string, SessionEntry>();
+  for (const e of entries) byId.set(e.id, e);
+  let turns = 0;
+  let current = oldest.parentId ? byId.get(oldest.parentId) : undefined;
+  while (current) {
+    const shape = turnAnchorShape(current);
+    if (shape && isMessageGroupAnchor(shape)) turns++;
+    current = current.parentId ? byId.get(current.parentId) : undefined;
+  }
+  return turns;
 }
 
 /**
@@ -1017,9 +1035,10 @@ function entryToUiMessage(
       // Transcript system messages carry the prompt and tool loadout (Pi >= 0.86).
       // They are provider input, not conversation, so they never render.
       if (entry.message.role === "system") return null;
+      const displayMessage = withoutMessageSignatures(entry.message);
       let message = options.deferToolResultImages
-        ? deferToolResultBase64Images(normalizeToolCalls(entry.message), options.sessionId, entry.id)
-        : normalizeToolCalls(entry.message);
+        ? deferToolResultBase64Images(normalizeToolCalls(displayMessage), options.sessionId, entry.id)
+        : normalizeToolCalls(displayMessage);
       const legacyContent = message.role === "assistant" ? (message as { content: unknown }).content : undefined;
       if (typeof legacyContent === "string") {
         message = { ...message, content: [{ type: "text", text: legacyContent }] } as AgentMessage;
