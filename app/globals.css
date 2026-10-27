@@ -1388,6 +1388,15 @@ pre, code {
 .markdown-body .katex {
   font-size: 1.05em;
 }
+/* The reader's own words follow the interface font the reader chose in
+   Settings › Appearance › Fonts — family and weight — while the answer body
+   keeps the content stack and its own 500. The CJK role family still backs the
+   interface stack, so Chinese text keeps its per-weight face. */
+.markdown-user-message {
+  font-family: var(--font-ui), "PiWebBodyCJK", var(--font-content);
+  font-weight: var(--font-ui-weight);
+}
+
 .markdown-user-message p {
   white-space: pre-wrap;
 }

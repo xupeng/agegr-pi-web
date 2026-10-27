@@ -23,6 +23,12 @@ export async function checkFontPreferences(page) {
   assert.equal(await weight(".markdown-code-block code"), "400");
   await uiWeight.fill("500");
   await monoWeight.fill("600");
+  // The weights reach CSS through an effect; the read below must not race it.
+  await page.waitForFunction(() => {
+    const style = getComputedStyle(document.documentElement);
+    return style.getPropertyValue("--font-ui-weight").trim() === "500"
+      && style.getPropertyValue("--font-mono-weight").trim() === "600";
+  });
   for (const selector of ["body", ".chat-input-textarea", ".markdown-user-message", "#settings-font-ui"]) {
     assert.equal(await weight(selector), "500", selector);
   }

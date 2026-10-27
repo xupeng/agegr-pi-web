@@ -714,6 +714,10 @@ try {
     await checkExtensionDialogs(page, artifacts, viewport.width);
     await checkAskUserView(page, { base, sessionId: ASK_USER });
     await checkStatusTailFollow(page, { base, sessionId: STATUS_TAIL, expectWrap: viewport.width <= 600 });
+    // The status-tail check replaces its session's event stream with a mock; a real extension
+    // dialog needs a session whose stream is real.
+    await page.goto(`${base}/?session=${RICH}`, { waitUntil: "domcontentloaded" });
+    await page.locator(".markdown-code-block pre").waitFor();
     await checkExtensionDialogSizing(page, viewport.width);
     if (viewport.width > 600) {
       await checkSessionRestore(page, {

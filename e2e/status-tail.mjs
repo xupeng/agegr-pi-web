@@ -187,13 +187,6 @@ export async function checkStatusTailFollow(page, {
   await delay(400);
 
   const wrapped = await measureStatusLine(page);
-  if (!wrapped) {
-    console.log("DIAG-STATUS", JSON.stringify(await page.evaluate(() => ({
-      sources: (window.__statusTailSources ?? []).map((s) => ({ ready: s.readyState, hasHandler: typeof s.onmessage === "function" })),
-      breakWords: [...document.querySelectorAll(".chat-content div")].filter((d) => d.className.includes("break-words")).map((d) => d.outerHTML.slice(0, 120)),
-      spans: [...document.querySelectorAll(".chat-content span")].slice(-8).map((s) => (s.textContent ?? "").slice(0, 60)),
-    }))));
-  }
   assert.ok(wrapped, "run-status line did not render");
   assert.match(wrapped.text, /^Running bash/, `unexpected status label: ${wrapped.text}`);
   if (expectWrap) {
@@ -275,4 +268,12 @@ export async function checkStatusTailFollow(page, {
     shortOfTailFollowed.scrollTop > shortOfTailBefore.scrollTop,
     "a changed status block must still re-pin an attached reader",
   );
+
+  // The page is reused by the dialog checks that follow, and a composer mid-run no longer accepts a
+  // prompt: end the mocked run and drop its stubs before returning.
+  await page.evaluate(() => window.__emitStatusTailEvent({ type: "agent_end" }));
+  await delay(300);
+  await page.unroute(`**/api/agent/${sessionId}`);
+  await page.unroute(`**/api/sessions/${sessionId}/state`);
+  await page.unroute(`**/api/agent/${sessionId}/lease`);
 }
