@@ -379,11 +379,14 @@ try {
     // The minimap numbers turns from the session's first, not the loaded page's (#791):
     // e0..e4949 hold 2475 user messages, so the turn asking text(4998) is 2500.
     const readMinimapTurn = async (screenshot) => {
-      const node = page.locator("[data-minimap-node-index='0']");
+      // The rail draws a tick for a turn header only when its answers have no outline of their
+      // own, so node 0 is not guaranteed to be rendered; the first drawn row is the anchor and the
+      // turn numbering below is what the check is about (#791).
+      const node = page.locator("[data-minimap-node-index]").first();
       await node.waitFor();
-      const rect = await node.boundingBox();
-      assert.ok(rect);
-      await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);
+      // Hover the row itself: a coordinate taken from its box can land on the rail's lock button
+      // or a neighbour once the rail's height changed, which never opens the panel.
+      await node.hover();
       const preview = page.locator("[data-minimap-preview-box]");
       const turn = preview.locator("[data-minimap-preview-index]").filter({ hasText: text(4998) });
       const result = {

@@ -182,11 +182,17 @@ export async function checkMinimapTypography(page, label, sidebarTitle) {
   if (sidebarTitle) {
     await page.locator(`[title="${sidebarTitle}"]`).first().waitFor({ state: "attached" });
     const sidebar = await page.evaluate((title) => {
-      const titleNode = document.querySelector(`[title="${title}"]`);
-      if (!titleNode) return null;
+      // The row's tooltip sits on the link that wraps the whole row (SessionTree) now, so the title
+      // and the meta are descendants of it; a same-named title elsewhere (a minimap row) is not a
+      // session row.
+      const main = [...document.querySelectorAll(".session-tree-main")]
+        .find((element) => element.getAttribute("title")?.includes(title));
+      if (!main) return null;
+      const titleNode = main.querySelector(".session-tree-title, .session-tree-title-suffix");
+      const metaNode = main.querySelector(".session-tree-meta");
       return {
-        title: getComputedStyle(titleNode).fontSize,
-        meta: titleNode.nextElementSibling ? getComputedStyle(titleNode.nextElementSibling).fontSize : null,
+        title: titleNode ? getComputedStyle(titleNode).fontSize : null,
+        meta: metaNode ? getComputedStyle(metaNode).fontSize : null,
       };
     }, sidebarTitle);
     assert.ok(sidebar?.title, `${label}: sidebar row for "${sidebarTitle}" must be mounted`);
