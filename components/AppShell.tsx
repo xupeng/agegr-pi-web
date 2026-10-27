@@ -230,8 +230,12 @@ export function AppShell() {
     });
   }, []);
   const agentsBadge = activeSessionFamily ? getAgentsBadge(activeSessionFamily.subagents, runningSessionIds) : null;
-  const agentsButtonLabel = agentsBadge?.running
-    ? translate("agentSwitcher.titleRunning", { count: agentsBadge.count })
+  // Trellis records can open the panel without any persisted child session, so the badge counts
+  // both and falls back to "not running" when no family exists (upstream's `agentsBadge` alone is
+  // null there and would hide the only entry to those records).
+  const subagentsBadge = { count: subagentsEntryCount, running: agentsBadge?.running ?? false };
+  const agentsButtonLabel = subagentsBadge.running
+    ? translate("agentSwitcher.titleRunning", { count: subagentsBadge.count })
     : translate("agentSwitcher.title");
   // The temporary id distinguishes consecutive fresh composers in one cwd.
   const [newSessionCwd, setNewSessionCwd] = useState<string | null>(null);
@@ -1937,7 +1941,7 @@ export function AppShell() {
             </button>
           );
         })()}
-        {hasSubagentSessions && agentsBadge && (
+        {hasSubagentsEntry && (
           <button
             type="button"
             onClick={() => toggleTopPanel("agents", mobile)}
@@ -1970,14 +1974,14 @@ export function AppShell() {
                 position: "relative",
                 minWidth: 15, height: 15, padding: "0 4px", display: "grid", placeItems: "center",
                 borderRadius: 7,
-                background: agentsBadge.running ? "color-mix(in srgb, var(--accent) 22%, var(--bg-panel))" : "var(--bg-selected)",
+                background: subagentsBadge.running ? "color-mix(in srgb, var(--accent) 22%, var(--bg-panel))" : "var(--bg-selected)",
                 color: "var(--accent)",
                 fontSize: 10, lineHeight: 1, fontVariantNumeric: "tabular-nums",
-                fontWeight: agentsBadge.running ? 600 : undefined,
+                fontWeight: subagentsBadge.running ? 600 : undefined,
                 ...(mobile ? { position: "absolute", top: 3, right: 3, minWidth: 13, height: 13, padding: "0 3px", fontSize: 9 } : {}),
               }}
             >
-              {agentsBadge.running && (
+              {subagentsBadge.running && (
                 <svg
                   className="animate-spin motion-reduce:animate-none"
                   viewBox="0 0 24 24" fill="none" aria-hidden="true"
@@ -1987,7 +1991,7 @@ export function AppShell() {
                   <path d="M23 12a11 11 0 0 0-11-11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
               )}
-              {agentsBadge.count}
+              {subagentsBadge.count}
             </span>
           </button>
         )}
