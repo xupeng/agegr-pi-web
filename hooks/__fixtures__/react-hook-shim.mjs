@@ -63,3 +63,13 @@ export function renderHook(hook, props) {
     unmount() { for (const entry of instance.slots) if (entry?.effect) entry.cleanup?.(); },
   };
 }
+
+// The i18n module builds a context at import time and throws outside its provider; a component is
+// never rendered here, so the hook reads a fixed translation surface instead.
+const i18nFallback = { locale: "en", setLocale() {}, t: (key) => key, supportedLocales: ["en"] };
+export function createContext(defaultValue) {
+  return { _currentValue: defaultValue ?? i18nFallback, Provider({ children }) { return children; }, Consumer() { return null; } };
+}
+export function useContext(context) {
+  return context?._currentValue ?? null;
+}

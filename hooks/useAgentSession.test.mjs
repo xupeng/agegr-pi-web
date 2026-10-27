@@ -138,7 +138,9 @@ test("fresh sessions use the preference while persisted and live sessions restor
     preferenceSource,
     /const existingSessionId = session\?\.id;[\s\S]*?useLayoutEffect\(\(\) => \{\s*if \(!existingSessionId && \(!isNew \|\| sessionIdRef\.current\)\) return;\s*setToolPresetState\(getPreferredToolPreset\(\)\)/,
   );
-  assert.match(source, /if \(agentState\?\.running\) \{\s*loadTools\(session\.id\)/);
+  // The mount's state restore moved into `applyLoadedAgentState(sid, …)`, which takes the session
+  // id as an argument instead of closing over `session`.
+  assert.match(source, /if \(agentState\?\.running\) \{\s*loadTools\(sid\)/);
   assert.match(source, /d\.toolNames !== undefined \? getPresetFromToolNames\(d\.toolNames\) : CONFIGURED_TOOL_PRESET/);
   assert.match(changeSource, /setPreferredToolPreset\(preset\)/);
   assert.match(changeSource, /type: "set_tools",\s*\.\.\.\(toolNames !== undefined \? \{ toolNames \} : \{\}\),/);
@@ -451,9 +453,11 @@ test("keeps the selected session warm while idle and renews its lease", () => {
   );
   assert.match(source, /sessionPropIdRef\.current === sid/);
   assert.match(source, /SESSION_LEASE_RENEW_INTERVAL_MS = 30_000/);
-  assert.match(source, /fetch\(`\/api\/agent\/\$\{encodeURIComponent\(sid\)\}\/lease`/);
-  assert.match(source, /setInterval\(\(\) => void renewLease\(\), SESSION_LEASE_RENEW_INTERVAL_MS\)/);
-  assert.match(source, /result\.renewed === 0[\s\S]*?closeEvents\(\)[\s\S]*?maintainEventsConnected\(sid\)/);
+  assert.match(source, /function sessionLeaseUrl\(sid: string\): string/, "the lease URL is built once, holder included");
+  assert.match(source, /fetch\(sessionLeaseUrl\(sid\), \{ method: "POST"/);
+  assert.match(source, /setInterval\(\(\) => void renew\(\), SESSION_LEASE_RENEW_INTERVAL_MS\)/);
+  assert.match(source, /if \(sessionLeaseShowsActivity\(reply\)\) reattachEventStreamRef\.current\(sid\)/);
+  assert.match(source, /document\.addEventListener\("visibilitychange", onVisibilityChange\)/);
   assert.match(source, /if \(sessionPropIdRef\.current === sid\) \{[\s\S]*?cancelEventStreamGrace\(\);[\s\S]*?return;/);
   assert.match(source, /maintainEventsConnected\(sid\)/);
   assert.doesNotMatch(source, /void connectEvents\(/);
@@ -470,15 +474,15 @@ test("opens the selected session's event stream even when Strict Mode re-runs ef
   // warm-session effect. That effect must therefore re-assert the ref itself
   // or shouldMaintain() refuses to open the stream on mount and on every
   // switch back to a running session.
-  const warmSource = source.slice(
-    source.indexOf("  // Keep the selected session warm even while its agent is idle."),
-    source.indexOf("    const renewLease = async () => {"),
+  // The lease effect no longer opens the stream itself: it re-attaches through
+  // `reattachEventStreamRef` once a reply shows work under way, and on return.
+  const leaseSource = source.slice(
+    source.indexOf("  // The page keeps its selected session alive with a lease of its own"),
+    source.indexOf("  // Load session on mount"),
   );
-  assert.match(warmSource, /sessionHookMountedRef\.current = true;\s*maintainEventsConnected\(sid\);/);
-  assert.ok(
-    warmSource.indexOf("sessionHookMountedRef.current = true;")
-      < warmSource.indexOf("maintainEventsConnected(sid);"),
-  );
+  assert.match(leaseSource, /const sid = session\?\.id;[\s\S]*?const renew = async/, "the lease effect renews for the selected session");
+  assert.match(leaseSource, /document\.visibilityState !== "visible"/);
+  assert.match(source, /if \(!eventStreamReleasedRef\.current\) return;[\s\S]*?maintainEventsConnected\(sid\)/);
   const mountSource = source.slice(
     source.indexOf("  useEffect(() => {\n    sessionHookMountedRef.current = true;"),
     source.indexOf("  useEffect(() => {\n    onSystemPromptChange?.(systemPrompt);"),
@@ -529,8 +533,13 @@ test("restoring a running session does not clear an SSE snapshot", () => {
     source.indexOf("useEffect(() => {\n    onSystemPromptChange"),
   );
 
-  assert.match(mountSource, /dispatch\(\{ type: "resume" \}\)/);
-  assert.doesNotMatch(mountSource, /dispatch\(\{ type: "start" \}\)/);
+  const restoreSource = source.slice(
+    source.indexOf("  const applyLoadedAgentState = useCallback"),
+    source.indexOf("  // Open a released stream again"),
+  );
+  assert.match(restoreSource, /dispatch\(\{ type: "resume" \}\)/);
+  assert.doesNotMatch(restoreSource, /dispatch\(\{ type: "start" \}\)/);
+  assert.match(mountSource, /applyLoadedAgentState\(session\.id, loadedAgentState\)/);
 });
 
 test("shows the latest streamed tool execution progress in the running phase", () => {
@@ -591,7 +600,7 @@ test("keeps calls a tool made itself out of the running tools", () => {
     assert.notEqual(guard, -1, `${from} must skip nested tool events`);
     assert.ok(guard < caseSource.indexOf("const id = event.toolCallId"), `${from} must skip them before using the id`);
   }
-  assert.match(source, /import \{ isNestedToolExecutionEvent, isSystemMessageEvent \} from "@\/lib\/agent-event-wire";/);
+  assert.match(source, /AGENT_EVENT_HEARTBEAT_MS,[^}]*isNestedToolExecutionEvent, isSystemMessageEvent[^}]*\} from "@\/lib\/agent-event-wire";/s);
 });
 
 test("plays the enabled sound once when an extension dialog appears over an empty slot", () => {
