@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { resolveSessionPath, openSessionManager, buildSessionContext } from "@/lib/session-reader";
 import { getRpcSession } from "@/lib/rpc-manager";
 import { projectTrellisSubagentHistory } from "@/lib/trellis-subagent-history";
+import { attachTranscriptNotices, readSessionTranscriptNotices } from "@/lib/transcript-notices-server";
+import type { SessionEntry } from "@/lib/types";
 
 export async function GET(
   req: Request,
@@ -37,13 +39,19 @@ export async function GET(
     // only (excludeLeaf) so prepending the page does not duplicate `before`.
     // An explicit root (or `root=1`) is an empty branch, never the default leaf.
     const contextLeaf = rootOnly ? null : (before ?? leafId);
-    const context = buildSessionContext(entries, contextLeaf, {
+    const transcriptNotices = readSessionTranscriptNotices({
+      entries: entries as unknown as SessionEntry[],
+      cwd: sm.getHeader()?.cwd ?? "",
+      leafId: leafId ?? sm.getLeafId(),
+      models: liveRpc?.inner.modelRuntime,
+    });
+    const context = attachTranscriptNotices(buildSessionContext(entries, contextLeaf, {
       deferThinking,
       deferToolResultImages,
       tail,
       excludeLeaf: Boolean(before),
       sessionId: id,
-    });
+    }), transcriptNotices);
 
     // Only the non-pagination request carries the bounded Trellis record
     // scope; paging upward must not recompute or replace the record snapshot.

@@ -42,15 +42,16 @@ test("keeps the session event stream open through the idle grace window", () => 
 
   assert.match(source, /const EVENT_STREAM_IDLE_GRACE_MS = 30_000/);
   assert.match(graceSource, /setTimeout\(\(\) => void checkServerIdle\(\), EVENT_STREAM_IDLE_GRACE_MS\)/);
-  assert.match(graceSource, /fetch\(`\/api\/agent\/\$\{encodeURIComponent\(sid\)\}`\)/);
+  // The status read goes through agentStatusUrl(sid), which leaves the system prompt out (#1302).
+  assert.match(graceSource, /fetch\(agentStatusUrl\(sid\)\)/);
   assert.match(graceSource, /closeEvents\(\)/);
   assert.match(finishSource, /scheduleEventStreamClose\(sid\)/);
   assert.doesNotMatch(finishSource, /closeEvents\(\)/);
   assert.doesNotMatch(agentEndSource, /closeEvents\(\)/);
   assert.match(agentStartSource, /cancelEventStreamGrace\(\)/);
   assert.match(agentSettledSource, /scheduleEventStreamClose\(sid\)/);
-  assert.match(agentSettledSource, /onAgentEnd\?\.\(\)/);
-  assert.match(promptDoneSource, /notifyPromptStage\(runId\)/);
+  assert.match(agentSettledSource, /onAgentEnd\?\.\(\{ aborted: event\.aborted === true \}\)/);
+  assert.match(promptDoneSource, /notifyPromptStage\(runId, event\.aborted === true\)/);
   assert.match(promptDoneSource, /scheduleEventStreamClose\(sid\)/);
   assert.match(sendSource, /const definitivelyRejected = !promptRequestStarted/);
   assert.match(sendSource, /if \(!definitivelyRejected && sentSessionId\) \{[\s\S]*?waitForPromptSettlement/);
@@ -137,7 +138,9 @@ test("fresh sessions use the preference while persisted and live sessions restor
     preferenceSource,
     /const existingSessionId = session\?\.id;[\s\S]*?useLayoutEffect\(\(\) => \{\s*if \(!existingSessionId && \(!isNew \|\| sessionIdRef\.current\)\) return;\s*setToolPresetState\(getPreferredToolPreset\(\)\)/,
   );
-  assert.match(source, /if \(agentState\?\.running\) \{\s*loadTools\(session\.id\)/);
+  // The mount's state restore moved into `applyLoadedAgentState(sid, …)`, which takes the session
+  // id as an argument instead of closing over `session`.
+  assert.match(source, /if \(agentState\?\.running\) \{\s*loadTools\(sid\)/);
   assert.match(source, /d\.toolNames !== undefined \? getPresetFromToolNames\(d\.toolNames\) : CONFIGURED_TOOL_PRESET/);
   assert.match(changeSource, /setPreferredToolPreset\(preset\)/);
   assert.match(changeSource, /type: "set_tools",\s*\.\.\.\(toolNames !== undefined \? \{ toolNames \} : \{\}\),/);
@@ -333,7 +336,11 @@ test("stale fresh-session completion cannot replace the active composer", () => 
     cwdChangeSource,
     /currentProject === newProject\s*&& \(selectedSession !== null \|\| currentFreshCwd === cwd\)/,
   );
-  assert.match(cwdChangeSource, /if \(currentProject !== newProject\) \{[\s\S]*?setFileTabs\(\[\]\)/);
+  // The fork keeps #281's project isolation without discarding the tabs of the
+  // workspace being left: they are parked per workspace and restored on return,
+  // so switching projects moves the file workspace instead of clearing it.
+  assert.match(cwdChangeSource, /if \(currentProject !== newProject\) \{[\s\S]*?changeFileWorkspace\(currentProject, newProject\)/);
+  assert.doesNotMatch(cwdChangeSource, /setFileTabs\(\[\]\)/);
   assert.match(
     appShellSource,
     /useLayoutEffect\(\(\) => \{\s*activeNewSessionDraftKeyRef\.current = newSessionDraftKey;/,
@@ -404,8 +411,10 @@ test("delegates event stream readiness and hides an empty agent phase", () => {
   assert.match(source, /shouldMaintain: \(sid\)[\s\S]*?sessionIdRef\.current === sid/);
   assert.match(ensureSource, /eventConnectionRef\.current!\.ensureConnected\(sid\)/);
   assert.match(ensureSource, /eventConnectionRef\.current!\.maintain\(sid\)/);
-  assert.match(chatWindowSource, /const hasStreamingContent = Boolean\(streamState\.streamingMessage\?\.content\.length\)/);
-  assert.match(chatWindowSource, /streamState\.isStreaming && hasStreamingContent && streamState\.streamingMessage/);
+  // The streamed reply moved out of React state into the streaming store
+  // (upstream 0.12.2), so the flag is a selector rather than a prop read.
+  assert.match(chatWindowSource, /const hasStreamingContent = useStreamingSelector\(streamingStore, selectHasStreamingContent\)/);
+  assert.match(chatWindowSource, /\{isStreaming && hasStreamingContent && \(\s*<StreamingReply store=\{streamingStore\}/);
   assert.match(chatWindowSource, /agentRunning && !hasStreamingContent && \(agentPhase \|\| isCompacting\)/);
   // Compaction is what the user needs to know while a turn is being compacted, so it is
   // forwarded to the label instead of letting the stream phase read as a hang.
@@ -429,7 +438,9 @@ test("uses server pagination state instead of guessing from rendered rows", () =
   assert.match(loadContextSource, /setData\(\(prev\) => \{[\s\S]*messages: \[\.\.\.d\.context\.messages, \.\.\.prev\.context\.messages\]/);
   assert.match(chatWindowSource, /const oldestId = historyCursor/);
   assert.doesNotMatch(chatWindowSource, /const oldestId = entryIds\[0\]/);
-  assert.match(chatWindowSource, /if \(!hasEarlierMessages\) return/);
+  // The cursor comes from the server, and a fully-loaded history still has to
+  // widen the render window instead of reaching for a page that does not exist.
+  assert.match(chatWindowSource, /if \(!hasEarlierMessages\) \{[\s\S]*?setVisibleCount\(\(current\) => getNextVisibleCount\(current\)\)/);
   assert.match(chatWindowSource, /const hasMore = startIndex > 0 \|\| hasEarlierMessages/);
   assert.doesNotMatch(chatWindowSource, /rendered\.length >= visibleCount/);
 });
@@ -442,9 +453,11 @@ test("keeps the selected session warm while idle and renews its lease", () => {
   );
   assert.match(source, /sessionPropIdRef\.current === sid/);
   assert.match(source, /SESSION_LEASE_RENEW_INTERVAL_MS = 30_000/);
-  assert.match(source, /fetch\(`\/api\/agent\/\$\{encodeURIComponent\(sid\)\}\/lease`/);
-  assert.match(source, /setInterval\(\(\) => void renewLease\(\), SESSION_LEASE_RENEW_INTERVAL_MS\)/);
-  assert.match(source, /result\.renewed === 0[\s\S]*?closeEvents\(\)[\s\S]*?maintainEventsConnected\(sid\)/);
+  assert.match(source, /function sessionLeaseUrl\(sid: string\): string/, "the lease URL is built once, holder included");
+  assert.match(source, /fetch\(sessionLeaseUrl\(sid\), \{ method: "POST"/);
+  assert.match(source, /setInterval\(\(\) => void renew\(\), SESSION_LEASE_RENEW_INTERVAL_MS\)/);
+  assert.match(source, /if \(sessionLeaseShowsActivity\(reply\)\) reattachEventStreamRef\.current\(sid\)/);
+  assert.match(source, /document\.addEventListener\("visibilitychange", onVisibilityChange\)/);
   assert.match(source, /if \(sessionPropIdRef\.current === sid\) \{[\s\S]*?cancelEventStreamGrace\(\);[\s\S]*?return;/);
   assert.match(source, /maintainEventsConnected\(sid\)/);
   assert.doesNotMatch(source, /void connectEvents\(/);
@@ -461,15 +474,15 @@ test("opens the selected session's event stream even when Strict Mode re-runs ef
   // warm-session effect. That effect must therefore re-assert the ref itself
   // or shouldMaintain() refuses to open the stream on mount and on every
   // switch back to a running session.
-  const warmSource = source.slice(
-    source.indexOf("  // Keep the selected session warm even while its agent is idle."),
-    source.indexOf("    const renewLease = async () => {"),
+  // The lease effect no longer opens the stream itself: it re-attaches through
+  // `reattachEventStreamRef` once a reply shows work under way, and on return.
+  const leaseSource = source.slice(
+    source.indexOf("  // The page keeps its selected session alive with a lease of its own"),
+    source.indexOf("  // Load session on mount"),
   );
-  assert.match(warmSource, /sessionHookMountedRef\.current = true;\s*maintainEventsConnected\(sid\);/);
-  assert.ok(
-    warmSource.indexOf("sessionHookMountedRef.current = true;")
-      < warmSource.indexOf("maintainEventsConnected(sid);"),
-  );
+  assert.match(leaseSource, /const sid = session\?\.id;[\s\S]*?const renew = async/, "the lease effect renews for the selected session");
+  assert.match(leaseSource, /document\.visibilityState !== "visible"/);
+  assert.match(source, /if \(!eventStreamReleasedRef\.current\) return;[\s\S]*?maintainEventsConnected\(sid\)/);
   const mountSource = source.slice(
     source.indexOf("  useEffect(() => {\n    sessionHookMountedRef.current = true;"),
     source.indexOf("  useEffect(() => {\n    onSystemPromptChange?.(systemPrompt);"),
@@ -492,7 +505,10 @@ test("keeps one reducer-owned assistant partial and consumes Pi JSON deltas", ()
     source.indexOf('case "tool_execution_start"'),
   );
 
-  assert.match(source, /streamReducer,[\s\S]*type ClientAssistantMessageEvent/);
+  // The streaming reply lives in one store now (per-chunk re-render, #1196); the reducer
+  // itself moved behind it, so assert the store wiring instead of the old useReducer call.
+  assert.match(source, /useState\(createStreamingStore\)/);
+  assert.match(source, /dispatch = streamingStore\.dispatch/);
   assert.doesNotMatch(source, /streamingMessageRef/);
   assert.match(connectedSource, /dispatch\(\{ type: "end" \}\)/);
   assert.match(connectedSource, /event\.isStreaming === true/);
@@ -517,8 +533,13 @@ test("restoring a running session does not clear an SSE snapshot", () => {
     source.indexOf("useEffect(() => {\n    onSystemPromptChange"),
   );
 
-  assert.match(mountSource, /dispatch\(\{ type: "resume" \}\)/);
-  assert.doesNotMatch(mountSource, /dispatch\(\{ type: "start" \}\)/);
+  const restoreSource = source.slice(
+    source.indexOf("  const applyLoadedAgentState = useCallback"),
+    source.indexOf("  // Open a released stream again"),
+  );
+  assert.match(restoreSource, /dispatch\(\{ type: "resume" \}\)/);
+  assert.doesNotMatch(restoreSource, /dispatch\(\{ type: "start" \}\)/);
+  assert.match(mountSource, /applyLoadedAgentState\(session\.id, loadedAgentState\)/);
 });
 
 test("shows the latest streamed tool execution progress in the running phase", () => {
@@ -548,7 +569,10 @@ test("reconnects active shell output to its streaming tool call", () => {
   assert.match(updateSource, /content,/);
   assert.match(endSource, /setActiveToolResults[\s\S]*next\.delete\(id\)/);
   assert.match(chatWindowSource, /const map = new Map\(activeToolResults\)/);
-  assert.match(chatWindowSource, /<MessageView message=\{streamState\.streamingMessage as AgentMessage\} toolResults=\{toolResultsMap\}/);
+  // The live reply is rendered by StreamingReply, which forwards the same
+  // toolResults map (shell output included) into its MessageView.
+  assert.match(chatWindowSource, /<StreamingReply store=\{streamingStore\} onCommit=\{updatePromptAnchor\} toolResults=\{toolResultsMap\}/);
+  assert.match(chatWindowSource, /<MessageView message=\{message\} toolResults=\{toolResults\} isStreaming/);
 });
 
 test("reports a running script's newest call as its progress", () => {
@@ -576,7 +600,7 @@ test("keeps calls a tool made itself out of the running tools", () => {
     assert.notEqual(guard, -1, `${from} must skip nested tool events`);
     assert.ok(guard < caseSource.indexOf("const id = event.toolCallId"), `${from} must skip them before using the id`);
   }
-  assert.match(source, /import \{ isNestedToolExecutionEvent, isSystemMessageEvent \} from "@\/lib\/agent-event-wire";/);
+  assert.match(source, /AGENT_EVENT_HEARTBEAT_MS,[^}]*isNestedToolExecutionEvent, isSystemMessageEvent[^}]*\} from "@\/lib\/agent-event-wire";/s);
 });
 
 test("plays the enabled sound once when an extension dialog appears over an empty slot", () => {
@@ -785,8 +809,10 @@ test("keeps prompt anchor measurement outside the React update cycle", () => {
     "useLayoutEffect(() => {\n    const spacer = promptAnchorSpacerRef.current;",
   );
   assert.notEqual(anchorEffectStart, -1);
+  // The sync effect now calls a stable callback instead of inlining the read,
+  // so the anchor is the callback declaration that follows the lifecycle effect.
   const syncEffectStart = chatWindowSource.indexOf(
-    "useLayoutEffect(() => {\n    promptAnchorUpdateRef.current?.();",
+    "  const updatePromptAnchor = useCallback(() => {",
     anchorEffectStart,
   );
   assert.notEqual(syncEffectStart, -1);
@@ -810,7 +836,8 @@ test("keeps prompt anchor measurement outside the React update cycle", () => {
   assert.match(anchorLifecycleEffectSource, /if \(disposed \|\| promptAnchorMeasureFrameRef\.current !== null\) return/);
   assert.match(anchorLifecycleEffectSource, /promptAnchorMeasureFrameRef\.current = requestAnimationFrame\(\(\) => \{\s*promptAnchorMeasureFrameRef\.current = null;\s*updatePromptAnchorSpacer\(\)/);
   assert.match(anchorLifecycleEffectSource, /disposed = true;[\s\S]*?promptAnchorUpdateRef\.current === updatePromptAnchorSpacer[\s\S]*?cancelAnimationFrame\(promptAnchorMeasureFrameRef\.current\)/);
-  assert.match(anchorSyncEffectSource, /promptAnchorUpdateRef\.current\?\.\(\);\s*\}, \[streamState\.streamingMessage\]\)/);
+  assert.match(anchorSyncEffectSource, /promptAnchorUpdateRef\.current\?\.\(\);\s*\}, \[\]\)/);
+  assert.match(anchorSyncEffectSource, /useLayoutEffect\(updatePromptAnchor, \[isStreaming, hasStreamingContent, updatePromptAnchor\]\)/);
   assert.match(chatWindowSource, /<div ref=\{messageContentRef\}[^>]*style=\{\{/);
 });
 
@@ -851,8 +878,10 @@ test("keeps the compaction control reachable while a turn is auto-compacting", (
   // Auto-compaction starts mid-turn, so `isStreaming` (sessionBusy) is already true. Hiding
   // the control behind `!isStreaming` left only the generic stop button, which aborts the
   // whole prompt instead of the compaction.
+  // Anchor on the guard itself: upstream 0.12.2 routes the click through a
+  // stray-click check, so the old onClick text is no longer a stable anchor.
   const controlBlock = chatInputSource.slice(
-    chatInputSource.indexOf("onClick={isCompacting ? onAbortCompaction : onCompact}") - 200,
+    chatInputSource.indexOf("{(!isStreaming || isCompacting) && onCompact && ("),
     chatInputSource.indexOf('aria-label={isCompacting ? t("chat.stopCompaction")'),
   );
 

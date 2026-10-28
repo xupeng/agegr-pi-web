@@ -195,21 +195,35 @@ test("keeps language selection in General settings", () => {
 });
 
 test("groups chat display controls together without row backgrounds", () => {
+  // Upstream gave typography its own section between appearance and chat, so
+  // the appearance slice ends at that heading; the intent (no chat display
+  // controls inside the palette section) is unchanged.
   const appearanceSection = panelSource.slice(
     panelSource.indexOf('{t("settings.appearance")}'),
-    panelSource.indexOf('{t("settings.chat")}'),
+    panelSource.indexOf('{t("settings.typography")}'),
   );
   const chatSection = panelSource.slice(
     panelSource.indexOf('{t("settings.chat")}'),
     panelSource.indexOf("{shellSettings?.isWindows"),
   );
 
+  const typographySection = panelSource.slice(
+    panelSource.indexOf('{t("settings.typography")}'),
+    panelSource.indexOf('{t("settings.chat")}'),
+  );
+
   assert.doesNotMatch(appearanceSection, /settings-chat-content/);
   assert.match(chatSection, /className="settings-chat-options"/);
   assert.equal((chatSection.match(/className="settings-chat-option(?: |")/g) ?? []).length, 5);
-  assert.equal((chatSection.match(/<ConfigSwitch/g) ?? []).length, 2);
-  for (const key of ["thinkingExpandedDefault", "chatContentWidth", "chatContentFontSize", "quoteSelection", "enterSendMode", "enterSendModeEnter", "enterSendModeCtrlEnter"]) {
+  assert.equal((chatSection.match(/<ConfigSwitch/g) ?? []).length, 3);
+  for (const key of ["thinkingExpandedDefault", "quoteSelection", "enterSendMode", "enterSendModeEnter", "enterSendModeCtrlEnter"]) {
     assert.match(chatSection, new RegExp(`t\\("settings\\.${key}"\\)`));
+  }
+  // The two range sliders moved into the typography section next to the font
+  // families, still sharing the row style the next assertions check.
+  assert.equal((typographySection.match(/className="settings-chat-option(?: |")/g) ?? []).length, 2);
+  for (const key of ["chatContentWidth", "chatContentFontSize"]) {
+    assert.match(typographySection, new RegExp(`t\\("settings\\.${key}"\\)`));
   }
   assert.doesNotMatch(panelSource, /ThinkingIcon|settings-thinking-/);
   const chatOptionStyles = cssSource.match(/\.settings-chat-option \{[\s\S]*?\}/)?.[0] ?? "";
@@ -270,4 +284,13 @@ test("keeps password authentication to one login field and one settings action",
   assert.match(panelSource, /t\("auth\.logOut"\)/);
   assert.match(loginSource, /className="web-login-composer"[\s\S]*?type="password"[\s\S]*?<button type="submit"/);
   assert.match(globalCssSource, /\.web-login-composer \{[\s\S]*?display: flex;[\s\S]*?border-radius: 14px/);
+});
+
+test("the trust dialog Settings › MCP opens stacks above Settings", () => {
+  const zIndex = (selector) => Number(cssSource.match(new RegExp(`\\${selector} \\{[^}]*z-index: (\\d+);`))?.[1]);
+  assert.ok(zIndex(".project-trust-backdrop") > zIndex(".settings-dialog-backdrop"));
+});
+
+test("the login page returns only to a destination safeLoginDestination() accepts", () => {
+  assert.match(loginSource, /safeLoginDestination\(destination, window\.location\.origin\)/);
 });

@@ -57,7 +57,9 @@ test("projects endpoint groups sessions by stable project identity", async () =>
     assert.equal(data.projects[0].runningCount, 0);
     assert.equal(data.projects[1].root, cwdA);
     assert.equal(data.projects[1].sessionCount, 2);
-    assert.deepEqual(data.projects[1].sessionIds, ["a1", "a2"]);
+    // The id list is a set for the sidebar's cross-project counts; it carries
+    // the catalogue's newest-activity-first order, not a sort of its own.
+    assert.deepEqual([...data.projects[1].sessionIds].sort(), ["a1", "a2"]);
     assert.equal(data.projects[1].modified, "2026-01-01T00:01:00.000Z");
     assert.ok(Array.isArray(data.runningSessionIds));
     assert.ok(Array.isArray(data.completionNotificationSuppressedSessionIds));

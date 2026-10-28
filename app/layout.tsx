@@ -10,6 +10,9 @@ import "./viewport.css";
 // The standalone header must have its fixed/opaque styles before hydration.
 import "../components/StandaloneTopBar.css";
 import "./keyboard-viewport.css";
+// The sidebar's own sheets come after globals.css so their layout rules win.
+import "./sidebar.css";
+import "./sidebar-menu.css";
 
 export const metadata: Metadata = {
   title: "Pi Web",

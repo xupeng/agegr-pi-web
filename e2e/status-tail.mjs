@@ -64,6 +64,16 @@ async function installStatusTailStubs(page, sessionId) {
         if (!this.url.includes(`/api/agent/${targetSession}/events`)) return new OriginalEventSource(url);
         window.__statusTailSources ??= [];
         window.__statusTailSources.push(this);
+        // The real stream opens with a `connected` frame; it is what tells a freshly mounted
+        // ChatWindow that a run is active (the shell remounts when the session arrives). Without
+        // it, an event sent to the previous connection would leave the new one idle.
+        queueMicrotask(() => {
+          this.onmessage?.({ data: JSON.stringify({
+            type: "connected",
+            isStreaming: false,
+            pendingExtensionUiIds: [],
+          }) });
+        });
       }
       close() {
         this.readyState = 2;
@@ -74,9 +84,13 @@ async function installStatusTailStubs(page, sessionId) {
       const sources = window.__statusTailSources ?? [];
       // Target the stream the app currently maintains: it closes and reopens
       // the selected session's stream, so an earlier mock may be discarded.
+      // Every open stream gets the frame: the shell remounts the chat once the session arrives,
+      // and a frame delivered only to the connection that was current before the remount leaves
+      // the rendered chat idle. A closed mock stream stays out.
       const open = sources.filter((source) => source.readyState === 1);
-      const source = open.at(-1) ?? sources.at(-1);
-      source?.onmessage?.({ data: JSON.stringify(event) });
+      for (const source of open.length > 0 ? open : sources.slice(-1)) {
+        source.onmessage?.({ data: JSON.stringify(event) });
+      }
     };
   }, sessionId);
 
@@ -148,7 +162,9 @@ export async function checkStatusTailFollow(page, {
   await page.goto(`${base}/?session=${sessionId}`, { waitUntil: "domcontentloaded" });
   await page.getByText("E2E status tail prompt 5", { exact: true }).waitFor();
   await page.waitForFunction(() => (window.__statusTailSources ?? []).some((source) => source.readyState === 1));
-  await delay(400);
+  // The shell remounts the chat once the session arrives, which replaces the hook that owns the
+  // stream; wait for that settle before driving it, or the frames land on the retired instance.
+  await delay(2000);
 
   // Start attached to the tail, then let the stream report a running bash tool
   // whose last output line is long enough to wrap the status label.
@@ -252,4 +268,12 @@ export async function checkStatusTailFollow(page, {
     shortOfTailFollowed.scrollTop > shortOfTailBefore.scrollTop,
     "a changed status block must still re-pin an attached reader",
   );
+
+  // The page is reused by the dialog checks that follow, and a composer mid-run no longer accepts a
+  // prompt: end the mocked run and drop its stubs before returning.
+  await page.evaluate(() => window.__emitStatusTailEvent({ type: "agent_end" }));
+  await delay(300);
+  await page.unroute(`**/api/agent/${sessionId}`);
+  await page.unroute(`**/api/sessions/${sessionId}/state`);
+  await page.unroute(`**/api/agent/${sessionId}/lease`);
 }

@@ -14,7 +14,7 @@ test("ask_user card scrolls inside the message column on non-empty sessions", ()
     /\{askUserCardElement && \(\s*<div style=\{\{ paddingBottom: 12 \}\}>\{askUserCardElement\}<\/div>\s*\)\}/,
   );
   assert.ok(
-    chatWindowSource.indexOf("askUserCardElement") < chatWindowSource.indexOf("streamState.isStreaming && hasStreamingContent"),
+    chatWindowSource.indexOf("askUserCardElement") < chatWindowSource.indexOf("{isStreaming && hasStreamingContent && ("),
   );
 });
 

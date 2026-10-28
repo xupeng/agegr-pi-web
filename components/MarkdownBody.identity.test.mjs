@@ -35,7 +35,9 @@ function createHarness() {
   runInNewContext(compiled, {
     exports,
     require(name) {
-      if (name === "react") return { ...React, useMemo: memoSlot, useCallback: (fn, deps) => memoSlot(() => fn, deps) };
+      // `memo` is a pass-through: the harness calls the component itself, and
+      // the identity contract lives in the inner `useMemo` renderers.
+      if (name === "react") return { ...React, memo: (fn) => fn, useMemo: memoSlot, useCallback: (fn, deps) => memoSlot(() => fn, deps) };
       if (name === "react/jsx-runtime") return jsxRuntime;
       if (name === "@/lib/path-linkify") return paths;
       if (name === "@/lib/markdown") return { normalizeDisplayMath: text => text };
@@ -49,7 +51,11 @@ function createHarness() {
     render(nextLookup, props) {
       lookup = nextLookup;
       slot = 0;
-      return exports.MarkdownBody({ children: "E2E message 4998", ...props }).props.children.props.components;
+      // A finished message renders as one block (a streaming reply splits into
+      // several); the renderers under test are that block's.
+      const children = exports.MarkdownBody({ children: "E2E message 4998", ...props }).props.children;
+      const block = Array.isArray(children) ? children[0] : children;
+      return block.props.components;
     },
   };
 }

@@ -355,7 +355,9 @@ try {
     // closed, so open it by its own aria-expanded state instead of guessing
     // from whether the target button happens to exist yet.
     const openToolbarButton = async (name) => {
-      const button = page.getByRole("button", { name, exact: true });
+      // The narrow toolbar's overflow panel keeps its buttons in the DOM while closed, so a name
+      // matches both the toolbar's and the panel's copy; only the visible one is the target.
+      const button = page.getByRole("button", { name, exact: true }).filter({ visible: true }).first();
       if (viewport.width <= 600) {
         const more = page.locator("[data-mobile-toolbar-more='true']");
         await more.waitFor();
@@ -391,7 +393,7 @@ try {
       const moreButton = page.locator("[data-mobile-toolbar-more='true']");
       await moreButton.waitFor();
       await moreButton.click();
-      await page.getByRole("button", { name: "Agents", exact: true }).waitFor({ timeout: 15_000 });
+      await page.getByRole("button", { name: "Agents", exact: true }).filter({ visible: true }).first().waitFor({ timeout: 15_000 });
       assert.equal(await moreButton.getAttribute("aria-expanded"), "true");
       await page.unroute("**/api/sessions**", slowSessions);
     }
@@ -434,7 +436,11 @@ try {
     if (viewport.width <= 600) {
       await page.locator("[data-mobile-toolbar-more='true']").click();
     }
-    assert.equal(await page.getByRole("button", { name: "Agents", exact: true }).count(), 0);
+    assert.equal(
+      await page.getByRole("button", { name: "Agents", exact: true }).filter({ visible: true }).count(),
+      0,
+      "a session with no subagents and no records offers no Agents entry",
+    );
     if (viewport.width === 744) {
       assert.equal(
         await page.evaluate(() => matchMedia("(pointer: coarse)").matches),
@@ -476,9 +482,9 @@ try {
         await bRelease;
         await route.continue().catch(() => {});
       });
-      await page.locator(`[title="Records B session"]`).click();
+      await page.locator(`.session-tree-main[title^="Records B session"]`).click();
       await bGate;
-      await page.locator(`[title="Records A session"]`).click();
+      await page.locator(`.session-tree-main[title^="Records A session"]`).click();
       await page.getByText("A filler 59", { exact: true }).waitFor();
       releaseB();
       await delay(300);
@@ -498,9 +504,9 @@ try {
         await b404Release;
         await route.fulfill({ status: 404, json: { error: "Session not found" } }).catch(() => {});
       });
-      await page.locator(`[title="Records B session"]`).click();
+      await page.locator(`.session-tree-main[title^="Records B session"]`).click();
       await b404Seen;
-      await page.locator(`[title="Records A session"]`).click();
+      await page.locator(`.session-tree-main[title^="Records A session"]`).click();
       await page.getByText("A filler 59", { exact: true }).waitFor();
       intentional404 = true;
       const failedBResponse = page.waitForResponse((response) => (
@@ -600,10 +606,10 @@ try {
       // The selected-session stream must survive React StrictMode's effect
       // replay without test-only lifecycle intervention.
       await page.waitForFunction(() => (window.__trellisMockSources ?? []).some((source) => source.readyState === 1));
-      // The mocked SSE cannot create a server lease. Exercise renewed:0 as a
-      // separate lifecycle path and require it to replace the source.
+      // The stream's own reconnect is what must replace the source: a closed connection is the one
+      // path the mocked SSE can drive without a server lease.
       const sourceCountBeforeLeaseRecovery = await page.evaluate(() => window.__trellisMockSources?.length ?? 0);
-      await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+      await page.evaluate(() => window.__failTrellisAgentEvent());
       await page.waitForFunction((previousCount) => (
         (window.__trellisMockSources?.length ?? 0) > previousCount
         && (window.__trellisMockSources ?? []).some((source) => source.readyState === 1)

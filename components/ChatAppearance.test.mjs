@@ -23,6 +23,7 @@ const {
   clampChatContentWidth,
   clampChatContentFontSize,
   readStoredChatContentFontSize,
+  terminalFontSize,
 } = await jiti.import("../hooks/useChatAppearance.ts");
 
 const widthVariable = /var\(--chat-content-max-width, 820px\)/g;
@@ -133,4 +134,12 @@ test("every locale spells out both modifier sets", () => {
   assert.match(enLocale, /"settings\.chatContentFontSizeShortcut": "Shortcut: Ctrl\/⌘ \+ Shift \+ - \/ = \/ 0 \(0 restores the default\)"/);
   assert.match(zhCnLocale, /"settings\.chatContentFontSizeShortcut": "快捷键：Ctrl\/⌘ \+ Shift \+ - \/ = \/ 0（0 恢复默认字号）"/);
   assert.match(zhTwLocale, /"settings\.chatContentFontSizeShortcut": "快速鍵：Ctrl\/⌘ \+ Shift \+ - \/ = \/ 0（0 恢復預設字級）"/);
+});
+
+test("the terminal keeps 13px at the default chat size and moves with the slider", () => {
+  for (const value of [undefined, null, "invalid", 14]) assert.equal(terminalFontSize(value), 13);
+  assert.equal(terminalFontSize(12), 11);
+  assert.equal(terminalFontSize(18), 17);
+  assert.equal(terminalFontSize(24), 23);
+  assert.equal(terminalFontSize(30), 23);
 });

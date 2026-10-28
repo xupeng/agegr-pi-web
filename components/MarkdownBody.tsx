@@ -3,6 +3,7 @@
 import {
   Children,
   createContext,
+  memo,
   useContext,
   useMemo,
   type ComponentProps,
@@ -12,11 +13,13 @@ import {
 import ReactMarkdown, { type Components, type ExtraProps } from "react-markdown";
 import { parsePdfPageFragment, resolveLocalFileHref, shouldOpenLocalFileInApp } from "@/lib/file-links";
 import { encodeFilePathForApi } from "@/lib/file-paths";
+import { isAudioPath, isVideoPath } from "@/lib/file-types";
 import { linkifyPlainText, linkifyToken, type FileIndexLookup } from "@/lib/path-linkify";
-import { markdownRehypePlugins, markdownRemarkPlugins, markdownUrlTransform, markdownUserRemarkPlugins, normalizeDisplayMath } from "@/lib/markdown";
+import { isExternalMarkdownHref, jumpToMarkdownFragment, markdownAppUrlTransform, markdownDocumentRehypePlugins, markdownRehypePlugins, markdownRemarkPlugins, markdownUrlTransform, markdownUserRemarkPlugins, normalizeDisplayMath } from "@/lib/markdown";
+import { splitMarkdownBlocks } from "@/lib/markdown-blocks";
 import { FileIndexProvider, useFileIndexContext } from "./FileIndexContext";
-import { PathText } from "./PathText";
 import { ImagePreview } from "./ImagePreview";
+import { PathText } from "./PathText";
 import type { OpenWrittenFileHandler } from "./TurnWrittenFiles";
 import { MermaidBlock, CodeBlock } from "./MermaidBlock";
 
@@ -28,6 +31,8 @@ interface MarkdownBodyProps {
   isStreaming?: boolean;
   cwd?: string;
   onOpenFile?: OpenWrittenFileHandler;
+  /** A document reader's own links: relative paths and `#headings` stay in the reader. */
+  onNavigateLink?: (href: string) => void;
   /** Preserve user-typed line breaks. */
   keepLineBreaks?: boolean;
 }
@@ -42,15 +47,25 @@ function MarkdownImage({
   delete props.node;
   const href = typeof src === "string" ? src : undefined;
   const filePath = href ? resolveLocalFileHref(href, cwd) : null;
-  const imageSrc = filePath
+  const mediaSrc = filePath
     ? `/api/files/${encodeFilePathForApi(filePath)}?type=read`
     : href;
+  // `![](take.wav)` is how a model shows a sound or clip it made, and an <img>
+  // cannot play it. The file API already streams both with range requests.
+  const mediaPath = filePath ?? href?.split(/[?#]/, 1)[0] ?? "";
+  const label = alt?.trim() ? alt : undefined;
+  if (isAudioPath(mediaPath)) {
+    return <audio controls preload="metadata" src={mediaSrc} aria-label={label} />;
+  }
+  if (isVideoPath(mediaPath)) {
+    return <video controls playsInline preload="metadata" src={mediaSrc} aria-label={label} />;
+  }
   // Dynamic local paths are served directly by the file API.
   // eslint-disable-next-line @next/next/no-img-element
-  const image = <img src={imageSrc} alt={alt ?? ""} loading="lazy" {...props} />;
-  if (!imageSrc || insideLink) return image;
+  const image = <img src={mediaSrc} alt={alt ?? ""} loading="lazy" {...props} />;
+  if (!mediaSrc || insideLink) return image;
   return (
-    <ImagePreview src={imageSrc} alt={alt ?? ""} className="markdown-image">
+    <ImagePreview src={mediaSrc} alt={alt ?? ""} className="markdown-image">
       {image}
     </ImagePreview>
   );
@@ -82,8 +97,37 @@ function useLinkifiedChildren(children: ReactNode, onOpenFile?: OpenWrittenFileH
   return lookup && onOpenFile ? linkifyChildren(children, lookup, onOpenFile) : children;
 }
 
-export function MarkdownBody({ children, className, isStreaming, cwd, onOpenFile, keepLineBreaks }: MarkdownBodyProps) {
+interface MarkdownBlockProps {
+  markdown: string;
+  remarkPlugins: typeof markdownRemarkPlugins;
+  urlTransform: typeof markdownUrlTransform;
+  rehypePlugins: typeof markdownRehypePlugins;
+  components: Components;
+}
+
+/** One parse; skipped while its text and renderers stay the same. */
+const MarkdownBlock = memo(function MarkdownBlock({ markdown, remarkPlugins, urlTransform, rehypePlugins, components }: MarkdownBlockProps) {
+  return (
+    <ReactMarkdown
+      remarkPlugins={remarkPlugins}
+      rehypePlugins={rehypePlugins}
+      urlTransform={urlTransform}
+      components={components}
+    >
+      {markdown}
+    </ReactMarkdown>
+  );
+});
+
+export const MarkdownBody = memo(function MarkdownBody({ children, className, isStreaming, cwd, onOpenFile, onNavigateLink, keepLineBreaks }: MarkdownBodyProps) {
   const normalizedMarkdown = useMemo(() => normalizeDisplayMath(children), [children]);
+  // A streaming reply grows by a few characters per chunk; parsing all of it
+  // each time made a long reply quadratic. Its finished blocks keep their
+  // parse and only the last is parsed again. A finished message is one block.
+  const blocks = useMemo(
+    () => (isStreaming ? splitMarkdownBlocks(normalizedMarkdown) : [normalizedMarkdown]),
+    [isStreaming, normalizedMarkdown],
+  );
   // Read the changing index inside each renderer, not in the memo's closure.
   // TTL refreshes must update links without changing React element types and
   // remounting paragraphs/code blocks underneath stable message entry keys.
@@ -157,6 +201,27 @@ export function MarkdownBody({ children, className, isStreaming, cwd, onOpenFile
     a({ href, children, ...props }) {
       // `node` is react-markdown metadata, not a DOM attribute.
       delete props.node;
+      if (onNavigateLink && href && !isExternalMarkdownHref(href)) {
+        // No href: a middle-click or "Open in new tab" would load the path on the app's own URL.
+        const navigate = () => onNavigateLink(href);
+        return (
+          <MarkdownLinkContext.Provider value={true}>
+            <a {...props} role="link" tabIndex={0} onClick={navigate} onKeyDown={(event) => { if (event.key === "Enter") navigate(); }}>
+              <FileIndexProvider lookup={null}>{children}</FileIndexProvider>
+            </a>
+          </MarkdownLinkContext.Provider>
+        );
+      }
+      if (href?.startsWith("#")) {
+        // An in-page link: never a second tab of Pi Web.
+        return (
+          <MarkdownLinkContext.Provider value={true}>
+            <a href={href} {...props} onClick={jumpToMarkdownFragment}>
+              <FileIndexProvider lookup={null}>{children}</FileIndexProvider>
+            </a>
+          </MarkdownLinkContext.Provider>
+        );
+      }
       const filePath = onOpenFile ? resolveLocalFileHref(href, cwd) : null;
       const openFile = onOpenFile;
       if (!filePath || !openFile) {
@@ -188,25 +253,38 @@ export function MarkdownBody({ children, className, isStreaming, cwd, onOpenFile
     img(props) {
       return <MarkdownImage cwd={cwd} {...props} />;
     },
+    ol({ node, start, style, ...props }) {
+      // An outside marker wider than the list's left padding is clipped by
+      // .markdown-body's overflow-x, so the padding follows the largest number.
+      const items = node?.children.filter((child) => child.type === "element" && child.tagName === "li").length ?? 0;
+      const digits = String(Math.abs((start ?? 1) + Math.max(items, 1) - 1)).length;
+      return <ol start={start} style={{ ...style, ["--ol-marker-digits" as string]: Math.max(digits, 2) }} {...props} />;
+    },
     table({ children }) {
+      // The frame draws the border; the scroller inside it fades its scrolled
+      // edges, which on the bordered box would fade the border too.
       return (
-        <div className="markdown-table-wrap">
-          <table>{children}</table>
+        <div className="markdown-table-frame">
+          <div className="markdown-table-wrap">
+            <table>{children}</table>
+          </div>
         </div>
       );
     },
-  }), [cwd, isStreaming, onOpenFile]);
+  }), [cwd, isStreaming, onOpenFile, onNavigateLink]);
 
   return (
     <div className={["markdown-body", className].filter(Boolean).join(" ")}>
-      <ReactMarkdown
-        remarkPlugins={keepLineBreaks ? markdownUserRemarkPlugins : markdownRemarkPlugins}
-        rehypePlugins={markdownRehypePlugins}
-        urlTransform={onOpenFile ? markdownUrlTransform : undefined}
-        components={components}
-      >
-        {normalizedMarkdown}
-      </ReactMarkdown>
+      {blocks.map((block, index) => (
+        <MarkdownBlock
+          key={index}
+          markdown={block}
+          remarkPlugins={keepLineBreaks ? markdownUserRemarkPlugins : markdownRemarkPlugins}
+          urlTransform={onOpenFile ? markdownUrlTransform : markdownAppUrlTransform}
+          rehypePlugins={onNavigateLink ? markdownDocumentRehypePlugins : markdownRehypePlugins}
+          components={components}
+        />
+      ))}
     </div>
   );
-}
+});

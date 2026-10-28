@@ -10,7 +10,9 @@ import {
   type LoadExtensionsResult,
   type PathMetadata,
   type ResolvedResource,
+  type ResourceDiagnostic,
   type ResourceLoader,
+  type Skill,
 } from "@earendil-works/pi-coding-agent";
 import { isExistingPathWithinRoots } from "./path-security";
 
@@ -41,6 +43,16 @@ export interface CreateNoInstallResourceLoaderOptions {
   /** Explicit files and preflighted resources must resolve inside one of these package roots. */
   containmentRoots?: readonly string[];
   extensionFactories?: InlineExtension[];
+  /**
+   * Built-in extension names to load by hand (`builtin:mcp`, `builtin:tool-search`); the SDK
+   * resolves these itself, so they need no authorization. Any other entry is ignored: real
+   * files come from the preflight alone.
+   */
+  additionalExtensionPaths?: readonly string[];
+  /** The SDK's own scoping hook; `extensions:` on a profile becomes `scopeSubagentExtensions()`. */
+  extensionsOverride?: (base: LoadExtensionsResult) => LoadExtensionsResult;
+  /** The skills counterpart, used by named `skills:` scopes. */
+  skillsOverride?: (base: { skills: Skill[]; diagnostics: ResourceDiagnostic[] }) => { skills: Skill[]; diagnostics: ResourceDiagnostic[] };
   /**
    * Load the preflighted installed extensions. Defaults to true; `false` still preflights
    * skills when `loadSkills` is set, but authorizes no extension and resolves no package
@@ -272,15 +284,22 @@ export function createNoInstallResourceLoader(
       agentDir,
       // A fresh projection per reload: no packages, no resource declarations, current trust.
       settingsManager: SettingsManager.inMemory({}, { projectTrusted }),
-      additionalExtensionPaths: sources.map((source) => source.path),
+      additionalExtensionPaths: [
+        ...(options.additionalExtensionPaths ?? []).filter((path) => path.startsWith("builtin:")),
+        ...sources.map((source) => source.path),
+      ],
       ...(skills.length > 0 ? { additionalSkillPaths: skills.map((skill) => skill.path) } : {}),
       noExtensions: true,
-      // Suppress auto-discovery; authorized skills still load through `additionalSkillPaths`.
-      noSkills: true,
+      // Suppress auto-discovery unless the caller asks for it (`skills:` scopes need the SDK's
+      // own discovery to name a skill); authorized skills always load through
+      // `additionalSkillPaths`.
+      noSkills: options.noSkills ?? true,
       noPromptTemplates: options.noPromptTemplates ?? true,
       noThemes: options.noThemes ?? true,
       noContextFiles: options.noContextFiles ?? true,
       ...(options.extensionFactories ? { extensionFactories: options.extensionFactories } : {}),
+      ...(options.extensionsOverride ? { extensionsOverride: options.extensionsOverride } : {}),
+      ...(options.skillsOverride ? { skillsOverride: options.skillsOverride } : {}),
       ...(options.systemPrompt !== undefined ? { systemPrompt: options.systemPrompt } : {}),
       ...(options.systemPromptOverride ? { systemPromptOverride: options.systemPromptOverride } : {}),
       ...(options.appendSystemPrompt ? { appendSystemPrompt: options.appendSystemPrompt } : {}),

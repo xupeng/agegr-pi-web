@@ -20,8 +20,13 @@ test.after(() => {
   fs.rmSync(root, { recursive: true, force: true });
 });
 const { NotificationStore } = await createJiti(import.meta.url).import("../../../lib/notifications/store.ts");
-const source = fs.readFileSync(new URL("./[id]/route.ts", import.meta.url), "utf8");
-const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText;
+const transpile = (url) => ts.transpileModule(fs.readFileSync(url, "utf8"),
+  { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText;
+// DELETE /api/sessions/[id] only maps a status; the bookkeeping under test
+// (notification rows, persisted asks, guards, re-parenting, unlinks) lives in
+// lib/session-delete.ts, so both modules run against the same stubs.
+const code = transpile(new URL("./[id]/route.ts", import.meta.url));
+const deleteCode = transpile(new URL("../../../lib/session-delete.ts", import.meta.url));
 const nativeRequire = createRequire(import.meta.url);
 
 function fixture({ failUnlink, failShutdown = false } = {}) {
@@ -57,24 +62,38 @@ function fixture({ failUnlink, failShutdown = false } = {}) {
         if (failShutdown) throw Error("shutdown failure");
       } }),
   };
-  const exports = {};
-  runInNewContext(code, { exports, require: (name) => {
-    if (name === "fs") return { ...fs, unlinkSync: (path) => {
-      if (path === paths[failUnlink]) throw Object.assign(Error("unlink denied"), { code: "EACCES" });
-      fs.unlinkSync(path); unlinked.push(path);
-    } };
-    if (name === "path") return nativeRequire("node:path");
-    if (name === "next/server") return { NextResponse: { json: (body, init) => Response.json(body, init) } };
-    if (name === "@/lib/session-reader") return readers;
-    if (name === "@/lib/session-path") return { sessionPathKey: (path) => path };
-    if (name === "@/lib/rpc-manager") return rpc;
-    if (name === "@/lib/ask-user/persist") return { forgetPersistedAsk: (id) => forgottenAsks.push(id) };
-    if (name === "@/lib/notifications/store") return {
-      beginNotificationSessionDeletion: (ids) => store.beginDeletion(ids), forgetNotificationSession: (id) => store.forget(id),
-    };
-    if (name === "@/lib/subagents") return { SUBAGENT_META_TYPE: "subagent", readSubagentRun: (_entries, id) => id === "child" ? { parentSessionId: "parent" } : null };
-    return {};
-  } });
+  const fsStub = { ...fs, unlinkSync: (path) => {
+    if (path === paths[failUnlink]) throw Object.assign(Error("unlink denied"), { code: "EACCES" });
+    fs.unlinkSync(path); unlinked.push(path);
+  } };
+  const pathStub = { sessionPathKey: (path) => path };
+  const persistStub = { forgetPersistedAsk: (id) => forgottenAsks.push(id) };
+  const storeStub = {
+    beginNotificationSessionDeletion: (ids) => store.beginDeletion(ids), forgetNotificationSession: (id) => store.forget(id),
+  };
+  const subagentsStub = { SUBAGENT_META_TYPE: "subagent", readSubagentRun: (_entries, id) => id === "child" ? { parentSessionId: "parent" } : null };
+  const uiStateStub = { forgetSessionUiState: async () => {} };
+  // The route imports through the "@/lib/..." alias, lib/session-delete.ts
+  // through relative specifiers; both must land on the same stubs.
+  const modules = {
+    fs: fsStub,
+    path: nativeRequire("node:path"),
+    "next/server": { NextResponse: { json: (body, init) => Response.json(body, init) } },
+    "@/lib/session-reader": readers, "./session-reader": readers,
+    "@/lib/session-path": pathStub, "./session-path": pathStub,
+    "@/lib/rpc-manager": rpc, "./rpc-manager": rpc,
+    "@/lib/ask-user/persist": persistStub, "./ask-user/persist": persistStub,
+    "@/lib/notifications/store": storeStub, "./notifications/store": storeStub,
+    "@/lib/subagents": subagentsStub, "./subagents": subagentsStub,
+    "@/lib/session-ui-state": uiStateStub, "./session-ui-state": uiStateStub,
+  };
+  const load = (transpiled) => {
+    const exports = {};
+    runInNewContext(transpiled, { exports, require: (name) => modules[name] ?? {} });
+    return exports;
+  };
+  modules["@/lib/session-delete"] = load(deleteCode);
+  const exports = load(code);
   return { store, paths, forgottenAsks, unlinked, shutdownGuards,
     remove: () => exports.DELETE(new Request("http://localhost/api/sessions/parent", { method: "DELETE" }), { params: Promise.resolve({ id: "parent" }) }) };
 }
@@ -91,14 +110,20 @@ test("successful deletion forgets actual parent/descendants, preserves reparente
   assert.equal(fs.existsSync(f.paths.child), false);
 });
 test("partial unlink failure clears only the actually successful deletion set", async () => {
-  const f = fixture({ failUnlink: "child" });
+  // lib/session-delete.ts unlinks descendants before their parent, so failing
+  // the parent's unlink is the case with one success behind it; the assertions
+  // below hold whichever order the unlink loop takes.
+  const f = fixture({ failUnlink: "parent" });
   assert.equal((await f.remove()).status, 500);
-  assert.deepEqual(f.forgottenAsks, ["parent"]);
-  assert.deepEqual(f.store.completions().map((c) => c.sessionId).sort(), ["child", "fork"]);
-  assert.equal(f.store.isDeleting("child"), false, "failure releases undeleted child guard");
-  assert.equal(f.store.completions().find((c) => c.sessionId === "child").runIdentity, "run1");
-  assert.equal(fs.existsSync(f.paths.parent), false);
-  assert.equal(fs.existsSync(f.paths.child), true);
+  const deleted = ["parent", "child"].filter((id) => !fs.existsSync(f.paths[id]));
+  const kept = ["parent", "child"].filter((id) => !deleted.includes(id));
+  assert.equal(deleted.length, 1, "one unlink succeeds before the failing one");
+  assert.deepEqual(f.forgottenAsks, deleted, "only actually unlinked sessions lose their persisted ask");
+  assert.deepEqual(f.store.completions().map((c) => c.sessionId).sort(), ["fork", ...kept].sort());
+  for (const id of kept) {
+    assert.equal(f.store.isDeleting(id), false, "failure releases the guard of a session it could not delete");
+    assert.equal(f.store.completions().find((c) => c.sessionId === id).runIdentity, "run1");
+  }
 });
 test("pre-unlink shutdown failure preserves notifications and releases all temporary guards", async () => {
   const f = fixture({ failShutdown: true });

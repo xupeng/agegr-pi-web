@@ -82,6 +82,16 @@ export function readModelSelectionFailureDTO(value: unknown): ModelSelectionFail
   };
 }
 
+/**
+ * GET /api/agent/[id] without the system prompt, for status reads: the usage read after each
+ * reply and on every stream connect, the settle and reconcile polls. None of them shows the
+ * prompt, and it is nearly all of the reply (context files, skills, tool notes: hundreds of KB
+ * in a large project), fetched again after every model call (#1302).
+ */
+export function agentStatusUrl(sessionId: string): string {
+  return `/api/agent/${encodeURIComponent(sessionId)}?systemPrompt=0`;
+}
+
 export async function sendAgentCommand<T = unknown>(
   sessionId: string,
   command: Record<string, unknown>,

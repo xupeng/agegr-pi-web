@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { createJiti } from "jiti";
 const source = await readFile(new URL("./SessionSidebar.tsx", import.meta.url), "utf8");
+const treeSource = await readFile(new URL("./SessionTree.tsx", import.meta.url), "utf8");
 const jiti = createJiti(import.meta.url);
 const { notificationSessionIds, notificationProjectCounts } = await jiti.import("../lib/notifications/client.ts");
 
@@ -28,8 +29,17 @@ test("sidebar is a read-only subscriber, not localStorage or running-diff unread
 });
 
 test("running and older completion are rendered together, without subagent/Trellis rows", () => {
-  assert.match(source, /\{isRunning && <RunningSessionIndicator \/>\}/);
-  assert.match(source, /\{isUnread && <UnreadSessionIndicator \/>\}/);
+  // Upstream moved the row's right-hand meta out of SessionSidebar into
+  // SessionTree: the sidebar now only classifies rows (`runningIds` /
+  // `unreadIds` -> `buildSessionTree`) and SessionTree paints the indicator.
+  // The fork contract is unchanged — a running session and an older,
+  // still-unread completion both surface in the sidebar rows — so the
+  // assertions follow the merged identifiers instead of the old inline
+  // `isRunning` / `isUnread` JSX.
+  assert.match(source, /runningIds: runningSessionIds/);
+  assert.match(source, /unreadIds: unreadSessionIds/);
+  assert.match(treeSource, /status\.running\) \{\s*\n\s*meta = <SpinnerIcon size=\{12\} label=\{t\("sidebar\.agentRunning"\)\} \/>/);
+  assert.match(treeSource, /status\.unread\) \{\s*\n\s*meta = <span className="session-tree-unread" role="img" aria-label=\{t\("sidebar\.newSessionActivity"\)\} \/>/);
   assert.match(source, /listSessionFamilies\(sessions\)/);
   assert.match(source, /session\.relation\?\.kind === "subagent"/);
 });

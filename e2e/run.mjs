@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
-import { appendFileSync, createWriteStream, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { appendFileSync, createWriteStream, existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -10,8 +10,15 @@ import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 import { checkFilePanel, filePanelFixture } from "./file-panel.mjs";
-import { checkExtensionDialogs, extensionSource } from "./extension-dialog.mjs";
+import { checkExtensionDialogSizing, checkExtensionDialogs, extensionSource } from "./extension-dialog.mjs";
 import { checkChatAppearance, checkChatColumnAlignment, checkMinimapTypography } from "./chat-appearance.mjs";
+import { checkCodeBackground } from "./code-background.mjs";
+import { checkModelDiscovery } from "./model-discovery.mjs";
+import { checkModelContext } from "./model-context.mjs";
+import { checkModelSelector } from "./model-selector.mjs";
+import { checkFilesPlacement, showSidebarSessions } from "./sidebar.mjs";
+import { checkSessionNavigation } from "./session-navigation.mjs";
+import { checkProjectNavigation, createProjectNavigationFixtures } from "./project-navigation.mjs";
 import { ASK_USER_SESSION, checkAskUserView, writeAskUserFixture } from "./ask-user.mjs";
 import { checkSessionRestore } from "./session-restore.mjs";
 import { STATUS_TAIL_SESSION, checkStatusTailFollow, statusTailEntries } from "./status-tail.mjs";
@@ -31,7 +38,9 @@ const viewports = [{ width: 1280, height: 800 }, { width: 390, height: 844 }]
   .filter(viewport => checkGroup !== "touch" && (selectedWidth === null || viewport.width === selectedWidth));
 const artifacts = join(root, "test-results/e2e");
 mkdirSync(artifacts, { recursive: true });
-const agentDir = mkdtempSync(join(tmpdir(), "pi-web-e2e-"));
+// Realpath'd: macOS hands out `/var/folders/...` while every real path in the app (and the server's own
+// project resolution) reads `/private/var/...`.
+const agentDir = realpathSync(mkdtempSync(join(tmpdir(), "pi-web-e2e-")));
 const project = join(agentDir, "project");
 const sessionDir = join(agentDir, "sessions", "e2e");
 mkdirSync(project);
@@ -47,6 +56,7 @@ const APPEND = "e2e-external-append-session";
 const TYPO = "e2e-typography-session";
 const ASK_USER = ASK_USER_SESSION;
 const STATUS_TAIL = STATUS_TAIL_SESSION;
+const CODE_BACKGROUND = "e2e-code-background";
 const text = (i) => `E2E message ${String(i).padStart(4, "0")}`;
 const ids = (start, end) => Array.from({ length: end - start }, (_, i) => `e${start + i}`);
 
@@ -106,6 +116,14 @@ try {
       { type: "thinking", thinking: "E2E final reasoning\nFinal thinking details." },
       { type: "text", text:
         "E2E final answer\n```js\nconsole.log('E2E code');\n```\n\n"
+        + "| Kind | " + "Long headings should wrap without stretching the table. ".repeat(8) + " |\n| --- | --- |\n"
+        + "| Text | " + "Long sentences should wrap while wide tables keep their natural column widths. ".repeat(8) + " |\n"
+        + "| 中文 | " + "表格中的长句应该自然换行，多列表格仍然可以横向滚动。".repeat(12) + " |\n"
+        + "| URL | https://example.invalid/" + "long-path-segment".repeat(24) + " |\n"
+        + "| Code | `" + "long_identifier_".repeat(24) + "` |\n\n"
+        + "| " + Array.from({ length: 8 }, (_, i) => `Column ${i + 1}`).join(" | ") + " |\n"
+        + "| " + Array(8).fill("---").join(" | ") + " |\n"
+        + "| " + Array.from({ length: 8 }, (_, i) => `release-20260901-${String(i + 1).padStart(6, "0")}`).join(" | ") + " |\n\n"
         + "E2E answer paragraph.\n\n".repeat(20)
         + "## E2E reading position\n\n"
         + "E2E answer paragraph.\n\n".repeat(20),
@@ -114,6 +132,12 @@ try {
   ];
   Object.assign(richEntries.at(-1).message, { provider: "test", model: "E2E Model" });
   writeSession(RICH, richEntries);
+  writeSession(CODE_BACKGROUND, [
+    message("user", null, "user", "E2E code background"),
+    message("answer", "user", "assistant", [{ type: "text", text:
+      "```js\nconst x = 1;\n```\n\n```mermaid\ngraph TD\n A --> B\n```",
+    }]),
+  ]);
   // The default page is 50 *visible* messages (user / assistant / compaction).
   // toolResults ride along free after #810, so 48 tool-call assistants + the
   // final answer + the divider fill that window; the user prompt is the 51st
@@ -173,6 +197,8 @@ try {
     message("queue-answer", "queue-root", "assistant", "AC6 queue fixture answer"),
   ]);
 
+  const projectNavigation = createProjectNavigationFixtures({ agentDir, sessionDir, timestamp });
+
   const probe = createServer();
   probe.listen(0, "127.0.0.1");
   await once(probe, "listening");
@@ -213,7 +239,7 @@ try {
     const response = await fetch(`${base}/api/sessions`, { signal: AbortSignal.timeout(5000) }).catch(() => null);
     if (response?.ok) {
       const { sessions } = await response.json();
-      assert.deepEqual(sessions.map((session) => session.id).sort(), [LONG, BRANCH, RICH, COMPACTED, APPEND, ASK_USER, TYPO, STATUS_TAIL, CODEMODE_SESSION, QUEUE_SESSION].sort());
+      assert.deepEqual(sessions.map((session) => session.id).sort(), [LONG, BRANCH, RICH, COMPACTED, APPEND, ASK_USER, TYPO, STATUS_TAIL, CODEMODE_SESSION, QUEUE_SESSION, CODE_BACKGROUND, projectNavigation.id].sort());
       break;
     }
     assert.ok(Date.now() < deadline, "Server readiness timed out; see server.log");
@@ -288,11 +314,21 @@ try {
     const errors = [];
     const olderResponses = [];
     page.on("pageerror", (error) => errors.push(error.message));
-    page.on("console", (event) => { if (event.type() === "error") errors.push(event.text()); });
+    page.on("console", (event) => {
+      // The registry probe behind the update badge cannot answer in a sandbox; its 502 is not a page
+      // error, and Chromium logs one `Failed to load resource` line for it.
+      if (event.type() === "error" && !/app-update|Failed to load resource: the server responded with a status of 502/.test(event.text())) {
+        errors.push(event.text());
+      }
+    });
     page.on("response", (response) => {
-      if (response.url().startsWith(base) && response.status() >= 500) errors.push(`${response.status()} ${response.url()}`);
       const url = new URL(response.url());
+      // Paged history reads are collected whatever their status: the check below compares the pages
+      // they asked for.
       if (url.pathname === `/api/sessions/${LONG}/context` && url.searchParams.has("before")) olderResponses.push(response);
+      if (!response.url().startsWith(base) || response.status() < 500) return;
+      if (url.pathname === "/api/app-update") return;
+      errors.push(`${response.status()} ${response.url()}`);
     });
     // Independent AC6 fixtures run first so a retained legacy failure cannot
     // prevent collecting their evidence. The full legacy checks still follow.
@@ -352,6 +388,31 @@ try {
     const sentinel = page.getByText("Scroll up to load earlier messages", { exact: true });
     await sentinel.waitFor({ state: "attached" });
     assert.equal(await page.getByText(text(4949), { exact: true }).count(), 0);
+    // The minimap numbers turns from the session's first, not the loaded page's (#791):
+    // e0..e4949 hold 2475 user messages, so the turn asking text(4998) is 2500.
+    const readMinimapTurn = async (screenshot) => {
+      // The rail draws a tick for a turn header only when its answers have no outline of their
+      // own, so node 0 is not guaranteed to be rendered; the first drawn row is the anchor and the
+      // turn numbering below is what the check is about (#791).
+      const node = page.locator("[data-minimap-node-index]").first();
+      await node.waitFor();
+      // Hover the row itself: a coordinate taken from its box can land on the rail's lock button
+      // or a neighbour once the rail's height changed, which never opens the panel.
+      await node.hover();
+      const preview = page.locator("[data-minimap-preview-box]");
+      const turn = preview.locator("[data-minimap-preview-index]").filter({ hasText: text(4998) });
+      const result = {
+        number: await turn.locator("span[aria-hidden='true']").first().textContent(),
+        earlier: await preview.locator("[data-minimap-preview-earlier]").textContent(),
+      };
+      await page.screenshot({ path: join(artifacts, screenshot) });
+      await page.mouse.move(0, 0);
+      await preview.waitFor({ state: "detached" });
+      return result;
+    };
+    if (viewport.width > 600) {
+      assert.deepEqual(await readMinimapTurn("minimap-turns-first-page.png"), { number: "2500", earlier: "Earlier turns not loaded: 2475. Click to load" });
+    }
 
     // Exercise the real IntersectionObserver and prepend path, twice.
     for (let turn = 0; turn < 2; turn++) {
@@ -443,6 +504,12 @@ try {
       `Rendered history must cover the paged-in range (window starts at ${suffixStart}, paged to ${oldest})`);
     assert.deepEqual(rendered, Array.from({ length: rendered.length }, (_, i) => text(suffixStart + i)),
       "Missing, reordered, or duplicate chat messages");
+    if (viewport.width > 600) {
+      assert.deepEqual(await readMinimapTurn("minimap-turns-paged.png"), {
+        number: "2500",
+        earlier: `Earlier turns not loaded: ${oldest / 2}. Click to load`,
+      }, "Loading older pages must not renumber minimap turns");
+    }
     await page.screenshot({ path: join(artifacts, `history-${viewport.width}.png`) });
 
     if (viewport.width > 600) {
@@ -481,6 +548,29 @@ try {
     assert.equal(await processDetails.count(), 1);
     assert.equal(await thinking.count(), 0, "All thinking stays inside process details");
     const finalMessage = page.locator("[data-entry-id='answer']");
+    const tables = finalMessage.last().locator(".markdown-table-wrap");
+    assert.equal(await tables.count(), 2);
+    await tables.first().scrollIntoViewIfNeeded();
+    await page.evaluate(() => document.fonts.ready);
+    const tableLayout = await tables.evaluateAll(([prose, wide]) => {
+      const wraps = (cell) => {
+        const range = document.createRange();
+        range.selectNodeContents(cell);
+        return range.getBoundingClientRect().height > parseFloat(getComputedStyle(cell).lineHeight);
+      };
+      return {
+        proseFits: prose.scrollWidth <= prose.clientWidth + 1,
+        longCellsWrap: [...prose.querySelectorAll("tr > :last-child")].every(wraps),
+        wideScrolls: wide.scrollWidth > wide.clientWidth + 1,
+        wideCellsStayOnOneLine: [...wide.querySelectorAll("tbody td")].every((cell) => !wraps(cell)),
+      };
+    });
+    assert.ok(tableLayout.proseFits, "Long table cells must not stretch a two-column table beyond the chat");
+    assert.ok(tableLayout.longCellsWrap, "Long headings, sentences, URLs, and inline code must wrap");
+    assert.ok(tableLayout.wideScrolls, "Wide tables must retain horizontal scrolling");
+    assert.ok(tableLayout.wideCellsStayOnOneLine, "Wide tables must not squeeze ordinary values into narrow columns");
+    await page.screenshot({ path: join(artifacts, `markdown-tables-${viewport.width}.png`) });
+    console.log(`PASS: ${viewport.width}px wrapping long table cells and scrolling wide tables`);
     assert.equal(await finalMessage.getByRole("button", { name: /^Thinking/ }).count(), 0);
     assert.equal(await finalMessage.getByText("test/E2E Model", { exact: true }).count(), 1);
     assert.equal(thinkingRequests.length, 0);
@@ -526,8 +616,17 @@ try {
       });
       await page.screenshot({ path: join(artifacts, "compaction-minimap.png") });
 
+      // A session row of the sidebar's sessions, found by its visible title
+      // (the row's tooltip adds message count and time, so no exact title match).
+      const sessionRow = (title) => page.locator("#session-sidebar-panel-sessions .session-tree-session").filter({
+        has: page.locator(".session-tree-title", { hasText: new RegExp(`^${title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`) }),
+      });
+      const clickSessionRow = async (title) => {
+        await showSidebarSessions(page);
+        await sessionRow(title).locator(".session-tree-main").click();
+      };
       const selectSession = async (title, entryId) => {
-        await page.locator(`[title="${title}"]`).click();
+        await clickSessionRow(title);
         await page.locator(`[data-entry-id="${entryId}"]:not([data-message-role])`).waitFor({ state: "visible" });
       };
       const readingOffset = (target) => target.evaluate((element) => (
@@ -606,7 +705,7 @@ try {
       await page.route(agentRoute, (route) => route.fulfill({ json: {} }));
       try {
         const pendingHistory = page.waitForRequest((request) => request.url().includes(`/api/sessions/${LONG}/context?`) && new URL(request.url()).searchParams.has("before"));
-        await page.locator(`[title="${text(0)}"]`).click();
+        await clickSessionRow(text(0));
         await pendingHistory;
         await page.getByRole("button", { name: "Branches", exact: true }).click();
         await page.getByText("E2E alternate history branch", { exact: true }).click();
@@ -627,6 +726,11 @@ try {
     await checkExtensionDialogs(page, artifacts, viewport.width);
     await checkAskUserView(page, { base, sessionId: ASK_USER });
     await checkStatusTailFollow(page, { base, sessionId: STATUS_TAIL, expectWrap: viewport.width <= 600 });
+    // The status-tail check replaces its session's event stream with a mock; a real extension
+    // dialog needs a session whose stream is real.
+    await page.goto(`${base}/?session=${RICH}`, { waitUntil: "domcontentloaded" });
+    await page.locator(".markdown-code-block pre").waitFor();
+    await checkExtensionDialogSizing(page, viewport.width);
     if (viewport.width > 600) {
       await checkSessionRestore(page, {
         base,
@@ -638,7 +742,31 @@ try {
       await page.goto(`${base}/?session=${RICH}`, { waitUntil: "domcontentloaded" });
       await page.locator(".markdown-code-block pre").waitFor();
       await checkChatAppearance(page);
+      await page.setViewportSize(viewport);
+      // Returning from the mobile breakpoint restores the desktop sidebar preference in an effect, so wait for the toggle to settle.
+      const hideSidebar = page.getByRole("button", { name: "Hide sidebar", exact: true });
+      const showSidebar = page.getByRole("button", { name: "Show sidebar", exact: true });
+      await hideSidebar.or(showSidebar).waitFor({ state: "visible" });
+      // That effect can also open the sidebar between the visible check and the click, so "Show sidebar" is
+      // gone and the click waits its full 30s for a button that will not come back. Retry against a short
+      // deadline: only the click's own timeout is ignored, and the wait below still fails if the sidebar
+      // never opens.
+      for (let attempt = 0; attempt < 5 && !(await hideSidebar.isVisible()); attempt++) {
+        await showSidebar.click({ timeout: 1_000 }).catch(() => {});
+        await page.waitForTimeout(200);
+      }
+      await hideSidebar.waitFor({ state: "visible" });
+      // The files sit below the sessions on a desktop; Settings › General ›
+      // File browser brings the tabs back, and goes back.
+      await checkFilesPlacement(page);
+      console.log("PASS: files below the sessions by default, tabs from Settings and back");
+      await checkModelDiscovery(page);
     }
+    await checkModelContext(page);
+    await page.goto(`${base}/?session=${CODE_BACKGROUND}`, { waitUntil: "domcontentloaded" });
+    await page.locator(".markdown-code-block pre").waitFor();
+    await checkCodeBackground(page);
+    await checkModelSelector(page, { base, project, artifacts });
     assert.deepEqual(errors, [], `Browser errors at width ${viewport.width}`);
     console.log(`PASS: ${viewport.width}px browser pagination, branch, markdown, code, tool call, and compaction navigation`);
     await context.tracing.stop({ path: join(artifacts, `trace-${viewport.width}.zip`) });
@@ -664,6 +792,25 @@ try {
   await context.close();
   context = undefined;
   page = undefined;
+  // The navigation suites belong to the full gate; E2E_CHECK_GROUP diagnostics
+  // keep selecting only their own checks.
+  if (checkGroup === "full") {
+    // Last, in its own context and tabs, so the checks above run as before. It
+    // restores the sidebar state (pins, archive) and deletes the fork it makes.
+    await checkSessionNavigation({
+      browser,
+      base,
+      artifacts,
+      a: { id: BRANCH, entry: "new", text: "Active branch answer" },
+      b: { id: CODE_BACKGROUND, entry: "answer", text: "const x = 1;" },
+      api,
+      deleteSession: async (id) => {
+        const response = await fetch(`${base}/api/sessions/${encodeURIComponent(id)}`, { method: "DELETE", signal: AbortSignal.timeout(30_000) });
+        assert.ok(response.ok, `DELETE session ${id} -> ${response.status}`);
+      },
+    });
+    await checkProjectNavigation({ browser, base, artifacts, fixture: projectNavigation, otherSessionId: BRANCH, api, post });
+  }
 } catch (error) {
   console.error(error);
   process.exitCode = 1;

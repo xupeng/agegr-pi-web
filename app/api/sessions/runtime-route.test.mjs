@@ -32,6 +32,11 @@ const {
   persistOpenAsk,
   readPersistedAsk,
 } = await jiti.import("../../../lib/ask-user/persist.ts");
+const {
+  readSessionUiState,
+  resetSessionUiStateCacheForTests,
+  updateSessionUiState,
+} = await jiti.import("../../../lib/session-ui-state.ts");
 
 test("list versions expose idle session creation, rename and deletion to other windows", async (t) => {
   const dir = await mkdtemp(join(tmpdir(), "pi-web-list-sync-"));
@@ -70,6 +75,7 @@ test("list versions expose idle session creation, rename and deletion to other w
   assert.equal(renamed.status, 200);
   const poll = await (await getRunningSessions()).json();
   assert.deepEqual(poll.runningSessionIds, []);
+  assert.deepEqual(poll.awaitingInputSessionIds, [], "the sidebar's awaiting-input badge reads the same poll");
   assert.ok(poll.sessionListVersion > created.sessionListVersion);
   const updated = await list();
   assert.equal(updated.sessionListVersion, poll.sessionListVersion);
@@ -81,6 +87,42 @@ test("list versions expose idle session creation, rename and deletion to other w
   assert.ok(deleted.sessionListVersion > updated.sessionListVersion);
   assert.deepEqual(deleted.sessions, []);
   assert.equal((await (await getRunningSessions()).json()).sessionListVersion, deleted.sessionListVersion);
+});
+
+test("the running poll carries the sidebar state revision and deleting a session forgets its pins", async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), "pi-web-ui-state-delete-"));
+  const previousAgentDir = process.env.PI_CODING_AGENT_DIR;
+  process.env.PI_CODING_AGENT_DIR = dir;
+  invalidateSessionListCache();
+  resetSessionUiStateCacheForTests();
+  let sessionId;
+  t.after(async () => {
+    if (previousAgentDir === undefined) delete process.env.PI_CODING_AGENT_DIR;
+    else process.env.PI_CODING_AGENT_DIR = previousAgentDir;
+    if (sessionId) invalidateSessionPathCache(sessionId);
+    invalidateSessionListCache();
+    resetSessionUiStateCacheForTests();
+    await rm(dir, { recursive: true, force: true });
+  });
+  const revision = async () => (await (await getRunningSessions()).json()).sessionUiStateRevision;
+  assert.equal(await revision(), 0);
+
+  const manager = SessionManager.create(dir);
+  manager.appendMessage({ role: "user", content: "Pinned then deleted", timestamp: Date.now() });
+  manager.appendMessage({ role: "assistant", content: [{ type: "text", text: "ok" }], timestamp: Date.now() });
+  sessionId = manager.getSessionId();
+  invalidateSessionListCache();
+  await updateSessionUiState({ action: "set", ids: [sessionId, "other-session"], pinned: true });
+  assert.equal(await revision(), 1);
+
+  const response = await deleteSession(
+    new Request(`http://localhost/api/sessions/${sessionId}`, { method: "DELETE" }),
+    { params: Promise.resolve({ id: sessionId }) },
+  );
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { ok: true });
+  assert.deepEqual(Object.keys(readSessionUiState().sessions), ["other-session"]);
+  assert.equal(await revision(), 2);
 });
 
 test("session listing returns a gzip-compressed response when the client accepts it", async (t) => {
@@ -95,10 +137,14 @@ test("session listing returns a gzip-compressed response when the client accepts
     await rm(dir, { recursive: true, force: true });
   });
 
+  // The list carries at most 500 characters of each first message, so a few
+  // sessions make the body large enough to compress.
   const firstMessage = "compressible session content ".repeat(500);
-  const manager = SessionManager.create(dir);
-  manager.appendMessage({ role: "user", content: firstMessage, timestamp: Date.now() });
-  manager.appendMessage({ role: "assistant", content: [{ type: "text", text: "done" }], timestamp: Date.now() });
+  for (let index = 0; index < 4; index++) {
+    const manager = SessionManager.create(dir);
+    manager.appendMessage({ role: "user", content: firstMessage, timestamp: Date.now() });
+    manager.appendMessage({ role: "assistant", content: [{ type: "text", text: "done" }], timestamp: Date.now() });
+  }
   invalidateSessionListCache();
 
   const response = await getSessionList(new Request("http://localhost/api/sessions", {
@@ -109,7 +155,8 @@ test("session listing returns a gzip-compressed response when the client accepts
   assert.equal(response.headers.get("Content-Encoding"), "gzip");
   assert.match(response.headers.get("Vary") ?? "", /(?:^|,\s*)Accept-Encoding(?:\s*,|$)/i);
   const payload = JSON.parse(gunzipSync(Buffer.from(await response.arrayBuffer())).toString("utf8"));
-  assert.equal(payload.sessions[0].firstMessage, firstMessage);
+  assert.equal(payload.sessions.length, 4);
+  assert.equal(payload.sessions[0].firstMessage, firstMessage.slice(0, 500));
 });
 
 test("deleting an unpersisted session shuts down its runtime and invalidates caches", async (t) => {
@@ -136,6 +183,7 @@ test("deleting an unpersisted session shuts down its runtime and invalidates cac
       sessionFile: filePath,
       isAlive: () => true,
       isRunning: () => false,
+      isAwaitingInput: () => false,
       shutdown: async () => {
         shutdownCalled = true;
         if (persistOnShutdown) await writeFile(filePath, JSON.stringify(manager.getHeader()));

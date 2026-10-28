@@ -34,7 +34,11 @@ test("only renders the Agents switcher when the active session family has subage
 
 test("keeps the mobile Agents icon directly after notifications and outside the more layer", () => {
   assert.match(source, /<span className="notification-bell-count">[^\n]+<\/span>\s*<\/button>\s*\{isMobile && renderSubagentsButton\(true\)\}/);
-  assert.match(source, /\{!mobile && renderSubagentsButton\(false\)\}/);
+  // The desktop toolbar keeps upstream's badge button (running count, spinner, accent ring); only the
+  // mobile icon still comes from the fork's `renderSubagentsButton`. Both open on Trellis records
+  // alone, so the desktop condition is the fork's entry flag and the badge is the combined count.
+  assert.match(source, /const subagentsBadge = \{ count: subagentsEntryCount, running: agentsBadge\?\.running \?\? false \}/);
+  assert.match(source, /\{hasSubagentsEntry && \(/);
   assert.equal(source.match(/renderSubagentsButton\(true\)/g)?.length, 1);
   assert.match(source, /if \(mobile\) setMobileToolbarMoreOpen\(false\);\s*toggleTopPanel\("agents"\)/);
 });

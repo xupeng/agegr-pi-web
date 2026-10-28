@@ -7,7 +7,7 @@ import { createJiti } from "jiti";
 // Same callback-execution pattern as mcp-slash-command.test.mjs, not a browser or React mount.
 // The real HTTP decoder and formatter feed the hook's actual callbacks; only hook state/IO are stubbed.
 const jiti = createJiti(import.meta.url, { interopDefault: true });
-const { AgentCommandError, isPromptRejectedError, isUnavailableAgentSessionError, readAgentCommandError, sendAgentCommand } = await jiti.import("../lib/agent-client.ts");
+const { AgentCommandError, agentStatusUrl, isPromptRejectedError, isUnavailableAgentSessionError, readAgentCommandError, sendAgentCommand } = await jiti.import("../lib/agent-client.ts");
 const { AgentEventConnection, AgentEventConnectionError } = await jiti.import("../lib/agent-event-connection.ts");
 const { createAgentEventStream } = await jiti.import("../lib/agent-event-stream.ts");
 const { ModelSelectionError } = await jiti.import("../lib/subagent-model-selection.ts");
@@ -88,13 +88,30 @@ function hook(t, { locale = "en", isNew = false, busy = false, fail = true, fail
     waitForPromptSettlement: async () => { state.wait++; }, refreshViewedSession: async () => {}, scheduleEventStreamClose: noop,
     onAgentEnd: () => { state.ends++; }, syncLiveModel: noop, setRetryInfo: noop, setActiveToolResults: noop,
     setIsCompacting: noop, setAutoCompactionEnabled: noop, normalizeQueuedMessages: (value) => value, setQueuedMessages: noop,
+    // Context usage is a separate concern (hooks/context-usage.test.mjs): the hook
+    // stamps a request id before every status read and applies the reply only if it
+    // is still the newest one, so both the counter ref and the apply step must exist.
+    // The merged hook renamed the usage applier and grew the hidden-page lease symbols; the
+    // compiled callbacks reference them by name.
+    contextUsageRequestIdRef: ref(0), applyContextUsage: noop, applyLiveUsage: noop, refreshContextUsage: noop, agentStatusUrl,
+    eventStreamReleasedRef: ref(false), setEventStreamReattachCount: noop,
+    requestLease: async () => ({ running: false, awaitingInput: false, subagentsActive: false }),
+    sessionLeaseShowsActivity: () => false, canReleaseHiddenEventStream: () => true,
+    maintainEventsConnected: () => {}, HIDDEN_PAGE_GRACE_MS: 30_000, SESSION_LEASE_RENEW_INTERVAL_MS: 30_000,
+    sessionLeaseLastReplyRef: ref(null),
     setContextUsage: noop, setSystemPrompt: noop, setExtensionStatuses: noop, setExtensionWidgets: noop,
     setPendingAsk: (value) => { state.pendingAsk = value; },
   };
   for (const name of names) scope[name] = callbacks[name](scope);
   return { scope, state, ask, result };
 }
-const flush = async () => { await new Promise((resolve) => setImmediate(resolve)); };
+// A rejection now settles through `reconcileAgentState` (status read, then the finish path), which
+// takes more than one turn of the microtask/immaculate queue; drain until it stops moving.
+const flush = async () => {
+  for (let round = 0; round < 40; round += 1) {
+    await new Promise((resolve) => setImmediate(resolve));
+  }
+};
 
 for (const locale of ["en", "zh-CN", "zh-TW"]) {
   test(`${locale}: real HTTP typed rejection keeps draft/images, old ask/branch/result and never completes`, async (t) => {
