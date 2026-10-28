@@ -45,6 +45,10 @@ export async function checkProjectNavigation({ browser, base, artifacts, fixture
   const empty = await post("/api/cwd/validate", { cwd: fixture.empty });
   const pin = { action: "pin-project", projectKey: empty.projectKey, root: empty.projectRoot };
   await post("/api/sessions/ui-state", { ...pin, pinned: true });
+  // A project shows its group in the tree while it is the current one or pinned; the other project is
+  // pinned here so its menu can be reached without switching this tab away from its own session.
+  const otherPin = { action: "pin-project", projectKey: other.projectKey, root: other.projectRoot };
+  await post("/api/sessions/ui-state", { ...otherPin, pinned: true });
   try {
     for (const mobile of [false, true]) {
       const context = await browser.newContext({
@@ -178,6 +182,9 @@ export async function checkProjectNavigation({ browser, base, artifacts, fixture
           assert.equal(new URL(page.url()).searchParams.get("cwd"), empty.cwd);
           assert.equal(await selected(page).count(), 0);
           console.log("PASS: an unavailable project's new tab shows the validation error, not another session");
+          // Back to the source session: the checks below act on its project's group.
+          await page.goto(`${base}/?session=${fixture.id}`, { waitUntil: "domcontentloaded" });
+          await page.getByText("E2E linked-worktree answer", { exact: true }).waitFor();
         }
         // + still means New here, not another tab, and chooses the same worktree.
         await showSessions();
@@ -200,6 +207,7 @@ export async function checkProjectNavigation({ browser, base, artifacts, fixture
       }
     }
   } finally {
+    await post("/api/sessions/ui-state", { ...otherPin, pinned: false });
     await post("/api/sessions/ui-state", { ...pin, pinned: false });
   }
 }
