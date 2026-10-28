@@ -142,7 +142,6 @@ export async function checkProjectNavigation({ browser, base, artifacts, fixture
         for (const [key, cwd, label] of [
           [current.projectKey, current.cwd, "current worktree"],
           [other.projectKey, other.projectRoot, "other project"],
-          [empty.projectKey, empty.cwd, "pinned project without sessions"],
         ]) {
           const expanded = await group(key).locator(".session-tree-group-toggle").getAttribute("aria-expanded");
           const tab = await openTab(key, !mobile && key === current.projectKey);
@@ -163,15 +162,21 @@ export async function checkProjectNavigation({ browser, base, artifacts, fixture
           }
           console.log(`PASS: ${mobile ? "mobile" : "desktop"} project Open in new tab: ${label}, reload, source context preserved`);
         }
+        // A project with no live sessions is a placeholder row now: it has no menu to open a tab from,
+        // and says so instead of offering an empty group.
+        await showSessions();
+        const emptyRow = page.locator(`[data-row-key=${JSON.stringify(`empty:${empty.projectKey}`)}]`);
+        await emptyRow.waitFor();
+        assert.match(await emptyRow.innerText(), /No sessions yet/);
+        console.log(`PASS: ${mobile ? "mobile" : "desktop"} a project without live sessions reads as a placeholder`);
         if (mobile) {
           // A gone directory stays an explicit failed destination; it must
           // not turn into another project/session or recreate the directory.
           rmSync(fixture.empty, { recursive: true });
-          const tab = await openTab(empty.projectKey);
-          await tab.getByText(`Directory does not exist: ${empty.cwd}`, { exact: true }).waitFor();
-          assert.equal(new URL(tab.url()).searchParams.get("cwd"), empty.cwd);
-          assert.equal(await selected(tab).count(), 0);
-          await tab.close();
+          await page.goto(`${base}/?cwd=${encodeURIComponent(empty.cwd)}`, { waitUntil: "domcontentloaded" });
+          await page.getByText(`Directory does not exist: ${empty.cwd}`, { exact: true }).waitFor();
+          assert.equal(new URL(page.url()).searchParams.get("cwd"), empty.cwd);
+          assert.equal(await selected(page).count(), 0);
           console.log("PASS: an unavailable project's new tab shows the validation error, not another session");
         }
         // + still means New here, not another tab, and chooses the same worktree.

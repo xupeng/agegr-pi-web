@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
-import { appendFileSync, createWriteStream, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { appendFileSync, createWriteStream, existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -38,7 +38,9 @@ const viewports = [{ width: 1280, height: 800 }, { width: 390, height: 844 }]
   .filter(viewport => checkGroup !== "touch" && (selectedWidth === null || viewport.width === selectedWidth));
 const artifacts = join(root, "test-results/e2e");
 mkdirSync(artifacts, { recursive: true });
-const agentDir = mkdtempSync(join(tmpdir(), "pi-web-e2e-"));
+// Realpath'd: macOS hands out `/var/folders/...` while every real path in the app (and the server's own
+// project resolution) reads `/private/var/...`.
+const agentDir = realpathSync(mkdtempSync(join(tmpdir(), "pi-web-e2e-")));
 const project = join(agentDir, "project");
 const sessionDir = join(agentDir, "sessions", "e2e");
 mkdirSync(project);
