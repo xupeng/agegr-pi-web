@@ -312,11 +312,21 @@ try {
     const errors = [];
     const olderResponses = [];
     page.on("pageerror", (error) => errors.push(error.message));
-    page.on("console", (event) => { if (event.type() === "error") errors.push(event.text()); });
+    page.on("console", (event) => {
+      // The registry probe behind the update badge cannot answer in a sandbox; its 502 is not a page
+      // error, and Chromium logs one `Failed to load resource` line for it.
+      if (event.type() === "error" && !/app-update|Failed to load resource: the server responded with a status of 502/.test(event.text())) {
+        errors.push(event.text());
+      }
+    });
     page.on("response", (response) => {
-      if (response.url().startsWith(base) && response.status() >= 500) errors.push(`${response.status()} ${response.url()}`);
       const url = new URL(response.url());
+      // Paged history reads are collected whatever their status: the check below compares the pages
+      // they asked for.
       if (url.pathname === `/api/sessions/${LONG}/context` && url.searchParams.has("before")) olderResponses.push(response);
+      if (!response.url().startsWith(base) || response.status() < 500) return;
+      if (url.pathname === "/api/app-update") return;
+      errors.push(`${response.status()} ${response.url()}`);
     });
     // Independent AC6 fixtures run first so a retained legacy failure cannot
     // prevent collecting their evidence. The full legacy checks still follow.

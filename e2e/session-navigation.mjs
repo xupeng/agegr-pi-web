@@ -13,9 +13,19 @@ export async function checkSessionNavigation({ browser, base, artifacts, a, b, a
   const errors = [];
   const watch = (target) => {
     target.on("pageerror", (error) => errors.push(error.message));
-    target.on("console", (event) => { if (event.type() === "error") errors.push(event.text()); });
+    target.on("console", (event) => {
+      // A 5xx is recorded from its response below, with the URL; Chromium's generic line for it adds
+      // nothing (and an unreachable registry answers /api/app-update with one on every load).
+      if (event.type() !== "error") return;
+      if (/^Failed to load resource: the server responded with a status of 5\d\d/.test(event.text())) return;
+      errors.push(event.text());
+    });
+    // `/api/app-update` asks the npm registry on every load; a sandbox without egress answers 502 and
+    // that says nothing about opening a session.
     target.on("response", (response) => {
-      if (response.url().startsWith(base) && response.status() >= 500) errors.push(`${response.status()} ${response.url()}`);
+      if (!response.url().startsWith(base) || response.status() < 500) return;
+      if (new URL(response.url()).pathname === "/api/app-update") return;
+      errors.push(`${response.status()} ${response.url()}`);
     });
   };
   // Nothing on these paths may create, copy or prompt a session: opening one
@@ -40,6 +50,29 @@ export async function checkSessionNavigation({ browser, base, artifacts, a, b, a
   const initialIds = await sessionIds();
 
   const panel = (target) => target.locator("#session-sidebar-panel-sessions");
+  // A project group lists GROUP_VISIBLE_LIMIT sessions before its "Show more" row; the fixtures this
+  // file navigates to can sit behind that fold.
+  const expandAll = async (target) => {
+    const scope = panel(target);
+    await scope.locator('[data-row-key^="session:"]').first().waitFor();
+    // A group's "Show more" row is built after its visible sessions.
+    // `data-more-action` rather than the first button: the row also offers "Show less" once a window is
+    // open, and clicking that alternates instead of expanding.
+    const moreToggle = '[data-row-key^="more:"] button[data-more-action="more"]';
+    await scope.locator(moreToggle).first().waitFor({ timeout: 5_000 }).catch(() => {});
+    for (let guard = 0; guard < 30; guard += 1) {
+      const more = scope.locator(moreToggle);
+      if (await more.count() === 0) return;
+      const before = await scope.locator('[data-row-key^="session:"]').count();
+      await more.first().click();
+      // Wait for the revealed rows: the click resolves before React repaints.
+      await target.waitForFunction(
+        (count) => document.querySelectorAll('#session-sidebar-panel-sessions [data-row-key^="session:"]').length > count,
+        before,
+        { timeout: 2_000 },
+      ).catch(() => {});
+    }
+  };
   const row = (target, id, where = "group") => panel(target).locator(`[data-row-key="session:${where}:${id}"]`);
   const link = (target, id, where = "group") => row(target, id, where).locator("a.session-tree-main");
   const content = {
@@ -66,6 +99,7 @@ export async function checkSessionNavigation({ browser, base, artifacts, a, b, a
     tab.setDefaultTimeout(60_000);
     // A new tab starts on about:blank before it navigates to the link.
     await tab.waitForURL((url) => url.href !== "about:blank", { waitUntil: "domcontentloaded" });
+    await expandAll(tab);
     return tab;
   };
   const markDocument = (target) => target.evaluate(() => { window.__piNavMarker = "kept"; });
@@ -73,6 +107,7 @@ export async function checkSessionNavigation({ browser, base, artifacts, a, b, a
 
   try {
     await page.goto(`${base}/?session=${a.id}`, { waitUntil: "domcontentloaded" });
+    await expandAll(page);
     await expectShows(page, a.id);
     for (const id of [a.id, b.id]) {
       assert.equal(await link(page, id).getAttribute("href"), `?session=${id}`);
@@ -146,6 +181,8 @@ export async function checkSessionNavigation({ browser, base, artifacts, a, b, a
     // Pinned and archived rows link the same way; pin, archive and restore never navigate.
     // (The reload above replaced the document: mark the new one.)
     await markDocument(page);
+    // The reload above rebuilt the sidebar, so the group's window is folded again.
+    await expandAll(page);
     await row(page, b.id).click({ button: "right" });
     await menu.getByRole("menuitem", { name: /^Pin/ }).click();
     await link(page, b.id, "pinned").waitFor();
@@ -213,7 +250,13 @@ export async function checkSessionNavigation({ browser, base, artifacts, a, b, a
     await page.keyboard.press("f");
     const copyId = (await (await forked).json()).session.id;
     try {
-      await page.waitForFunction((key) => document.activeElement?.matches(`[data-row-key="${key}"] a.session-tree-main`) === true, `session:group:${copyId}`);
+      // The reveal lands focus once the refreshed list holds the copy.
+      await page.locator(`[data-row-key="session:group:${copyId}"] a.session-tree-main`).waitFor();
+      await page.waitForTimeout(1_200);
+      assert.ok(
+        await page.evaluate((key) => document.activeElement?.matches(`[data-row-key="${key}"] a.session-tree-main`) === true, `session:group:${copyId}`),
+        "focus must land on the copy row's link",
+      );
       assert.equal(await link(page, copyId).getAttribute("href"), `?session=${copyId}`);
       console.log("PASS: after a keyboard Fork, focus lands on the copy row's link");
     } finally {

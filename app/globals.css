@@ -1366,6 +1366,15 @@ pre, code {
   word-break: normal;
   overflow-wrap: break-word;
 }
+
+/* On a phone the 32rem cap is wider than the chat itself, and a two-column
+   table then stretches past it instead of wrapping (the rail keeps wide tables
+   scrollable, but prose columns must fit). */
+@media (max-width: 640px) {
+  .markdown-body th, .markdown-body td {
+    max-width: 240px;
+  }
+}
 .markdown-body tr:last-child td { border-bottom: 0; }
 .markdown-body th {
   background: var(--bg-panel);

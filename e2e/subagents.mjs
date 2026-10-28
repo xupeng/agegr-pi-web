@@ -476,9 +476,9 @@ try {
         await bRelease;
         await route.continue().catch(() => {});
       });
-      await page.locator(`[title="Records B session"]`).click();
+      await page.locator(`.session-tree-main[title^="Records B session"]`).click();
       await bGate;
-      await page.locator(`[title="Records A session"]`).click();
+      await page.locator(`.session-tree-main[title^="Records A session"]`).click();
       await page.getByText("A filler 59", { exact: true }).waitFor();
       releaseB();
       await delay(300);
@@ -498,9 +498,9 @@ try {
         await b404Release;
         await route.fulfill({ status: 404, json: { error: "Session not found" } }).catch(() => {});
       });
-      await page.locator(`[title="Records B session"]`).click();
+      await page.locator(`.session-tree-main[title^="Records B session"]`).click();
       await b404Seen;
-      await page.locator(`[title="Records A session"]`).click();
+      await page.locator(`.session-tree-main[title^="Records A session"]`).click();
       await page.getByText("A filler 59", { exact: true }).waitFor();
       intentional404 = true;
       const failedBResponse = page.waitForResponse((response) => (
