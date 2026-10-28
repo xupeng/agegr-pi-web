@@ -285,6 +285,9 @@ export function SessionTree(props: SessionTreeProps): ReactNode {
   // The last reveal request handled (scrolled to, or dropped), ignored from
   // then on, until the parent's answer to onRevealHandled arrives.
   const [handledRevealId, setHandledRevealId] = useState<number | null>(null);
+  // A reveal whose row is already rendered changes neither the rows nor the visible window, so the
+  // focus effect below needs a signal of its own or the row is never focused.
+  const [focusRequest, setFocusRequest] = useState(0);
   const pendingReveal = reveal && reveal.id !== handledRevealId ? reveal : null;
   const pendingRevealKey = pendingReveal?.rowKey ?? null;
   const keepMounted = useMemo(() => {
@@ -361,6 +364,7 @@ export function SessionTree(props: SessionTreeProps): ReactNode {
       }
       if (pendingReveal.takeFocusFrom) {
         pendingFocusRef.current = { rowKey: pendingReveal.rowKey, fallbackKey: pendingReveal.rowKey, tries: 0, takeFocusFrom: pendingReveal.takeFocusFrom };
+        setFocusRequest((count) => count + 1);
       }
     }
     setHandledRevealId(pendingReveal.id);
@@ -389,7 +393,7 @@ export function SessionTree(props: SessionTreeProps): ReactNode {
     } else if (++target.tries > 2) {
       pendingFocusRef.current = null;
     }
-  }, [visibleIndices]);
+  }, [focusRequest, visibleIndices]);
 
   const hasTreeRows = rows.some((row) => row.kind === "session" || row.kind === "group");
   const showEmpty = !loading && !error && emptyLabel !== null && !hasTreeRows;

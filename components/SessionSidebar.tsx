@@ -1601,6 +1601,16 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
     moreShown,
     pinnedCollapsed,
   }), [sessions, uiState, runningSessionIds, awaitingInputSessionIds, unreadSessionIds, selectedSessionId, currentProject, shownGroupExpansion, moreShown, pinnedCollapsed]);
+  // A fork's copy row takes focus once the refreshed list holds it (see openForked()).
+  const [forkFocusId, setForkFocusId] = useState<string | null>(null);
+  useEffect(() => {
+    if (!forkFocusId) return;
+    const row = document.querySelector<HTMLElement>(`[data-row-key="${CSS.escape(`session:group:${forkFocusId}`)}"]`);
+    const target = row?.querySelector<HTMLElement>("a[href], button") ?? null;
+    if (!target) return;
+    target.focus({ preventScroll: true });
+    setForkFocusId(null);
+  }, [forkFocusId, sessions]);
   // Built while the archive view is rendered, its way out included: it
   // leaves as it was, not empty.
   const archiveMounted = archiveMotion.archiveMounted;
@@ -2104,6 +2114,10 @@ export function SessionSidebar({ selectedSessionId, onSelectSession, onNewSessio
       rowKey: `session:group:${forked.id}`,
       takeFocusFrom: (active) => (fromRow !== null && active.closest(fromRow) !== null) || active === archiveCloseFocusRef.current,
     });
+    // The copy's row is where a fork started from a row continues (keyboard or the row menu). The
+    // reveal asks for that focus, but a reveal whose row is already rendered changes no window, so
+    // the tree has nothing to re-run its focus pass on: settle it here.
+    if (fromRowKey !== null) setForkFocusId(forked.id);
   };
   const openForkedRef = useRef(openForked);
   openForkedRef.current = openForked;
